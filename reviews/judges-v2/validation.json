@@ -1,0 +1,10 @@
+{
+  "definitions": 6,
+  "core": 3,
+  "specialists": 3,
+  "localLinksChecked": 12,
+  "v1FilesUnchanged": true,
+  "specialistRunsExecuted": 0,
+  "runtimeChanges": 0,
+  "checks": "JSON parsing, IDs, file references, Markdown local links, M0 activation example, v1 hash preservation"
+}

@@ -1,0 +1,14 @@
+import {describe,it,expect} from 'vitest';
+import {readFileSync} from 'node:fs';
+import {ExplanationSchema,sampleEntity} from '../src/contracts/explanation.js';
+const read=(id:string)=>JSON.parse(readFileSync(`examples/cross-project-v1/${id}-proof.json`,'utf8'));
+describe('cross-project explanation contract',()=>{
+ it('accepts both mechanisms using the same contract',()=>{for(const id of ['rea','rembg'])expect(ExplanationSchema.parse(read(id)).audio).toBe('silent-visual-proof');});
+ it('accepts arbitrary metadata without project dispatch',()=>{const p=read('rea');p.id='unknown-project';p.projectName='完全不同的项目';expect(ExplanationSchema.parse(p).projectName).toBe(p.projectName);const source=readFileSync('src/explanation/composition.tsx','utf8');expect(source).not.toMatch(/\b(rea|rembg|dino)\b/i);});
+ it.each(['version','reference','evidence','time','duplicate','unknown-field'])('rejects %s',kind=>{const p=read('rea');if(kind==='version')p.schemaVersion='2.0';if(kind==='reference')p.beats[0].visibleEntityIds=['missing'];if(kind==='evidence')p.beats[0].evidenceIds=['missing'];if(kind==='time')p.beats[1].start=2;if(kind==='duplicate')p.entities[1].id=p.entities[0].id;if(kind==='unknown-field')p.entities[0].execute='untrusted';expect(ExplanationSchema.safeParse(p).success).toBe(false);});
+ it('data edits change visible state, not renderer source',()=>{const p=ExplanationSchema.parse(read('rea')),e=p.entities.find(e=>e.id==='code')!,a=sampleEntity(e,5.85);e.states[3]!.x=200;expect(sampleEntity(e,5.85).x).not.toBe(a.x);});
+ it.each(['actor','order','state','beat-id','coverage'])('rejects causal %s',kind=>{const p=read('rea');if(kind==='actor')p.beats[1].causal.triggerEntityId='missing';if(kind==='order')p.beats[1].causal.effectAt=0;if(kind==='state')p.beats[1].causal.after=p.beats[1].causal.before;if(kind==='beat-id')p.beats[1].id=p.beats[0].id;if(kind==='coverage')p.entities[0].states[0].at=1;expect(ExplanationSchema.safeParse(p).success).toBe(false);});
+ it('manual control is hidden throughout automatic-rule explanation',()=>{const p=ExplanationSchema.parse(read('rea')),e=p.entities.find(e=>e.id==='control')!;for(const t of [8,9,10,11,12])expect(sampleEntity(e,t).opacity).toBe(0);});
+ it('rule parameter directly changes game movement and event order is required',()=>{const p=ExplanationSchema.parse(read('rea')),entity=p.entities.find(e=>e.id==='obstacle')!,before=sampleEntity(entity,10,p.drivers);p.drivers[0]!.events[0]!.rate=210;expect(sampleEntity(entity,10,p.drivers).x).not.toBe(before.x);p.drivers[0]!.events[0]!.at=8;expect(ExplanationSchema.safeParse(p).success).toBe(false);});
+ it('all evidence snapshots match recorded hashes',async()=>{const {createHash}=await import('node:crypto');for(const id of ['rea','rembg'])for(const e of ExplanationSchema.parse(read(id)).evidence)expect(createHash('sha256').update(readFileSync(e.snapshot)).digest('hex')).toBe(e.sha256);});
+});

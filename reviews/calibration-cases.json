@@ -1,0 +1,10 @@
+{
+  "purpose": "用户校准 judge 的具体样例；这些样例已公开，不是盲测集，不用于声称统计质量提升",
+  "cases": [
+    {"id":"good-M0-baseline","expected":"M0-09 baseline content PASS; no requirement for cinema/TTS/repo research","evidence":"acceptance-output/run-eMfam7/baseline.mp4"},
+    {"id":"bad-accepted-title","expected":"major M0-09 FAIL","finding":"P-01","evidence":"reviews/M0/round-1/product-evidence/product-long-title.png"},
+    {"id":"bad-stage-setup-state","expected":"major M0-03/M0-07 FAIL","finding":"REL-01","evidence":"reviews/M0/round-1/reliability-setup-failure-evidence.json"},
+    {"id":"bad-accepted-body","expected":"major M0-09 FAIL despite other judges PASS and automated tests passing","finding":"P-02","evidence":"reviews/M0/round-2/product-evidence/product-body-identifier.png"},
+    {"id":"scoped-Windows-path-limit","expected":"document limitation; do not falsify a fresh install or globally invalidate matching historical evidence","finding":"E-01","evidence":"reviews/M0/round-1/evidence.md"}
+  ]
+}

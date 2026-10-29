@@ -1,0 +1,1 @@
+{"schemaVersion":"2.0","milestone":"M2","activeRoles":["product","reliability","evidence","video_quality","content_facts","security"],"requiredCriteria":{"product":["G3-01","G3-03"],"reliability":["G3-05"],"evidence":["G3-06"],"video_quality":["G3-02","G3-03","G3-04"],"content_facts":["G3-01","G3-04"],"security":["G3-05","G3-06"]}}

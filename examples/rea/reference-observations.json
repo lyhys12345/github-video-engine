@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-26T08:38:49.367Z",
+  "references": [
+    {
+      "url": "https://www.xiaohongshu.com/explore/6accb54c000000001303df4c",
+      "status": "partial-observation",
+      "observations": [
+        "实际获取并解码542.42秒参考媒体；抽样0/5/10/15/20/25秒和每60秒画面，非逐帧完整观看。",
+        "可见暖灰白背景、黑色大标题、居中软件图标/窗口、中文底部字幕与局部黄色强调；多个采样点右下角有人像讲解。",
+        "采用浅暖灰底、深色文字、居中流程图、字幕与单一强调色；不用第三方头像或软件画面冒充自有实测。"
+      ],
+      "observedRange": "FFmpeg抽样静帧 + 浏览器0秒封面和播放状态；9分钟内容非完整动态/声音审阅",
+      "limitations": "原声尚未听取，不声称复刻语速、音色、音乐或精确切换节奏；本片采用官方案例的纯图形讲解，不仿造屏幕录制/人像。"
+    },
+    {
+      "url": "https://www.instagram.com/reel/De5sX0yD_l1/",
+      "status": "partial-observation",
+      "observations": [
+        "浏览器可播放86.933秒竖屏Reel；读取说明文字并看到约8秒暗色3D场景与白底GitHub统计叠层。",
+        "可见顶部细小来源标签；文案明确其非一键完美、未安装、素材来自作者。"
+      ],
+      "observedRange": "浏览器页面说明及单个约8秒画面；媒体分段导出失败",
+      "limitations": "未完整观看或听取，不推断后续镜头、准确配色规范或音乐；不将浏览器说明当作本项目事实证据。"
+    }
+  ],
+  "primaryLocalMedia": "work/reference-xhs.mp4",
+  "analysisOnly": true,
+  "reuseInOutput": false,
+  "audioListened": false
+}

@@ -1,0 +1,175 @@
+{
+  "schemaVersion": "1.0",
+  "projectId": "rea",
+  "planRevision": "c8274e86bb0672f1d64f99302fb6acd381ef39489857c18c17e52b567475b8dc",
+  "readthrough": {
+    "schemaVersion": "1.0",
+    "id": "1af866b91405257e5413343d6401185f17a47cf9757e607e5e32a3cbf8f85d1c",
+    "sha256": "1af866b91405257e5413343d6401185f17a47cf9757e607e5e32a3cbf8f85d1c",
+    "bytes": 5575,
+    "mediaType": "application/json",
+    "storage": "1a/1af866b91405257e5413343d6401185f17a47cf9757e607e5e32a3cbf8f85d1c.json",
+    "producingStage": "PUBLISH",
+    "inputFingerprint": "071d1c24253fa62da78ceba1795621b486deb686320a8fafcc970e7c2dfc8c4e",
+    "createdAt": "2026-10-26T08:36:15.649Z",
+    "integrity": "verified"
+  },
+  "style": {
+    "id": "warm-evidence-v1",
+    "fontFamily": "Microsoft YaHei",
+    "background": "#EEEDE6",
+    "foreground": "#202321",
+    "accent": "#0B7463",
+    "muted": "#565D58",
+    "direction": "沿用主要参考已观察的浅暖灰背景、深色大标题、居中图解和中文底字幕。绿色强调为可读性设计选择，不声称参考的精确品牌色。解释性流程，不使用第三方人物或伪造操作结果。",
+    "captionSize": 34,
+    "safeArea": "left54-right100-top100-bottom260"
+  },
+  "scenes": [
+    {
+      "id": "copy-question",
+      "scriptId": "opening",
+      "layout": "hook",
+      "title": "复制以后，去了哪？",
+      "subtitle": "从界面，到系统剪贴板",
+      "labels": [],
+      "sourceLabel": "来源：固定 commit 官方文档 · 编辑性图解",
+      "claimIds": [
+        "notion-case"
+      ]
+    },
+    {
+      "id": "rea-role",
+      "scriptId": "purpose",
+      "layout": "purpose",
+      "title": "沿着证据，理解功能",
+      "subtitle": "REA / Reverse Engineer Anything",
+      "labels": [
+        "目标：理解一个软件功能",
+        "工具：提供软件分析证据",
+        "智能体：据此继续调查"
+      ],
+      "sourceLabel": "来源：固定 commit 官方文档 · 编辑性图解",
+      "claimIds": [
+        "purpose",
+        "targets",
+        "workflow"
+      ]
+    },
+    {
+      "id": "electron-trace",
+      "scriptId": "trace",
+      "layout": "path",
+      "title": "一段富文本的四站旅程",
+      "subtitle": "官方 Notion / Electron 文档案例",
+      "labels": [
+        "Renderer / 渲染进程",
+        "Preload / 预加载脚本",
+        "IPC / 进程间通信",
+        "Main / 主进程"
+      ],
+      "sourceLabel": "来源：REA 官方 README / Notion 案例",
+      "claimIds": [
+        "notion-case"
+      ]
+    },
+    {
+      "id": "investigation-loop",
+      "scriptId": "loop",
+      "layout": "loop",
+      "title": "先问问题，再追证据",
+      "subtitle": "研究一个功能，而非凭截图猜测",
+      "labels": [
+        "目标 + 具体问题",
+        "工具返回证据",
+        "继续追问 / 标出未知"
+      ],
+      "sourceLabel": "来源：固定 commit 官方文档 · 编辑性图解",
+      "claimIds": [
+        "workflow"
+      ]
+    },
+    {
+      "id": "conditions",
+      "scriptId": "conditions",
+      "layout": "compare",
+      "title": "先看目标，再选工具",
+      "subtitle": "先看目标，再确认工具条件",
+      "labels": [
+        "可能依赖原生反编译工具",
+        "检查 JavaScript 应用文件"
+      ],
+      "sourceLabel": "来源：REA README / 分析条件",
+      "claimIds": [
+        "dependencies"
+      ]
+    },
+    {
+      "id": "honest-boundary",
+      "scriptId": "disclaimer",
+      "layout": "limits",
+      "title": "这是讲解，不是实测",
+      "subtitle": "保留事实、案例和运行结果的边界",
+      "labels": [
+        "依据固定版本官方文档",
+        "动画是解释性图示",
+        "未执行 REA / Notion"
+      ],
+      "sourceLabel": "来源：固定 commit 官方文档 · 编辑性图解",
+      "claimIds": [
+        "synthetic-diagram",
+        "notion-case"
+      ]
+    },
+    {
+      "id": "source-close",
+      "scriptId": "closing",
+      "layout": "closing",
+      "title": "结论要有证据",
+      "subtitle": "把未知留在画面里",
+      "labels": [],
+      "sourceLabel": "来源：固定 commit 官方文档 · 编辑性图解",
+      "claimIds": [
+        "unknowns",
+        "purpose"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "url": "https://www.xiaohongshu.com/explore/6accb54c000000001303df4c",
+      "status": "partial-observation",
+      "observations": [
+        "实际获取并解码542.42秒参考媒体；抽样0/5/10/15/20/25秒和每60秒画面，非逐帧完整观看。",
+        "可见暖灰白背景、黑色大标题、居中软件图标/窗口、中文底部字幕与局部黄色强调；多个采样点右下角有人像讲解。",
+        "采用浅暖灰底、深色文字、居中流程图、字幕与单一强调色；不用第三方头像或软件画面冒充自有实测。"
+      ],
+      "observedRange": "FFmpeg抽样静帧 + 浏览器0秒封面和播放状态；9分钟内容非完整动态/声音审阅",
+      "limitations": "原声尚未听取，不声称复刻语速、音色、音乐或精确切换节奏；本片采用官方案例的纯图形讲解，不仿造屏幕录制/人像。"
+    },
+    {
+      "url": "https://www.instagram.com/reel/De5sX0yD_l1/",
+      "status": "partial-observation",
+      "observations": [
+        "浏览器可播放86.933秒竖屏Reel；读取说明文字并看到约8秒暗色3D场景与白底GitHub统计叠层。",
+        "可见顶部细小来源标签；文案明确其非一键完美、未安装、素材来自作者。"
+      ],
+      "observedRange": "浏览器页面说明及单个约8秒画面；媒体分段导出失败",
+      "limitations": "未完整观看或听取，不推断后续镜头、准确配色规范或音乐；不将浏览器说明当作本项目事实证据。"
+    }
+  ],
+  "authorization": {
+    "previewWidth": 360,
+    "previewHeight": 640,
+    "motionWidth": 720,
+    "motionHeight": 1280,
+    "motionScene": "electron-trace",
+    "motionSeconds": 7,
+    "maxPreviewAttempts": 2,
+    "maxPaidUsd": 0,
+    "audio": "temporary-local-sapi",
+    "fullProduction": false,
+    "motionAudioScriptId": "purpose"
+  },
+  "origin": "agent-authored-graphics-not-target-execution"
+}

@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "projectId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "planRevision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "provider": {
+      "type": "string",
+      "const": "windows-sapi-offline"
+    },
+    "voiceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "rate": {
+      "type": "number",
+      "const": 0
+    },
+    "measuredAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+    },
+    "lines": {
+      "minItems": 3,
+      "maxItems": 16,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "audio": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "string",
+                "const": "1.0"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "mediaType": {
+                "type": "string"
+              },
+              "storage": {
+                "type": "string"
+              },
+              "producingStage": {
+                "type": "string",
+                "enum": [
+                  "VALIDATE",
+                  "RESOLVE_ASSETS",
+                  "RENDER",
+                  "VERIFY_MEDIA",
+                  "PUBLISH"
+                ]
+              },
+              "inputFingerprint": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "integrity": {
+                "type": "string",
+                "const": "verified"
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "id",
+              "sha256",
+              "bytes",
+              "mediaType",
+              "storage",
+              "producingStage",
+              "inputFingerprint",
+              "createdAt",
+              "integrity"
+            ],
+            "additionalProperties": false
+          },
+          "durationMs": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 20000
+          },
+          "allocatedFrames": {
+            "type": "integer",
+            "minimum": 24,
+            "maximum": 600
+          },
+          "pronunciations": {
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "audio",
+          "durationMs",
+          "allocatedFrames",
+          "pronunciations"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fps": {
+      "anyOf": [
+        {
+          "type": "number",
+          "const": 24
+        },
+        {
+          "type": "number",
+          "const": 30
+        }
+      ]
+    },
+    "totalFrames": {
+      "type": "integer",
+      "minimum": 720,
+      "maximum": 1800
+    },
+    "status": {
+      "type": "string",
+      "const": "measured-not-yet-listened"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "projectId",
+    "planRevision",
+    "provider",
+    "voiceId",
+    "rate",
+    "measuredAt",
+    "lines",
+    "fps",
+    "totalFrames",
+    "status"
+  ],
+  "additionalProperties": false,
+  "$id": "urn:github-video-engine:Readthrough:1.0",
+  "$comment": "Zod also enforces cross-field invariants; see docs/contracts.md."
+}

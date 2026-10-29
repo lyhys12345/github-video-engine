@@ -1,0 +1,17 @@
+{
+  "exampleOnly": true,
+  "milestone": "M0",
+  "registryVersion": "judges-v2-review-draft",
+  "activeRoles": ["product", "reliability", "evidence"],
+  "inactiveRoles": {
+    "video_quality": "fixed synthetic engineering demo; full production/reference/audio quality is outside approved M0",
+    "content_facts": "synthetic fixture; no real repository claims or research",
+    "security": "no untrusted repository execution, credentials, external writes, multiuser or remote asset entrypoints in approved M0; the approved trusted fixed local toolchain is not a standalone trigger"
+  },
+  "requiredCriteria": {
+    "product": ["M0-02", "M0-09", "M0-11", "M0-14"],
+    "reliability": ["M0-03", "M0-04", "M0-05", "M0-06", "M0-07", "M0-08"],
+    "evidence": ["M0-01", "M0-10", "M0-12", "M0-13"]
+  },
+  "note": "A configuration example, not a new approval, judge run or automated gate result. All active roles must be included in the actual future gate."
+}

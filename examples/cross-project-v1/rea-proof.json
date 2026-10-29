@@ -1,0 +1,1138 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rea-proof",
+  "projectName": "REA",
+  "audience": "不了解 REA、代码或游戏机制的短视频观众",
+  "purpose": "理解 REA 提供代码线索，助手理解规则并重建演示",
+  "input": "网页加载的游戏代码",
+  "output": "助手理解规则后重建的可调速教学演示",
+  "audio": "silent-visual-proof",
+  "durationSeconds": 18,
+  "evidence": [
+    {
+      "id": "rea-case",
+      "url": "https://rea.tools/examples/dino-lab/",
+      "snapshot": "fixtures/sources/rea-dino.html",
+      "sha256": "a045d256cd040a21f163ad2f662c81d77e3fa47df6bc8add92b10f0b901dd769",
+      "supports": "官方案例：读取网页加载的 index.js；助手分析加速规则，重建教学演示。"
+    }
+  ],
+  "comprehensionQuestions": [
+    "REA 交给助手的是什么？",
+    "游戏为什么会越来越快？",
+    "可调速演示是谁据此重建的？"
+  ],
+  "disclosure": "官方案例原理示意 · 教学重建 · 非实际操作录像",
+  "entities": [
+    {
+      "id": "game",
+      "meaning": "原游戏原理与新演示的连续舞台",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 860,
+          "h": 620,
+          "fill": "#1b2940",
+          "radius": 30
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 110,
+          "y": 500,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 3,
+          "x": 110,
+          "y": 500,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 4,
+          "x": 110,
+          "y": 950,
+          "opacity": 1,
+          "scale": 0.65
+        },
+        {
+          "at": 8,
+          "x": 110,
+          "y": 950,
+          "opacity": 1,
+          "scale": 0.65
+        },
+        {
+          "at": 9,
+          "x": 110,
+          "y": 650,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 110,
+          "y": 650,
+          "opacity": 1,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "runner",
+      "meaning": "游戏中的恐龙",
+      "shapes": [
+        {
+          "kind": "path",
+          "d": "M0 130V70H35V0H125V65H80V95H110V120H75V175H45V130H30V175H0Z",
+          "fill": "#90e8c2"
+        },
+        {
+          "kind": "rect",
+          "x": 97,
+          "y": 17,
+          "w": 10,
+          "h": 10,
+          "fill": "#101727",
+          "radius": 0
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 250,
+          "y": 930,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 1.7,
+          "x": 250,
+          "y": 930,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 2.2,
+          "x": 250,
+          "y": 730,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 2.8,
+          "x": 250,
+          "y": 930,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 3.2,
+          "x": 250,
+          "y": 930,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 4,
+          "x": 210,
+          "y": 1140,
+          "opacity": 1,
+          "scale": 0.65
+        },
+        {
+          "at": 8,
+          "x": 210,
+          "y": 1140,
+          "opacity": 1,
+          "scale": 0.65
+        },
+        {
+          "at": 9,
+          "x": 250,
+          "y": 1080,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 13,
+          "x": 250,
+          "y": 1080,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 15.3,
+          "x": 250,
+          "y": 1080,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 15.8,
+          "x": 250,
+          "y": 850,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 16.4,
+          "x": 250,
+          "y": 1080,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 250,
+          "y": 1080,
+          "opacity": 1,
+          "scale": 1
+        }
+      ],
+      "reaction": {
+        "driverId": "acceleration",
+        "axis": "y",
+        "center": 250,
+        "range": 230,
+        "amplitude": -240
+      }
+    },
+    {
+      "id": "obstacle",
+      "meaning": "障碍物移动：规则触发后更快",
+      "shapes": [
+        {
+          "kind": "path",
+          "d": "M35 140V0H60V65H80V30H100V90H60V140Z",
+          "fill": "#f9bb72"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 900,
+          "y": 970,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 2.8,
+          "x": 120,
+          "y": 970,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 3.1,
+          "x": 120,
+          "y": 970,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 8.99,
+          "x": 900,
+          "y": 1115,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 9,
+          "x": 900,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 10.4,
+          "x": 120,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 10.41,
+          "x": 900,
+          "y": 1115,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 10.42,
+          "x": 900,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 11.42,
+          "x": 120,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 11.43,
+          "x": 900,
+          "y": 1115,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 11.44,
+          "x": 900,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 12.139999999999999,
+          "x": 120,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 12.149999999999999,
+          "x": 900,
+          "y": 1115,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 12.159999999999998,
+          "x": 900,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 13,
+          "x": 900,
+          "y": 1115,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 13.6,
+          "x": 900,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 16.4,
+          "x": 120,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 16.41,
+          "x": 900,
+          "y": 1115,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 16.5,
+          "x": 900,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 480,
+          "y": 1115,
+          "opacity": 1,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "meaning": "网页来源",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 250,
+          "h": 190,
+          "fill": "#334762",
+          "radius": 20
+        },
+        {
+          "kind": "text",
+          "x": 25,
+          "y": 75,
+          "text": "网页",
+          "size": 43,
+          "fill": "#ffffff"
+        },
+        {
+          "kind": "text",
+          "x": 25,
+          "y": 135,
+          "text": "游戏代码",
+          "size": 30,
+          "fill": "#ffffff"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 100,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 3.2,
+          "x": 100,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 3.8,
+          "x": 100,
+          "y": 480,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 7.5,
+          "x": 100,
+          "y": 480,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 8,
+          "x": 100,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 100,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "rea",
+      "meaning": "REA 读取和交接代码",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 230,
+          "h": 190,
+          "fill": "#226650",
+          "radius": 30
+        },
+        {
+          "kind": "text",
+          "x": 50,
+          "y": 80,
+          "text": "REA",
+          "size": 48,
+          "fill": "#ffffff"
+        },
+        {
+          "kind": "text",
+          "x": 25,
+          "y": 140,
+          "text": "读取 · 交接",
+          "size": 29,
+          "fill": "#ffffff"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 420,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 3.5,
+          "x": 420,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 4,
+          "x": 420,
+          "y": 480,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 7.5,
+          "x": 420,
+          "y": 480,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 8,
+          "x": 420,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 420,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "assistant",
+      "meaning": "助手解释与重建",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 250,
+          "h": 190,
+          "fill": "#8d562e",
+          "radius": 30
+        },
+        {
+          "kind": "text",
+          "x": 30,
+          "y": 80,
+          "text": "AI 助手",
+          "size": 40,
+          "fill": "#ffffff"
+        },
+        {
+          "kind": "text",
+          "x": 30,
+          "y": 140,
+          "text": "理解 · 重建",
+          "size": 29,
+          "fill": "#ffffff"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 740,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 3.7,
+          "x": 740,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 4.1,
+          "x": 740,
+          "y": 480,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 7.5,
+          "x": 740,
+          "y": 480,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 8,
+          "x": 740,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 740,
+          "y": 480,
+          "opacity": 0,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "code",
+      "meaning": "同一个有标签的代码包连续交接",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 235,
+          "h": 110,
+          "fill": "#d9fff0",
+          "radius": 16
+        },
+        {
+          "kind": "text",
+          "x": 20,
+          "y": 46,
+          "text": "游戏代码",
+          "size": 33,
+          "fill": "#16372c"
+        },
+        {
+          "kind": "text",
+          "x": 20,
+          "y": 86,
+          "text": "index.js",
+          "size": 27,
+          "fill": "#16372c"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 110,
+          "y": 750,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 4.2,
+          "x": 110,
+          "y": 750,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 4.3,
+          "x": 110,
+          "y": 750,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 5.85,
+          "x": 420,
+          "y": 750,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 7.4,
+          "x": 740,
+          "y": 750,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 7.7,
+          "x": 740,
+          "y": 750,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 740,
+          "y": 750,
+          "opacity": 0,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "rule",
+      "meaning": "助手提取的加速规则",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 850,
+          "h": 130,
+          "fill": "#2c594a",
+          "radius": 22
+        },
+        {
+          "kind": "text",
+          "x": 40,
+          "y": 80,
+          "text": "规则触发 → 速度增加 → 跑得更快",
+          "size": 38,
+          "fill": "#ffffff"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 115,
+          "y": 380,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 7.5,
+          "x": 115,
+          "y": 380,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 8.4,
+          "x": 115,
+          "y": 380,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 12.5,
+          "x": 115,
+          "y": 380,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 13.1,
+          "x": 115,
+          "y": 380,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 115,
+          "y": 380,
+          "opacity": 0,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "pulse",
+      "meaning": "规则更新脉冲",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 160,
+          "h": 65,
+          "fill": "#f9bb72",
+          "radius": 16
+        },
+        {
+          "kind": "text",
+          "x": 20,
+          "y": 45,
+          "text": "更新一次",
+          "size": 27,
+          "fill": "#101727"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 170,
+          "y": 540,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 170,
+          "y": 540,
+          "opacity": 0,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "control",
+      "meaning": "只在助手重建演示时出现的手动调速控件",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 760,
+          "h": 120,
+          "fill": "#226650",
+          "radius": 22
+        },
+        {
+          "kind": "text",
+          "x": 25,
+          "y": 48,
+          "text": "助手重建：现在可以调速",
+          "size": 32,
+          "fill": "#ffffff"
+        },
+        {
+          "kind": "rect",
+          "x": 30,
+          "y": 80,
+          "w": 680,
+          "h": 8,
+          "fill": "#c6ffdf",
+          "radius": 0
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 160,
+          "y": 1330,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 2.6,
+          "x": 160,
+          "y": 1330,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 3.1,
+          "x": 160,
+          "y": 1330,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 13,
+          "x": 160,
+          "y": 1330,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 13.6,
+          "x": 160,
+          "y": 1330,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 160,
+          "y": 1330,
+          "opacity": 1,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "ground",
+      "meaning": "固定参照线，让速度和跳跃可比较",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 5,
+          "fill": "#6d829f",
+          "radius": 0
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 140,
+          "y": 1110,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 3,
+          "x": 140,
+          "y": 1110,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 4,
+          "x": 140,
+          "y": 1260,
+          "opacity": 1,
+          "scale": 0.6
+        },
+        {
+          "at": 8,
+          "x": 140,
+          "y": 1260,
+          "opacity": 1,
+          "scale": 0.6
+        },
+        {
+          "at": 9,
+          "x": 140,
+          "y": 1255,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 140,
+          "y": 1255,
+          "opacity": 1,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "knob",
+      "meaning": "仅重建演示出现的可调速控制点",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 27,
+          "h": 42,
+          "fill": "#f9bb72",
+          "radius": 10
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 720,
+          "y": 1393,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 0.8,
+          "x": 720,
+          "y": 1393,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 1.8,
+          "x": 390,
+          "y": 1393,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 2.6,
+          "x": 390,
+          "y": 1393,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 3.1,
+          "x": 390,
+          "y": 1393,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 13,
+          "x": 720,
+          "y": 1393,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 13.6,
+          "x": 720,
+          "y": 1393,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 14.8,
+          "x": 390,
+          "y": 1393,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 390,
+          "y": 1393,
+          "opacity": 1,
+          "scale": 1
+        }
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "id": "hook",
+      "start": 0,
+      "end": 3,
+      "caption": "同一只恐龙，慢一点就好跳。",
+      "narrationDraft": "小恐龙太快？慢一点，就好跳多了。",
+      "cause": "手动调速",
+      "effect": "展示重建演示的结果",
+      "visibleEntityIds": [
+        "game",
+        "runner",
+        "obstacle",
+        "control",
+        "knob"
+      ],
+      "evidenceIds": [
+        "rea-case"
+      ],
+      "mode": "result",
+      "causal": {
+        "triggerEntityId": "knob",
+        "affectedEntityId": "obstacle",
+        "triggerAt": 0.8,
+        "effectAt": 2,
+        "before": "快",
+        "after": "变慢",
+        "operation": "compare",
+        "recipe": "comparison-v1"
+      }
+    },
+    {
+      "id": "handoff",
+      "start": 3,
+      "end": 8,
+      "caption": "该改哪儿？|REA 把游戏代码交给助手。",
+      "narrationDraft": "该改哪儿？REA 把网页里的游戏代码交给助手。",
+      "cause": "REA 获取网页加载代码",
+      "effect": "助手收到有标签的代码包",
+      "visibleEntityIds": [
+        "web",
+        "rea",
+        "assistant",
+        "code"
+      ],
+      "evidenceIds": [
+        "rea-case"
+      ],
+      "mode": "handoff",
+      "causal": {
+        "triggerEntityId": "rea",
+        "affectedEntityId": "code",
+        "triggerAt": 4.3,
+        "effectAt": 7.2,
+        "before": "网页旁的代码",
+        "after": "到达助手旁",
+        "operation": "handoff",
+        "recipe": "handoff-v1"
+      }
+    },
+    {
+      "id": "mechanism",
+      "start": 8,
+      "end": 13,
+      "caption": "助手发现：它会自己越跑越快。|规则触发后，障碍物移动更快。",
+      "narrationDraft": "助手发现：原来，它会自己越跑越快。",
+      "cause": "每次非碰撞更新增加速度，时间压缩示意",
+      "effect": "障碍物穿过相同距离所需时间变短",
+      "visibleEntityIds": [
+        "rule",
+        "pulse",
+        "runner",
+        "obstacle"
+      ],
+      "evidenceIds": [
+        "rea-case"
+      ],
+      "mode": "mechanism",
+      "causal": {
+        "triggerEntityId": "pulse",
+        "affectedEntityId": "obstacle",
+        "triggerAt": 9.2,
+        "effectAt": 11.8,
+        "before": "相同距离1.4秒",
+        "after": "相同距离0.7秒",
+        "operation": "rule",
+        "recipe": "rule-v1",
+        "driverId": "acceleration"
+      }
+    },
+    {
+      "id": "output",
+      "start": 13,
+      "end": 18,
+      "caption": "懂了规则，再重建一个演示。|这次，速度交给你控制。",
+      "narrationDraft": "找到这条规则，就能重新做个演示，把速度交给你控制。",
+      "cause": "助手理解规则后重建",
+      "effect": "手动控件出现，游戏速度下降",
+      "visibleEntityIds": [
+        "control",
+        "runner",
+        "obstacle",
+        "knob"
+      ],
+      "evidenceIds": [
+        "rea-case"
+      ],
+      "mode": "output",
+      "causal": {
+        "triggerEntityId": "knob",
+        "affectedEntityId": "obstacle",
+        "triggerAt": 13.6,
+        "effectAt": 15,
+        "before": "自动加速",
+        "after": "助手重建控件后可固定慢速",
+        "operation": "compare",
+        "recipe": "comparison-v1"
+      }
+    }
+  ],
+  "drivers": [
+    {
+      "id": "acceleration",
+      "entityId": "obstacle",
+      "start": 9,
+      "end": 13,
+      "axis": "x",
+      "origin": 900,
+      "wrapDistance": 780,
+      "initialRate": 280,
+      "label": "规则更新 → 加速",
+      "events": [
+        {
+          "at": 9.4,
+          "rate": 420,
+          "evidenceId": "rea-case"
+        },
+        {
+          "at": 10.4,
+          "rate": 560,
+          "evidenceId": "rea-case"
+        },
+        {
+          "at": 11.4,
+          "rate": 840,
+          "evidenceId": "rea-case"
+        }
+      ]
+    }
+  ]
+}

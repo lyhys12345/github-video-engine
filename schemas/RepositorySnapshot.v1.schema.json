@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^https:\\/\\/github\\.com\\/[A-Za-z0-9_-][A-Za-z0-9_.-]{0,99}\\/[A-Za-z0-9_-][A-Za-z0-9_.-]{0,99}$"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "defaultBranch": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "license": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 120
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fetchedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+    },
+    "documents": {
+      "minItems": 1,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 200000
+          }
+        },
+        "required": [
+          "path",
+          "url",
+          "sha256",
+          "content"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "trust": {
+      "type": "string",
+      "const": "untrusted-data-never-executed"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "repository",
+    "commit",
+    "name",
+    "description",
+    "defaultBranch",
+    "license",
+    "fetchedAt",
+    "documents",
+    "trust"
+  ],
+  "additionalProperties": false,
+  "$id": "urn:github-video-engine:RepositorySnapshot:1.0",
+  "$comment": "Zod also enforces cross-field invariants; see docs/contracts.md."
+}

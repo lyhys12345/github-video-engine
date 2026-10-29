@@ -1,0 +1,18 @@
+{
+ "schemaVersion":"2.0",
+ "milestone":"M3-engineering-owner-av-deferred-v1",
+ "scope":"Complete M3 engineering contract; perceptual AV explicitly deferred by owner and historical UNVERIFIED retained",
+ "activeRoles":["product","reliability","evidence","video_quality","content_facts","security"],
+ "requiredCriteria":{
+  "product":["M3-01","M3-02","M3-04","M3-06","M3-08","M3-10","M3-12","M3-13"],
+  "reliability":["M3-01","M3-03","M3-04","M3-05","M3-08","M3-10","M3-11","M3-12"],
+  "evidence":["M3-01","M3-04","M3-05","M3-07","M3-08","M3-09","M3-10","M3-11","M3-12"],
+  "video_quality":["M3-04","M3-05","M3-06","M3-13"],
+  "content_facts":["M3-02","M3-06","M3-09","M3-10"],
+  "security":["M3-01","M3-03","M3-07","M3-08","M3-10","M3-11","M3-12"]
+ },
+ "deferredChecksAuthority":"reviews/owner-av-deferral-2026-10-26.json",
+ "deferredChecksRemainUnverified":["actual-listening","continuous-video-viewing","perceptual-audio-visual-quality","final-owner-acceptance"],
+ "decisionRule":"All required nondeferred criteria and active roles pass; no unresolved major/blocker. Deferred AV is not relabeled PASS.",
+ "humanFinalAcceptance":"pending; never implied"
+}

@@ -1,0 +1,5 @@
+# Keep checkout text predictable; exact provenance fixtures/font assets retain bytes.
+* text=auto eol=lf
+/fixtures/sources/** -text -whitespace
+/assets/fonts/** -text -whitespace
+*.ttf binary

@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rembg-evidence",
+  "name": "rembg",
+  "audience": "不了解项目的普通短视频观众",
+  "interpretation": "agent-curated-semantic-graph-not-automatic-source-understanding",
+  "sources": [
+    {
+      "id": "implementation",
+      "path": "fixtures/sources/rembg-bg.py.txt",
+      "url": "https://github.com/danielgatis/rembg/blob/c5b48b0417a0254df7d461efa14573597f369a83/rembg/bg.py",
+      "sha256": "2e1977b6d16d5369e2c20c5ca5d9ba2e2c0228f8beef39c5d2296df1879df62b"
+    }
+  ],
+  "claims": [
+    {
+      "id": "predict",
+      "statement": "模型根据图片预测前景蒙版",
+      "kind": "documented",
+      "rationale": "人工核对官方文档与代码；引文定位不等于自动语义证明",
+      "citations": [
+        {
+          "document": "implementation",
+          "startLine": 322,
+          "endLine": 328,
+          "quote": "\n    if session is None:\n        session = new_session(\"bria-rmbg\", *args, **kwargs)\n\n    masks = session.predict(img, *args, **kwargs)\n    cutouts = []\n"
+        }
+      ]
+    },
+    {
+      "id": "apply",
+      "statement": "按蒙版生成保留主体的抠图",
+      "kind": "documented",
+      "rationale": "人工核对官方文档与代码；引文定位不等于自动语义证明",
+      "citations": [
+        {
+          "document": "implementation",
+          "startLine": 369,
+          "endLine": 378,
+          "quote": "                    cutout = decontaminate_cutout(img, mask)\n        else:\n            if putalpha:\n                cutout = putalpha_cutout(img, mask)\n            elif decontaminate:\n                cutout = decontaminate_cutout(img, mask)\n            else:\n                cutout = naive_cutout(img, mask)\n\n        cutouts.append(cutout)"
+        }
+      ]
+    },
+    {
+      "id": "background",
+      "statement": "可为抠图添加指定背景颜色；花纹背景为一般合成用途示意",
+      "kind": "inference",
+      "rationale": "源码支持背景颜色，花纹背景是透明素材后续使用的教学推断，不冒充模型生成",
+      "citations": [
+        {
+          "document": "implementation",
+          "startLine": 380,
+          "endLine": 385,
+          "quote": "    cutout = img\n    if len(cutouts) > 0:\n        cutout = get_concat_v_multi(cutouts)\n\n    if bgcolor is not None and not only_mask:\n        cutout = apply_background_color(cutout, bgcolor)"
+        }
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "id": "photo",
+      "label": "带背景的图片",
+      "kind": "image"
+    },
+    {
+      "id": "mask",
+      "label": "前景蒙版",
+      "kind": "mask"
+    },
+    {
+      "id": "cutout",
+      "label": "透明背景的主体",
+      "kind": "cutout"
+    },
+    {
+      "id": "design",
+      "label": "主体放入新背景的合成图",
+      "kind": "image"
+    }
+  ],
+  "actors": [
+    {
+      "id": "tool",
+      "label": "rembg",
+      "role": "tool"
+    }
+  ],
+  "operations": [
+    {
+      "id": "reuse",
+      "kind": "composite",
+      "input": "cutout",
+      "output": "design",
+      "dependsOn": [
+        "cut"
+      ],
+      "claimIds": [
+        "background"
+      ],
+      "actorIds": [
+        "tool"
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "cut",
+      "kind": "extract",
+      "input": "mask",
+      "output": "cutout",
+      "dependsOn": [
+        "predict"
+      ],
+      "claimIds": [
+        "apply"
+      ],
+      "actorIds": [
+        "tool"
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "predict",
+      "kind": "segment",
+      "input": "photo",
+      "output": "mask",
+      "dependsOn": [],
+      "claimIds": [
+        "predict"
+      ],
+      "actorIds": [
+        "tool"
+      ],
+      "parameters": {}
+    }
+  ],
+  "disclosure": "合成插画与蒙版示意 · 未运行 rembg 模型"
+}

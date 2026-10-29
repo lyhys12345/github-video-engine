@@ -1,0 +1,1422 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rembg-proof",
+  "projectName": "rembg",
+  "audience": "不知道抠图或蒙版的普通观众",
+  "purpose": "理解输入图片经过主体分离，输出带透明背景的图片",
+  "input": "一张包含杯子与背景的图片",
+  "output": "保留杯子、背景透明的图片，可用于重新排版",
+  "audio": "silent-visual-proof",
+  "durationSeconds": 18,
+  "evidence": [
+    {
+      "id": "rembg-readme",
+      "url": "https://github.com/danielgatis/rembg/blob/c5b48b0417a0254df7d461efa14573597f369a83/README.md",
+      "snapshot": "fixtures/sources/rembg-README.md",
+      "sha256": "8455c52c60130199ab61858d359f2d25440dd95772844e2b3a037e490b31179d",
+      "supports": "输入图像，经 remove 处理后保存 PNG；项目用于去除图片背景。"
+    },
+    {
+      "id": "rembg-mask",
+      "url": "https://github.com/danielgatis/rembg/blob/c5b48b0417a0254df7d461efa14573597f369a83/rembg/bg.py",
+      "snapshot": "fixtures/sources/rembg-bg.py.txt",
+      "sha256": "2e1977b6d16d5369e2c20c5ca5d9ba2e2c0228f8beef39c5d2296df1879df62b",
+      "supports": "remove 调用 session.predict 获取 masks；putalpha_cutout 把 mask 写入 alpha 通道。"
+    }
+  ],
+  "comprehensionQuestions": [
+    "输入是图片还是一句文字？",
+    "透明棋盘格代表什么？",
+    "输出保留了什么，又去掉了什么？"
+  ],
+  "disclosure": "合成插画与蒙版原理示意 · 未运行 rembg 模型",
+  "entities": [
+    {
+      "id": "transparent",
+      "meaning": "透明区域用棋盘格表示",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 80,
+          "y": 0,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 160,
+          "y": 0,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 240,
+          "y": 0,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 320,
+          "y": 0,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 400,
+          "y": 0,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 480,
+          "y": 0,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 560,
+          "y": 0,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 640,
+          "y": 0,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 720,
+          "y": 0,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 80,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 80,
+          "y": 80,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 160,
+          "y": 80,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 240,
+          "y": 80,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 320,
+          "y": 80,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 400,
+          "y": 80,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 480,
+          "y": 80,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 560,
+          "y": 80,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 640,
+          "y": 80,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 720,
+          "y": 80,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 160,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 80,
+          "y": 160,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 160,
+          "y": 160,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 240,
+          "y": 160,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 320,
+          "y": 160,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 400,
+          "y": 160,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 480,
+          "y": 160,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 560,
+          "y": 160,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 640,
+          "y": 160,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 720,
+          "y": 160,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 240,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 80,
+          "y": 240,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 160,
+          "y": 240,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 240,
+          "y": 240,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 320,
+          "y": 240,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 400,
+          "y": 240,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 480,
+          "y": 240,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 560,
+          "y": 240,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 640,
+          "y": 240,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 720,
+          "y": 240,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 320,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 80,
+          "y": 320,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 160,
+          "y": 320,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 240,
+          "y": 320,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 320,
+          "y": 320,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 400,
+          "y": 320,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 480,
+          "y": 320,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 560,
+          "y": 320,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 640,
+          "y": 320,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 720,
+          "y": 320,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 400,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 80,
+          "y": 400,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 160,
+          "y": 400,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 240,
+          "y": 400,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 320,
+          "y": 400,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 400,
+          "y": 400,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 480,
+          "y": 400,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 560,
+          "y": 400,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 640,
+          "y": 400,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 720,
+          "y": 400,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 480,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 80,
+          "y": 480,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 160,
+          "y": 480,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 240,
+          "y": 480,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 320,
+          "y": 480,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 400,
+          "y": 480,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 480,
+          "y": 480,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 560,
+          "y": 480,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 640,
+          "y": 480,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 720,
+          "y": 480,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 560,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 80,
+          "y": 560,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 160,
+          "y": 560,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 240,
+          "y": 560,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 320,
+          "y": 560,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 400,
+          "y": 560,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 480,
+          "y": 560,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 560,
+          "y": 560,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 640,
+          "y": 560,
+          "w": 80,
+          "h": 80,
+          "fill": "#cbd3e1",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 720,
+          "y": 560,
+          "w": 80,
+          "h": 80,
+          "fill": "#f3f5f9",
+          "radius": 0
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 3,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 4,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        },
+        {
+          "at": 18,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        }
+      ]
+    },
+    {
+      "id": "backdrop",
+      "meaning": "输入图片的原背景",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 650,
+          "fill": "#567d67",
+          "radius": 28
+        },
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 430,
+          "w": 800,
+          "h": 220,
+          "fill": "#a68969",
+          "radius": 0
+        },
+        {
+          "kind": "rect",
+          "x": 50,
+          "y": 60,
+          "w": 120,
+          "h": 300,
+          "fill": "#8bb69a",
+          "radius": 20
+        },
+        {
+          "kind": "rect",
+          "x": 650,
+          "y": 70,
+          "w": 90,
+          "h": 350,
+          "fill": "#3b5c50",
+          "radius": 20
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 2.4,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 3.5,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 7.5,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        },
+        {
+          "at": 10.8,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 0.9
+        },
+        {
+          "at": 18,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 0.9
+        }
+      ]
+    },
+    {
+      "id": "subject",
+      "meaning": "贯穿输入和输出的同一个杯子",
+      "shapes": [
+        {
+          "kind": "path",
+          "d": "M200 100H470V440Q470 510 400 510H270Q200 510 200 440Z",
+          "fill": "#ef795e"
+        },
+        {
+          "kind": "path",
+          "d": "M470 160H540Q630 160 630 260Q630 360 540 360H470V315H530Q580 315 580 260Q580 205 530 205H470Z",
+          "fill": "#ef795e"
+        },
+        {
+          "kind": "rect",
+          "x": 230,
+          "y": 155,
+          "w": 28,
+          "h": 270,
+          "fill": "#ffc4a7",
+          "radius": 14
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 3,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 4,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        },
+        {
+          "at": 18,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        }
+      ]
+    },
+    {
+      "id": "processor",
+      "meaning": "rembg 处理者",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 720,
+          "h": 130,
+          "fill": "#226650",
+          "radius": 25
+        },
+        {
+          "kind": "text",
+          "x": 35,
+          "y": 82,
+          "text": "rembg：把主体和背景分开",
+          "size": 40,
+          "fill": "#ffffff"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 140,
+          "y": 320,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 4.8,
+          "x": 140,
+          "y": 320,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 5.5,
+          "x": 140,
+          "y": 320,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 11,
+          "x": 140,
+          "y": 320,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 12,
+          "x": 140,
+          "y": 320,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 140,
+          "y": 320,
+          "opacity": 0,
+          "scale": 1
+        }
+      ]
+    },
+    {
+      "id": "mask",
+      "meaning": "蒙版中白色保留、黑色去除",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 650,
+          "fill": "#05070a",
+          "radius": 28
+        },
+        {
+          "kind": "path",
+          "d": "M200 100H470V440Q470 510 400 510H270Q200 510 200 440Z",
+          "fill": "#ffffff"
+        },
+        {
+          "kind": "path",
+          "d": "M470 160H540Q630 160 630 260Q630 360 540 360H470V315H530Q580 315 580 260Q580 205 530 205H470Z",
+          "fill": "#ffffff"
+        },
+        {
+          "kind": "rect",
+          "x": 230,
+          "y": 155,
+          "w": 28,
+          "h": 270,
+          "fill": "#ffffff",
+          "radius": 14
+        },
+        {
+          "kind": "text",
+          "x": 70,
+          "y": 600,
+          "text": "白：保留主体   黑：去掉背景",
+          "size": 35,
+          "fill": "#ffffff"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 0.9
+        },
+        {
+          "at": 6.2,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 0.9
+        },
+        {
+          "at": 7.2,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        },
+        {
+          "at": 8.5,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        },
+        {
+          "at": 9.2,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 0.9
+        },
+        {
+          "at": 18,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 0.9
+        }
+      ]
+    },
+    {
+      "id": "new-background",
+      "meaning": "输出可以放到新的设计背景中",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 650,
+          "fill": "#7652b5",
+          "radius": 28
+        },
+        {
+          "kind": "text",
+          "x": 30,
+          "y": 600,
+          "text": "放到新的背景里",
+          "size": 40,
+          "fill": "#ffffff"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 0.9
+        },
+        {
+          "at": 13.5,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 0.9
+        },
+        {
+          "at": 14.5,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        },
+        {
+          "at": 18,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        }
+      ]
+    },
+    {
+      "id": "output-subject",
+      "meaning": "同一杯子的透明输出；新背景置于杯子后面",
+      "shapes": [
+        {
+          "kind": "path",
+          "d": "M200 100H470V440Q470 510 400 510H270Q200 510 200 440Z",
+          "fill": "#ef795e"
+        },
+        {
+          "kind": "path",
+          "d": "M470 160H540Q630 160 630 260Q630 360 540 360H470V315H530Q580 315 580 260Q580 205 530 205H470Z",
+          "fill": "#ef795e"
+        },
+        {
+          "kind": "rect",
+          "x": 230,
+          "y": 155,
+          "w": 28,
+          "h": 270,
+          "fill": "#ffc4a7",
+          "radius": 14
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 0.9
+        },
+        {
+          "at": 13.4,
+          "x": 140,
+          "y": 520,
+          "opacity": 0,
+          "scale": 0.9
+        },
+        {
+          "at": 13.6,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        },
+        {
+          "at": 18,
+          "x": 140,
+          "y": 520,
+          "opacity": 1,
+          "scale": 0.9
+        }
+      ]
+    },
+    {
+      "id": "output-label",
+      "meaning": "透明不是白底",
+      "shapes": [
+        {
+          "kind": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 120,
+          "fill": "#263953",
+          "radius": 20
+        },
+        {
+          "kind": "text",
+          "x": 30,
+          "y": 78,
+          "text": "棋盘格 = 透明，不是新的背景",
+          "size": 37,
+          "fill": "#ffffff"
+        }
+      ],
+      "states": [
+        {
+          "at": 0,
+          "x": 140,
+          "y": 1250,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 2.5,
+          "x": 140,
+          "y": 1250,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 3,
+          "x": 140,
+          "y": 1250,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 10,
+          "x": 140,
+          "y": 1250,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 11,
+          "x": 140,
+          "y": 1250,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 13.5,
+          "x": 140,
+          "y": 1250,
+          "opacity": 1,
+          "scale": 1
+        },
+        {
+          "at": 14,
+          "x": 140,
+          "y": 1250,
+          "opacity": 0,
+          "scale": 1
+        },
+        {
+          "at": 18,
+          "x": 140,
+          "y": 1250,
+          "opacity": 0,
+          "scale": 1
+        }
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "id": "hook",
+      "start": 0,
+      "end": 3,
+      "caption": "背景拿掉，杯子就能单独用了。",
+      "narrationDraft": "背景拿掉，杯子就能单独用了。",
+      "cause": "主体与背景分离",
+      "effect": "杯子显示在透明棋盘格上",
+      "visibleEntityIds": [
+        "subject",
+        "transparent",
+        "output-label"
+      ],
+      "evidenceIds": [
+        "rembg-readme"
+      ],
+      "mode": "result",
+      "causal": {
+        "triggerEntityId": "subject",
+        "affectedEntityId": "transparent",
+        "triggerAt": 0,
+        "effectAt": 1,
+        "before": "原图有背景",
+        "after": "输出背景透明",
+        "operation": "compare",
+        "recipe": "comparison-v1"
+      }
+    },
+    {
+      "id": "input",
+      "start": 3,
+      "end": 6,
+      "caption": "输入：一张带背景的图片。|交给 rembg 处理。",
+      "narrationDraft": "给 rembg 一张图片，它会把主体和背景分开。",
+      "cause": "原始图片输入 rembg",
+      "effect": "进入主体分离过程",
+      "visibleEntityIds": [
+        "subject",
+        "backdrop",
+        "processor",
+        "processor"
+      ],
+      "evidenceIds": [
+        "rembg-readme"
+      ],
+      "mode": "input",
+      "causal": {
+        "triggerEntityId": "processor",
+        "affectedEntityId": "backdrop",
+        "triggerAt": 5.5,
+        "effectAt": 5.8,
+        "before": "原始图片",
+        "after": "进入分离处理",
+        "operation": "handoff",
+        "recipe": "handoff-v1"
+      }
+    },
+    {
+      "id": "mechanism",
+      "start": 6,
+      "end": 9,
+      "caption": "先得到一张蒙版：|白色保留，黑色去掉。",
+      "narrationDraft": "用一张蒙版标出哪些地方要留下，再把背景变透明。",
+      "cause": "模型预测蒙版，蒙版用于透明度处理",
+      "effect": "背景逐渐消失，主体保持同一位置",
+      "visibleEntityIds": [
+        "mask",
+        "subject",
+        "backdrop",
+        "transparent"
+      ],
+      "evidenceIds": [
+        "rembg-mask"
+      ],
+      "mode": "mechanism",
+      "causal": {
+        "triggerEntityId": "mask",
+        "affectedEntityId": "subject",
+        "triggerAt": 7.2,
+        "effectAt": 8,
+        "before": "主体与背景混合",
+        "after": "蒙版保留主体，背景透明",
+        "operation": "separate",
+        "recipe": "separation-v1"
+      }
+    },
+    {
+      "id": "apply-mask",
+      "start": 9,
+      "end": 11,
+      "caption": "按蒙版去掉背景。|杯子留下，背景变透明。",
+      "narrationDraft": "按蒙版去掉背景，杯子留下，背景变透明。",
+      "cause": "蒙版应用于图片透明度",
+      "effect": "背景消失，主体保留",
+      "visibleEntityIds": [
+        "mask",
+        "subject",
+        "backdrop",
+        "transparent"
+      ],
+      "evidenceIds": [
+        "rembg-mask"
+      ],
+      "mode": "mechanism",
+      "causal": {
+        "triggerEntityId": "mask",
+        "affectedEntityId": "subject",
+        "triggerAt": 9,
+        "effectAt": 10.5,
+        "before": "背景仍在",
+        "after": "背景透明",
+        "operation": "separate",
+        "recipe": "separation-v1"
+      }
+    },
+    {
+      "id": "output",
+      "start": 11,
+      "end": 18,
+      "caption": "输出：带透明背景的图片。|杯子保留，换个背景也能用。",
+      "narrationDraft": "得到带透明背景的图片，就能把杯子放进新的设计里。",
+      "cause": "透明图片可与其他背景合成",
+      "effect": "主体保持不变，新背景置于其后",
+      "visibleEntityIds": [
+        "subject",
+        "transparent",
+        "new-background",
+        "output-subject"
+      ],
+      "evidenceIds": [
+        "rembg-readme",
+        "rembg-mask"
+      ],
+      "mode": "output",
+      "causal": {
+        "triggerEntityId": "subject",
+        "affectedEntityId": "new-background",
+        "triggerAt": 13.5,
+        "effectAt": 15,
+        "before": "透明输出",
+        "after": "主体与新背景组合",
+        "operation": "compare",
+        "recipe": "comparison-v1"
+      }
+    }
+  ],
+  "drivers": []
+}

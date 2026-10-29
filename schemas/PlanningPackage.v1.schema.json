@@ -1,0 +1,482 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "projectId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "snapshotHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "facts": {
+      "minItems": 1,
+      "maxItems": 60,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "documented",
+              "inference",
+              "synthetic"
+            ]
+          },
+          "evidence": {
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "document": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "startLine": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endLine": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1200
+                }
+              },
+              "required": [
+                "document",
+                "startLine",
+                "endLine",
+                "quote"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "limitations": {
+            "type": "string",
+            "maxLength": 600
+          }
+        },
+        "required": [
+          "id",
+          "statement",
+          "kind",
+          "evidence",
+          "limitations"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "brief": {
+      "type": "object",
+      "properties": {
+        "audience": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "zh-CN",
+            "en-US"
+          ]
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "number",
+              "const": 720
+            },
+            {
+              "type": "number",
+              "const": 1080
+            }
+          ]
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "number",
+              "const": 1280
+            },
+            {
+              "type": "number",
+              "const": 1920
+            }
+          ]
+        },
+        "fps": {
+          "anyOf": [
+            {
+              "type": "number",
+              "const": 24
+            },
+            {
+              "type": "number",
+              "const": 30
+            }
+          ]
+        },
+        "durationSeconds": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 60
+        },
+        "useCase": {
+          "type": "object",
+          "properties": {
+            "who": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "situation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "input": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "output": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "evidenceKind": {
+              "type": "string",
+              "enum": [
+                "documented-example",
+                "synthetic-example"
+              ]
+            }
+          },
+          "required": [
+            "who",
+            "situation",
+            "input",
+            "output",
+            "value",
+            "evidenceKind"
+          ],
+          "additionalProperties": false
+        },
+        "guidanceOrigin": {
+          "type": "string",
+          "enum": [
+            "user-provided",
+            "agent-proposed-defaults"
+          ]
+        },
+        "styleDirection": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "audience",
+        "objective",
+        "language",
+        "width",
+        "height",
+        "fps",
+        "durationSeconds",
+        "useCase",
+        "guidanceOrigin",
+        "styleDirection"
+      ],
+      "additionalProperties": false
+    },
+    "concepts": {
+      "minItems": 2,
+      "maxItems": 2,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "premise": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "opening": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "id",
+          "premise",
+          "opening",
+          "rationale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "selectedConcept": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "script": {
+      "minItems": 3,
+      "maxItems": 16,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "narration": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "caption": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "claimIds": {
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,63}$"
+            }
+          },
+          "plannedDurationMs": {
+            "type": "integer",
+            "minimum": 500,
+            "maximum": 20000
+          }
+        },
+        "required": [
+          "id",
+          "narration",
+          "caption",
+          "claimIds",
+          "plannedDurationMs"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "storyboard": {
+      "minItems": 3,
+      "maxItems": 16,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "scriptIds": {
+            "minItems": 1,
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,63}$"
+            }
+          },
+          "visual": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200
+          },
+          "animation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600
+          },
+          "evidenceLabel": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "id",
+          "scriptIds",
+          "visual",
+          "animation",
+          "evidenceLabel"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "references": {
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "observed",
+              "unavailable",
+              "not-requested"
+            ]
+          },
+          "observations": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "limitation": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "url",
+          "status",
+          "observations",
+          "limitation"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "audio": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "local-tts",
+            "provided-recording",
+            "preview-silent"
+          ]
+        },
+        "voice": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "timingStatus": {
+          "type": "string",
+          "enum": [
+            "estimated",
+            "measured"
+          ]
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "mode",
+        "voice",
+        "timingStatus",
+        "note"
+      ],
+      "additionalProperties": false
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "maxPaidUsd": {
+          "type": "number",
+          "const": 0
+        },
+        "maxRevisionRounds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "execution": {
+          "type": "string",
+          "const": "no-untrusted-repository-execution"
+        }
+      },
+      "required": [
+        "maxPaidUsd",
+        "maxRevisionRounds",
+        "execution"
+      ],
+      "additionalProperties": false
+    },
+    "origin": {
+      "type": "string",
+      "const": "agent-authored-not-an-automatic-model-api-call"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "projectId",
+    "snapshotHash",
+    "facts",
+    "brief",
+    "concepts",
+    "selectedConcept",
+    "script",
+    "storyboard",
+    "references",
+    "audio",
+    "budget",
+    "origin"
+  ],
+  "additionalProperties": false,
+  "$id": "urn:github-video-engine:PlanningPackage:1.0",
+  "$comment": "Zod also enforces cross-field invariants; see docs/contracts.md."
+}

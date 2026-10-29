@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "^https:\\/\\/github\\.com\\/[A-Za-z0-9_.-]+\\/[A-Za-z0-9_.-]+$"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "evidence": {
+          "type": "string",
+          "const": "synthetic-demo"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "id",
+        "name",
+        "repository",
+        "revision",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "video": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 320,
+          "maximum": 1920,
+          "multipleOf": 2
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 320,
+          "maximum": 1920,
+          "multipleOf": 2
+        },
+        "fps": {
+          "anyOf": [
+            {
+              "type": "number",
+              "const": 24
+            },
+            {
+              "type": "number",
+              "const": 25
+            },
+            {
+              "type": "number",
+              "const": 30
+            }
+          ]
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "fps"
+      ],
+      "additionalProperties": false
+    },
+    "style": {
+      "type": "object",
+      "properties": {
+        "background": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "foreground": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "accent": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      },
+      "required": [
+        "background",
+        "foreground",
+        "accent"
+      ],
+      "additionalProperties": false
+    },
+    "scenes": {
+      "minItems": 1,
+      "maxItems": 6,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "const": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "durationFrames": {
+            "type": "integer",
+            "minimum": 48,
+            "maximum": 450
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "title",
+              "architecture",
+              "closing"
+            ]
+          },
+          "elements": {
+            "minItems": 1,
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "eyebrow",
+                    "title",
+                    "body",
+                    "label"
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                }
+              },
+              "required": [
+                "role",
+                "text"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "animation": {
+            "type": "object",
+            "properties": {
+              "preset": {
+                "type": "string",
+                "const": "fade-slide"
+              },
+              "entranceFrames": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 45
+              }
+            },
+            "required": [
+              "preset",
+              "entranceFrames"
+            ],
+            "additionalProperties": false
+          },
+          "assetIds": {
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,63}$"
+            }
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "id",
+          "durationFrames",
+          "layout",
+          "elements",
+          "animation",
+          "assetIds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "assets": {
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "mediaType": {
+            "type": "string",
+            "const": "image/png"
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "sha256",
+          "mediaType"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "audio": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "const": "silent"
+        },
+        "references": {
+          "maxItems": 0,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "mode",
+        "references"
+      ],
+      "additionalProperties": false
+    },
+    "evidenceReferences": {
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "id",
+          "uri",
+          "note"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "project",
+    "video",
+    "style",
+    "scenes",
+    "assets",
+    "audio",
+    "evidenceReferences"
+  ],
+  "additionalProperties": false,
+  "$id": "urn:github-video-engine:VideoSpec:1.0",
+  "$comment": "Zod also enforces cross-field invariants; see docs/contracts.md."
+}

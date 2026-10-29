@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "authorityText": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 4000
+    },
+    "authoritySource": {
+      "type": "string",
+      "const": "current-chat-user-instruction"
+    },
+    "recordedBy": {
+      "type": "string",
+      "const": "trusted-local-operator"
+    },
+    "humanIdentityAuthenticated": {
+      "type": "boolean",
+      "const": false
+    },
+    "allowedGates": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "G1",
+          "G2",
+          "G3",
+          "G4",
+          "G5"
+        ]
+      }
+    },
+    "finalHumanRequired": {
+      "type": "boolean",
+      "const": true
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "maxPaidUsd": {
+          "type": "number",
+          "const": 0
+        },
+        "deployment": {
+          "type": "boolean",
+          "const": false
+        },
+        "untrustedRepositoryExecution": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "required": [
+        "maxPaidUsd",
+        "deployment",
+        "untrustedRepositoryExecution"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "id",
+    "authorityText",
+    "authoritySource",
+    "recordedBy",
+    "humanIdentityAuthenticated",
+    "allowedGates",
+    "finalHumanRequired",
+    "limits"
+  ],
+  "additionalProperties": false,
+  "$id": "urn:github-video-engine:DelegationAttestation:1.0",
+  "$comment": "Zod also enforces cross-field invariants; see docs/contracts.md."
+}

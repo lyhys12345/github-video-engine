@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0",
+  "id": "user-long-horizon-2026-10-26",
+  "authorityText": "ok，现在开始你用这些judge来审阅每个M。一直到完成以后再叫我。这是一个long horizon 任务。你理解我什么意思吗？",
+  "authoritySource": "current-chat-user-instruction",
+  "recordedBy": "trusted-local-operator",
+  "humanIdentityAuthenticated": false,
+  "allowedGates": [
+    "G1",
+    "G2",
+    "G3",
+    "G4",
+    "G5"
+  ],
+  "finalHumanRequired": true,
+  "limits": {
+    "maxPaidUsd": 0,
+    "deployment": false,
+    "untrustedRepositoryExecution": false
+  }
+}

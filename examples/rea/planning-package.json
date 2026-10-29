@@ -1,0 +1,306 @@
+{
+  "schemaVersion": "1.0",
+  "projectId": "rea",
+  "snapshotHash": "ffbbf9ba8fe142770076e1cf703ae42ebba503123d528e9c835d9b5924c83496",
+  "facts": [
+    {
+      "id": "purpose",
+      "statement": "官方将 REA 描述为让智能体调查软件功能、解释其工作方式并展示证据的工具。",
+      "kind": "documented",
+      "evidence": [
+        {
+          "document": "README.md",
+          "startLine": 61,
+          "endLine": 61,
+          "quote": "See a feature in an app that you want in your own product? Ask your agent to investigate it with REA. It can inspect the app without its source code, explain how the feature works, show the evidence, and build a version for your project."
+        }
+      ],
+      "limitations": "官方功能描述，不是本次安装或运行结果。"
+    },
+    {
+      "id": "targets",
+      "statement": "官方文档列出原生二进制、JavaScript/Electron、.NET 和网站等分析目标。",
+      "kind": "documented",
+      "evidence": [
+        {
+          "document": "README.md",
+          "startLine": 63,
+          "endLine": 63,
+          "quote": "REA connects your agent to tools for inspecting native binaries, JavaScript and Electron apps, .NET assemblies, and websites. You can also use the same tools from your terminal. Analysis runs locally, and results include the evidence and limitations behind each conclusion."
+        }
+      ],
+      "limitations": "各目标的依赖和能力不同；不保证任意目标都能完整分析。"
+    },
+    {
+      "id": "workflow",
+      "statement": "智能体通过 MCP 调用 REA 检查目标并跟踪代码，结合返回的证据继续提问、解释或编写和测试实现。",
+      "kind": "documented",
+      "evidence": [
+        {
+          "document": "README.md",
+          "startLine": 167,
+          "endLine": 170,
+          "quote": "Your agent calls REA through MCP to inspect the target and trace relevant code.\nREA returns findings with their evidence. The agent uses them to ask follow-up\nquestions, explain the behavior, or write and test an implementation.\nCLI commands use the same workflows."
+        }
+      ],
+      "limitations": "这是官方说明的调查流程；本视频不声称执行了该流程。"
+    },
+    {
+      "id": "notion-case",
+      "statement": "官方 Notion 案例描述了从 renderer 的剪贴板 API，经 preload 和 IPC 到 main process，并检查富剪贴板格式的追踪路线。",
+      "kind": "documented",
+      "evidence": [
+        {
+          "document": "README.md",
+          "startLine": 263,
+          "endLine": 266,
+          "quote": "### Notion: trace the Electron clipboard bridge\n\nFind the renderer's clipboard API, follow it through preload and IPC into the\nmain process, and inspect the rich clipboard format."
+        }
+      ],
+      "limitations": "官方案例的图形转述，不是本次对 Notion 的实测或录屏。"
+    },
+    {
+      "id": "dependencies",
+      "statement": "官方文档区分原生分析所需的 Hopper/Ghidra/IDA 与不需原生分析引擎的静态 JavaScript 分析。",
+      "kind": "documented",
+      "evidence": [
+        {
+          "document": "README.md",
+          "startLine": 65,
+          "endLine": 65,
+          "quote": "Setup registers REA with your agent and installs matching workflow instructions. Native analysis can use an existing Hopper, Ghidra, or IDA installation; setup can optionally install Hopper with approval. Static JavaScript analysis needs no native analysis engine."
+        }
+      ],
+      "limitations": "具体平台、安装和权限仍需核查；本项目不执行这些工具。"
+    },
+    {
+      "id": "unknowns",
+      "statement": "官方文档要求保留静态观察、运行时观察、关系推断及未知/不可用事实的原始证据身份。",
+      "kind": "documented",
+      "evidence": [
+        {
+          "document": "docs/javascript-application-workflows.md",
+          "startLine": 12,
+          "endLine": 18,
+          "quote": "`inspect_analysis_view` also projects retained `inspect_binary_layout`\nEvidence. The remaining workflows consume Evidence produced by\n`analyze_javascript_application` or `reconcile_javascript_runtime`. They do not\nread an artifact, execute application code, attach to a process, or open a\nnative-analysis provider. Static artifact observations, passive runtime\nobservations, relationship inferences, and unknown or unavailable facts retain\ntheir original graph authority."
+        }
+      ],
+      "limitations": "仅针对该文档描述的工作流；不能把未知自动视为不存在。"
+    },
+    {
+      "id": "synthetic-diagram",
+      "statement": "本片使用原创图形解释官方案例，没有运行 REA、Notion 或用户提供的 GitHub 仓库代码。",
+      "kind": "synthetic",
+      "evidence": [],
+      "limitations": "图形不是产品界面、执行日志或测试结果。"
+    },
+    {
+      "id": "local-analysis",
+      "statement": "官方称目标在本地分析，同时明确智能体模型提供商有自己的数据政策。",
+      "kind": "documented",
+      "evidence": [
+        {
+          "document": "README.md",
+          "startLine": 378,
+          "endLine": 379,
+          "quote": "REA analyzes targets locally. Your agent receives the tool results, and its\nmodel provider has its own data policy."
+        }
+      ],
+      "limitations": "本地分析不等于整条智能体链路没有数据外传；本视频不作隐私保证。"
+    }
+  ],
+  "brief": {
+    "audience": "希望理解开源 AI 开发工具用途的中文开发者与 AI 爱好者",
+    "objective": "用一个有来源的剪贴板案例解释 REA 的用途、工作方式与使用边界，不冒充本次实测",
+    "language": "zh-CN",
+    "width": 720,
+    "height": 1280,
+    "fps": 30,
+    "durationSeconds": 50,
+    "useCase": {
+      "who": "研究 Electron 应用功能实现的开发者",
+      "situation": "想理解富文本复制从界面到系统剪贴板的实现链路",
+      "input": "待研究目标和一个明确的功能问题",
+      "output": "可追溯到代码/关系与未知项的分析证据，再供智能体解释",
+      "value": "把抽象功能问题拆成可核查的追踪路线",
+      "evidenceKind": "documented-example"
+    },
+    "guidanceOrigin": "agent-proposed-defaults",
+    "styleDirection": "中文竖屏原创科技图形讲解：暗色背景、清晰层级、少量强调色、按节点逐步推进。采用 M0 已实测模板作为工程起点，随后由 J4 审阅。未取得两条参考视频的可观察内容，因此不声称风格已经对齐。"
+  },
+  "concepts": [
+    {
+      "id": "clipboard-journey",
+      "premise": "让一段复制内容成为主线，跟随官方案例穿过 Electron 的层次",
+      "opening": "复制之后，发生了什么？",
+      "rationale": "用具体用途和输入输出解释 REA，不要求观众先懂二进制分析"
+    },
+    {
+      "id": "evidence-investigation",
+      "premise": "以一次调查的证据板展示智能体和分析工具如何分工",
+      "opening": "一个功能，怎样找到它的证据？",
+      "rationale": "更强调方法与来源边界，适合已有开发经验的观众"
+    }
+  ],
+  "selectedConcept": "clipboard-journey",
+  "script": [
+    {
+      "id": "opening",
+      "narration": "复制一段富文本，它怎样从界面走到系统剪贴板？",
+      "caption": "复制之后，发生了什么？",
+      "claimIds": [
+        "notion-case"
+      ],
+      "plannedDurationMs": 6000
+    },
+    {
+      "id": "purpose",
+      "narration": "R E A 把智能体接到软件分析工具，帮助沿着证据理解功能。",
+      "caption": "REA：沿着证据理解功能",
+      "claimIds": [
+        "purpose",
+        "targets",
+        "workflow"
+      ],
+      "plannedDurationMs": 7000
+    },
+    {
+      "id": "trace",
+      "narration": "官方的 Notion 案例，追踪渲染进程、预加载脚本、I P C，再到主进程。",
+      "caption": "官方案例：Renderer → Preload → IPC → Main",
+      "claimIds": [
+        "notion-case"
+      ],
+      "plannedDurationMs": 8000
+    },
+    {
+      "id": "loop",
+      "narration": "你给出要研究的目标和问题；工具返回证据，智能体据此继续追问。",
+      "caption": "目标与问题 → 分析工具 → 证据 → 继续追问",
+      "claimIds": [
+        "workflow"
+      ],
+      "plannedDurationMs": 8000
+    },
+    {
+      "id": "conditions",
+      "narration": "分析路径不同：原生程序可能需要反编译工具，静态 JavaScript 不需要。",
+      "caption": "不同目标，对应不同依赖",
+      "claimIds": [
+        "dependencies"
+      ],
+      "plannedDurationMs": 7000
+    },
+    {
+      "id": "disclaimer",
+      "narration": "本片只是依据官方文档制作的图形讲解，没有运行 Notion，也不是这次实测。",
+      "caption": "图形讲解 · 官方文档案例 · 非本次实测",
+      "claimIds": [
+        "synthetic-diagram",
+        "notion-case"
+      ],
+      "plannedDurationMs": 7000
+    },
+    {
+      "id": "closing",
+      "narration": "结论需要证据，未知也要保留。使用条件，请查看 R E A 官方仓库。",
+      "caption": "证据可追溯，未知不抹去",
+      "claimIds": [
+        "unknowns",
+        "purpose"
+      ],
+      "plannedDurationMs": 7000
+    }
+  ],
+  "storyboard": [
+    {
+      "id": "copy-question",
+      "scriptIds": [
+        "opening"
+      ],
+      "visual": "原创文本卡片代表富文本，复制动作点亮一条尚未展开的路径；醒目标注官方案例图解。不是 Notion 界面截图。",
+      "animation": "文字卡片短距离移动；问题标题进入；背景路径缓慢点亮，重点停留到旁白结束。",
+      "evidenceLabel": "官方 Notion 案例 · 图形讲解"
+    },
+    {
+      "id": "rea-role",
+      "scriptIds": [
+        "purpose"
+      ],
+      "visual": "REA 位于智能体与分析工具之间；以问题/证据两个方向的箭头说明其角色，避免虚构执行终端。",
+      "animation": "先出现目标问题，再出现分析工具和证据卡；有节奏地连接。",
+      "evidenceLabel": "官方 README 功能描述 · 未实测"
+    },
+    {
+      "id": "electron-trace",
+      "scriptIds": [
+        "trace"
+      ],
+      "visual": "Renderer、Preload、IPC、Main 四个原创节点组成路径；小文字标明来自官方 Notion 案例。",
+      "animation": "跟随旁白逐节点高亮，最后显示富剪贴板格式的抽象卡片。",
+      "evidenceLabel": "README 263–266 · 官方案例转述"
+    },
+    {
+      "id": "investigation-loop",
+      "scriptIds": [
+        "loop"
+      ],
+      "visual": "问题、分析、证据、追问构成可读循环；未知项使用不同颜色保留在证据旁。",
+      "animation": "沿循环推进一次，不让多条箭头同时抢注意力。",
+      "evidenceLabel": "README 167–170 · 流程示意"
+    },
+    {
+      "id": "conditions",
+      "scriptIds": [
+        "conditions"
+      ],
+      "visual": "分成原生分析与静态 JavaScript 两条路径，前者标示所需分析工具，后者标示不同依赖。",
+      "animation": "两栏顺序出现，强调不能把不同目标的运行条件混为一谈。",
+      "evidenceLabel": "README 65 · 依赖需核查"
+    },
+    {
+      "id": "honest-boundary",
+      "scriptIds": [
+        "disclaimer"
+      ],
+      "visual": "清楚列出图形讲解、官方文档案例、没有执行目标三个边界；无仿造成功日志。",
+      "animation": "逐条进入并完整停留，节奏放慢以保证手机阅读。",
+      "evidenceLabel": "本次制作方式 · 非目标实测"
+    },
+    {
+      "id": "source-close",
+      "scriptIds": [
+        "closing"
+      ],
+      "visual": "证据卡与未知卡并存，最后显示仓库身份 morluto/rea、来源 commit 缩写与官方链接指引。",
+      "animation": "收束路径到来源卡，保留足够时间读完结尾。",
+      "evidenceLabel": "固定 commit 文档快照 · 来源可追溯"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://www.xiaohongshu.com/explore/6accb54c000000001303df4c",
+      "status": "unavailable",
+      "observations": [],
+      "limitation": "已尝试读取，尚未取得可观察视频；不得根据旧参考或猜测描述其镜头、节奏、声音。"
+    },
+    {
+      "url": "https://www.instagram.com/reel/De5sX0yD_l1/",
+      "status": "unavailable",
+      "observations": [],
+      "limitation": "读取未成功；后续涉及该参考的对齐判断须重新取得内容，或明确提出替代方向而不声称已对齐。"
+    }
+  ],
+  "audio": {
+    "mode": "local-tts",
+    "voice": "M2 选择可用的本地中文声音",
+    "timingStatus": "estimated",
+    "note": "当前仅为 50 秒脚本时长分配，未声称已经试读。M2 在零付费约束下实际生成/听取与计时，检查 REA/IPC/JavaScript/Notion 专名读法，再校准时序。"
+  },
+  "budget": {
+    "maxPaidUsd": 0,
+    "maxRevisionRounds": 3,
+    "execution": "no-untrusted-repository-execution"
+  },
+  "origin": "agent-authored-not-an-automatic-model-api-call"
+}

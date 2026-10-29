@@ -1,0 +1,10 @@
+import {resolve,join} from 'node:path';
+import {EngineError} from '../core/errors.js';
+import {FinalizationStore} from './finalization.js';
+type Options={id?:string;data?:string;authorization?:string;'owner-record'?:string;task?:string;out?:string;candidate?:string;rules?:string;delegation?:string};
+export async function finalCommand(positionals:string[],options:Options,signal:AbortSignal){
+ const action=positionals[1],allowed:Record<string,string[]>={prepare:['id','data','owner-record'],render:['id','data','authorization'],status:['id','data'],inspect:['id','data','task'],export:['id','data','task','out'],lock:['id','data','task','candidate','rules','delegation']};
+ if(positionals.length!==2||!action||!allowed[action]||!options.id||Object.entries(options).some(([key,value])=>value!==undefined&&!allowed[action]!.includes(key))||(action==='render'&&!options.authorization)||(['inspect','export','lock'].includes(action)&&!options.task)||(action==='export'&&!options.out)||(action==='lock'&&(!options.candidate||!options.rules||!options.delegation)))throw new EngineError('USAGE','final prepare --id <id> [--owner-record <explicit-record>] | final render --id <id> --authorization <task-id> | final status/inspect --id <id> [--task <full-task-id>] | final export --id <id> --task <full-task-id> --out <new-directory> | final lock --id <id> --task <full-task-id> --candidate <file> --rules <file> --delegation <file>; all accept --data');
+ const store=new FinalizationStore(join(resolve(options.data??process.env.GVE_DATA??'.gve'),'workflow'));
+ try{if(action==='prepare')return await store.prepare(options.id,options['owner-record'],signal);if(action==='render')return await store.run(options.id,options.authorization!,signal);if(action==='inspect')return await store.result(options.id,options.task!);if(action==='export')return await store.export(options.id,options.task!,resolve(options.out!),signal);if(action==='lock')return await store.lock(options.id,options.task!,resolve(options.candidate!),resolve(options.rules!),resolve(options.delegation!),signal);return store.status(options.id);}finally{store.close();}
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "1.0",
+  "font": "Noto Sans SC",
+  "commit": "e7db6ca603fd4862010383ff17ffd6cc4ffac1c0",
+  "acquiredAt": "2026-10-26T13:46:15.786Z",
+  "license": "SIL Open Font License 1.1; distribute copyright and OFL with font; unmodified file",
+  "files": [
+    {
+      "name": "NotoSansSC[wght].ttf",
+      "local": "NotoSansSC-Variable.ttf",
+      "gitBlob": "fb0637bafbcd804fe32152370a1225990745b4bc",
+      "bytes": 17772300,
+      "max": 20000000,
+      "url": "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf",
+      "sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+      "verifiedGitBlob": true
+    },
+    {
+      "name": "OFL.txt",
+      "local": "OFL.txt",
+      "gitBlob": "1c9f43281b8f216c5461fe9ac729afbade7724e4",
+      "bytes": 4388,
+      "max": 20000,
+      "url": "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/notosanssc/OFL.txt",
+      "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9",
+      "verifiedGitBlob": true
+    },
+    {
+      "name": "METADATA.pb",
+      "local": "METADATA.pb",
+      "gitBlob": "2da7e54d742a000810c6ec99ffae919158d9d4d6",
+      "bytes": 1296,
+      "max": 10000,
+      "url": "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/notosanssc/METADATA.pb",
+      "sha256": "c6c4bdb785793b2de1da177caeeffcd0c90d7680bdab2de8f88ab45007bc59bc",
+      "verifiedGitBlob": true
+    }
+  ],
+  "execution": "font/license/metadata data only; no repository code executed",
+  "rendererAdmission": "not yet tested"
+}

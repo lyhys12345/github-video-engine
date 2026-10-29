@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "id": "owner-av-deferral-2026-10-26",
+  "kind": "conditional-engineering-authorization",
+  "recordedAt": "2026-10-26T13:29:21Z",
+  "authoritySource": "current-chat-user-answer",
+  "questionItemId": "[\"request_user_input_async\",\"call_a2dfbd75a8a14f4ab90570238a4099df\",0]",
+  "authorityText": "明确授权：视听检查留到我最终 review，继续 M3/M4 工程；历史 UNVERIFIED 保留",
+  "recordedBy": "trusted-local-operator",
+  "humanIdentityAuthenticated": false,
+  "allowedEngineeringMilestones": ["M3", "M4"],
+  "deferredToFinalOwnerReview": ["actual-listening", "continuous-video-viewing", "perceptual-audio-visual-quality"],
+  "preserveHistoricalUnverified": true,
+  "createsG4Pass": false,
+  "finalHumanRequired": true,
+  "limits": {"maxPaidUsd": 0, "deployment": false, "untrustedRepositoryExecution": false},
+  "remainingRequiredEngineeringChecks": ["real-media-generation", "technical-media-validation", "fact-and-evidence-review", "runtime-integrity-recovery", "all-active-judge-engineering-criteria", "editable-local-delivery"]
+}

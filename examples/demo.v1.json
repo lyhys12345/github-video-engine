@@ -1,0 +1,116 @@
+{
+  "scenes": [
+    {
+      "layout": "title",
+      "assetIds": [],
+      "animation": {
+        "preset": "fade-slide",
+        "entranceFrames": 20
+      },
+      "schemaVersion": "1.0",
+      "durationFrames": 120,
+      "elements": [
+        {
+          "text": "01 / DEFINE",
+          "role": "eyebrow"
+        },
+        {
+          "text": "One spec.\nA real video.",
+          "role": "title"
+        },
+        {
+          "text": "A versioned, validated blueprint turns an idea into a repeatable render.",
+          "role": "body"
+        },
+        {
+          "text": "VideoSpec v1.0",
+          "role": "label"
+        }
+      ],
+      "id": "spec"
+    },
+    {
+      "layout": "architecture",
+      "assetIds": [],
+      "animation": {
+        "preset": "fade-slide",
+        "entranceFrames": 20
+      },
+      "schemaVersion": "1.0",
+      "durationFrames": 120,
+      "elements": [
+        {
+          "text": "02 / RECOVER",
+          "role": "eyebrow"
+        },
+        {
+          "text": "Progress\nthat survives.",
+          "role": "title"
+        },
+        {
+          "text": "Save each completed step. Resume after a failure. Reuse the same request.",
+          "role": "body"
+        },
+        {
+          "text": "SQLite checkpoints",
+          "role": "label"
+        }
+      ],
+      "id": "jobs"
+    },
+    {
+      "layout": "closing",
+      "assetIds": [],
+      "animation": {
+        "preset": "fade-slide",
+        "entranceFrames": 20
+      },
+      "schemaVersion": "1.0",
+      "durationFrames": 120,
+      "elements": [
+        {
+          "text": "03 / VERIFY",
+          "role": "eyebrow"
+        },
+        {
+          "text": "Rendered.\nChecked.\nPreserved.",
+          "role": "title"
+        },
+        {
+          "text": "Remotion motion graphics. FFmpeg validation. Content-addressed artifacts.",
+          "role": "body"
+        },
+        {
+          "text": "M0 / LOCAL DEMO",
+          "role": "label"
+        }
+      ],
+      "id": "artifact"
+    }
+  ],
+  "project": {
+    "repository": "https://github.com/example/demo",
+    "revision": "fixture-m0",
+    "schemaVersion": "1.0",
+    "evidence": "synthetic-demo",
+    "id": "demo",
+    "name": "GitHub Video Engine"
+  },
+  "video": {
+    "width": 720,
+    "height": 1280,
+    "fps": 30
+  },
+  "schemaVersion": "1.0",
+  "evidenceReferences": [],
+  "style": {
+    "background": "#0B1020",
+    "foreground": "#F3F6FF",
+    "accent": "#8BFFCE"
+  },
+  "audio": {
+    "references": [],
+    "mode": "silent"
+  },
+  "assets": []
+}

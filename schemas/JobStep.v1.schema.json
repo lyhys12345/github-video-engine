@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "jobId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "VALIDATE",
+        "RESOLVE_ASSETS",
+        "RENDER",
+        "VERIFY_MEDIA",
+        "PUBLISH"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "failed",
+        "cancelled",
+        "succeeded"
+      ]
+    },
+    "attempt": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "inputFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "const": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "storage": {
+            "type": "string"
+          },
+          "producingStage": {
+            "type": "string",
+            "enum": [
+              "VALIDATE",
+              "RESOLVE_ASSETS",
+              "RENDER",
+              "VERIFY_MEDIA",
+              "PUBLISH"
+            ]
+          },
+          "inputFingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "integrity": {
+            "type": "string",
+            "const": "verified"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "id",
+          "sha256",
+          "bytes",
+          "mediaType",
+          "storage",
+          "producingStage",
+          "inputFingerprint",
+          "createdAt",
+          "integrity"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "classification": {
+              "type": "string",
+              "enum": [
+                "retryable",
+                "permanent",
+                "cancelled"
+              ]
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "classification",
+            "message"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "startedAt": {
+      "type": "string"
+    },
+    "finishedAt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "owner": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "jobId",
+    "stage",
+    "status",
+    "attempt",
+    "inputFingerprint",
+    "outputs",
+    "error",
+    "startedAt",
+    "finishedAt",
+    "owner"
+  ],
+  "additionalProperties": false,
+  "$id": "urn:github-video-engine:JobStep:1.0",
+  "$comment": "Zod also enforces cross-field invariants; see docs/contracts.md."
+}

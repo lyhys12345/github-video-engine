@@ -1,0 +1,19 @@
+{
+  "version": "judges-v2-accepted-2026-10-26",
+  "status": "active_by_user_instruction",
+  "authority": "User: ok，现在开始你用这些judge来审阅每个M。一直到完成以后再叫我。这是一个long horizon 任务。你理解我什么意思吗？",
+  "sourceDefinitions": "reviews/judges-v2/registry.json",
+  "commonInstructions": "reviews/judges-v2/common.md",
+  "gateImplementation": "src/evaluation/judge-gate.mjs",
+  "gateCommand": "node reviews/check-gate-v2.mjs <candidate.json> <gate.json>",
+  "roleDirectory": "reviews/judges-v2/roles",
+  "milestoneScope": ["M1", "M2", "M3", "M4"],
+  "roadmap": "docs/product-plan-v7.md#11",
+  "executionPlan": "docs/long-horizon-plan.md",
+  "coreRoles": ["product", "reliability", "evidence"],
+  "specialists": ["video_quality", "content_facts", "security"],
+  "decisionRule": "All active roles and mandatory criteria pass, no unresolved blocker/major, no missing evidence/version mismatch; final human approval remains separate",
+  "notifications": "completion or genuine required input/authorization/blocker only",
+  "limits": {"paidApis": false, "deploymentOrPublication": false, "untrustedRepositoryExecution": false},
+  "heartbeatId": "github-video-engine-judge"
+}

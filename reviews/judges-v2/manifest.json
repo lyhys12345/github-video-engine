@@ -1,0 +1,59 @@
+{
+  "version": "judges-v2-review-draft",
+  "status": "ready_for_user_review",
+  "createdAt": "2026-10-26T00:19:42.9557324-07:00",
+  "files": [
+    {
+      "path": "activation-matrix.md",
+      "sha256": "7501ee57046863fb8e4d159e2d197a092afcf17280cb975b4b794a67f33915f0"
+    },
+    {
+      "path": "calibration-cases.md",
+      "sha256": "a80c20c151cb92b1fbf1c9ededad53c6a4da9a61a70e93752d46852ba77228d6"
+    },
+    {
+      "path": "common.md",
+      "sha256": "bf3dd030ad74deffb28e8104ec70f1f73d332f101d0934da18fa1811849fbade"
+    },
+    {
+      "path": "M0-activation.example.json",
+      "sha256": "3ec562d84d37b937d6910b8d1e4cab573b646d756bab2d3d3578957563448c08"
+    },
+    {
+      "path": "registry.json",
+      "sha256": "759f09e82f44c2d91bed28cfdb124415089514f82dc9ac992ba532166d5fb31c"
+    },
+    {
+      "path": "report-template.md",
+      "sha256": "d9ea5a127ec6e8e9d19ad27b16e750e9e622a7f0c35fc7b306683fc801db216b"
+    },
+    {
+      "path": "REVIEW-START-HERE.md",
+      "sha256": "fd03e2c864eea63603d72cedf7fc99a5bca0700c7e77732a76e6d61239014907"
+    },
+    {
+      "path": "roles/content-facts.md",
+      "sha256": "6cd8c3ba54767e035187ff889d0157a66aac3feef7a48ddb7243d17af9ba698c"
+    },
+    {
+      "path": "roles/evidence.md",
+      "sha256": "449d03291f533941b2fba687a3555abdbd2fc0a63a6db494a273671d0b70f12d"
+    },
+    {
+      "path": "roles/product.md",
+      "sha256": "c6f24cc248e05c4f638dc6d2383030f2dccd002c12a950d35442992f74941cf6"
+    },
+    {
+      "path": "roles/reliability.md",
+      "sha256": "7bac111a9eb7beb36b1ce9f025830abb802dd261997434550e68777fa723605d"
+    },
+    {
+      "path": "roles/security.md",
+      "sha256": "f505e8335470395ca4399f11cf3dd5326faeaec1e84dea93bf4daec26f17f7ca"
+    },
+    {
+      "path": "roles/video-quality.md",
+      "sha256": "0e8695e727734433933d40966c9c68ed9b3e791e4ca4870310b91412b89f6dae"
+    }
+  ]
+}

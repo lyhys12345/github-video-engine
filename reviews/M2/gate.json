@@ -1,0 +1,5 @@
+{
+  "schemaVersion":"2.0","milestone":"M2",
+  "activeRoles":["product","reliability","evidence","video_quality","content_facts","security"],
+  "requiredCriteria":{"product":["M2-03","M2-04","M2-10"],"reliability":["M2-05","M2-08"],"evidence":["M2-01","M2-11"],"video_quality":["M2-02","M2-06","M2-07"],"content_facts":["M2-09"],"security":["M2-10"]}
+}

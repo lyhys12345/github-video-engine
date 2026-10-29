@@ -1,0 +1,18 @@
+{
+  "version": "judges-v2-review-draft",
+  "status": "ready_for_user_review",
+  "commonInstructions": "common.md",
+  "reportTemplate": "report-template.md",
+  "activationPolicy": "activation-matrix.md",
+  "currentAuthorizedMilestone": "M0",
+  "automaticBackgroundService": false,
+  "runtimeGateIntegration": "existing v1 gate supports only the three core roles; specialist activation is not yet wired or executed",
+  "roles": [
+    {"id":"product","number":"J1","name":"产品与需求","kind":"core","definition":"roles/product.md","activation":"every approved milestone","executionStatus":"v1 M0 trial exists; this v2 definition has not been separately executed"},
+    {"id":"reliability","number":"J2","name":"工程可靠性","kind":"core","definition":"roles/reliability.md","activation":"every approved milestone","executionStatus":"v1 M0 trial exists; this v2 definition has not been separately executed"},
+    {"id":"evidence","number":"J3","name":"证据与复现","kind":"core","definition":"roles/evidence.md","activation":"every approved milestone","executionStatus":"v1 M0 trial exists; this v2 definition has not been separately executed"},
+    {"id":"video_quality","number":"J4","name":"视频质量","kind":"specialist","definition":"roles/video-quality.md","activation":"approved video/reference/audio/caption quality acceptance","executionStatus":"defined_only_not_executed"},
+    {"id":"content_facts","number":"J5","name":"内容事实与来源","kind":"specialist","definition":"roles/content-facts.md","activation":"real project research, factual scripts, effect claims or source review","executionStatus":"defined_only_not_executed"},
+    {"id":"security","number":"J6","name":"安全与隔离","kind":"specialist","definition":"roles/security.md","activation":"real repository/untrusted script or dependency execution, secrets/private data, external writes, remote asset entrypoints, multiuser or isolation mechanisms; approved trusted fixed tools alone do not trigger","executionStatus":"defined_only_not_executed"}
+  ]
+}

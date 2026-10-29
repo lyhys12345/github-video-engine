@@ -1,0 +1,11 @@
+# Core mechanism 30-second silent test — actual result
+
+Candidate round-1/candidate.json SHA256 20c0e3da70b90954467b7b560f43e135e24646b7ce1226ee619df3ac1271e7c4. Final media examples/rea/core-mechanism-v1/preview-v3/preview.mp4. This is a short mechanism excerpt of the approved core-story-v2, not a full film, voice test or replacement for the owner's accepted B baseline.
+
+Three independent reviewers: core_mechanism_visual (product/video raw reports), core_mechanism_technical (reliability/evidence/content_facts/security), core_mechanism_fresh (fresh blind understanding). All required responsibilities report bounded PASS, no unresolved major/blocker. First-look notes preserved before script/source inspection; initial visual concerns were narrowed after scope and source checks, not concealed. No majority waiver used.
+
+Actual executed: 4 targeted Vitest tests and typecheck PASS; 30s/900frames/1080x1920/30fps/H264/yuv420p/single video stream/noaudio FFprobe checks and full FFmpeg decode. Exact input replay cache:true same task/media. Independent 53 current/frozen file hash and binding checks. Delivery conflict returns1, retains existing file, no partial output, durable task state unchanged. Assertions inside the independent verification script are not an additional test count. No new full-suite or crash-recovery run claimed.
+
+Actual fixes: source evidence now travels with source sheet; script location distinguished from later assistant rule interpretation. Rule arrives before game acceleration at27seconds, confirmed exact decoded frames809/810/811 and following samples. Limits label overlap, background covering/dimming SVG content and out-of-panel cactus were corrected. First versions/failing test evidence preserved.
+
+Remaining minors: brief incoming request occludes its destination; evidence-card hold still feels slow/information-graphic; rule crosses metadata briefly; final numeric speed lacks explicit unit/name; secondary labels are small. B has the stronger hook and speed labeling, this excerpt better exposes allowed target/request/CDP/provenance. Do not claim improved audience retention, continuous viewing, audio naturalness, arbitrary project understanding or actual REA execution. No paid calls/deployment/full film. Final human review pending.

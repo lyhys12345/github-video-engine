@@ -1,0 +1,44 @@
+{
+  "name": "github-video-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "scripts": {
+    "gve": "tsx src/cli.ts",
+    "doctor": "tsx src/cli.ts doctor",
+    "demo": "tsx src/cli.ts render examples/demo.v1.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run tests/core.test.ts tests/recovery.test.ts tests/planning.test.ts tests/workflow.test.ts tests/tasks.test.ts tests/production.test.ts tests/operations.test.ts tests/operations-cli.test.ts tests/usage.test.ts tests/usage-audit.test.ts tests/revision-diff.test.ts tests/repairs.test.ts tests/revision-audit.test.ts tests/final-finishing.test.ts tests/finalization.test.ts tests/final-delivery.test.ts tests/final-audit.test.ts tests/owned-runtime.test.ts tests/legacy-runtime.test.ts tests/legacy-runtime-env.test.ts tests/editable-snapshot.test.ts tests/evidence-plan.test.ts tests/explain-runtime.test.ts",
+    "test:workflow": "vitest run tests/planning.test.ts tests/workflow.test.ts",
+    "test:smoke": "vitest run tests/smoke.test.ts",
+    "test:acceptance": "vitest run tests/acceptance.test.ts",
+    "schemas": "tsx src/contracts/export.ts",
+    "test:production": "vitest run tests/tasks.test.ts tests/production.test.ts",
+    "test:operations": "vitest run tests/operations.test.ts tests/operations-cli.test.ts",
+    "test:usage": "vitest run tests/usage.test.ts tests/usage-audit.test.ts",
+    "test:revisions": "vitest run tests/revision-diff.test.ts tests/repairs.test.ts tests/revision-audit.test.ts",
+    "test:final": "vitest run tests/final-finishing.test.ts tests/finalization.test.ts tests/final-delivery.test.ts tests/final-audit.test.ts tests/owned-runtime.test.ts tests/editable-snapshot.test.ts",
+    "test:evidence-plan": "vitest run tests/evidence-plan.test.ts",
+    "schemas:evidence-plan": "tsx src/evidence-planner/export.ts"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.538",
+    "@remotion/renderer": "4.0.538",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.538",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}

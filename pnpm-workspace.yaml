@@ -1,0 +1,6 @@
+packages:
+  - '.'
+allowBuilds:
+  esbuild: true
+overrides:
+  webpack: 5.112.2

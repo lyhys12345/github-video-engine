@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "mediaType": {
+      "type": "string"
+    },
+    "storage": {
+      "type": "string"
+    },
+    "producingStage": {
+      "type": "string",
+      "enum": [
+        "VALIDATE",
+        "RESOLVE_ASSETS",
+        "RENDER",
+        "VERIFY_MEDIA",
+        "PUBLISH"
+      ]
+    },
+    "inputFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "createdAt": {
+      "type": "string"
+    },
+    "integrity": {
+      "type": "string",
+      "const": "verified"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "id",
+    "sha256",
+    "bytes",
+    "mediaType",
+    "storage",
+    "producingStage",
+    "inputFingerprint",
+    "createdAt",
+    "integrity"
+  ],
+  "additionalProperties": false,
+  "$id": "urn:github-video-engine:Artifact:1.0",
+  "$comment": "Zod also enforces cross-field invariants; see docs/contracts.md."
+}

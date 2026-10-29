@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rea-evidence",
+  "name": "REA",
+  "audience": "不了解项目的普通短视频观众",
+  "interpretation": "agent-curated-semantic-graph-not-automatic-source-understanding",
+  "sources": [
+    {
+      "id": "official",
+      "path": "fixtures/sources/rea-dino.html",
+      "url": "https://rea.tools/examples/dino-lab/",
+      "sha256": "a045d256cd040a21f163ad2f662c81d77e3fa47df6bc8add92b10f0b901dd769"
+    }
+  ],
+  "claims": [
+    {
+      "id": "handoff",
+      "statement": "REA 返回网页加载的游戏脚本；助手阅读是本次演示的代理分工",
+      "kind": "inference",
+      "rationale": "官方只声明返回脚本及案例重建，助手角色为本次教学流程推断，非官方自动能力",
+      "citations": [
+        {
+          "document": "official",
+          "startLine": 297,
+          "endLine": 304,
+          "quote": "            <p>\n              We inspected\n              <a href=\"https://wayou.github.io/t-rex-runner/\"\n                >wayou’s Chromium-derived browser edition</a\n              >\n              with REA. It returned the loaded <code>index.js</code>, including\n              this branch in the game’s update function:\n            </p>"
+        }
+      ]
+    },
+    {
+      "id": "rule",
+      "statement": "游戏在未碰撞更新时逐步加速",
+      "kind": "documented",
+      "rationale": "人工核对官方文档与代码；引文定位不等于自动语义证明",
+      "citations": [
+        {
+          "document": "official",
+          "startLine": 309,
+          "endLine": 317,
+          "quote": "              <pre><code>if (this.currentSpeed &lt; this.config.MAX_SPEED) {\n  this.currentSpeed += this.config.ACCELERATION;\n}</code></pre>\n            </div>\n            <p>\n              The settings are <code>SPEED: 6</code>,\n              <code>ACCELERATION: 0.001</code> and <code>MAX_SPEED: 13</code>.\n              The game runs this branch on an update without a collision.\n            </p>"
+        }
+      ]
+    },
+    {
+      "id": "rebuild",
+      "statement": "重建后的教学游戏可用滑杆设为固定速度",
+      "kind": "documented",
+      "rationale": "人工核对官方文档与代码；引文定位不等于自动语义证明",
+      "citations": [
+        {
+          "document": "official",
+          "startLine": 333,
+          "endLine": 341,
+          "quote": "              <pre><code id=\"lab-speed-rule\">function advanceSpeed(speed) {\n  return speed &lt; 13 ? speed + 0.001 : speed;\n}</code></pre>\n            </div>\n            <p>\n              The mini-game uses this function for automatic acceleration.\n              Moving the slider supplies a fixed speed instead. Drawing, jump\n              physics and rectangle collision checks are new code for this\n              teaching game; its simulation advances at 60 updates per second."
+        }
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "id": "loaded-code",
+      "label": "网页加载的游戏代码",
+      "kind": "code"
+    },
+    {
+      "id": "delivered-code",
+      "label": "交给助手的游戏代码",
+      "kind": "code"
+    },
+    {
+      "id": "game",
+      "label": "自动加速规则的原理演示",
+      "kind": "game"
+    },
+    {
+      "id": "demo",
+      "label": "助手重建的可调速教学演示",
+      "kind": "demo"
+    }
+  ],
+  "actors": [
+    {
+      "id": "web",
+      "label": "网页",
+      "role": "source"
+    },
+    {
+      "id": "tool",
+      "label": "REA",
+      "role": "tool"
+    },
+    {
+      "id": "assistant",
+      "label": "助手",
+      "role": "interpreter"
+    },
+    {
+      "id": "viewer",
+      "label": "你",
+      "role": "user"
+    }
+  ],
+  "operations": [
+    {
+      "id": "understand",
+      "kind": "rate-change",
+      "input": "delivered-code",
+      "output": "game",
+      "dependsOn": [
+        "obtain"
+      ],
+      "claimIds": [
+        "rule"
+      ],
+      "actorIds": [
+        "assistant"
+      ],
+      "parameters": {
+        "initialRate": 170,
+        "rateMultiplier": 3
+      }
+    },
+    {
+      "id": "rebuild",
+      "kind": "control",
+      "input": "game",
+      "output": "demo",
+      "dependsOn": [
+        "understand"
+      ],
+      "claimIds": [
+        "rebuild"
+      ],
+      "actorIds": [
+        "assistant",
+        "viewer"
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "obtain",
+      "kind": "handoff",
+      "input": "loaded-code",
+      "output": "delivered-code",
+      "dependsOn": [],
+      "claimIds": [
+        "handoff"
+      ],
+      "actorIds": [
+        "web",
+        "tool",
+        "assistant"
+      ],
+      "parameters": {}
+    }
+  ],
+  "disclosure": "官方案例原理示意 · 助手分工为推断 · 教学重建"
+}

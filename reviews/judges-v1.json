@@ -1,0 +1,55 @@
+{
+  "version": "judges-v1",
+  "createdAt": "2026-10-25T23:59:06.2811543-07:00",
+  "independence": "three role contexts; not a statistical or cross-model independence claim",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "a14e37289f6ec7fb5d9bd26f38583dc1f0cfec36403a317e7bdfc186b6bfef83"
+    },
+    {
+      "path": "reviews/README.md",
+      "sha256": "6fccb0ec7fe04383696fe3cd197e5dd51cd9facd2f27f7eaadb8ddcf525548cd"
+    },
+    {
+      "path": "reviews/report-template.md",
+      "sha256": "60e87d3d39b4ef1842e1ec5d2b4ba026c797dc58d5b0537b4d24a4617089b13e"
+    },
+    {
+      "path": "reviews/milestone-template.md",
+      "sha256": "31e80965f1d5b3eae86a01918e07241c624f71a094789519db44f1d29eb4e43f"
+    },
+    {
+      "path": "reviews/roles/product.md",
+      "sha256": "04c836060e6e58d35648d0e676a4d0ea0860c68dc8bb1da151b7e212e6d01d98"
+    },
+    {
+      "path": "reviews/roles/reliability.md",
+      "sha256": "c40488d1c2b69e3463ccce7b4d86e84aa33926f78f2fbcc0821b193c0ff8559e"
+    },
+    {
+      "path": "reviews/roles/evidence.md",
+      "sha256": "f7dd420358315627ebc40d95e6b4bef16e1b1172096db61c611fe2c968d22e52"
+    },
+    {
+      "path": "reviews/check-gate.mjs",
+      "sha256": "3eb5800038a4846a7cbfa1de6592e096b782050efdbdb22d11955363aa0000fa"
+    },
+    {
+      "path": "reviews/check-gate.selftest.mjs",
+      "sha256": "6f1972541f01780bb7d6450a0d749b4b0f088c5f8faa28d16de623ab5ab7f217"
+    },
+    {
+      "path": "reviews/M0/contract.md",
+      "sha256": "5b95f274e2959ea70b8a2b17fc42fc0be222ed25d29e107620458c5634738291"
+    },
+    {
+      "path": "reviews/M0/gate.json",
+      "sha256": "9cdbe8175fc8290a71c14223101369910d7464bad4cd00465f32b844f98daf55"
+    },
+    {
+      "path": "reviews/calibration-cases.json",
+      "sha256": "b0dc1e7f125466df10e52b1e854a49c963d3009103ba4f2f172c5022a5e4e970"
+    }
+  ]
+}
