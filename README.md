@@ -1,4 +1,4 @@
-> New computer / continuation: read [HANDOFF.md](HANDOFF.md) first. Current engineering checkpoint and limits are recorded there.
+> New computer / continuation: read the project handoff in Google Drive: https://drive.google.com/file/d/1YtEYD-TT-qk87WjYjGPi05OIQpTespxd/view .
 
 # GitHub Video Engine
 

@@ -129,3 +129,5 @@ id_ed25519*
 !/reviews/asset-closure-v1/
 /reviews/asset-closure-v1/*
 !/reviews/asset-closure-v1/*.md
+
+/HANDOFF.md
