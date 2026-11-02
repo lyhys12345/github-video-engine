@@ -10,6 +10,8 @@ The current generation receipt associates each exact submitted text with its cap
 
 Captions use text-weighted allocation within the measured continuous recording. The JSON records source-time and output-frame windows, and the SRT and burned-in captions share that cue table. Filenames, spoken decimal words and common mechanism terms remain together; small final lines are balanced. Timing is explicitly estimated, not forced alignment. Listening, exact spoken synchronization, pronunciation, voice naturalness, continuous audiovisual rhythm and final human acceptance remain pending. Historical G4 UNVERIFIED records are preserved.
 
+New renders may instead provide `cueTimingPath` in the segment input. The strict timing sidecar binds the exact audio SHA-256, transcript SHA-256 and measured duration, and supplies one reviewed boundary per caption phase plus the final audio boundary. It accepts either manual-listening boundaries or reviewed forced-alignment boundaries. Stale hashes, duration drift, missing/non-monotonic boundaries and sub-four-frame cues fail before rendering. The sidecar and its hash are copied into the output and fingerprint; this improves timing evidence without claiming transcription accuracy, voice quality or final owner acceptance. Omitting it preserves the explicitly estimated text-weighted fallback.
+
 To recreate the current source inputs in a clean versioned directory, first inspect `scripts/prepare-continuous-stories.ts` and `scripts/prepare-continuous-inputs.ts`. They refuse to overwrite existing source bundles/input files. Current rendering uses the trusted local browser and FFmpeg runtime:
 
 ```powershell

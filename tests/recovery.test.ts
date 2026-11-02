@@ -1,5 +1,6 @@
 import {it, expect} from 'vitest';
 import {spawn} from 'node:child_process';
+import {readFileSync} from 'node:fs';
 import {access, readFile, readdir, writeFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
 import {Engine} from '../src/orchestrator/engine.js';
@@ -8,7 +9,13 @@ import {command, killTree} from '../src/core/process.js';
 import {fixture, fixtureDirectory, mockOptions, temp, until, pause} from './support.js';
 const helper = resolve('tests/child.ts');
 const exists = async (path: string) => access(path).then(() => true, () => false);
-const alive = (pid: number) => { try { process.kill(pid, 0); return true; } catch { return false; } };
+const alive = (pid: number) => {
+  try {
+    process.kill(pid, 0);
+    if (process.platform === 'linux') return readFileSync(`/proc/${pid}/stat`, 'utf8').split(' ')[2] !== 'Z';
+    return true;
+  } catch { return false; }
+};
 
 it.each(['crash', 'crash-render'])('recovers force-killed process %s from SQLite in a new process (mock media)', async (mode) => {
   const root = await temp('crash'); const marker = join(root, 'ready');

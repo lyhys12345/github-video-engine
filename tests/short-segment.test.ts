@@ -1,7 +1,7 @@
 import {it,expect} from 'vitest';
 import {readFile} from 'node:fs/promises';
 import {StorySchema} from '../src/contracts/story.js';
-import {VisualPlanSchema,validateSegmentNarration,buildSegmentTimeline,segmentSrt} from '../src/short-segment/plan.js';
+import {VisualPlanSchema,SegmentCueTimingSchema,validateSegmentNarration,buildSegmentTimeline,segmentSrt} from '../src/short-segment/plan.js';
 import {renderSegmentFrame,captionLines} from '../src/short-segment/frame.js';
 const load=async(name:string)=>{const story=StorySchema.parse(JSON.parse(await readFile(`examples/story-planner-v1/${name}.json`,'utf8'))),plan=VisualPlanSchema.parse(JSON.parse(await readFile(`reviews/chen-segments-v1/${name}-visual-plan.json`,'utf8')));return {story,plan};};
 it('keeps index.js in one subtitle line without changing current narration',async()=>{
@@ -13,6 +13,14 @@ it('binds current selected narration as one continuous source and rejects histor
 });
 it('keeps full measured audio at original speed and marks approximate source-time cues honestly',async()=>{
  const {plan}=await load('rembg'),timeline=buildSegmentTimeline(plan,13.137);expect(timeline.totalFrames/30).toBeGreaterThanOrEqual(14.137);expect(timeline.cues[0]!.sourceStartSeconds).toBe(0);expect(timeline.cues.at(-1)!.sourceEndSeconds).toBeCloseTo(13.137);expect(timeline.cueMethod).toContain('not-forced-aligned');expect(timeline.cues.map(c=>c.text).join('')).toBe(plan.phases.map(p=>p.captionText).join(''));for(let i=1;i<timeline.cues.length;i++)expect(timeline.cues[i]!.startFrame).toBe(timeline.cues[i-1]!.endFrame);expect(segmentSrt(timeline)).toContain('00:00:00,400 -->');expect(()=>buildSegmentTimeline(plan,41)).toThrow('Bounded');
+});
+it('accepts reviewed cue boundaries only when bound to the exact voice, transcript and measured duration',async()=>{
+ const {plan}=await load('rembg'),voiceSha256='a'.repeat(64),transcriptSha256='b'.repeat(64),seconds=13.137;
+ const timing=SegmentCueTimingSchema.parse({schemaVersion:'1.0',voiceSha256,transcriptSha256,measuredVoiceSeconds:seconds,method:'manual-listening',boundariesSeconds:[0,3.2,6,9.1,seconds],reviewBasis:'Manual cue-boundary review; final owner acceptance remains pending'});
+ const timeline=buildSegmentTimeline(plan,seconds,timing,{voiceSha256,transcriptSha256});expect(timeline.cueMethod).toBe('manual-listening-reviewed-boundaries');expect(timeline.cues[0]!.sourceEndSeconds).toBe(3.2);expect(timeline.cues.every(c=>c.confidence==='reviewed-timing-pending-owner-acceptance')).toBe(true);
+ expect(()=>buildSegmentTimeline(plan,seconds,timing,{voiceSha256:'c'.repeat(64),transcriptSha256})).toThrow('exact current voice');
+ expect(()=>buildSegmentTimeline(plan,seconds+.01,timing,{voiceSha256,transcriptSha256})).toThrow('measured duration');
+ expect(()=>buildSegmentTimeline(plan,seconds,{...timing,boundariesSeconds:[0,6,3.2,9.1,seconds]},{voiceSha256,transcriptSha256})).toThrow('monotonically');
 });
 it('shows source condition separately from illustrative range and preserves the foreground during mask application',async()=>{
  const rea=await load('rea'),timeline=buildSegmentTimeline(rea.plan,17),r=renderSegmentFrame(rea.plan,timeline,timeline.voiceEndFrame-1,'a'.repeat(64));expect(r).toContain('speed &lt; 13');expect(r).toContain('6 → 12');expect(r).toContain('非实际测速');
