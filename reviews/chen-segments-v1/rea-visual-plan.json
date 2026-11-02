@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rea-chen-short-v1",
+  "title": "REA：找到游戏加速规则",
+  "kind": "rule-build",
+  "sourceShotIds": ["shot-5"],
+  "claimIds": ["handoff", "rule"],
+  "phases": [
+    {"label": "官方案例：取得脚本", "captionText": "官方的小恐龙案例，就拿到了游戏的 index.js。"},
+    {"label": "定位加速分支", "captionText": "沿着这份代码，可以找到加速分支："},
+    {"label": "条件成立", "captionText": "没撞上、也没到上限时，"},
+    {"label": "每次更新：速度 +0.001", "captionText": "每更新一次，速度就加一点。"}
+  ],
+  "labels": {
+    "source": "官方案例中的 index.js",
+    "result": "规则驱动的跑酷示意",
+    "disclosure": "官方案例原理示意 · 教学重建 · 动画时间压缩"
+  },
+  "rule": {
+    "from": 6,
+    "to": 12,
+    "conditionMax": 13,
+    "acceleration": 0.001,
+    "basis": "源码参数 SPEED 6、ACCELERATION 0.001、条件 speed < 13；演示终点12与更新节奏为作者选择、时间压缩，不是硬钳位或运行测速"
+  }
+}

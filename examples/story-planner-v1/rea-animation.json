@@ -1,0 +1,339 @@
+{
+  "schemaVersion": "1.0",
+  "storyId": "rea-story",
+  "shots": [
+    {
+      "shotId": "shot-1",
+      "objects": [
+        {
+          "id": "input",
+          "label": "游戏",
+          "kind": "document",
+          "visual": "runner"
+        },
+        {
+          "id": "result",
+          "label": "速度变化",
+          "kind": "state",
+          "visual": "gauge"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "compare",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "rule"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-2",
+      "objects": [
+        {
+          "id": "input",
+          "label": "网页",
+          "kind": "document",
+          "visual": "scene"
+        },
+        {
+          "id": "result",
+          "label": "脚本线索",
+          "kind": "state",
+          "visual": "code"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "reveal",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "server",
+            "javascript",
+            "binary",
+            "evidence"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-3",
+      "objects": [
+        {
+          "id": "input",
+          "label": "MCP服务",
+          "kind": "document",
+          "visual": "agent"
+        },
+        {
+          "id": "result",
+          "label": "浏览器工具",
+          "kind": "state",
+          "visual": "code"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "transfer",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "server"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-4",
+      "objects": [
+        {
+          "id": "input",
+          "label": "脚本请求",
+          "kind": "document",
+          "visual": "code"
+        },
+        {
+          "id": "result",
+          "label": "源码结果",
+          "kind": "state",
+          "visual": "code"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "transfer",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "cdp"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-5",
+      "objects": [
+        {
+          "id": "input",
+          "label": "速度规则",
+          "kind": "document",
+          "visual": "gauge"
+        },
+        {
+          "id": "result",
+          "label": "加速状态",
+          "kind": "state",
+          "visual": "runner"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "transform",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "handoff",
+            "rule"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-6",
+      "objects": [
+        {
+          "id": "input",
+          "label": "源码证据",
+          "kind": "document",
+          "visual": "code"
+        },
+        {
+          "id": "result",
+          "label": "解释依据",
+          "kind": "state",
+          "visual": "agent"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "emphasize",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "javascript",
+            "binary"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-7",
+      "objects": [
+        {
+          "id": "input",
+          "label": "解释依据",
+          "kind": "document",
+          "visual": "code"
+        },
+        {
+          "id": "result",
+          "label": "重建示意",
+          "kind": "state",
+          "visual": "runner"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "rule-build",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "rule"
+          ],
+          "rule": {
+            "inputLabel": "更新计数",
+            "outputLabel": "速度",
+            "effect": "speed",
+            "from": 1,
+            "to": 4,
+            "unit": "×"
+          }
+        }
+      ]
+    },
+    {
+      "shotId": "shot-8",
+      "objects": [
+        {
+          "id": "input",
+          "label": "JS入口",
+          "kind": "document",
+          "visual": "code"
+        },
+        {
+          "id": "result",
+          "label": "静态分析",
+          "kind": "state",
+          "visual": "agent"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "transfer",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "rebuild"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-9",
+      "objects": [
+        {
+          "id": "input",
+          "label": "原生入口",
+          "kind": "document",
+          "visual": "code"
+        },
+        {
+          "id": "result",
+          "label": "另一提供方",
+          "kind": "state",
+          "visual": "agent"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "compare",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "evidence"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-10",
+      "objects": [
+        {
+          "id": "input",
+          "label": "证据范围",
+          "kind": "document",
+          "visual": "code"
+        },
+        {
+          "id": "result",
+          "label": "限制",
+          "kind": "state",
+          "visual": "agent"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "emphasize",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "cdp",
+            "binary"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-11",
+      "objects": [
+        {
+          "id": "input",
+          "label": "研究线索",
+          "kind": "document",
+          "visual": "code"
+        },
+        {
+          "id": "result",
+          "label": "下一步判断",
+          "kind": "state",
+          "visual": "agent"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "reveal",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "rebuild"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,451 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rea-story",
+  "name": "REA 完整故事（人工撰写）",
+  "evidence": {
+    "schemaVersion": "1.0",
+    "id": "rea-evidence",
+    "name": "REA",
+    "audience": "不了解项目的普通短视频观众",
+    "interpretation": "agent-curated-semantic-graph-not-automatic-source-understanding",
+    "sources": [
+      {
+        "id": "official",
+        "path": "fixtures/sources/rea-dino.html",
+        "url": "https://rea.tools/examples/dino-lab/",
+        "sha256": "a045d256cd040a21f163ad2f662c81d77e3fa47df6bc8add92b10f0b901dd769"
+      },
+      {
+        "id": "server",
+        "path": "fixtures/sources/rea-core/server.txt",
+        "url": "https://github.com/morluto/rea/blob/f4cc6c85efe7f3513d587df3bd5086adb1bc6a76/src/server/createServer.ts",
+        "sha256": "81aec2db8f56525fef8d076e7c12de8d8ddc405f175df6082ed9b44d757759cd"
+      },
+      {
+        "id": "cdp",
+        "path": "fixtures/sources/rea-core/cdp.txt",
+        "url": "https://github.com/morluto/rea/blob/f4cc6c85efe7f3513d587df3bd5086adb1bc6a76/src/browser/CdpPageCaptureScripts.ts",
+        "sha256": "fd5a91e11690458d85d53989fd531da0f50ad5825736e234e9ed7a03a7f705aa"
+      },
+      {
+        "id": "javascript",
+        "path": "fixtures/sources/rea-core/javascript.txt",
+        "url": "https://github.com/morluto/rea/blob/f4cc6c85efe7f3513d587df3bd5086adb1bc6a76/src/application/javascript/JavaScriptArtifactAnalysis.ts",
+        "sha256": "b2d48519e8c81ba535728535b49cf73f0f8074d512503f68179aadb73a1dc41d"
+      },
+      {
+        "id": "binary",
+        "path": "fixtures/sources/rea-core/binary.txt",
+        "url": "https://github.com/morluto/rea/blob/f4cc6c85efe7f3513d587df3bd5086adb1bc6a76/src/application/binary/AnalysisProviderRegistry.ts",
+        "sha256": "da74964bdcb1cf53d81f11ae3d9543f63473b5c92b3f10f7b0b4552b275b04c7"
+      },
+      {
+        "id": "evidence",
+        "path": "fixtures/sources/rea-core/evidence.txt",
+        "url": "https://github.com/morluto/rea/blob/f4cc6c85efe7f3513d587df3bd5086adb1bc6a76/src/domain/evidence.ts",
+        "sha256": "b31ebf156c630f72c3b95ad4fa11dbc19ca82d6227b7430563fc6bc1c59c29fe"
+      },
+      {
+        "id": "browser-tools",
+        "path": "fixtures/sources/rea-core/browser-tools.txt",
+        "url": "https://github.com/morluto/rea/blob/f4cc6c85efe7f3513d587df3bd5086adb1bc6a76/src/server/registerBrowserTools.ts",
+        "sha256": "f33817f737b37e8d42377d813ef60cbbf4a72f240362b5a7c78aaa0e016dec75"
+      },
+      {
+        "id": "binary-composition",
+        "path": "fixtures/sources/rea-core/binary-composition.txt",
+        "url": "https://github.com/morluto/rea/blob/f4cc6c85efe7f3513d587df3bd5086adb1bc6a76/src/composition/binary.ts",
+        "sha256": "95806f12de287d106678c948f67c916be5b1e2350d123c1517149927614b81b5"
+      }
+    ],
+    "claims": [
+      {
+        "id": "handoff",
+        "statement": "REA 返回网页加载的游戏脚本；助手阅读是本次演示的代理分工",
+        "kind": "inference",
+        "rationale": "官方只声明返回脚本及案例重建，助手角色为本次教学流程推断，非官方自动能力",
+        "citations": [
+          {
+            "document": "official",
+            "startLine": 297,
+            "endLine": 304,
+            "quote": "            <p>\n              We inspected\n              <a href=\"https://wayou.github.io/t-rex-runner/\"\n                >wayou’s Chromium-derived browser edition</a\n              >\n              with REA. It returned the loaded <code>index.js</code>, including\n              this branch in the game’s update function:\n            </p>"
+          }
+        ]
+      },
+      {
+        "id": "rule",
+        "statement": "游戏在未碰撞更新时逐步加速",
+        "kind": "documented",
+        "rationale": "人工核对官方文档与代码；引文定位不等于自动语义证明",
+        "citations": [
+          {
+            "document": "official",
+            "startLine": 309,
+            "endLine": 317,
+            "quote": "              <pre><code>if (this.currentSpeed &lt; this.config.MAX_SPEED) {\n  this.currentSpeed += this.config.ACCELERATION;\n}</code></pre>\n            </div>\n            <p>\n              The settings are <code>SPEED: 6</code>,\n              <code>ACCELERATION: 0.001</code> and <code>MAX_SPEED: 13</code>.\n              The game runs this branch on an update without a collision.\n            </p>"
+          }
+        ]
+      },
+      {
+        "id": "rebuild",
+        "statement": "重建后的教学游戏可用滑杆设为固定速度",
+        "kind": "documented",
+        "rationale": "人工核对官方文档与代码；引文定位不等于自动语义证明",
+        "citations": [
+          {
+            "document": "official",
+            "startLine": 333,
+            "endLine": 341,
+            "quote": "              <pre><code id=\"lab-speed-rule\">function advanceSpeed(speed) {\n  return speed &lt; 13 ? speed + 0.001 : speed;\n}</code></pre>\n            </div>\n            <p>\n              The mini-game uses this function for automatic acceleration.\n              Moving the slider supplies a fixed speed instead. Drawing, jump\n              physics and rectangle collision checks are new code for this\n              teaching game; its simulation advances at 60 updates per second."
+          }
+        ]
+      },
+      {
+        "id": "server",
+        "statement": "REA 的 MCP 服务注册浏览器工具，并将浏览器观察端口传给工具注册代码",
+        "kind": "inference",
+        "rationale": "多处源码共同支持服务和工具的连接；旁白中的助手与层次为讲解抽象，待事实审阅",
+        "citations": [
+          {
+            "document": "server",
+            "startLine": 407,
+            "endLine": 414,
+            "quote": "const createMcpServer = (\n  session: BinarySessionPort | undefined,\n  delivery: ToolResultDelivery,\n  compactPresentation: CompactInputSchemaPresentation | undefined,\n  omitOutputSchemas: boolean,\n): EvidenceMcpServer =>\n  new EvidenceMcpServer(\n    {"
+          },
+          {
+            "document": "server",
+            "startLine": 1282,
+            "endLine": 1290,
+            "quote": "}: ServerToolContext): void => {\n  const common = { logger, recordEvidence, withAdmittedAnalysis };\n  registerWebScriptTool(server, { ...common, artifactResources });\n  registerBrowserTools(server, {\n    ...common,\n    evidenceById,\n    browser: options.browserObservation,\n    loadFailure: options.optionalProviderLoadFailures?.browserObservation,\n  });"
+          },
+          {
+            "document": "browser-tools",
+            "startLine": 57,
+            "endLine": 82,
+            "quote": "export const registerBrowserTools = (\n  server: EvidenceMcpServer,\n  options: BrowserToolRegistration,\n): void => {\n  const registration = { ...options, delivery: server.delivery, server };\n  const listContract = toolContract(\"list_browser_targets\");\n  const inspectContract = toolContract(\"inspect_web_page\");\n  const analyzeContract = toolContract(\"analyze_web_bundle\");\n  const sessionContract = toolContract(\"observe_web_session\");\n  const webMcpContract = toolContract(\"discover_webmcp_tools\");\n  const captureDiffContract = toolContract(\"compare_web_captures\");\n  const screenshotContract = toolContract(\"capture_web_screenshot\");\n  const screenshotDiffContract = toolContract(\"compare_web_screenshots\");\n\n  server.registerTool(\n    listContract.name,\n    toolRegistrationOptions(listContract),\n    (input, context) =>\n      runBrowserTool(\n        registration,\n        listContract,\n        { input, context },\n        (parsed, { signal }) =>\n          listBrowserTargets(options.browser, parsed, {\n            signal,\n          }),"
+          }
+        ]
+      },
+      {
+        "id": "cdp",
+        "statement": "CDP 脚本源代码抓取需选中，受时间和字节预算约束",
+        "kind": "inference",
+        "rationale": "源码显示可选捕获及时间、字节预算，具体环境仍需人工核查。",
+        "citations": [
+          {
+            "document": "cdp",
+            "startLine": 174,
+            "endLine": 180,
+            "quote": "  sourceBudget: CdpScriptSourceBudget,\n): Promise<WebPageInspection[\"scripts\"][\"items\"][number][\"source\"]> => {\n  const { context } = state;\n  const response = await context.connection.send(\n    \"Debugger.getScriptSource\",\n    { scriptId: script.scriptId },\n    context.sessionId,"
+          },
+          {
+            "document": "cdp",
+            "startLine": 68,
+            "endLine": 104,
+            "quote": "    context.input.command_timeout_ms,\n  );\n  const deadlineOmission =\n    cdpScriptSourceDeadlineOmissionReason(commandTimeoutMs);\n  const sourceBudget =\n    context.input.include_script_sources && scripts.size > 0\n      ? new CdpScriptSourceBudget(context.signal, commandTimeoutMs)\n      : undefined;\n  try {\n    for (const script of scripts.values()) {\n      state ??= {\n        context,\n        events,\n        frameIds,\n        reconcileResource: createCapturedWebScriptReconciler(\n          rawResources,\n          resources,\n        ),\n      };\n      let source: WebPageInspection[\"scripts\"][\"items\"][number][\"source\"] =\n        context.input.include_script_sources\n          ? sourceExcluded(deadlineOmission)\n          : sourceExcluded(\"source capture was not selected\");\n      if (\n        context.input.include_script_sources &&\n        isSourceDeadlineExpired(sourceBudget)\n      ) {\n        events.completeness.exclude(\n          \"script_sources\",\n          \"resource_budget_exhausted\",\n        );\n      } else if (\n        context.input.include_script_sources &&\n        sourceBudget !== undefined\n      ) {\n        try {\n          source = await captureScriptSource(script, state, sourceBudget);"
+          },
+          {
+            "document": "cdp",
+            "startLine": 185,
+            "endLine": 201,
+            "quote": "  if (sourceBudget.timedOut) {\n    state.events.completeness.exclude(\n      \"script_sources\",\n      \"resource_budget_exhausted\",\n    );\n    return sourceExcluded(\n      cdpScriptSourceDeadlineOmissionReason(sourceBudget.commandTimeoutMs),\n    );\n  }\n  if (!sourceBudget.admit(content)) {\n    state.events.completeness.exclude(\n      \"script_sources\",\n      \"resource_budget_exhausted\",\n    );\n    return sourceExcluded(CDP_SCRIPT_SOURCE_BYTES_OMISSION_REASON);\n  }\n  return sourceResult(content);"
+          }
+        ]
+      },
+      {
+        "id": "javascript",
+        "statement": "人工解读 javascript 源码，需要事实审阅",
+        "kind": "inference",
+        "rationale": "单一代码摘录提供定位，不足以证明整段叙述",
+        "citations": [
+          {
+            "document": "javascript",
+            "startLine": 302,
+            "endLine": 305,
+            "quote": "    parse_failures: state.parseFailures,\n    limitations: [\n      \"JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.\",\n      \"Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.\","
+          }
+        ]
+      },
+      {
+        "id": "binary",
+        "statement": "REA 创建 Ghidra 等候选分析器，并由 registry 选择",
+        "kind": "inference",
+        "rationale": "源码说明配置和候选结构，不保证安装、可用或适配全部目标。",
+        "citations": [
+          {
+            "document": "binary",
+            "startLine": 100,
+            "endLine": 106,
+            "quote": "\n/**\n * Discover and select overlapping deep providers without starting their clients.\n * Registration order never affects selection or caller-visible output.\n */\nexport class AnalysisProviderRegistry {\n  readonly #providers: readonly AnalysisProviderCandidate[];"
+          },
+          {
+            "document": "binary-composition",
+            "startLine": 58,
+            "endLine": 85,
+            "quote": "  selectedEnvironment: Readonly<NodeJS.ProcessEnv>,\n  inspection?: \"inspect_native_dispatch_metadata\",\n  settings?: AnalysisSettingsReader,\n): BinarySession => {\n  const environment = snapshotEnvironment(selectedEnvironment);\n  const hopper = new HopperProvider(config, logger, environment);\n  const ghidra = new GhidraProvider(config, logger, environment);\n  const ida = new IdaProvider(config, environment);\n  const kuna = new KunaProvider(environment, {\n    regexMatchingDeadline: config.regexMatchingDeadline,\n    regexWorkerHeapRequest: config.regexWorkerHeapRequest,\n  });\n  const auxiliaryDeclarations = auxiliaryAnalysisProviderDeclarations(\n    environment,\n    process.platform,\n    settings,\n  );\n  const nativeInspectionAvailable =\n    inspection !== undefined &&\n    auxiliaryDeclarations.some(({ capabilities }) =>\n      capabilities.some(\n        ({ operation, available }) => operation === inspection && available,\n      ),\n    );\n  return composeBinarySession(\n    new AnalysisProviderRegistry(\n      [hopper, ghidra, ida, kuna],\n      config.analysisProvider,"
+          }
+        ]
+      },
+      {
+        "id": "evidence",
+        "statement": "证据记录包含 provider、operation、结果、置信级别、限制和位置",
+        "kind": "inference",
+        "rationale": "字段存在不表示实际运行每项均完整或自动正确。",
+        "citations": [
+          {
+            "document": "evidence",
+            "startLine": 138,
+            "endLine": 159,
+            "quote": "const evidenceBaseSchema = z\n  .object({\n    evidence_id: prefixedDigestSchema(\"ev\"),\n    subject: subjectSchema.nullable(),\n    provider: providerSchema,\n    analysis_profile: analysisProfileSchema.nullable(),\n    predicate_type: z.string().min(1),\n    operation: z.string().min(1),\n    parameters: jsonObjectSchema,\n    /** Verbatim selected path for a direct request; absent on older records. */\n    caller_input_path: nulFreeStringSchema\n      .exactOptional()\n      .describe(\"Verbatim direct-request path; not part of semantic identity.\"),\n    raw_result: jsonValueSchema.nullable(),\n    normalized_result: jsonValueSchema,\n    confidence: z.enum([\"observed\", \"derived\", \"inferred\"]),\n    authority: evidenceAuthoritySchema,\n    environment: executionEnvironmentSchema.nullable(),\n    limitations: z.array(z.string()),\n    relationship_coverage: relationshipCoverageSchema.nullable(),\n    locations: z.array(evidenceLocationSchema),\n    evidence_links: z.array(prefixedDigestSchema(\"ev\")),"
+          }
+        ]
+      }
+    ],
+    "objects": [
+      {
+        "id": "loaded-code",
+        "label": "网页加载的游戏代码",
+        "kind": "code"
+      },
+      {
+        "id": "delivered-code",
+        "label": "交给助手的游戏代码",
+        "kind": "code"
+      },
+      {
+        "id": "game",
+        "label": "自动加速规则的原理演示",
+        "kind": "game"
+      },
+      {
+        "id": "demo",
+        "label": "助手重建的可调速教学演示",
+        "kind": "demo"
+      }
+    ],
+    "actors": [
+      {
+        "id": "web",
+        "label": "网页",
+        "role": "source"
+      },
+      {
+        "id": "tool",
+        "label": "REA",
+        "role": "tool"
+      },
+      {
+        "id": "assistant",
+        "label": "助手",
+        "role": "interpreter"
+      },
+      {
+        "id": "viewer",
+        "label": "你",
+        "role": "user"
+      }
+    ],
+    "operations": [
+      {
+        "id": "understand",
+        "kind": "rate-change",
+        "input": "delivered-code",
+        "output": "game",
+        "dependsOn": [
+          "obtain"
+        ],
+        "claimIds": [
+          "rule"
+        ],
+        "actorIds": [
+          "assistant"
+        ],
+        "parameters": {
+          "initialRate": 170,
+          "rateMultiplier": 3
+        }
+      },
+      {
+        "id": "rebuild",
+        "kind": "control",
+        "input": "game",
+        "output": "demo",
+        "dependsOn": [
+          "understand"
+        ],
+        "claimIds": [
+          "rebuild"
+        ],
+        "actorIds": [
+          "assistant",
+          "viewer"
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "obtain",
+        "kind": "handoff",
+        "input": "loaded-code",
+        "output": "delivered-code",
+        "dependsOn": [],
+        "claimIds": [
+          "handoff"
+        ],
+        "actorIds": [
+          "web",
+          "tool",
+          "assistant"
+        ],
+        "parameters": {}
+      }
+    ],
+    "disclosure": "官方案例原理示意 · 助手分工为推断 · 教学重建"
+  },
+  "timing": {
+    "fps": 30,
+    "chineseCharsPerSecond": 4,
+    "wordsPerSecond": 2.5
+  },
+  "shots": [
+    {
+      "id": "shot-1",
+      "beat": "hook",
+      "narration": "这个网页里的小恐龙跑酷，越玩越快。想让 AI 找到原因，再做个能调速度的版本，光看画面，还缺什么？",
+      "visual": "立即看到网页游戏加速，预闪调速版跳过障碍的结果，再回原网页。调速版标识“教学重建”，开头已有对象、问题与回报。沿用接受的B版配色与游戏主体。",
+      "claimIds": [
+        "rule"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.6,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-2",
+      "beat": "context",
+      "narration": "缺的是程序线索。REA 给 AI 助手接上软件分析工具：能调查网页脚本或程序文件，并提供带出处和限制的线索；判断仍由助手负责。",
+      "visual": "助手面前是“这段加速怎样实现”的调查问题；选中的网页与本地文件是两个不同入口，当前只点亮网页。返回的代码片段带位置和限制，助手作出下一步选择。画面提前交代输入、输出和分工。",
+      "claimIds": [
+        "server",
+        "javascript",
+        "binary",
+        "evidence"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-3",
+      "beat": "mechanism",
+      "narration": "里面怎么连起来？从源码可以看到 MCP 服务和浏览器工具的注册关系。这里把它们简化成接口和分析能力两层，方便理解，不代表完整架构。",
+      "visual": "以“讲解抽象”标记服务和工具注册关系，沿请求方向展示工具调用；未核实的应用服务内部调用链不画作既定事实。",
+      "claimIds": [
+        "server"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-4",
+      "beat": "mechanism",
+      "narration": "浏览器这条路，源码里可以看到 REA 请求已加载脚本的源码。采集需要选中，还受到时间和字节预算限制。",
+      "visual": "从示意的已连接浏览器展示 Debugger.getScriptSource 请求及返回；技术名可见但不必口播。未采集条目为灰色，不画成全部已获取。具体连接、授权和环境要求待补证据。",
+      "claimIds": [
+        "cdp"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-5",
+      "beat": "example",
+      "narration": "官方的小恐龙案例，就拿到了游戏的 index.js。沿着这份代码，可以找到加速分支：没撞上、也没到上限时，每更新一次，速度就加一点。",
+      "visual": "官方文件与规则依据对应；助手定位过程标“演绎”。快速高亮条件和加速行，规则直接驱动持续运行的游戏。固定更新节奏，不再长篇解释累加，不堆大计数器。",
+      "claimIds": [
+        "handoff",
+        "rule"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-6",
+      "beat": "mechanism",
+      "narration": "换个目标，分析路径也会变。JavaScript 有静态解析；原生程序可以选择 Ghidra 这类分析器。具体能查到什么，还取决于工具是否可用、是否支持目标。",
+      "visual": "相同调查请求换成JS文件和原生程序，走不同适配器。图形可少量显示Ghidra/IDA/Hopper，不口播名单；不画成全部启动或自动选最佳。静态JS分支标惰性文本解析，不把所有REA模式都说成不执行目标。",
+      "claimIds": [
+        "javascript",
+        "binary"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-7",
+      "beat": "mechanism",
+      "narration": "所以，它还需要统一的交付方式。源码里专门定义了证据记录：用了哪个分析器、做了什么操作、结果对应哪里、有哪些限制；也区分直接观察、派生结果和推断。助手拿到的，除了结论，还有回头核对的线索。",
+      "visual": "两种不同工具结果汇入同一证据结构，展示来源、代码位置、限制三个关键字段；观察/派生/推断用三种小标识。点一次位置回到原片段，让观众看见“为什么有用”。不展示满屏JSON，不暗示格式统一就正确。",
+      "claimIds": [
+        "evidence",
+        "rule"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-8",
+      "beat": "example",
+      "narration": "接着怎么用，就回到助手。沿用恐龙案例来演示：助手根据这条规则，尝试写个新游戏，再加上手动调速。拖动滑杆，让速度跟着变，就能检查这条调速逻辑有没有用对。",
+      "visual": "REA把带来源的规则返回助手；助手写入新舞台，规则与控制器连续组装。新演示明确与原网页分开。先自动加速，再切手动停止自动递增；操作速度对应游戏运动。助手制作全程标“演绎”，不是官方真实录屏。",
+      "claimIds": [
+        "rebuild"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-9",
+      "beat": "benefit",
+      "narration": "这套设计的优势，是把不同分析工具接到助手的工作流里，让调查能沿着依据继续往下走。但有出处，不代表解释一定对；只拿到一部分材料，也可能漏掉关键逻辑。",
+      "visual": "同一观察结果被助手回查，已覆盖代码亮起，未覆盖部分保留未知。所谓优势是源码结构带来的设计判断，不说实测快多少、不声称免除人工验证，也不把内容哈希当真伪证明。",
+      "claimIds": [
+        "evidence"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-10",
+      "beat": "limitation",
+      "narration": "门槛也在这里：浏览器需要可连接的调试环境，原生分析需要可用且支持目标的分析器。它只能分析实际拿到的材料，网页里加载的内容，不等于服务端全部代码。",
+      "visual": "展示调试连接和本地工具配置两个实际关口；浏览器端代码可见，未取得的服务端代码保持灰色未知。外部分析器是需具备的依赖，不画成REA自带且无条件可用。",
+      "claimIds": [
+        "cdp",
+        "binary"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-11",
+      "beat": "closing",
+      "narration": "找回加速规则，还不等于复制了整个游戏。教学版的绘制、跳跃和碰撞仍得重写，新实现有没有对上，还要验证。",
+      "visual": "将找到的速度规则与新写的绘制/跳跃/碰撞区分一次，再汇成可玩的结果。最终停在游戏与原始依据的对应关系，避免新增口号页或再讲一遍全流程。",
+      "claimIds": [
+        "rebuild"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    }
+  ]
+}

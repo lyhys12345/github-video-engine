@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rembg-chen-short-v1",
+  "title": "rembg：蒙版决定保留什么",
+  "kind": "mask-apply",
+  "sourceShotIds": ["shot-3", "shot-4"],
+  "claimIds": ["predict", "apply"],
+  "phases": [
+    {"label": "原图 → 预测蒙版", "captionText": "它先让模型预测前景蒙版，"},
+    {"label": "白色保留 · 黑色移除", "captionText": "用蒙版标记需要保留的区域。"},
+    {"label": "同一蒙版作用于原图", "captionText": "再用蒙版处理原图，"},
+    {"label": "保留主体 · 背景透明", "captionText": "背景变透明，主体得以保留。"}
+  ],
+  "labels": {
+    "source": "合成原图与预测蒙版示意",
+    "result": "透明背景的主体",
+    "disclosure": "合成插画与蒙版示意 · 未运行 rembg 模型"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "provider": "elevenlabs",
+  "text": "这是离线配置示例，尚未发送给语音服务。",
+  "voiceId": "CONFIGURE_EXACT_ACCOUNT_VOICE_ID",
+  "voiceLabel": "Chen preference; API identity and entitlement unverified",
+  "modelId": "eleven_multilingual_v2",
+  "voiceSettings": {
+    "stability": 0.5,
+    "similarity_boost": 0.75,
+    "style": 0,
+    "use_speaker_boost": true,
+    "speed": 1
+  },
+  "outputFormat": "mp3_44100_128",
+  "entitlement": "unverified",
+  "estimatedMaxChargeMicros": 100000
+}

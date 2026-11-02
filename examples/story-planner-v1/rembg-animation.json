@@ -1,0 +1,216 @@
+{
+  "schemaVersion": "1.0",
+  "storyId": "rembg-story",
+  "shots": [
+    {
+      "shotId": "shot-1",
+      "objects": [
+        {
+          "id": "input",
+          "label": "原图",
+          "kind": "document",
+          "visual": "scene"
+        },
+        {
+          "id": "result",
+          "label": "前景结果",
+          "kind": "state",
+          "visual": "cutout"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "compare",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "predict"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-2",
+      "objects": [
+        {
+          "id": "input",
+          "label": "原图",
+          "kind": "document",
+          "visual": "scene"
+        },
+        {
+          "id": "result",
+          "label": "预测蒙版",
+          "kind": "state",
+          "visual": "mask"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "transform",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "predict"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-3",
+      "objects": [
+        {
+          "id": "input",
+          "label": "蒙版",
+          "kind": "document",
+          "visual": "mask"
+        },
+        {
+          "id": "result",
+          "label": "前景区域",
+          "kind": "state",
+          "visual": "cutout"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "reveal",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "predict"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-4",
+      "objects": [
+        {
+          "id": "input",
+          "label": "原图",
+          "kind": "document",
+          "visual": "scene"
+        },
+        {
+          "id": "result",
+          "label": "合成结果",
+          "kind": "state",
+          "visual": "cutout"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "transform",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "apply"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-5",
+      "objects": [
+        {
+          "id": "original",
+          "label": "原图",
+          "kind": "image",
+          "visual": "scene"
+        },
+        {
+          "id": "mask",
+          "label": "预测蒙版",
+          "kind": "image",
+          "visual": "mask"
+        },
+        {
+          "id": "output",
+          "label": "保留前景",
+          "kind": "image",
+          "visual": "cutout"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "mask-apply",
+          "source": "original",
+          "target": "output",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "apply"
+          ],
+          "operand": "mask"
+        }
+      ]
+    },
+    {
+      "shotId": "shot-6",
+      "objects": [
+        {
+          "id": "input",
+          "label": "边缘细节",
+          "kind": "document",
+          "visual": "scene"
+        },
+        {
+          "id": "result",
+          "label": "待检查区域",
+          "kind": "state",
+          "visual": "cutout"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "emphasize",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "quality-inference"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "shot-7",
+      "objects": [
+        {
+          "id": "input",
+          "label": "输入图片",
+          "kind": "document",
+          "visual": "scene"
+        },
+        {
+          "id": "result",
+          "label": "输出结果",
+          "kind": "state",
+          "visual": "cutout"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "compare",
+          "source": "input",
+          "target": "result",
+          "start": 0.15,
+          "end": 0.8,
+          "claimIds": [
+            "apply"
+          ]
+        }
+      ]
+    }
+  ]
+}

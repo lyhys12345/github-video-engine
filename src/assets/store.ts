@@ -4,7 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {ArtifactSchema, type Artifact, type Stage} from '../contracts/runtime.js';
 import {fileHash, sha256} from '../core/util.js';
 import {EngineError} from '../core/errors.js';
-const extensionFor=(mediaType:string)=>({'video/mp4':'mp4','image/png':'png','audio/wav':'wav','audio/flac':'flac','text/vtt':'vtt','text/plain':'txt','application/zip':'zip','font/ttf':'ttf'}[mediaType]??'json');
+const extensionFor=(mediaType:string)=>({'video/mp4':'mp4','image/png':'png','audio/wav':'wav','audio/flac':'flac','audio/mpeg':'mp3','text/vtt':'vtt','text/plain':'txt','application/zip':'zip','font/ttf':'ttf'}[mediaType]??'json');
 
 export class ArtifactStore {
   readonly root: string;

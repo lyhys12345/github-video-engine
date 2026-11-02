@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rea-continuous-v1",
+  "title": "REA：从画面找到规则",
+  "kind": "rule-build",
+  "presentation": "continuous-explainer",
+  "styleAssetPath": "assets/visual-style.json",
+  "durationBounds": {
+    "minSeconds": 45,
+    "maxSeconds": 60
+  },
+  "sourceShotIds": [
+    "beat-1",
+    "beat-2",
+    "beat-3",
+    "beat-4",
+    "beat-5",
+    "beat-6",
+    "beat-7",
+    "beat-8"
+  ],
+  "claimIds": [
+    "handoff",
+    "rule",
+    "rebuild"
+  ],
+  "phases": [
+    {
+      "scene": "hook",
+      "label": "为什么越跑越快？",
+      "captionText": "这个小恐龙，为什么越跑越快？光看画面，很难知道。"
+    },
+    {
+      "scene": "inspect",
+      "label": "跟着线索找代码",
+      "captionText": "REA 的官方案例，拿到了网页加载的 index.js。"
+    },
+    {
+      "scene": "connect",
+      "label": "找到更新条件",
+      "captionText": "沿着代码看，规则就出现了：没撞上、速度还没到上限，"
+    },
+    {
+      "scene": "execute",
+      "label": "一次更新，加一点",
+      "captionText": "每更新一次，就加一点。起步是六，每次加零点零零一，不到十三，就继续加速。"
+    },
+    {
+      "scene": "execute",
+      "label": "规则驱动游戏",
+      "captionText": "把这条规则放进教学游戏，障碍物就越跑越快。"
+    },
+    {
+      "scene": "test",
+      "label": "切换成手动控制",
+      "captionText": "再切成手动调速，拖动滑杆，快慢就由你控制。"
+    },
+    {
+      "scene": "resolve",
+      "label": "线索交给助手",
+      "captionText": "这里，REA 提供程序线索，助手根据线索重建演示。"
+    },
+    {
+      "scene": "resolve",
+      "label": "找到规则之后",
+      "captionText": "找到一条规则，不等于复制整个游戏；绘制、跳跃和碰撞，还需要重新实现。"
+    }
+  ],
+  "labels": {
+    "source": "官方案例中的 index.js",
+    "result": "可调速教学重建",
+    "disclosure": "官方案例原理示意 · 助手演绎 · 教学重建 · 时间压缩"
+  },
+  "rule": {
+    "from": 6,
+    "to": 12,
+    "conditionMax": 13,
+    "acceleration": 0.001,
+    "basis": "原代码 SPEED 6 / ACCELERATION .001 / speed < 13；演示终点12、更新节奏及手动速度轨迹均为作者选择，不是实测或硬钳位。"
+  }
+}

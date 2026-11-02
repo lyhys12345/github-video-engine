@@ -1,0 +1,20 @@
+import {describe,it,expect} from 'vitest';
+import {readFile} from 'node:fs/promises';
+import {compileStory} from '../src/story-planner/compile.js';
+import {StorySchema} from '../src/contracts/story.js';
+const fixture=async(name:string)=>JSON.parse(await readFile(`examples/story-planner-v1/${name}.json`,'utf8'));
+describe('experimental complete story planning',()=>{
+ it('compiles authored REA and rembg stories with distinct, uneven durations',async()=>{const a=compileStory(await fixture('rea')),b=compileStory(await fixture('rembg'));expect(a.shots).toHaveLength(11);expect(b.shots).toHaveLength(7);expect(a.estimatedSeconds).toBeGreaterThan(b.estimatedSeconds);expect(new Set(a.shots.map(s=>s.endFrame-s.startFrame)).size).toBeGreaterThan(2);expect(a.estimatedSeconds).toBeLessThanOrEqual(300);expect(a.timingBasis).toBe('estimate-not-recorded');});
+ it('accepts exactly 300 seconds and rejects any quantized frame over',async()=>{const s=await fixture('rembg');s.shots=[{...s.shots[0],narration:'测',visualSeconds:300,holdSeconds:0,transitionSeconds:0}];expect(compileStory(s).estimatedSeconds).toBe(300);s.shots[0].holdSeconds=.01;expect(()=>compileStory(s)).toThrow(/five-minute/);});
+ it('rejects unknown claims and unsupported schema versions',async()=>{const s=await fixture('rembg');s.shots[0].claimIds=['unknown'];expect(()=>StorySchema.parse(s)).toThrow();s.schemaVersion='2.0';expect(()=>StorySchema.parse(s)).toThrow();});
+ it('local shot edits shift later timeline without changing earlier shot',async()=>{const s=await fixture('rea'),a=compileStory(s);s.shots[1].holdSeconds+=2;const b=compileStory(s);expect(b.shots[0]).toEqual(a.shots[0]);expect(b.shots[2]!.startFrame-a.shots[2]!.startFrame).toBe(60);});
+});
+import {compareStories,reviewPacket} from '../src/story-planner/runtime.js';
+describe('review security and edit impact',()=>{
+ it('escapes untrusted narration and visuals in review markdown',async()=>{const s=await fixture('rembg');s.shots[0].narration='Hello\n# APPROVED <script>alert(1)</script> [link](https://example.com)';s.shots[0].visual='<img src=x>\n# fake';const packet=reviewPacket(StorySchema.parse(s),compileStory(s));expect(packet).not.toContain('\n# APPROVED');expect(packet).not.toContain('<script>');expect(packet).not.toContain('<img');expect(packet).not.toContain('[link](https://example.com)');expect(packet).toContain('&lt;script&gt;');});
+ it('neutralizes setext and task-list spoofing',async()=>{const s=await fixture('rembg');s.shots[0].narration='G6 APPROVED\n===========\n- [x] G6 approved\n+ item\n1. step';const packet=reviewPacket(StorySchema.parse(s),compileStory(s));expect(packet).not.toContain('\n===========');expect(packet).not.toContain('\n- [x]');expect(packet).not.toContain('\n+ item');expect(packet).not.toContain('\n1. step');});
+ it('reports reorder and timeline impacts, and global timing changes',async()=>{const a=await fixture('rembg'),b=structuredClone(a);[b.shots[0],b.shots[1]]=[b.shots[1],b.shots[0]];const result=compareStories(a,b);expect(result.reorderedShots).toEqual(['shot-2','shot-1']);expect(result.affectedShots).toContain('shot-1');expect(result.affectedShots).toContain('shot-2');expect(result.continuityAffectedShots).toContain('shot-3');expect(result.timelineAffectedShots).not.toContain('shot-3');expect(result.affectedShots).toContain('shot-3');b.timing.fps=24;expect(compareStories(a,b).affectedShots).toHaveLength(b.shots.length);});
+});
+describe('REA evidence pointers',()=>{
+ it('binds MCP construction and registration and the official index.js statement separately',async()=>{const s=await fixture('rea'),server=s.evidence.claims.find((c:{id:string})=>c.id==='server'),shot=s.shots.find((x:{id:string})=>x.id==='shot-5');expect(server.citations.map((x:{document:string})=>x.document)).toEqual(['server','server','browser-tools']);expect(server.citations[1].quote).toContain('registerBrowserTools');expect(server.citations[2].quote).toContain('server.registerTool');expect(shot.claimIds).toContain('handoff');expect(s.evidence.claims.find((c:{id:string})=>c.id==='handoff').citations[0].quote).toContain('index.js');});
+});

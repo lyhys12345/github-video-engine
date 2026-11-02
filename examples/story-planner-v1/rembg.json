@@ -1,0 +1,272 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rembg-story",
+  "name": "rembg 完整故事（人工撰写）",
+  "evidence": {
+    "schemaVersion": "1.0",
+    "id": "rembg-evidence",
+    "name": "rembg",
+    "audience": "不了解项目的普通短视频观众",
+    "interpretation": "agent-curated-semantic-graph-not-automatic-source-understanding",
+    "sources": [
+      {
+        "id": "implementation",
+        "path": "fixtures/sources/rembg-bg.py.txt",
+        "url": "https://github.com/danielgatis/rembg/blob/c5b48b0417a0254df7d461efa14573597f369a83/rembg/bg.py",
+        "sha256": "2e1977b6d16d5369e2c20c5ca5d9ba2e2c0228f8beef39c5d2296df1879df62b"
+      }
+    ],
+    "claims": [
+      {
+        "id": "predict",
+        "statement": "模型根据图片预测前景蒙版",
+        "kind": "documented",
+        "rationale": "人工核对官方文档与代码；引文定位不等于自动语义证明",
+        "citations": [
+          {
+            "document": "implementation",
+            "startLine": 322,
+            "endLine": 328,
+            "quote": "\n    if session is None:\n        session = new_session(\"bria-rmbg\", *args, **kwargs)\n\n    masks = session.predict(img, *args, **kwargs)\n    cutouts = []\n"
+          },
+          {
+            "document": "implementation",
+            "startLine": 280,
+            "endLine": 280,
+            "quote": "    This function takes in various parameters and returns a modified version of the input image with the background removed. The function can handle input data in the form of bytes, a PIL image, or a numpy array. The function first checks the type of the input data and converts it to a PIL image if necessary. It then fixes the orientation of the image and proceeds to perform background removal using the 'bria-rmbg' model. The result is a list of binary masks representing the foreground objects in the image. These masks are post-processed and combined to create a final cutout image. If a background color is provided, it is applied to the cutout image. The function returns the resulting cutout image in the format specified by the input 'return_type' parameter or as python bytes if force_return_bytes is true."
+          }
+        ]
+      },
+      {
+        "id": "apply",
+        "statement": "按蒙版生成保留主体的抠图",
+        "kind": "documented",
+        "rationale": "人工核对官方文档与代码；引文定位不等于自动语义证明",
+        "citations": [
+          {
+            "document": "implementation",
+            "startLine": 369,
+            "endLine": 378,
+            "quote": "                    cutout = decontaminate_cutout(img, mask)\n        else:\n            if putalpha:\n                cutout = putalpha_cutout(img, mask)\n            elif decontaminate:\n                cutout = decontaminate_cutout(img, mask)\n            else:\n                cutout = naive_cutout(img, mask)\n\n        cutouts.append(cutout)"
+          },
+          {
+            "document": "implementation",
+            "startLine": 99,
+            "endLine": 112,
+            "quote": "def naive_cutout(img: PILImage, mask: PILImage) -> PILImage:\n    \"\"\"\n    Perform a simple cutout operation on an image using a mask.\n\n    This function takes a PIL image `img` and a PIL image `mask` as input.\n    It uses the mask to create a new image where the pixels from `img` are\n    cut out based on the mask.\n\n    The function returns a PIL image representing the cutout of the original\n    image using the mask.\n    \"\"\"\n    empty = Image.new(\"RGBA\", (img.size), 0)\n    cutout = Image.composite(img, empty, mask)\n    return cutout"
+          },
+          {
+            "document": "implementation",
+            "startLine": 146,
+            "endLine": 157,
+            "quote": "def putalpha_cutout(img: PILImage, mask: PILImage) -> PILImage:\n    \"\"\"\n    Apply the specified mask to the image as an alpha cutout.\n\n    Args:\n        img (PILImage): The image to be modified.\n        mask (PILImage): The mask to be applied.\n\n    Returns:\n        PILImage: The modified image with the alpha cutout applied.\n    \"\"\"\n    img.putalpha(mask)"
+          }
+        ]
+      },
+      {
+        "id": "background",
+        "statement": "可为抠图添加指定背景颜色；花纹背景为一般合成用途示意",
+        "kind": "inference",
+        "rationale": "源码支持背景颜色，花纹背景是透明素材后续使用的教学推断，不冒充模型生成",
+        "citations": [
+          {
+            "document": "implementation",
+            "startLine": 380,
+            "endLine": 385,
+            "quote": "    cutout = img\n    if len(cutouts) > 0:\n        cutout = get_concat_v_multi(cutouts)\n\n    if bgcolor is not None and not only_mask:\n        cutout = apply_background_color(cutout, bgcolor)"
+          }
+        ]
+      },
+      {
+        "id": "quality-inference",
+        "statement": "边缘质量可能因输入和模型而不同，需要人工检查",
+        "kind": "inference",
+        "rationale": "代码描述软边缘修复选项，支持检查细节的谨慎推断；未测量模型或不同输入的效果。",
+        "citations": [
+          {
+            "document": "implementation",
+            "startLine": 322,
+            "endLine": 328,
+            "quote": "\n    if session is None:\n        session = new_session(\"bria-rmbg\", *args, **kwargs)\n\n    masks = session.predict(img, *args, **kwargs)\n    cutouts = []\n"
+          },
+          {
+            "document": "implementation",
+            "startLine": 284,
+            "endLine": 292,
+            "quote": "        alpha_matting (bool, optional): Flag indicating whether to use alpha matting. Defaults to False.\n        alpha_matting_foreground_threshold (int, optional): Foreground threshold for alpha matting. Defaults to 240.\n        alpha_matting_background_threshold (int, optional): Background threshold for alpha matting. Defaults to 10.\n        alpha_matting_erode_size (int, optional): Erosion size for alpha matting. Defaults to 10.\n        session (Optional[BaseSession], optional): A session object for the 'bria-rmbg' model. Defaults to None.\n        only_mask (bool, optional): Flag indicating whether to return only the binary masks. Defaults to False.\n        post_process_mask (bool, optional): Flag indicating whether to post-process the masks. Defaults to False.\n        decontaminate (bool, optional): Flag indicating whether to remove the background color fringing left on soft edges. Ignored when alpha_matting is on. Defaults to False.\n        vitmatte (bool, optional): Flag indicating whether to refine the mask with ViTMatte, which recovers more soft edge detail than alpha matting. Takes precedence over alpha_matting. Defaults to False."
+          }
+        ]
+      }
+    ],
+    "objects": [
+      {
+        "id": "photo",
+        "label": "带背景的图片",
+        "kind": "image"
+      },
+      {
+        "id": "mask",
+        "label": "前景蒙版",
+        "kind": "mask"
+      },
+      {
+        "id": "cutout",
+        "label": "透明背景的主体",
+        "kind": "cutout"
+      },
+      {
+        "id": "design",
+        "label": "主体放入新背景的合成图",
+        "kind": "image"
+      }
+    ],
+    "actors": [
+      {
+        "id": "tool",
+        "label": "rembg",
+        "role": "tool"
+      }
+    ],
+    "operations": [
+      {
+        "id": "reuse",
+        "kind": "composite",
+        "input": "cutout",
+        "output": "design",
+        "dependsOn": [
+          "cut"
+        ],
+        "claimIds": [
+          "background"
+        ],
+        "actorIds": [
+          "tool"
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "cut",
+        "kind": "extract",
+        "input": "mask",
+        "output": "cutout",
+        "dependsOn": [
+          "predict"
+        ],
+        "claimIds": [
+          "apply"
+        ],
+        "actorIds": [
+          "tool"
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "predict",
+        "kind": "segment",
+        "input": "photo",
+        "output": "mask",
+        "dependsOn": [],
+        "claimIds": [
+          "predict"
+        ],
+        "actorIds": [
+          "tool"
+        ],
+        "parameters": {}
+      }
+    ],
+    "disclosure": "合成插画与蒙版示意 · 未运行 rembg 模型"
+  },
+  "timing": {
+    "fps": 30,
+    "chineseCharsPerSecond": 4,
+    "wordsPerSecond": 2.5
+  },
+  "shots": [
+    {
+      "id": "shot-1",
+      "beat": "hook",
+      "narration": "一张照片，背景消失了。rembg 如何知道该留下什么？",
+      "visual": "照片主体保留，背景透明，重新放入新场景。",
+      "claimIds": [
+        "predict"
+      ],
+      "visualSeconds": 1,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-2",
+      "beat": "context",
+      "narration": "输入可以是一张图片，输出可以是带透明背景的主体图像。",
+      "visual": "原图和透明结果连续变换。",
+      "claimIds": [
+        "predict"
+      ],
+      "visualSeconds": 1,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-3",
+      "beat": "mechanism",
+      "narration": "它先让模型预测前景蒙版，用蒙版标记需要保留的区域。",
+      "visual": "图像进入模型，前景蒙版逐渐显现。",
+      "claimIds": [
+        "predict"
+      ],
+      "visualSeconds": 2,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-4",
+      "beat": "mechanism",
+      "narration": "再用蒙版处理原图，背景变透明，主体得以保留。",
+      "visual": "蒙版与原图叠合，背景淡出。",
+      "claimIds": [
+        "apply"
+      ],
+      "visualSeconds": 1,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-5",
+      "beat": "benefit",
+      "narration": "这样，主体就可以放到其他背景里。",
+      "visual": "透明主体移动到另一背景。",
+      "claimIds": [
+        "background",
+        "apply"
+      ],
+      "visualSeconds": 2,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-6",
+      "beat": "limitation",
+      "narration": "细节尤其是边缘，仍值得放大检查。",
+      "visual": "放大头发边缘，标出可能需要检查的细节。",
+      "claimIds": [
+        "quality-inference"
+      ],
+      "visualSeconds": 1,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "shot-7",
+      "beat": "closing",
+      "narration": "从原图到蒙版，再到透明结果，就是这条处理路径。",
+      "visual": "原图、蒙版和结果连贯回顾。",
+      "claimIds": [
+        "apply"
+      ],
+      "visualSeconds": 1,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2
+    }
+  ]
+}

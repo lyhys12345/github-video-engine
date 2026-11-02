@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "1.0",
+  "compilerVersion": "story-planner-1",
+  "timingBasis": "estimate-not-recorded",
+  "fps": 30,
+  "totalFrames": 4955,
+  "estimatedSeconds": 165.16666666666666,
+  "shots": [
+    {
+      "id": "shot-1",
+      "beat": "hook",
+      "narration": "这个网页里的小恐龙跑酷，越玩越快。想让 AI 找到原因，再做个能调速度的版本，光看画面，还缺什么？",
+      "visual": "立即看到网页游戏加速，预闪调速版跳过障碍的结果，再回原网页。调速版标识“教学重建”，开头已有对象、问题与回报。沿用接受的B版配色与游戏主体。",
+      "claimIds": [
+        "rule"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.6,
+      "transitionSeconds": 0.2,
+      "startFrame": 0,
+      "endFrame": 329,
+      "estimatedSpeechSeconds": 10.15
+    },
+    {
+      "id": "shot-2",
+      "beat": "context",
+      "narration": "缺的是程序线索。REA 给 AI 助手接上软件分析工具：接收选定网页或本地程序文件，返回带出处和限制的结果；判断仍由助手负责。",
+      "visual": "助手面前是“这段加速怎样实现”的调查问题；选中的网页与本地文件是两个不同入口，当前只点亮网页。返回的代码片段带位置和限制，助手作出下一步选择。画面提前交代输入、输出和分工。",
+      "claimIds": [
+        "server"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2,
+      "startFrame": 329,
+      "endFrame": 740,
+      "estimatedSpeechSeconds": 13.3
+    },
+    {
+      "id": "shot-3",
+      "beat": "mechanism",
+      "narration": "里面怎么连起来？助手通过 MCP 发出工具请求，REA 的应用服务衔接具体分析能力，再把结果整理回来。MCP 可以理解成助手调用工具的接口。",
+      "visual": "沿同一个请求往内部走：接口校验请求，应用服务调用浏览器适配器，结果沿路返回。对象移动承担解释，不用全屏三框图。三层是讲解抽象，不声称完整架构只有三层。",
+      "claimIds": [
+        "server"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2,
+      "startFrame": 740,
+      "endFrame": 1178,
+      "estimatedSpeechSeconds": 14.2
+    },
+    {
+      "id": "shot-4",
+      "beat": "mechanism",
+      "narration": "浏览器这条路，用的是 Chrome 调试协议，也就是开发者工具背后的接口。REA 能向浏览器请求某个已加载脚本的源码；但要明确开启采集，还受大小和时间限制。",
+      "visual": "从刚才选中的页面打开CDP连接，浏览器交回脚本清单，选一项发出 Debugger.getScriptSource 请求并返回源码。技术名留画面可选，不逐字念。未采集条目为灰色，不能画成获取全部代码；连接环境需已获准访问。",
+      "claimIds": [
+        "cdp"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2,
+      "startFrame": 1178,
+      "endFrame": 1664,
+      "estimatedSpeechSeconds": 15.8
+    },
+    {
+      "id": "shot-5",
+      "beat": "example",
+      "narration": "官方的小恐龙案例，就拿到了游戏的 index.js。沿着这份代码，可以找到加速分支：没撞上、也没到上限时，每更新一次，速度就加一点。",
+      "visual": "官方文件与规则依据对应；助手定位过程标“演绎”。快速高亮条件和加速行，规则直接驱动持续运行的游戏。固定更新节奏，不再长篇解释累加，不堆大计数器。",
+      "claimIds": [
+        "rule"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2,
+      "startFrame": 1664,
+      "endFrame": 2068,
+      "estimatedSpeechSeconds": 13.05
+    },
+    {
+      "id": "shot-6",
+      "beat": "mechanism",
+      "narration": "换个目标，分析路径也会变。JavaScript 有静态解析；原生程序则可能用到 Ghidra 这类分析器。工具的配置、可用性和支持范围，都会影响能查到什么。",
+      "visual": "相同调查请求换成JS文件和原生程序，走不同适配器。图形可少量显示Ghidra/IDA/Hopper，不口播名单；不画成全部启动或自动选最佳。静态JS分支标惰性文本解析，不把所有REA模式都说成不执行目标。",
+      "claimIds": [
+        "javascript",
+        "binary"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2,
+      "startFrame": 2068,
+      "endFrame": 2494,
+      "estimatedSpeechSeconds": 13.8
+    },
+    {
+      "id": "shot-7",
+      "beat": "mechanism",
+      "narration": "所以，它还需要统一的交付方式。源码里专门定义了证据记录：哪个工具分析的、结果对应哪里、有哪些限制；也区分直接观察、派生结果和推断。助手拿到的，除了结论，还有回头核对的线索。",
+      "visual": "两种不同工具结果汇入同一证据结构，展示来源、代码位置、限制三个关键字段；观察/派生/推断用三种小标识。点一次位置回到原片段，让观众看见“为什么有用”。不展示满屏JSON，不暗示格式统一就正确。",
+      "claimIds": [
+        "evidence"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2,
+      "startFrame": 2494,
+      "endFrame": 3069,
+      "estimatedSpeechSeconds": 18.75
+    },
+    {
+      "id": "shot-8",
+      "beat": "example",
+      "narration": "接着怎么用，就回到助手。沿用恐龙案例来演示：助手根据这条规则，尝试写个新游戏，再加上手动调速。拖动滑杆，让速度跟着变，就能检查这条调速逻辑有没有用对。",
+      "visual": "REA把带来源的规则返回助手；助手写入新舞台，规则与控制器连续组装。新演示明确与原网页分开。先自动加速，再切手动停止自动递增；操作速度对应游戏运动。助手制作全程标“演绎”，不是官方真实录屏。",
+      "claimIds": [
+        "rebuild"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2,
+      "startFrame": 3069,
+      "endFrame": 3576,
+      "estimatedSpeechSeconds": 16.5
+    },
+    {
+      "id": "shot-9",
+      "beat": "benefit",
+      "narration": "这套设计的优势，是把不同分析工具接到助手的工作流里，让调查能沿着依据继续往下走。但有出处，不代表解释一定对；只拿到一部分材料，也可能漏掉关键逻辑。",
+      "visual": "同一观察结果被助手回查，已覆盖代码亮起，未覆盖部分保留未知。所谓优势是源码结构带来的设计判断，不说实测快多少、不声称免除人工验证，也不把内容哈希当真伪证明。",
+      "claimIds": [
+        "evidence"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2,
+      "startFrame": 3576,
+      "endFrame": 4083,
+      "estimatedSpeechSeconds": 16.5
+    },
+    {
+      "id": "shot-10",
+      "beat": "limitation",
+      "narration": "门槛也在这里：浏览器要有可连接的调试环境，原生分析还可能要安装、配置额外工具。它只能分析实际拿到的材料，网页加载了什么，并不等于服务端的代码也都在里面。",
+      "visual": "展示调试连接和本地工具配置两个实际关口；浏览器端代码可见，未取得的服务端代码保持灰色未知。外部分析器是需具备的依赖，不画成REA自带且无条件可用。",
+      "claimIds": [
+        "cdp",
+        "binary"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2,
+      "startFrame": 4083,
+      "endFrame": 4613,
+      "estimatedSpeechSeconds": 17.25
+    },
+    {
+      "id": "shot-11",
+      "beat": "closing",
+      "narration": "找回加速规则，还不等于复制了整个游戏。教学版的绘制、跳跃和碰撞仍得重写，新实现有没有对上，还要验证。",
+      "visual": "将找到的速度规则与新写的绘制/跳跃/碰撞区分一次，再汇成可玩的结果。最终停在游戏与原始依据的对应关系，避免新增口号页或再讲一遍全流程。",
+      "claimIds": [
+        "rebuild"
+      ],
+      "visualSeconds": 0,
+      "holdSeconds": 0.2,
+      "transitionSeconds": 0.2,
+      "startFrame": 4613,
+      "endFrame": 4955,
+      "estimatedSpeechSeconds": 11
+    }
+  ]
+}

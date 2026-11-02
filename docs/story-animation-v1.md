@@ -1,0 +1,7 @@
+# Story animation expression v1
+
+`pnpm gve story animate --spec examples/story-planner-v1/rea.json --plan examples/story-planner-v1/rea-animation.json --out work/new-animation.json`
+
+The independent versioned sidecar describes authored objects and reveal/transfer/transform/compare/emphasize actions, with normalized within-shot intervals and supporting claim IDs. Every story shot must have exactly one binding. Compilation uses the complete story frame timeline, so duration edits and ordering follow the edited story rather than a fixed template. Unknown actions, missing objects, invalid intervals or unsupported claims fail explicitly. Existing outputs are not overwritten.
+
+`sampleAnimation` returns deterministic normalized positions, opacity, scale, mix and highlight for a requested frame. These are renderer-independent illustrative states; mix needs suitable assets for meaningful visual transformation. Conflicting actions use array order. This increment does not render media or assess visual quality. The sidecar is manually authored, not automatically derived from source or prose. The CLI exports a new JSON file; it does not yet persist the animation task in SQLite/CAS or automatically connect an adapter. REA/rembg examples prove schema and state reuse, not cinematic quality or exact real application behavior. Source provenance is validated by the existing story planning runtime separately; animate itself checks contract references, not source files.

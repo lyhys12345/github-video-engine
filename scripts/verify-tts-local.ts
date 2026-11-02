@@ -1,0 +1,17 @@
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {resolve,join} from 'node:path';
+import {sha256} from '../src/core/util.js';
+import {dryRunTts,produceTts,statusTts,exportTts} from '../src/tts/runtime.js';
+const root=resolve('work/tts-provider-v1/local-lifecycle'),data=join(root,'state');
+await mkdir(root,{recursive:true});
+const story=JSON.parse(await readFile('examples/story-planner-v1/rea.json','utf8')),plan=JSON.parse(await readFile('reviews/chen-segments-v1/rea-visual-plan.json','utf8'));
+if(plan.sourceShotIds.length!==1)throw Error('This bounded proof imports one existing exact narration shot only');
+const shot=story.shots.find((s:{id:string})=>s.id===plan.sourceShotIds[0]);if(!shot)throw Error('Missing current shot');
+const audioPath=resolve('examples/chen-segments-v1/rea/source-audio.bin'),bytes=await readFile(audioPath);
+const spec={schemaVersion:'1.0',provider:'local-import',text:shot.narration,voiceLabel:'Historic Chen UI recording import; API identity unverified; pending owner listening',sourceSha256:sha256(bytes),mediaType:'audio/mpeg'};
+await writeFile(join(root,'import.json'),JSON.stringify(spec,null,2)+'\n',{flag:'wx'});
+await writeFile(join(root,'current-story.json'),JSON.stringify(story,null,2)+'\n',{flag:'wx'});
+const signal=new AbortController().signal,result=await produceTts(spec,data,signal,{audioPath}),status=await statusTts(data,result.fingerprint),repeat=await produceTts(spec,data,signal),exported=await exportTts(data,result.fingerprint,join(root,'export'),signal,{story,shotId:shot.id});
+if(!repeat.cached||sha256(await readFile(exported.audioPath))!==sha256(bytes))throw Error('Local lifecycle integrity failed');
+const proof={schemaVersion:'tts-local-proof/1.0',scope:'existing real MP3 import/cache/status/export/handoff only; no remote generation, no film rendering',remoteCalls:0,credentialsRead:false,sourceAudio:{path:audioPath,sha256:sha256(bytes),bytes:bytes.length},sourceStory:{path:resolve('examples/story-planner-v1/rea.json'),shotId:shot.id,transcriptBasis:'existing selected narration declaration; recorded speech not independently transcribed or heard'},dryRun:dryRunTts(spec),result,status,cacheRepeat:{fingerprint:repeat.fingerprint,cached:repeat.cached},exported,exportSha256:sha256(await readFile(exported.audioPath)),ownerListening:'pending',chenApiIdentity:'unverified',actualProviderVerification:'not performed'};
+await writeFile(join(root,'proof.json'),JSON.stringify(proof,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({proof:join(root,'proof.json'),fingerprint:result.fingerprint,cachedRepeat:repeat.cached,durationSeconds:result.receipt.durationSeconds}));

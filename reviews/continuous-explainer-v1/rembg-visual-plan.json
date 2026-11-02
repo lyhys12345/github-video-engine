@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rembg-continuous-v1",
+  "title": "rembg：留下同一个主体",
+  "kind": "mask-apply",
+  "presentation": "continuous-explainer",
+  "styleAssetPath": "assets/visual-style.json",
+  "durationBounds": {
+    "minSeconds": 25,
+    "maxSeconds": 40
+  },
+  "sourceShotIds": [
+    "beat-1",
+    "beat-2",
+    "beat-3",
+    "beat-4",
+    "beat-5",
+    "beat-6",
+    "beat-7"
+  ],
+  "claimIds": [
+    "predict",
+    "apply",
+    "background",
+    "quality-inference"
+  ],
+  "phases": [
+    {
+      "scene": "hook",
+      "label": "怎样只留下主体？",
+      "captionText": "一张图，怎样只留下主体？"
+    },
+    {
+      "scene": "inspect",
+      "label": "模型先预测蒙版",
+      "captionText": "rembg 先让模型预测前景蒙版。"
+    },
+    {
+      "scene": "inspect",
+      "label": "白色保留，黑色透明",
+      "captionText": "白色区域保留，黑色区域变透明。"
+    },
+    {
+      "scene": "connect",
+      "label": "同一蒙版对准原图",
+      "captionText": "把这张蒙版盖回原图，"
+    },
+    {
+      "scene": "execute",
+      "label": "背景透明，主体留下",
+      "captionText": "背景消失，主体留下。注意，同一个主体，没有重新画一遍。"
+    },
+    {
+      "scene": "test",
+      "label": "换个背景，检查边缘",
+      "captionText": "它现在可以放到新的背景里。放大边缘，再检查有没有多留或漏掉的细节。"
+    },
+    {
+      "scene": "resolve",
+      "label": "处理原理示意",
+      "captionText": "这里用合成插画演示处理原理，并没有实际运行模型。"
+    }
+  ],
+  "labels": {
+    "source": "合成原图与蒙版",
+    "result": "透明主体与新背景",
+    "disclosure": "合成插画与蒙版示意 · 未运行 rembg 模型"
+  }
+}

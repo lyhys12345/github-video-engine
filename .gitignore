@@ -105,3 +105,27 @@ id_ed25519*
 /reviews/silent-pair-v1/*
 !/reviews/silent-pair-v1/RESULT.md
 !/reviews/silent-pair-v1/owner-direction.md
+# Generated sample runs retain local files; portable plans live in fixtures/reviews.
+/examples/chen-segments-v1/
+/examples/continuous-explainer-v1/*/
+**/runtime/bundle/
+*.bin
+!/fixtures/tts-synthetic.mp3
+!/reviews/chen-segments-v1/
+/reviews/chen-segments-v1/*
+!/reviews/chen-segments-v1/*.md
+!/reviews/chen-segments-v1/*-visual-plan.json
+!/reviews/continuous-explainer-v1/
+/reviews/continuous-explainer-v1/*
+!/reviews/continuous-explainer-v1/*.md
+!/reviews/continuous-explainer-v1/*-visual-plan.json
+!/reviews/tts-provider-v1/
+/reviews/tts-provider-v1/*
+!/reviews/tts-provider-v1/contract.md
+!/reviews/tts-provider-v1/candidate-4/
+/reviews/tts-provider-v1/candidate-4/*
+!/reviews/tts-provider-v1/candidate-4/architecture-final.md
+!/reviews/tts-provider-v1/candidate-4/security-reliability-ack.md
+!/reviews/asset-closure-v1/
+/reviews/asset-closure-v1/*
+!/reviews/asset-closure-v1/*.md

@@ -9,16 +9,20 @@ import {productionCommand} from './workflow/production-cli.js';
 import {auditRuntime} from './operations/audit.js';
 import {diffCommand} from './workflow/diff-cli.js';
 import {finalCommand} from './workflow/final-cli.js';
+import {storyCommand} from './story-planner/cli.js';
 import {explainCommand} from './evidence-planner/cli.js';
-const help = 'Usage: pnpm gve doctor | render --spec <file> | jobs status/resume/cancel | research --repo <url> --out <snapshot> | explain plan --spec <graph> --root <source-root> --data <state> --out <new-directory> | explain status/export --task <id> --data <state> [--out <new-directory>] | explain diff --before <task-id> --after <task-id> --data <state> [--out <new-report.json>] | project create/import/status/export/approve --id <id> | production readthrough/import/revise/repairs/status/usage/stills/animatic/motion/export/approve --id <id> | final prepare/render/status/inspect/export/lock --id <id> | diff --kind plan|production --before <json> --after <json> [--out <new.json>] | audit --data <existing-directory> [--out <new-report.json>]';
+import {ttsCommand} from './tts/cli.js';
+const help = 'Usage: pnpm gve tts dry-run/generate/import/status/export | doctor | render --spec <file> | jobs status/resume/cancel | research --repo <url> --out <snapshot> | explain plan --spec <graph> --root <source-root> --data <state> --out <new-directory> | explain status/export --task <id> --data <state> [--out <new-directory>] | explain diff --before <task-id> --after <task-id> --data <state> [--out <new-report.json>] | project create/import/status/export/approve --id <id> | production readthrough/import/revise/repairs/status/usage/stills/animatic/motion/export/approve --id <id> | final prepare/render/status/inspect/export/lock --id <id> | diff --kind plan|production --before <json> --after <json> [--out <new.json>] | audit --data <existing-directory> [--out <new-report.json>]';
 let engine: Engine | undefined;
 const abort = new AbortController();
 const signalHandler = () => abort.abort(new EngineError('CANCELLED', 'Interrupted by user', 'cancelled'));
 process.once('SIGINT', signalHandler); process.once('SIGTERM', signalHandler);
 try {
-  const {values, positionals} = parseArgs({allowPositionals: true, options: {spec: {type: 'string'}, root:{type:'string'}, data: {type: 'string'}, help: {type: 'boolean'}, repo:{type:'string'},ref:{type:'string'},doc:{type:'string',multiple:true},out:{type:'string'},id:{type:'string'},snapshot:{type:'string'},plan:{type:'string'},gate:{type:'string'},candidate:{type:'string'},rules:{type:'string'},delegation:{type:'string'},design:{type:'string'},repair:{type:'string'},kind:{type:'string'},before:{type:'string'},after:{type:'string'},authorization:{type:'string'},'owner-record':{type:'string'},task:{type:'string'}}});
+  const {values, positionals} = parseArgs({allowPositionals: true, options: {spec: {type: 'string'}, root:{type:'string'}, data: {type: 'string'}, help: {type: 'boolean'}, repo:{type:'string'},ref:{type:'string'},doc:{type:'string',multiple:true},out:{type:'string'},id:{type:'string'},snapshot:{type:'string'},plan:{type:'string'},voice:{type:'string'},gate:{type:'string'},candidate:{type:'string'},rules:{type:'string'},delegation:{type:'string'},design:{type:'string'},repair:{type:'string'},kind:{type:'string'},before:{type:'string'},after:{type:'string'},authorization:{type:'string'},'owner-record':{type:'string'},task:{type:'string'},audio:{type:'string'},story:{type:'string'},shot:{type:'string'},'allow-paid':{type:'boolean'},'budget-micros':{type:'string'}}});
   const [command, action, id] = positionals;
   if (values.help || !command) { console.log(help); }
+  else if(command==='tts'){console.log(JSON.stringify(await ttsCommand(positionals,values,abort.signal),null,2));}
+  else if(command==='story'){console.log(JSON.stringify(await storyCommand(positionals,values,abort.signal),null,2));}
   else if(command==='explain'){console.log(JSON.stringify(await explainCommand(positionals,values,abort.signal),null,2));}
   else if(command==='diff'){
     if(Object.entries(values).some(([key,value])=>value!==undefined&&!['kind','before','after','out'].includes(key)))throw new EngineError('USAGE','diff accepts only --kind, --before, --after and --out');

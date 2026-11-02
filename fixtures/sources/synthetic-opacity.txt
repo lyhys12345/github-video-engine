@@ -1,0 +1,4 @@
+Synthetic diagnostic renderer fixture; no external project or target execution.
+An authored opacity control is interpolated linearly from 0 to 1.
+The fixture uses a synthetic tone, not speech; declared narration is not recorded speech.
+All shapes, mappings, rates and numeric values are authored test choices.

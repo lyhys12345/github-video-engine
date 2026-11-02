@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1.0",
+  "scope": "two bounded continuous explainers plus one actual narration-edit proof",
+  "provider": "ElevenLabs account UI",
+  "voiceLabel": "Chen Mandarin Chinese",
+  "model": "Eleven v4",
+  "stability": 0.5,
+  "similarity": 0.75,
+  "cloneStrength": 0,
+  "rate": "original",
+  "reaText": "这个小恐龙，为什么越跑越快？光看画面，很难知道。REA 的官方案例，拿到了网页加载的 index.js。沿着代码看，规则就出现了：没撞上、速度还没到上限，每更新一次，就加一点。起步是六，每次加零点零零一，不到十三，就继续加速。把这条规则放进教学游戏，障碍物就越跑越快。再切成手动调速，拖动滑杆，快慢就由你控制。这里，REA 提供程序线索，助手根据线索重建演示。找到一条规则，不等于复制整个游戏；绘制、跳跃和碰撞，还需要重新实现。",
+  "rembgText": "一张图，怎样只留下主体？rembg 先让模型预测前景蒙版。白色区域保留，黑色区域变透明。把这张蒙版盖回原图，背景消失，主体留下。注意，同一个主体，没有重新画一遍。它现在可以放到新的背景里。放大边缘，再检查有没有多留或漏掉的细节。这里用合成插画演示处理原理，并没有实际运行模型。",
+  "rembgRevisionText": "一张图，怎样把背景去掉？rembg 先让模型预测前景蒙版。白色区域保留，黑色区域变透明。把这张蒙版盖回原图，背景消失，主体留下。注意，同一个主体，没有重新画一遍。它现在可以放到新的背景里。放大边缘，再检查有没有多留或漏掉的细节。这里用合成插画演示处理原理，并没有实际运行模型。",
+  "creditsBefore": 9341,
+  "creditsAfterRea": 9127,
+  "creditsAfterRembg": 8989,
+  "creditsAfterRembgRevision": 8851,
+  "creditsUsed": 490,
+  "paidAction": false,
+  "identityBasis": "coordinator reports same approved selected voice and settings; screenshot independently inspected shows Chen Mandarin Chinese, Eleven v4 and matching slider positions",
+  "observationBasis": {
+    "coordinator": "root generated and saved all three MP3s and reported balance sequence in this chat",
+    "screenshot": {
+      "path": "generation-ui.png",
+      "sha256": "31cdb51a228ed6b221658d8b0f83b84c5dacc482f54be998780916c568884b74",
+      "shows": "revision exact text, Chen Mandarin Chinese, Eleven v4, sliders at .5/.75/0 positions, MP3 44.1kHz/128kbps and final balance 8851; does not itself prove earlier balance steps or transcribe earlier clips"
+    }
+  },
+  "recordings": [
+    {
+      "name": "rea",
+      "path": "rea.mp3",
+      "sha256": "67fd6babc763d5f2b8e7e754238286738a5d5ce025b7f7e1517d363abc612c10",
+      "bytes": 830285,
+      "text": "这个小恐龙，为什么越跑越快？光看画面，很难知道。REA 的官方案例，拿到了网页加载的 index.js。沿着代码看，规则就出现了：没撞上、速度还没到上限，每更新一次，就加一点。起步是六，每次加零点零零一，不到十三，就继续加速。把这条规则放进教学游戏，障碍物就越跑越快。再切成手动调速，拖动滑杆，快慢就由你控制。这里，REA 提供程序线索，助手根据线索重建演示。找到一条规则，不等于复制整个游戏；绘制、跳跃和碰撞，还需要重新实现。",
+      "measuredSeconds": 50.83425,
+      "creditsBefore": 9341,
+      "creditsAfter": 9127,
+      "creditsUsed": 214,
+      "probe": "rea.ffprobe.json",
+      "probeSha256": "35a8f8d4cb8418a0ad90bbeb3149d8c7da25fd7507e6028c9961f7773aea064e",
+      "transcriptVerification": "coordinator exact submitted-text declaration; not independently transcribed or heard"
+    },
+    {
+      "name": "rembg",
+      "path": "rembg.mp3",
+      "sha256": "31c470430fff5f25995b98ff7194af8057c488acd426d6b6cd0cfa5dbb03b4d5",
+      "bytes": 521831,
+      "text": "一张图，怎样只留下主体？rembg 先让模型预测前景蒙版。白色区域保留，黑色区域变透明。把这张蒙版盖回原图，背景消失，主体留下。注意，同一个主体，没有重新画一遍。它现在可以放到新的背景里。放大边缘，再检查有没有多留或漏掉的细节。这里用合成插画演示处理原理，并没有实际运行模型。",
+      "measuredSeconds": 31.555875,
+      "creditsBefore": 9127,
+      "creditsAfter": 8989,
+      "creditsUsed": 138,
+      "probe": "rembg.ffprobe.json",
+      "probeSha256": "5a06d55d31139e93d2148b161947694eb8050f451bd8b8de2786becb7158a841",
+      "transcriptVerification": "coordinator exact submitted-text declaration; not independently transcribed or heard"
+    },
+    {
+      "name": "rembg-revision",
+      "path": "rembg-revision.mp3",
+      "sha256": "3952cd7489a39bceef4a1efb09c975f930a8fa63981fc459d15465b73ad4f51f",
+      "bytes": 513054,
+      "text": "一张图，怎样把背景去掉？rembg 先让模型预测前景蒙版。白色区域保留，黑色区域变透明。把这张蒙版盖回原图，背景消失，主体留下。注意，同一个主体，没有重新画一遍。它现在可以放到新的背景里。放大边缘，再检查有没有多留或漏掉的细节。这里用合成插画演示处理原理，并没有实际运行模型。",
+      "measuredSeconds": 31.007313,
+      "creditsBefore": 8989,
+      "creditsAfter": 8851,
+      "creditsUsed": 138,
+      "probe": "rembg-revision.ffprobe.json",
+      "probeSha256": "2eefccd2387cfce62863cf601ab9a10add968dd7c6dc33d616c2bb9b717a7ec7",
+      "transcriptVerification": "coordinator exact submitted-text declaration; not independently transcribed or heard"
+    }
+  ],
+  "speechContentReview": "pending; no listening or independent speech transcription",
+  "voiceId": "not recorded; not inferred"
+}

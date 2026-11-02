@@ -1,0 +1,37 @@
+# Independent architecture and final review — Chen segments candidate 1
+
+**PASS for the bounded technical and sampled-visual delivery defined by CS-01 through CS-07.** No unresolved blocker or major within that scope. Actual spoken-word correctness, voice naturalness, exact subtitle synchronization, continuous audiovisual rhythm and final owner acceptance remain **UNVERIFIED / pending**. This is not a finished-film or listening approval, and it does not change any historical G4/J3/J4 decision.
+
+Candidate manifest: `candidate-1/manifest.json`, SHA256 `a28d34c1417b8e1cfa874e656586c60e73eab4b3f6991d7631f3edb513e797a7`. The independent reviewer recomputed all 225 frozen file hashes and byte lengths before checks, then all file hashes again after checks: zero mismatches. Contract and source/raw evidence were read before the visual judge report. Shared implementation, source assets and frozen artifacts were read only. Reviewer outputs and the isolated test copy are in `architecture-evidence/`.
+
+## Direct verification
+
+Executed `node reviews/chen-segments-v1/architecture-evidence/check.mjs`. The checker and its outputs are retained. It independently checked each nested source-pack manifest (REA 51 files; rembg 32), original audio hash, exact original selected narration, exact phase/caption concatenation, cue ordering and source/output time ranges. It verified the complete timeline formula, 0.4-second lead and at least 0.6-second tail. All four captions per segment cover the current selected narration exactly. Timing remains explicitly text-weighted and not forced aligned.
+
+Independently ran FFprobe against both source recordings and final MP4s, then full FFmpeg decode with `-xerror`; all exit statuses were 0. Both final videos contain exactly one H.264 yuv420p stream at 1080×1920 and 30 fps, plus one AAC stereo 48 kHz stream. REA is 444 frames / 14.8 seconds, from a 13.792625-second source. rembg is 370 frames / 12.333333 seconds, from an 11.311-second source.
+
+Independently decoded each original recording to 48 kHz stereo PCM and compared it byte for byte with the PCM track inside `narration.wav`, starting exactly 400 ms after its start. Every original decoded sample was preserved in order: REA 2,648,192 bytes; rembg 2,171,716 bytes. Preceding and following samples were digital silence. This directly supports full source preservation without time stretching or source truncation; it does not verify the spoken words or the subjective quality of AAC encoding.
+
+Copied the frozen short-segment implementation/contracts/tests and selected source stories to `architecture-evidence/scratch`, then independently ran the frozen short-segment unit tests there: **3/3 passed**. Raw test JSON and log are retained. The builder's frozen broader six-test and typecheck evidence are additional evidence, not represented as my own executions. No external generation, network call, target repository execution or spending was performed by this reviewer.
+
+## Acceptance findings
+
+| Criterion | Finding |
+| --- | --- |
+| CS-01 — Bounded current text | PASS. Two separate short outputs only: REA original shot-5 and rembg original shots-3→4. Exact narration/phase/cue concatenations independently match their captured stories. Preserved source packs bind the applicable claims and source snapshots. |
+| CS-02 — Actual selected voice | PASS for generation provenance, with actual voice/listening verification deferred. New source bytes and hashes are bound to exact submitted text. Current receipt records Chen Mandarin Chinese / Eleven v4, stability .5, similarity .75, clone strength 0, original rate and no paid action. I opened the retained actual UI screenshot and saw current rembg text, Chen/v4/settings and 9341 remaining credits. The receipt records 9454→9388→9341 (113 free credits total). Only the rembg post-generation UI is shown by this screenshot; REA generation provenance additionally relies on the coordinator's recorded operation/receipt and captured new clip. No invented provider voice ID or historical speech substitution is claimed. |
+| CS-03 — Audio-driven duration | PASS. Independent media probes, exact frame totals, full decodes and byte-level PCM preservation checks pass for both. Technical padding/resampling/encoding is explicit. Neither output approaches the 30-second bounded target. |
+| CS-04 — Traceable timing/subtitles | PASS for structural timing, declared estimation method and sampled readability. Exact source-time and output-frame cue windows are retained; all current words appear in order. Estimated clause allocation is not actual spoken-word alignment. Visual judge found no clipping; minor filename wrap remains below. |
+| CS-05 — Causal visible action | PASS within sampled evidence. Source inspection separates source condition `<13` and increment `.001` from authored illustrative range 6→12 and compressed updates. rembg retains the same illustrative foreground while its surrounding background transitions to transparency. Source facts, teaching reconstruction and non-execution are visibly labeled. Independent visual report directly covers all samples and two frames extracted from the MP4s. |
+| CS-06 — Exact evidence | PASS. All 225 frozen files verified before/after; source stories, visual plans, raw source audio, binding/cues/SRT, implementation, MP4s, samples, generation UI/receipt and technical logs are captured. Source MP3 bytes remain available under format-sniffable `source-audio.bin`. |
+| CS-07 — Independent review/honesty | PASS. This architecture/technical verification and the separate actual-PNG review bind the same manifest. All nondeferred bounded criteria are supported. Listening and continuous AV remain pending; no new full-film or historical milestone approval is inferred. |
+
+Independent visual report: `work/chen-visual-judge/review-candidate-1.md`, SHA256 `5689870faa140b3e380c4c028256aa3b6484a794cb06679954f0a37d52662f46`, independently rechecked. It reports opening all 30 frozen PNGs, including each caption and transition-boundary pairs, and independently extracting/opening REA frame 84 and rembg frame 307 from the frozen MP4s. The visual review was read after my independent technical checks passed.
+
+## Remaining minor and deferred work
+
+- VQ-01: REA's first caption wraps `index.js` after `index`, leaving `.js。` on the next line. The filename remains complete and is also prominently visible in the graphic. This is a minor readability issue, not a missing/clipped subtitle. A future fix requires a new render/freeze and affected reinspection.
+- Subtitle/action cue timing uses text weights inside measured audio duration. Neither reviewer heard the clips. Exact synchronization, pronunciation, naturalness and continuous rhythm must be checked by the owner; the current result must not be described as perceptually calibrated or precisely aligned.
+- Samples establish bounded visible states, not every in-between motion frame or phone-device usability. The presentation is an authored teaching illustration, not execution footage of REA/rembg. Source-pack verification establishes preserved provenance, not automatic semantic understanding.
+
+Final media hashes: REA `f908cb4db2feb1ff8672409779a890157b3712ea4e5039544618d21f022737f3`; rembg `d5ce80c94486f0040c3d2af48fb0ce6f83461159052dae45f8c47cf87de44c62`. Any changed file invalidates this exact-candidate verdict for affected checks.

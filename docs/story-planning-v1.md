@@ -1,0 +1,15 @@
+# Experimental complete story planning v1
+
+`story` is additive and does not replace the existing `explain` 18-second mechanism experiment. Inputs are **human/agent-authored** editable JSON, including curated evidence graphs and shots, not automatic research or creative direction. Existing graph vocabulary remains limited to the mechanism experiment and is not a general project-research contract. Citations bind exact text and hashes, not semantic truth. Each shot lists supporting claims; reviewers must inspect whether those claims support all narration and visuals. This version does not check completeness of that relationship.
+
+`pnpm gve story plan --spec examples/story-planner-v1/rea.json --root . --data work/story-state --out work/story-rea`
+
+Use `story status --task <id> --data <state>`, `story export --task <id> --data <state> --out <new-dir>` and `story diff --before <id> --after <id> --data <state>`. Repeat `plan` with identical input to reuse verified persisted results. Export bundles contain source byte snapshots, authored story, editable portable story, compiled frame timeline, and review packet. Edits create a new input identity and never overwrite old committed artifacts. Diff is guidance only; edited timing can shift all later shots. No media cache reuse is claimed.
+
+The duration is an estimate, calculated from Han characters and other words using explicitly chosen rates, plus visual minimum, hold and transition for each shot. Each shot is rounded up to whole frames; >300 seconds after rounding is rejected, exactly 300 seconds accepted. Text rate is not measured audio, does not account for prosody/punctuation and cannot establish retention, voice quality or creative acceptance. No footage, audio or video is generated here. Changes to sources or facts still require factual review; REA source excerpts are from its pinned commit and accompanied by the upstream license at `fixtures/sources/rea-LICENSE.txt`. REA narration is the user's reviewed draft; its cited source excerpts are selective pointers, not complete semantic proof.
+
+Run `pnpm exec vitest run tests/story-planner.test.ts`. State and output directories must not overlap; Windows state path limits and filesystem restrictions match the existing planning runtime. Final user review remains required.
+
+The rembg edge-quality statement is explicitly an author inference, not established by the linked prediction call; it requires a better source and factual review. The human review packet escapes authored text and presents estimated seconds, frame rate and source-line references. Reordering reports affected shot order and shifted frame positions; editorial adjacency and semantics still require review.
+
+REA's server claim includes separate citations for MCP server construction, browser-tool registration with its observation port, and actual tool registration. Shot 5 cites the official source's loaded index.js statement separately from its acceleration rule. These are targeted corrections, not a complete semantic audit of every REA sentence.
