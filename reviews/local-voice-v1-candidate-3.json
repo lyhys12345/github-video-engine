@@ -1,0 +1,100 @@
+{
+  "candidate": "local-voice-candidate-3",
+  "candidateManifestSha256": "04522a3a168f7cce63a50daa9b8680fe34d5ac3b9ec4b5e449062fa3f8b8046c",
+  "candidateManifestPath": "work/local-voice-v1/candidates/candidate-3/manifest.json",
+  "activeRoles": [
+    "product",
+    "reliability",
+    "evidence",
+    "video_quality",
+    "security"
+  ],
+  "reports": {
+    "product": {
+      "verdict": "PASS",
+      "scope": "bounded contract scope only",
+      "path": "work/local-voice-v1/judges/candidate-3/product/report.md",
+      "sha256": "fc698e07480492bf3e6f38c802dc2572e8a941c0eb718e91b1c4bc6469d777f7"
+    },
+    "reliability": {
+      "verdict": "PASS",
+      "scope": "bounded contract scope only",
+      "path": "work/local-voice-v1/judges/candidate-3/reliability/report.md",
+      "sha256": "4be5f2995f859ba03f289f86b8dd6996d5ca901efd64bc6cad79f4d5ef905a5f"
+    },
+    "evidence": {
+      "verdict": "PASS",
+      "scope": "bounded contract scope only",
+      "path": "work/local-voice-v1/judges/candidate-3/evidence/report.md",
+      "sha256": "cee74dd2428ff85b42ac3daa01464261aaed942791a81886b94fd3a0d437ecbf"
+    },
+    "video_quality": {
+      "verdict": "UNVERIFIED",
+      "scope": "independent perceptual evidence missing",
+      "path": "work/local-voice-v1/judges/candidate-3/video_quality/report.md",
+      "sha256": "d5b0d49b59fe9c83581c75d0f827258e23624bdb37a8423967e339b9030b49b0"
+    },
+    "security": {
+      "verdict": "PASS",
+      "scope": "bounded contract scope only",
+      "path": "work/local-voice-v1/judges/candidate-3/security/report.md",
+      "sha256": "4191748cb16580ae64e45982f78d80630de6acb5230861933178407772dabb14"
+    }
+  },
+  "overallVerdict": "UNVERIFIED",
+  "allActiveRolesPass": false,
+  "releaseScope": "conditional engineering/local voice pilot; not film or audiovisual release",
+  "unresolvedFinding": {
+    "id": "J4-C3-01",
+    "severity": "major",
+    "status": "UNVERIFIED",
+    "description": "Missing independent actual listening evidence for similarity, naturalness, pronunciation and transcript accuracy; not a proven audio defect."
+  },
+  "ownerPilotPreference": "比较接近，可继续使用",
+  "ownerPilotAudioSha256": "5b14969365a4ee0cd0f011812a32df61fe726733d5556d702c5300c4866a994c",
+  "ownerPilotEvidence": "work/local-voice-v1/owner-feedback-candidate-1.json",
+  "userPermission": "user requested Chen approximation and stated ElevenLabs agreed; provider correspondence not independently inspected",
+  "method": "reference-conditioning",
+  "finetuned": false,
+  "modelExtracted": false,
+  "originalElevenLabsModelObtained": false,
+  "model": {
+    "repository": "mlx-community/Qwen3-TTS-12Hz-1.7B-Base-8bit",
+    "revision": "e7dd0585652209fa0d7783659aad4e8a324de11c",
+    "bytes": 3104157269,
+    "files": 13
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "mlx-audio": "0.6.4",
+    "lockedPackages": 38
+  },
+  "actualSample": {
+    "path": "work/local-voice-v1/generated-sample-candidate-2/audio.wav",
+    "sha256": "5b14969365a4ee0cd0f011812a32df61fe726733d5556d702c5300c4866a994c",
+    "bytes": 526124,
+    "durationSeconds": 10.96,
+    "fullDecode": "PASS",
+    "elapsedSeconds": 28.41993450000882,
+    "audioReuse": "candidate3 same generation code/model/reference/text as candidate2; only helper test added to frozen source closure"
+  },
+  "validation": {
+    "focusedTestsPassed": 18,
+    "testExitCode": 0,
+    "sourceFilesRechecked": 23,
+    "evidenceFilesRechecked": 35,
+    "validationPath": "work/local-voice-v1/validation-candidate-3/results.json"
+  },
+  "remoteProviderCalls": 0,
+  "providerChargeUsdPerRun": 0,
+  "hardwareAndElectricityCost": "not measured; not represented as zero",
+  "independentListening": "UNVERIFIED",
+  "filmProduced": false,
+  "g6": "pending",
+  "rawEvidence": "Local ignored work/; requires separate transfer to another computer",
+  "priorCandidatesPreserved": [
+    1,
+    2
+  ],
+  "gitSave": "local selective commit; no remote push/deployment"
+}

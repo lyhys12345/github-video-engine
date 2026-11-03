@@ -70,5 +70,5 @@ export function renderContinuousFrame(plan:VisualPlan,timeline:SegmentTimeline,f
  <g transform="translate(0 ${(1-enter)*5})">${txt(44,215,cue.label,29,C.mint,'font-weight="650"')}</g>
  ${stages.map((name,i)=>`<circle cx="${53+i*122}" cy="255" r="${i===stage?5:3}" fill="${i<=stage?C.mint:C.line}"/>${i<5?`<path d="M${62+i*122} 255H${166+i*122}" stroke="${C.line}"/>`:''}`).join('')}
  <g>${world}</g><rect x="36" y="1014" width="648" height="148" rx="20" fill="#102233"/>${captionLines(caption).map((line,i)=>txt(360,1062+i*38,line,27,C.text,'text-anchor="middle" font-weight="550"')).join('')}
- <rect x="44" y="1190" width="632" height="3" fill="${C.line}"/><rect x="44" y="1190" width="${632*voiceP}" height="3" fill="${C.mint}"/>${txt(44,1220,'图形教学重建 · 非目标项目实际执行录像',17,C.dim)}${txt(44,1248,plan.labels.disclosure.slice(0,40),16,C.orange)}</g></svg>`;
+ <rect x="44" y="1190" width="632" height="3" fill="${C.line}"/><rect x="44" y="1190" width="${632*voiceP}" height="3" fill="${C.mint}"/>${txt(44,1220,'图形教学重建 · 非目标项目实际执行录像',17,C.dim)}${txt(44,1248,plan.labels.disclosure.slice(0,40),16,C.orange)}</g>${timeline.purpose==='owner-review-preview'?`<g data-owner-review-badge="unreviewed"><rect x="44" y="148" width="242" height="32" rx="8" fill="#34281e" stroke="${C.orange}"/>${txt(58,172,'自动对齐·待听审',20,C.orange,'font-weight="700"')}</g>`:''}</svg>`;
 }

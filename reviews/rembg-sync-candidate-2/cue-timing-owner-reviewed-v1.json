@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.1",
+  "voiceSha256": "31c470430fff5f25995b98ff7194af8057c488acd426d6b6cd0cfa5dbb03b4d5",
+  "transcriptSha256": "8cfe3352f58d523c33f610046a189dd410cc7e047f14144bc9b64b2aab56335d",
+  "measuredVoiceSeconds": 31.555875,
+  "method": "forced-alignment-reviewed",
+  "captionTextSha256": [
+    "e7ce25548ddc8c0595a75aa54ec52d4c7dcdbfda8082cb041428c6de77fdfb93",
+    "0e4114be0a47de7e1b141e2c4f48b62d88a408ffbb865ea9963137c560f95af9",
+    "89af9a8eba471afb1597022bf14e143b906774df2dc79fdd2b624931bc450329",
+    "67bad87d9e1fc0e01dd380759d4875f503881a150965389e7cb2dd65e0054365",
+    "c6da5f8f57167cfaa588f43fe1c45d2b48a4048ffe0076ea571b281cedd8ce7e",
+    "156c8b281011ed708253516c5411d3adb832147dc387afcd9e2d2e29c29967e7",
+    "0c609f96df2f3891c134149c3ce5298757cbfeb49d7769dc714c2ee63476b3b4"
+  ],
+  "boundariesSeconds": [
+    0,
+    2.92,
+    6.8,
+    10.600000000000001,
+    12.96,
+    19.08,
+    26.28,
+    31.555875
+  ],
+  "reviewBasis": "Owner explicitly reported all six exact rembg boundary auditions heard and acceptable in this chat on 2026-11-02. Review record SHA-256 5129be1c9af25167be09adf49aca74a1a2c30b0b7760555c01bb483d737e0a40. Scope: subtitle boundaries only; independent timing/content review and final continuous AV/G6 remain pending."
+}

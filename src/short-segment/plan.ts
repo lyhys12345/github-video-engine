@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {sha256} from '../core/util.js';
 import type {Story} from '../contracts/story.js';
 
 export const VisualPlanSchema=z.object({
@@ -14,12 +15,12 @@ export const VisualPlanSchema=z.object({
 export type VisualPlan=z.infer<typeof VisualPlanSchema>;
 export const VisualStyleSchema=z.object({schemaVersion:z.literal('1.0'),subjectColor:z.string().regex(/^#[a-fA-F0-9]{6}$/),backdropColor:z.string().regex(/^#[a-fA-F0-9]{6}$/)}).strict();
 export type VisualStyle=z.infer<typeof VisualStyleSchema>;
-export const SegmentInputSchema=z.object({schemaVersion:z.literal('1.0'),bundlePath:z.string(),visualPlanPath:z.string(),generationReceiptPath:z.string().optional(),cueTimingPath:z.string().optional(),previousOutputPath:z.string().optional(),voice:z.object({path:z.string(),sha256:z.string().regex(/^[a-f0-9]{64}$/),transcript:z.string().min(1),provider:z.string().min(1),voiceLabel:z.string().min(1),approvalBasis:z.string().min(1)}).strict()}).strict();
+export const SegmentInputSchema=z.object({schemaVersion:z.literal('1.0'),bundlePath:z.string(),visualPlanPath:z.string(),generationReceiptPath:z.string().optional(),cueTimingPath:z.string().optional(),unreviewedAlignmentPath:z.string().min(1).optional(),previousOutputPath:z.string().optional(),voice:z.object({path:z.string(),sha256:z.string().regex(/^[a-f0-9]{64}$/),transcript:z.string().min(1),provider:z.string().min(1),voiceLabel:z.string().min(1),approvalBasis:z.string().min(1)}).strict()}).strict().refine(input=>!(input.cueTimingPath!==undefined&&input.unreviewedAlignmentPath!==undefined),'Reviewed timing and unreviewed alignment paths are mutually exclusive');
 export type SegmentInput=z.infer<typeof SegmentInputSchema>;
-export const SegmentCueTimingSchema=z.object({schemaVersion:z.literal('1.0'),voiceSha256:z.string().regex(/^[a-f0-9]{64}$/),transcriptSha256:z.string().regex(/^[a-f0-9]{64}$/),measuredVoiceSeconds:z.number().positive().max(600),method:z.enum(['manual-listening','forced-alignment-reviewed']),boundariesSeconds:z.array(z.number().nonnegative().finite()).min(3).max(33),reviewBasis:z.string().min(1).max(500)}).strict();
+export const SegmentCueTimingSchema=z.object({schemaVersion:z.literal('1.1',{error:'Cue timing schema 1.1 required; legacy timing must be reviewed again against the exact caption phases; do not migrate by adding hashes alone'}),captionTextSha256:z.array(z.string().regex(/^[a-f0-9]{64}$/)).min(2).max(32),voiceSha256:z.string().regex(/^[a-f0-9]{64}$/),transcriptSha256:z.string().regex(/^[a-f0-9]{64}$/),measuredVoiceSeconds:z.number().positive().max(600),method:z.enum(['manual-listening','forced-alignment-reviewed']),boundariesSeconds:z.array(z.number().nonnegative().finite()).min(3).max(33),reviewBasis:z.string().min(1).max(500)}).strict();
 export type SegmentCueTiming=z.infer<typeof SegmentCueTimingSchema>;
-export type SegmentCue={index:number;label:string;text:string;startFrame:number;endFrame:number;startSeconds:number;endSeconds:number;sourceStartSeconds:number;sourceEndSeconds:number;confidence:'estimated-unverified-by-listening'|'reviewed-timing-pending-owner-acceptance'};
-export type SegmentTimeline={fps:number;totalFrames:number;measuredVoiceSeconds:number;voiceStartFrame:number;voiceEndFrame:number;cueMethod:'text-weighted-within-measured-continuous-audio-not-forced-aligned'|'manual-listening-reviewed-boundaries'|'forced-alignment-reviewed-boundaries';cues:SegmentCue[]};
+export type SegmentCue={index:number;label:string;text:string;startFrame:number;endFrame:number;startSeconds:number;endSeconds:number;sourceStartSeconds:number;sourceEndSeconds:number;confidence:'estimated-unverified-by-listening'|'caller-declared-reviewed-timing-independent-unverified'|'forced-alignment-proposal-unverified-by-listening'};
+export type SegmentTimeline={fps:number;totalFrames:number;measuredVoiceSeconds:number;voiceStartFrame:number;voiceEndFrame:number;cueMethod:'text-weighted-within-measured-continuous-audio-not-forced-aligned'|'caller-declared-manual-listening-boundaries'|'caller-declared-forced-alignment-reviewed-boundaries'|'local-forced-alignment-proposal-unreviewed-preview';purpose?:'owner-review-preview';independentTimingReview?:'UNVERIFIED';speechContentReview?:'UNVERIFIED';ownerAcceptance?:'pending';unreviewedAlignment?:{draftSha256:string;status:'PROPOSED_UNREVIEWED';renderable:false;flags:unknown[];timestampRepairs:unknown[];timestampResolution:unknown;sourceAudio:unknown;decodedAudio:unknown;containerMinusPcmSeconds:number;coverageEndpoints:string;tokenMatchMeaning:string};timingEvidence?:{source:'caller-declared';independentTimingReview:'UNVERIFIED';ownerAcceptance:'pending';reviewBasis:string};cues:SegmentCue[]};
 export function validateSegmentNarration(story:Story,plan:VisualPlan,transcript:string){
  if(new Set(plan.sourceShotIds).size!==plan.sourceShotIds.length)throw Error('Duplicate selected shot');
  const selected=plan.sourceShotIds.map(id=>{const shot=story.shots.find(s=>s.id===id);if(!shot)throw Error('Unknown selected shot');return shot;});
@@ -42,22 +43,24 @@ export function validateSegmentGeneration(plan:VisualPlan,receipt:unknown,voiceH
  if(!parsed.success||parsed.data.provider!==provider||parsed.data.voiceLabel!==voiceLabel||!parsed.data.recordings.some(r=>r.sha256===voiceHash&&r.text===transcript))throw Error('Current generation receipt must bind exact submitted text and captured audio bytes');
 }
 function weight(text:string){return Math.max(1,(text.match(/\p{Script=Han}/gu)||[]).length+(text.replace(/\p{Script=Han}/gu,' ').match(/[\p{L}\p{N}]+/gu)||[]).length*1.6);}
-export function buildSegmentTimeline(plan:VisualPlan,measuredVoiceSeconds:number,timing?:SegmentCueTiming,binding?:{voiceSha256:string;transcriptSha256:string}):SegmentTimeline{
+export function buildSegmentTimeline(plan:VisualPlan,measuredVoiceSeconds:number,timing?:unknown,binding?:{voiceSha256:string;transcriptSha256:string}):SegmentTimeline{
  if(!Number.isFinite(measuredVoiceSeconds)||measuredVoiceSeconds<=0||measuredVoiceSeconds>(plan.presentation==='continuous-explainer'?59:40))throw Error('Bounded short clip audio exceeds its declared scope');
  const fps=30,voiceStartFrame=12,voiceFrames=Math.ceil(measuredVoiceSeconds*fps),voiceEndFrame=voiceStartFrame+voiceFrames,totalFrames=voiceEndFrame+18;
  if(plan.durationBounds&&(totalFrames/fps<plan.durationBounds.minSeconds||totalFrames/fps>plan.durationBounds.maxSeconds))throw Error('Measured continuous output falls outside authored duration bounds; regenerate or revise narration without retiming');
- let boundaries:number[],cueMethod:SegmentTimeline['cueMethod'],confidence:SegmentCue['confidence'];
- if(timing){
-  if(!binding||timing.voiceSha256!==binding.voiceSha256||timing.transcriptSha256!==binding.transcriptSha256)throw Error('Cue timing must bind exact current voice and transcript');
-  if(Math.abs(timing.measuredVoiceSeconds-measuredVoiceSeconds)>.005)throw Error('Cue timing measured duration does not match current audio');
-  if(timing.boundariesSeconds.length!==plan.phases.length+1||Math.abs(timing.boundariesSeconds[0]!)>.001||Math.abs(timing.boundariesSeconds.at(-1)!-measuredVoiceSeconds)>.005||timing.boundariesSeconds.some((value,index)=>index>0&&value<=timing.boundariesSeconds[index-1]!))throw Error('Cue timing boundaries must cover the exact audio monotonically');
-  boundaries=timing.boundariesSeconds;cueMethod=timing.method==='manual-listening'?'manual-listening-reviewed-boundaries':'forced-alignment-reviewed-boundaries';confidence='reviewed-timing-pending-owner-acceptance';
+ let boundaries:number[],cueMethod:SegmentTimeline['cueMethod'],confidence:SegmentCue['confidence'],timingEvidence:SegmentTimeline['timingEvidence'];
+ if(timing!==undefined){
+  const declaredTiming=SegmentCueTimingSchema.parse(timing);
+  if(declaredTiming.captionTextSha256.length!==plan.phases.length||plan.phases.some((phase,index)=>declaredTiming.captionTextSha256[index]!==sha256(phase.captionText)))throw Error('Cue timing must bind each exact current caption phase in order');
+  if(!binding||declaredTiming.voiceSha256!==binding.voiceSha256||declaredTiming.transcriptSha256!==binding.transcriptSha256)throw Error('Cue timing must bind exact current voice and transcript');
+  if(Math.abs(declaredTiming.measuredVoiceSeconds-measuredVoiceSeconds)>.005)throw Error('Cue timing measured duration does not match current audio');
+  if(declaredTiming.boundariesSeconds.length!==plan.phases.length+1||Math.abs(declaredTiming.boundariesSeconds[0]!)>.001||Math.abs(declaredTiming.boundariesSeconds.at(-1)!-measuredVoiceSeconds)>.005||declaredTiming.boundariesSeconds.some((value,index)=>index>0&&value<=declaredTiming.boundariesSeconds[index-1]!))throw Error('Cue timing boundaries must cover the exact audio monotonically');
+  boundaries=declaredTiming.boundariesSeconds;cueMethod=declaredTiming.method==='manual-listening'?'caller-declared-manual-listening-boundaries':'caller-declared-forced-alignment-reviewed-boundaries';timingEvidence={source:'caller-declared',independentTimingReview:'UNVERIFIED',ownerAcceptance:'pending',reviewBasis:declaredTiming.reviewBasis};confidence='caller-declared-reviewed-timing-independent-unverified';
  }else{
   const weights=plan.phases.map(p=>weight(p.captionText)),sum=weights.reduce((a,b)=>a+b,0);let consumed=0;boundaries=[0];for(const value of weights){consumed+=value;boundaries.push(measuredVoiceSeconds*consumed/sum);}
   cueMethod='text-weighted-within-measured-continuous-audio-not-forced-aligned';confidence='estimated-unverified-by-listening';
  }
  const cues=plan.phases.map((p,index)=>{const sourceStartSeconds=boundaries[index]!,sourceEndSeconds=boundaries[index+1]!,startFrame=voiceStartFrame+Math.round(sourceStartSeconds*fps),endFrame=index===plan.phases.length-1?voiceEndFrame:voiceStartFrame+Math.round(sourceEndSeconds*fps);if(endFrame-startFrame<4)throw Error('Measured clip is too short for bounded caption phases');return {index,label:p.label,text:p.captionText,startFrame,endFrame,startSeconds:startFrame/fps,endSeconds:endFrame/fps,sourceStartSeconds,sourceEndSeconds,confidence};});
- return {fps,totalFrames,measuredVoiceSeconds,voiceStartFrame,voiceEndFrame,cueMethod,cues};
+ return {fps,totalFrames,measuredVoiceSeconds,voiceStartFrame,voiceEndFrame,cueMethod,...(timingEvidence?{timingEvidence}:{}),cues};
 }
 function stamp(seconds:number){const ms=Math.round(seconds*1000);return `${String(Math.floor(ms/3600000)).padStart(2,'0')}:${String(Math.floor(ms/60000)%60).padStart(2,'0')}:${String(Math.floor(ms/1000)%60).padStart(2,'0')},${String(ms%1000).padStart(3,'0')}`;}
 export function segmentSrt(timeline:SegmentTimeline){return timeline.cues.map(c=>`${c.index+1}\n${stamp(c.startSeconds)} --> ${stamp(c.endSeconds)}\n${c.text}\n`).join('\n');}

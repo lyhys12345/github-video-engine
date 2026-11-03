@@ -1,0 +1,2053 @@
+{
+  "bindings": {
+    "model_lockSha256": "a0922df84fcde5342563611b264325af066252b2140825920aecb69aa01aa914",
+    "runtime_lockSha256": "6edf9418e93f8be1e4bda2fbd37aacd5ad14103b52c654a18e9760c18bc97189",
+    "receiptSha256": "3bf995cab5d5b81a3347574890f75343e88b1af67dc30d9ac601201fac99df23",
+    "audioSha256": "31c470430fff5f25995b98ff7194af8057c488acd426d6b6cd0cfa5dbb03b4d5",
+    "planSha256": "3aa352a9ba1032d83db59c4f49200f34e168bbc8a78c177372c7ba137888a033",
+    "scriptSha256": "d45134c7c9c6e5a8df8a3c0e432800d87051dae69689dfb4cdbed70b25484e73",
+    "helperSha256": "e389b8f45f8ae5f0ac642e57cd2e1f6e9ca77a6c1970adcaa2c9617f65e4ee7b",
+    "textSha256": "8cfe3352f58d523c33f610046a189dd410cc7e047f14144bc9b64b2aab56335d",
+    "captionTextSha256": [
+      "e7ce25548ddc8c0595a75aa54ec52d4c7dcdbfda8082cb041428c6de77fdfb93",
+      "0e4114be0a47de7e1b141e2c4f48b62d88a408ffbb865ea9963137c560f95af9",
+      "89af9a8eba471afb1597022bf14e143b906774df2dc79fdd2b624931bc450329",
+      "67bad87d9e1fc0e01dd380759d4875f503881a150965389e7cb2dd65e0054365",
+      "c6da5f8f57167cfaa588f43fe1c45d2b48a4048ffe0076ea571b281cedd8ce7e",
+      "156c8b281011ed708253516c5411d3adb832147dc387afcd9e2d2e29c29967e7",
+      "0c609f96df2f3891c134149c3ce5298757cbfeb49d7769dc714c2ee63476b3b4"
+    ],
+    "audioBytes": 521831,
+    "canonicalMeasuredSeconds": 31.555875,
+    "modelRepository": "mlx-community/Qwen3-ForcedAligner-0.6B-8bit",
+    "modelRevision": "0e1a68e91d815300c7c9754b2a7639378b23db15",
+    "recording": "rembg"
+  },
+  "sourceAudio": {
+    "path": "source-original.mp3",
+    "sha256": "31c470430fff5f25995b98ff7194af8057c488acd426d6b6cd0cfa5dbb03b4d5",
+    "bytes": 521831,
+    "containerDurationSeconds": 31.555875
+  },
+  "decodedAudio": {
+    "path": "decoded.wav",
+    "sha256": "2e23477a89efb1cb8ac97dee63ce59eed64d40976712d1244a9730170dd9a1f9",
+    "pcmSha256": "736c764a9bc8325857743f814955b659efef6b622866290845dc649f77641151",
+    "frames": 504895,
+    "sampleRate": 16000,
+    "channels": 1,
+    "sampleWidthBytes": 2,
+    "durationSeconds": 31.5559375,
+    "fullDecode": "PASS",
+    "trimmed": false,
+    "retimed": false
+  },
+  "containerMinusPcmSeconds": -6.249999999852207e-05,
+  "commands": {
+    "probe": [
+      "/fixture/tools/ffprobe",
+      "-v",
+      "error",
+      "-show_format",
+      "-show_streams",
+      "-of",
+      "json",
+      "/fixture/original/rembg.mp3"
+    ],
+    "decode": [
+      "/fixture/tools/ffmpeg",
+      "-v",
+      "error",
+      "-xerror",
+      "-nostdin",
+      "-i",
+      "/fixture/original/rembg.mp3",
+      "-map",
+      "0:a:0",
+      "-ac",
+      "1",
+      "-ar",
+      "16000",
+      "-c:a",
+      "pcm_s16le",
+      "/fixture/alignment/decoded.wav"
+    ]
+  },
+  "tools": {
+    "ffprobe": {
+      "path": "/fixture/tools/ffprobe",
+      "sha256": "c846d5db9d3b5bc33f987725e21f3ea14953931221c191575918e907ad6c18ff"
+    },
+    "ffmpeg": {
+      "path": "/fixture/tools/ffmpeg",
+      "sha256": "a2ad6f0fc42a3c8f5183ef1d53e906d6bb35478d14a6b67175c30ce6c17e9214"
+    }
+  },
+  "schemaVersion": "local-forced-alignment-draft/1.0",
+  "status": "PROPOSED_UNREVIEWED",
+  "renderable": false,
+  "independentTimingReview": "UNVERIFIED",
+  "speechContentReview": "UNVERIFIED",
+  "ownerAcceptance": "pending",
+  "method": "local-forced-alignment-proposal",
+  "language": "Chinese",
+  "remoteProviderCalls": 0,
+  "providerChargeUsd": 0,
+  "modelSynthesizedAudio": false,
+  "networkIsolation": {
+    "os": "macOS sandbox-exec deny network*",
+    "probe": "local bind rejected",
+    "workerGuard": "current-process bind rejected before audit/preflight/import",
+    "pythonAudit": "supplemental"
+  },
+  "tokenLedger": {
+    "tokens": [
+      {
+        "text": "一",
+        "codepointStart": 0,
+        "codepointEnd": 1,
+        "utf8Start": 0,
+        "utf8End": 3
+      },
+      {
+        "text": "张",
+        "codepointStart": 1,
+        "codepointEnd": 2,
+        "utf8Start": 3,
+        "utf8End": 6
+      },
+      {
+        "text": "图",
+        "codepointStart": 2,
+        "codepointEnd": 3,
+        "utf8Start": 6,
+        "utf8End": 9
+      },
+      {
+        "text": "怎",
+        "codepointStart": 4,
+        "codepointEnd": 5,
+        "utf8Start": 12,
+        "utf8End": 15
+      },
+      {
+        "text": "样",
+        "codepointStart": 5,
+        "codepointEnd": 6,
+        "utf8Start": 15,
+        "utf8End": 18
+      },
+      {
+        "text": "只",
+        "codepointStart": 6,
+        "codepointEnd": 7,
+        "utf8Start": 18,
+        "utf8End": 21
+      },
+      {
+        "text": "留",
+        "codepointStart": 7,
+        "codepointEnd": 8,
+        "utf8Start": 21,
+        "utf8End": 24
+      },
+      {
+        "text": "下",
+        "codepointStart": 8,
+        "codepointEnd": 9,
+        "utf8Start": 24,
+        "utf8End": 27
+      },
+      {
+        "text": "主",
+        "codepointStart": 9,
+        "codepointEnd": 10,
+        "utf8Start": 27,
+        "utf8End": 30
+      },
+      {
+        "text": "体",
+        "codepointStart": 10,
+        "codepointEnd": 11,
+        "utf8Start": 30,
+        "utf8End": 33
+      },
+      {
+        "text": "rembg",
+        "codepointStart": 12,
+        "codepointEnd": 17,
+        "utf8Start": 36,
+        "utf8End": 41
+      },
+      {
+        "text": "先",
+        "codepointStart": 18,
+        "codepointEnd": 19,
+        "utf8Start": 42,
+        "utf8End": 45
+      },
+      {
+        "text": "让",
+        "codepointStart": 19,
+        "codepointEnd": 20,
+        "utf8Start": 45,
+        "utf8End": 48
+      },
+      {
+        "text": "模",
+        "codepointStart": 20,
+        "codepointEnd": 21,
+        "utf8Start": 48,
+        "utf8End": 51
+      },
+      {
+        "text": "型",
+        "codepointStart": 21,
+        "codepointEnd": 22,
+        "utf8Start": 51,
+        "utf8End": 54
+      },
+      {
+        "text": "预",
+        "codepointStart": 22,
+        "codepointEnd": 23,
+        "utf8Start": 54,
+        "utf8End": 57
+      },
+      {
+        "text": "测",
+        "codepointStart": 23,
+        "codepointEnd": 24,
+        "utf8Start": 57,
+        "utf8End": 60
+      },
+      {
+        "text": "前",
+        "codepointStart": 24,
+        "codepointEnd": 25,
+        "utf8Start": 60,
+        "utf8End": 63
+      },
+      {
+        "text": "景",
+        "codepointStart": 25,
+        "codepointEnd": 26,
+        "utf8Start": 63,
+        "utf8End": 66
+      },
+      {
+        "text": "蒙",
+        "codepointStart": 26,
+        "codepointEnd": 27,
+        "utf8Start": 66,
+        "utf8End": 69
+      },
+      {
+        "text": "版",
+        "codepointStart": 27,
+        "codepointEnd": 28,
+        "utf8Start": 69,
+        "utf8End": 72
+      },
+      {
+        "text": "白",
+        "codepointStart": 29,
+        "codepointEnd": 30,
+        "utf8Start": 75,
+        "utf8End": 78
+      },
+      {
+        "text": "色",
+        "codepointStart": 30,
+        "codepointEnd": 31,
+        "utf8Start": 78,
+        "utf8End": 81
+      },
+      {
+        "text": "区",
+        "codepointStart": 31,
+        "codepointEnd": 32,
+        "utf8Start": 81,
+        "utf8End": 84
+      },
+      {
+        "text": "域",
+        "codepointStart": 32,
+        "codepointEnd": 33,
+        "utf8Start": 84,
+        "utf8End": 87
+      },
+      {
+        "text": "保",
+        "codepointStart": 33,
+        "codepointEnd": 34,
+        "utf8Start": 87,
+        "utf8End": 90
+      },
+      {
+        "text": "留",
+        "codepointStart": 34,
+        "codepointEnd": 35,
+        "utf8Start": 90,
+        "utf8End": 93
+      },
+      {
+        "text": "黑",
+        "codepointStart": 36,
+        "codepointEnd": 37,
+        "utf8Start": 96,
+        "utf8End": 99
+      },
+      {
+        "text": "色",
+        "codepointStart": 37,
+        "codepointEnd": 38,
+        "utf8Start": 99,
+        "utf8End": 102
+      },
+      {
+        "text": "区",
+        "codepointStart": 38,
+        "codepointEnd": 39,
+        "utf8Start": 102,
+        "utf8End": 105
+      },
+      {
+        "text": "域",
+        "codepointStart": 39,
+        "codepointEnd": 40,
+        "utf8Start": 105,
+        "utf8End": 108
+      },
+      {
+        "text": "变",
+        "codepointStart": 40,
+        "codepointEnd": 41,
+        "utf8Start": 108,
+        "utf8End": 111
+      },
+      {
+        "text": "透",
+        "codepointStart": 41,
+        "codepointEnd": 42,
+        "utf8Start": 111,
+        "utf8End": 114
+      },
+      {
+        "text": "明",
+        "codepointStart": 42,
+        "codepointEnd": 43,
+        "utf8Start": 114,
+        "utf8End": 117
+      },
+      {
+        "text": "把",
+        "codepointStart": 44,
+        "codepointEnd": 45,
+        "utf8Start": 120,
+        "utf8End": 123
+      },
+      {
+        "text": "这",
+        "codepointStart": 45,
+        "codepointEnd": 46,
+        "utf8Start": 123,
+        "utf8End": 126
+      },
+      {
+        "text": "张",
+        "codepointStart": 46,
+        "codepointEnd": 47,
+        "utf8Start": 126,
+        "utf8End": 129
+      },
+      {
+        "text": "蒙",
+        "codepointStart": 47,
+        "codepointEnd": 48,
+        "utf8Start": 129,
+        "utf8End": 132
+      },
+      {
+        "text": "版",
+        "codepointStart": 48,
+        "codepointEnd": 49,
+        "utf8Start": 132,
+        "utf8End": 135
+      },
+      {
+        "text": "盖",
+        "codepointStart": 49,
+        "codepointEnd": 50,
+        "utf8Start": 135,
+        "utf8End": 138
+      },
+      {
+        "text": "回",
+        "codepointStart": 50,
+        "codepointEnd": 51,
+        "utf8Start": 138,
+        "utf8End": 141
+      },
+      {
+        "text": "原",
+        "codepointStart": 51,
+        "codepointEnd": 52,
+        "utf8Start": 141,
+        "utf8End": 144
+      },
+      {
+        "text": "图",
+        "codepointStart": 52,
+        "codepointEnd": 53,
+        "utf8Start": 144,
+        "utf8End": 147
+      },
+      {
+        "text": "背",
+        "codepointStart": 54,
+        "codepointEnd": 55,
+        "utf8Start": 150,
+        "utf8End": 153
+      },
+      {
+        "text": "景",
+        "codepointStart": 55,
+        "codepointEnd": 56,
+        "utf8Start": 153,
+        "utf8End": 156
+      },
+      {
+        "text": "消",
+        "codepointStart": 56,
+        "codepointEnd": 57,
+        "utf8Start": 156,
+        "utf8End": 159
+      },
+      {
+        "text": "失",
+        "codepointStart": 57,
+        "codepointEnd": 58,
+        "utf8Start": 159,
+        "utf8End": 162
+      },
+      {
+        "text": "主",
+        "codepointStart": 59,
+        "codepointEnd": 60,
+        "utf8Start": 165,
+        "utf8End": 168
+      },
+      {
+        "text": "体",
+        "codepointStart": 60,
+        "codepointEnd": 61,
+        "utf8Start": 168,
+        "utf8End": 171
+      },
+      {
+        "text": "留",
+        "codepointStart": 61,
+        "codepointEnd": 62,
+        "utf8Start": 171,
+        "utf8End": 174
+      },
+      {
+        "text": "下",
+        "codepointStart": 62,
+        "codepointEnd": 63,
+        "utf8Start": 174,
+        "utf8End": 177
+      },
+      {
+        "text": "注",
+        "codepointStart": 64,
+        "codepointEnd": 65,
+        "utf8Start": 180,
+        "utf8End": 183
+      },
+      {
+        "text": "意",
+        "codepointStart": 65,
+        "codepointEnd": 66,
+        "utf8Start": 183,
+        "utf8End": 186
+      },
+      {
+        "text": "同",
+        "codepointStart": 67,
+        "codepointEnd": 68,
+        "utf8Start": 189,
+        "utf8End": 192
+      },
+      {
+        "text": "一",
+        "codepointStart": 68,
+        "codepointEnd": 69,
+        "utf8Start": 192,
+        "utf8End": 195
+      },
+      {
+        "text": "个",
+        "codepointStart": 69,
+        "codepointEnd": 70,
+        "utf8Start": 195,
+        "utf8End": 198
+      },
+      {
+        "text": "主",
+        "codepointStart": 70,
+        "codepointEnd": 71,
+        "utf8Start": 198,
+        "utf8End": 201
+      },
+      {
+        "text": "体",
+        "codepointStart": 71,
+        "codepointEnd": 72,
+        "utf8Start": 201,
+        "utf8End": 204
+      },
+      {
+        "text": "没",
+        "codepointStart": 73,
+        "codepointEnd": 74,
+        "utf8Start": 207,
+        "utf8End": 210
+      },
+      {
+        "text": "有",
+        "codepointStart": 74,
+        "codepointEnd": 75,
+        "utf8Start": 210,
+        "utf8End": 213
+      },
+      {
+        "text": "重",
+        "codepointStart": 75,
+        "codepointEnd": 76,
+        "utf8Start": 213,
+        "utf8End": 216
+      },
+      {
+        "text": "新",
+        "codepointStart": 76,
+        "codepointEnd": 77,
+        "utf8Start": 216,
+        "utf8End": 219
+      },
+      {
+        "text": "画",
+        "codepointStart": 77,
+        "codepointEnd": 78,
+        "utf8Start": 219,
+        "utf8End": 222
+      },
+      {
+        "text": "一",
+        "codepointStart": 78,
+        "codepointEnd": 79,
+        "utf8Start": 222,
+        "utf8End": 225
+      },
+      {
+        "text": "遍",
+        "codepointStart": 79,
+        "codepointEnd": 80,
+        "utf8Start": 225,
+        "utf8End": 228
+      },
+      {
+        "text": "它",
+        "codepointStart": 81,
+        "codepointEnd": 82,
+        "utf8Start": 231,
+        "utf8End": 234
+      },
+      {
+        "text": "现",
+        "codepointStart": 82,
+        "codepointEnd": 83,
+        "utf8Start": 234,
+        "utf8End": 237
+      },
+      {
+        "text": "在",
+        "codepointStart": 83,
+        "codepointEnd": 84,
+        "utf8Start": 237,
+        "utf8End": 240
+      },
+      {
+        "text": "可",
+        "codepointStart": 84,
+        "codepointEnd": 85,
+        "utf8Start": 240,
+        "utf8End": 243
+      },
+      {
+        "text": "以",
+        "codepointStart": 85,
+        "codepointEnd": 86,
+        "utf8Start": 243,
+        "utf8End": 246
+      },
+      {
+        "text": "放",
+        "codepointStart": 86,
+        "codepointEnd": 87,
+        "utf8Start": 246,
+        "utf8End": 249
+      },
+      {
+        "text": "到",
+        "codepointStart": 87,
+        "codepointEnd": 88,
+        "utf8Start": 249,
+        "utf8End": 252
+      },
+      {
+        "text": "新",
+        "codepointStart": 88,
+        "codepointEnd": 89,
+        "utf8Start": 252,
+        "utf8End": 255
+      },
+      {
+        "text": "的",
+        "codepointStart": 89,
+        "codepointEnd": 90,
+        "utf8Start": 255,
+        "utf8End": 258
+      },
+      {
+        "text": "背",
+        "codepointStart": 90,
+        "codepointEnd": 91,
+        "utf8Start": 258,
+        "utf8End": 261
+      },
+      {
+        "text": "景",
+        "codepointStart": 91,
+        "codepointEnd": 92,
+        "utf8Start": 261,
+        "utf8End": 264
+      },
+      {
+        "text": "里",
+        "codepointStart": 92,
+        "codepointEnd": 93,
+        "utf8Start": 264,
+        "utf8End": 267
+      },
+      {
+        "text": "放",
+        "codepointStart": 94,
+        "codepointEnd": 95,
+        "utf8Start": 270,
+        "utf8End": 273
+      },
+      {
+        "text": "大",
+        "codepointStart": 95,
+        "codepointEnd": 96,
+        "utf8Start": 273,
+        "utf8End": 276
+      },
+      {
+        "text": "边",
+        "codepointStart": 96,
+        "codepointEnd": 97,
+        "utf8Start": 276,
+        "utf8End": 279
+      },
+      {
+        "text": "缘",
+        "codepointStart": 97,
+        "codepointEnd": 98,
+        "utf8Start": 279,
+        "utf8End": 282
+      },
+      {
+        "text": "再",
+        "codepointStart": 99,
+        "codepointEnd": 100,
+        "utf8Start": 285,
+        "utf8End": 288
+      },
+      {
+        "text": "检",
+        "codepointStart": 100,
+        "codepointEnd": 101,
+        "utf8Start": 288,
+        "utf8End": 291
+      },
+      {
+        "text": "查",
+        "codepointStart": 101,
+        "codepointEnd": 102,
+        "utf8Start": 291,
+        "utf8End": 294
+      },
+      {
+        "text": "有",
+        "codepointStart": 102,
+        "codepointEnd": 103,
+        "utf8Start": 294,
+        "utf8End": 297
+      },
+      {
+        "text": "没",
+        "codepointStart": 103,
+        "codepointEnd": 104,
+        "utf8Start": 297,
+        "utf8End": 300
+      },
+      {
+        "text": "有",
+        "codepointStart": 104,
+        "codepointEnd": 105,
+        "utf8Start": 300,
+        "utf8End": 303
+      },
+      {
+        "text": "多",
+        "codepointStart": 105,
+        "codepointEnd": 106,
+        "utf8Start": 303,
+        "utf8End": 306
+      },
+      {
+        "text": "留",
+        "codepointStart": 106,
+        "codepointEnd": 107,
+        "utf8Start": 306,
+        "utf8End": 309
+      },
+      {
+        "text": "或",
+        "codepointStart": 107,
+        "codepointEnd": 108,
+        "utf8Start": 309,
+        "utf8End": 312
+      },
+      {
+        "text": "漏",
+        "codepointStart": 108,
+        "codepointEnd": 109,
+        "utf8Start": 312,
+        "utf8End": 315
+      },
+      {
+        "text": "掉",
+        "codepointStart": 109,
+        "codepointEnd": 110,
+        "utf8Start": 315,
+        "utf8End": 318
+      },
+      {
+        "text": "的",
+        "codepointStart": 110,
+        "codepointEnd": 111,
+        "utf8Start": 318,
+        "utf8End": 321
+      },
+      {
+        "text": "细",
+        "codepointStart": 111,
+        "codepointEnd": 112,
+        "utf8Start": 321,
+        "utf8End": 324
+      },
+      {
+        "text": "节",
+        "codepointStart": 112,
+        "codepointEnd": 113,
+        "utf8Start": 324,
+        "utf8End": 327
+      },
+      {
+        "text": "这",
+        "codepointStart": 114,
+        "codepointEnd": 115,
+        "utf8Start": 330,
+        "utf8End": 333
+      },
+      {
+        "text": "里",
+        "codepointStart": 115,
+        "codepointEnd": 116,
+        "utf8Start": 333,
+        "utf8End": 336
+      },
+      {
+        "text": "用",
+        "codepointStart": 116,
+        "codepointEnd": 117,
+        "utf8Start": 336,
+        "utf8End": 339
+      },
+      {
+        "text": "合",
+        "codepointStart": 117,
+        "codepointEnd": 118,
+        "utf8Start": 339,
+        "utf8End": 342
+      },
+      {
+        "text": "成",
+        "codepointStart": 118,
+        "codepointEnd": 119,
+        "utf8Start": 342,
+        "utf8End": 345
+      },
+      {
+        "text": "插",
+        "codepointStart": 119,
+        "codepointEnd": 120,
+        "utf8Start": 345,
+        "utf8End": 348
+      },
+      {
+        "text": "画",
+        "codepointStart": 120,
+        "codepointEnd": 121,
+        "utf8Start": 348,
+        "utf8End": 351
+      },
+      {
+        "text": "演",
+        "codepointStart": 121,
+        "codepointEnd": 122,
+        "utf8Start": 351,
+        "utf8End": 354
+      },
+      {
+        "text": "示",
+        "codepointStart": 122,
+        "codepointEnd": 123,
+        "utf8Start": 354,
+        "utf8End": 357
+      },
+      {
+        "text": "处",
+        "codepointStart": 123,
+        "codepointEnd": 124,
+        "utf8Start": 357,
+        "utf8End": 360
+      },
+      {
+        "text": "理",
+        "codepointStart": 124,
+        "codepointEnd": 125,
+        "utf8Start": 360,
+        "utf8End": 363
+      },
+      {
+        "text": "原",
+        "codepointStart": 125,
+        "codepointEnd": 126,
+        "utf8Start": 363,
+        "utf8End": 366
+      },
+      {
+        "text": "理",
+        "codepointStart": 126,
+        "codepointEnd": 127,
+        "utf8Start": 366,
+        "utf8End": 369
+      },
+      {
+        "text": "并",
+        "codepointStart": 128,
+        "codepointEnd": 129,
+        "utf8Start": 372,
+        "utf8End": 375
+      },
+      {
+        "text": "没",
+        "codepointStart": 129,
+        "codepointEnd": 130,
+        "utf8Start": 375,
+        "utf8End": 378
+      },
+      {
+        "text": "有",
+        "codepointStart": 130,
+        "codepointEnd": 131,
+        "utf8Start": 378,
+        "utf8End": 381
+      },
+      {
+        "text": "实",
+        "codepointStart": 131,
+        "codepointEnd": 132,
+        "utf8Start": 381,
+        "utf8End": 384
+      },
+      {
+        "text": "际",
+        "codepointStart": 132,
+        "codepointEnd": 133,
+        "utf8Start": 384,
+        "utf8End": 387
+      },
+      {
+        "text": "运",
+        "codepointStart": 133,
+        "codepointEnd": 134,
+        "utf8Start": 387,
+        "utf8End": 390
+      },
+      {
+        "text": "行",
+        "codepointStart": 134,
+        "codepointEnd": 135,
+        "utf8Start": 390,
+        "utf8End": 393
+      },
+      {
+        "text": "模",
+        "codepointStart": 135,
+        "codepointEnd": 136,
+        "utf8Start": 393,
+        "utf8End": 396
+      },
+      {
+        "text": "型",
+        "codepointStart": 136,
+        "codepointEnd": 137,
+        "utf8Start": 396,
+        "utf8End": 399
+      }
+    ],
+    "discardedSeparators": [
+      {
+        "text": "，",
+        "codepointStart": 3,
+        "codepointEnd": 4,
+        "utf8Start": 9,
+        "utf8End": 12
+      },
+      {
+        "text": "？",
+        "codepointStart": 11,
+        "codepointEnd": 12,
+        "utf8Start": 33,
+        "utf8End": 36
+      },
+      {
+        "text": " ",
+        "codepointStart": 17,
+        "codepointEnd": 18,
+        "utf8Start": 41,
+        "utf8End": 42
+      },
+      {
+        "text": "。",
+        "codepointStart": 28,
+        "codepointEnd": 29,
+        "utf8Start": 72,
+        "utf8End": 75
+      },
+      {
+        "text": "，",
+        "codepointStart": 35,
+        "codepointEnd": 36,
+        "utf8Start": 93,
+        "utf8End": 96
+      },
+      {
+        "text": "。",
+        "codepointStart": 43,
+        "codepointEnd": 44,
+        "utf8Start": 117,
+        "utf8End": 120
+      },
+      {
+        "text": "，",
+        "codepointStart": 53,
+        "codepointEnd": 54,
+        "utf8Start": 147,
+        "utf8End": 150
+      },
+      {
+        "text": "，",
+        "codepointStart": 58,
+        "codepointEnd": 59,
+        "utf8Start": 162,
+        "utf8End": 165
+      },
+      {
+        "text": "。",
+        "codepointStart": 63,
+        "codepointEnd": 64,
+        "utf8Start": 177,
+        "utf8End": 180
+      },
+      {
+        "text": "，",
+        "codepointStart": 66,
+        "codepointEnd": 67,
+        "utf8Start": 186,
+        "utf8End": 189
+      },
+      {
+        "text": "，",
+        "codepointStart": 72,
+        "codepointEnd": 73,
+        "utf8Start": 204,
+        "utf8End": 207
+      },
+      {
+        "text": "。",
+        "codepointStart": 80,
+        "codepointEnd": 81,
+        "utf8Start": 228,
+        "utf8End": 231
+      },
+      {
+        "text": "。",
+        "codepointStart": 93,
+        "codepointEnd": 94,
+        "utf8Start": 267,
+        "utf8End": 270
+      },
+      {
+        "text": "，",
+        "codepointStart": 98,
+        "codepointEnd": 99,
+        "utf8Start": 282,
+        "utf8End": 285
+      },
+      {
+        "text": "。",
+        "codepointStart": 113,
+        "codepointEnd": 114,
+        "utf8Start": 327,
+        "utf8End": 330
+      },
+      {
+        "text": "，",
+        "codepointStart": 127,
+        "codepointEnd": 128,
+        "utf8Start": 369,
+        "utf8End": 372
+      },
+      {
+        "text": "。",
+        "codepointStart": 137,
+        "codepointEnd": 138,
+        "utf8Start": 399,
+        "utf8End": 402
+      }
+    ],
+    "normalization": "none; exact case, Unicode and number spelling retained"
+  },
+  "phases": [
+    {
+      "index": 0,
+      "label": "怎样只留下主体？",
+      "text": "一张图，怎样只留下主体？",
+      "captionTextSha256": "e7ce25548ddc8c0595a75aa54ec52d4c7dcdbfda8082cb041428c6de77fdfb93",
+      "codepointStart": 0,
+      "codepointEnd": 12,
+      "firstToken": 0,
+      "lastToken": 9
+    },
+    {
+      "index": 1,
+      "label": "模型先预测蒙版",
+      "text": "rembg 先让模型预测前景蒙版。",
+      "captionTextSha256": "0e4114be0a47de7e1b141e2c4f48b62d88a408ffbb865ea9963137c560f95af9",
+      "codepointStart": 12,
+      "codepointEnd": 29,
+      "firstToken": 10,
+      "lastToken": 20
+    },
+    {
+      "index": 2,
+      "label": "白色保留，黑色透明",
+      "text": "白色区域保留，黑色区域变透明。",
+      "captionTextSha256": "89af9a8eba471afb1597022bf14e143b906774df2dc79fdd2b624931bc450329",
+      "codepointStart": 29,
+      "codepointEnd": 44,
+      "firstToken": 21,
+      "lastToken": 33
+    },
+    {
+      "index": 3,
+      "label": "同一蒙版对准原图",
+      "text": "把这张蒙版盖回原图，",
+      "captionTextSha256": "67bad87d9e1fc0e01dd380759d4875f503881a150965389e7cb2dd65e0054365",
+      "codepointStart": 44,
+      "codepointEnd": 54,
+      "firstToken": 34,
+      "lastToken": 42
+    },
+    {
+      "index": 4,
+      "label": "背景透明，主体留下",
+      "text": "背景消失，主体留下。注意，同一个主体，没有重新画一遍。",
+      "captionTextSha256": "c6da5f8f57167cfaa588f43fe1c45d2b48a4048ffe0076ea571b281cedd8ce7e",
+      "codepointStart": 54,
+      "codepointEnd": 81,
+      "firstToken": 43,
+      "lastToken": 64
+    },
+    {
+      "index": 5,
+      "label": "换个背景，检查边缘",
+      "text": "它现在可以放到新的背景里。放大边缘，再检查有没有多留或漏掉的细节。",
+      "captionTextSha256": "156c8b281011ed708253516c5411d3adb832147dc387afcd9e2d2e29c29967e7",
+      "codepointStart": 81,
+      "codepointEnd": 114,
+      "firstToken": 65,
+      "lastToken": 94
+    },
+    {
+      "index": 6,
+      "label": "处理原理示意",
+      "text": "这里用合成插画演示处理原理，并没有实际运行模型。",
+      "captionTextSha256": "0c609f96df2f3891c134149c3ce5298757cbfeb49d7769dc714c2ee63476b3b4",
+      "codepointStart": 114,
+      "codepointEnd": 138,
+      "firstToken": 95,
+      "lastToken": 116
+    }
+  ],
+  "postprocessedItems": [
+    {
+      "text": "一",
+      "startSeconds": 0.0,
+      "endSeconds": 0.16
+    },
+    {
+      "text": "张",
+      "startSeconds": 0.16,
+      "endSeconds": 0.32
+    },
+    {
+      "text": "图",
+      "startSeconds": 0.32,
+      "endSeconds": 0.88
+    },
+    {
+      "text": "怎",
+      "startSeconds": 0.96,
+      "endSeconds": 1.2
+    },
+    {
+      "text": "样",
+      "startSeconds": 1.2,
+      "endSeconds": 1.36
+    },
+    {
+      "text": "只",
+      "startSeconds": 1.36,
+      "endSeconds": 1.6
+    },
+    {
+      "text": "留",
+      "startSeconds": 1.6,
+      "endSeconds": 1.76
+    },
+    {
+      "text": "下",
+      "startSeconds": 1.76,
+      "endSeconds": 2.0
+    },
+    {
+      "text": "主",
+      "startSeconds": 2.0,
+      "endSeconds": 2.24
+    },
+    {
+      "text": "体",
+      "startSeconds": 2.24,
+      "endSeconds": 2.64
+    },
+    {
+      "text": "rembg",
+      "startSeconds": 3.2,
+      "endSeconds": 3.68
+    },
+    {
+      "text": "先",
+      "startSeconds": 4.08,
+      "endSeconds": 4.24
+    },
+    {
+      "text": "让",
+      "startSeconds": 4.24,
+      "endSeconds": 4.4
+    },
+    {
+      "text": "模",
+      "startSeconds": 4.4,
+      "endSeconds": 4.64
+    },
+    {
+      "text": "型",
+      "startSeconds": 4.64,
+      "endSeconds": 4.96
+    },
+    {
+      "text": "预",
+      "startSeconds": 4.96,
+      "endSeconds": 5.12
+    },
+    {
+      "text": "测",
+      "startSeconds": 5.12,
+      "endSeconds": 5.36
+    },
+    {
+      "text": "前",
+      "startSeconds": 5.36,
+      "endSeconds": 5.76
+    },
+    {
+      "text": "景",
+      "startSeconds": 5.76,
+      "endSeconds": 5.84
+    },
+    {
+      "text": "蒙",
+      "startSeconds": 5.84,
+      "endSeconds": 6.24
+    },
+    {
+      "text": "版",
+      "startSeconds": 6.24,
+      "endSeconds": 6.56
+    },
+    {
+      "text": "白",
+      "startSeconds": 7.04,
+      "endSeconds": 7.12
+    },
+    {
+      "text": "色",
+      "startSeconds": 7.2,
+      "endSeconds": 7.44
+    },
+    {
+      "text": "区",
+      "startSeconds": 7.44,
+      "endSeconds": 7.68
+    },
+    {
+      "text": "域",
+      "startSeconds": 7.68,
+      "endSeconds": 7.76
+    },
+    {
+      "text": "保",
+      "startSeconds": 7.76,
+      "endSeconds": 8.08
+    },
+    {
+      "text": "留",
+      "startSeconds": 8.08,
+      "endSeconds": 8.48
+    },
+    {
+      "text": "黑",
+      "startSeconds": 8.56,
+      "endSeconds": 8.8
+    },
+    {
+      "text": "色",
+      "startSeconds": 8.8,
+      "endSeconds": 9.04
+    },
+    {
+      "text": "区",
+      "startSeconds": 9.04,
+      "endSeconds": 9.44
+    },
+    {
+      "text": "域",
+      "startSeconds": 9.44,
+      "endSeconds": 9.44
+    },
+    {
+      "text": "变",
+      "startSeconds": 9.44,
+      "endSeconds": 9.68
+    },
+    {
+      "text": "透",
+      "startSeconds": 9.68,
+      "endSeconds": 10.0
+    },
+    {
+      "text": "明",
+      "startSeconds": 10.0,
+      "endSeconds": 10.32
+    },
+    {
+      "text": "把",
+      "startSeconds": 10.88,
+      "endSeconds": 10.96
+    },
+    {
+      "text": "这",
+      "startSeconds": 10.96,
+      "endSeconds": 11.12
+    },
+    {
+      "text": "张",
+      "startSeconds": 11.12,
+      "endSeconds": 11.28
+    },
+    {
+      "text": "蒙",
+      "startSeconds": 11.28,
+      "endSeconds": 11.52
+    },
+    {
+      "text": "版",
+      "startSeconds": 11.52,
+      "endSeconds": 11.76
+    },
+    {
+      "text": "盖",
+      "startSeconds": 11.76,
+      "endSeconds": 12.0
+    },
+    {
+      "text": "回",
+      "startSeconds": 12.0,
+      "endSeconds": 12.16
+    },
+    {
+      "text": "原",
+      "startSeconds": 12.16,
+      "endSeconds": 12.4
+    },
+    {
+      "text": "图",
+      "startSeconds": 12.4,
+      "endSeconds": 12.88
+    },
+    {
+      "text": "背",
+      "startSeconds": 13.04,
+      "endSeconds": 13.2
+    },
+    {
+      "text": "景",
+      "startSeconds": 13.2,
+      "endSeconds": 13.28
+    },
+    {
+      "text": "消",
+      "startSeconds": 13.44,
+      "endSeconds": 13.68
+    },
+    {
+      "text": "失",
+      "startSeconds": 13.68,
+      "endSeconds": 14.08
+    },
+    {
+      "text": "主",
+      "startSeconds": 14.16,
+      "endSeconds": 14.4
+    },
+    {
+      "text": "体",
+      "startSeconds": 14.4,
+      "endSeconds": 14.64
+    },
+    {
+      "text": "留",
+      "startSeconds": 14.64,
+      "endSeconds": 14.88
+    },
+    {
+      "text": "下",
+      "startSeconds": 14.88,
+      "endSeconds": 15.28
+    },
+    {
+      "text": "注",
+      "startSeconds": 15.76,
+      "endSeconds": 16.0
+    },
+    {
+      "text": "意",
+      "startSeconds": 16.0,
+      "endSeconds": 16.24
+    },
+    {
+      "text": "同",
+      "startSeconds": 16.48,
+      "endSeconds": 16.72
+    },
+    {
+      "text": "一",
+      "startSeconds": 16.72,
+      "endSeconds": 16.8
+    },
+    {
+      "text": "个",
+      "startSeconds": 16.8,
+      "endSeconds": 16.88
+    },
+    {
+      "text": "主",
+      "startSeconds": 16.88,
+      "endSeconds": 17.12
+    },
+    {
+      "text": "体",
+      "startSeconds": 17.12,
+      "endSeconds": 17.44
+    },
+    {
+      "text": "没",
+      "startSeconds": 17.44,
+      "endSeconds": 17.6
+    },
+    {
+      "text": "有",
+      "startSeconds": 17.6,
+      "endSeconds": 17.76
+    },
+    {
+      "text": "重",
+      "startSeconds": 17.76,
+      "endSeconds": 18.0
+    },
+    {
+      "text": "新",
+      "startSeconds": 18.0,
+      "endSeconds": 18.16
+    },
+    {
+      "text": "画",
+      "startSeconds": 18.16,
+      "endSeconds": 18.48
+    },
+    {
+      "text": "一",
+      "startSeconds": 18.48,
+      "endSeconds": 18.48
+    },
+    {
+      "text": "遍",
+      "startSeconds": 18.48,
+      "endSeconds": 18.88
+    },
+    {
+      "text": "它",
+      "startSeconds": 19.28,
+      "endSeconds": 19.36
+    },
+    {
+      "text": "现",
+      "startSeconds": 19.36,
+      "endSeconds": 19.6
+    },
+    {
+      "text": "在",
+      "startSeconds": 19.6,
+      "endSeconds": 19.84
+    },
+    {
+      "text": "可",
+      "startSeconds": 19.84,
+      "endSeconds": 20.0
+    },
+    {
+      "text": "以",
+      "startSeconds": 20.0,
+      "endSeconds": 20.08
+    },
+    {
+      "text": "放",
+      "startSeconds": 20.08,
+      "endSeconds": 20.16
+    },
+    {
+      "text": "到",
+      "startSeconds": 20.16,
+      "endSeconds": 20.4
+    },
+    {
+      "text": "新",
+      "startSeconds": 20.4,
+      "endSeconds": 20.72
+    },
+    {
+      "text": "的",
+      "startSeconds": 20.72,
+      "endSeconds": 20.8
+    },
+    {
+      "text": "背",
+      "startSeconds": 20.8,
+      "endSeconds": 20.96
+    },
+    {
+      "text": "景",
+      "startSeconds": 20.96,
+      "endSeconds": 21.2
+    },
+    {
+      "text": "里",
+      "startSeconds": 21.2,
+      "endSeconds": 21.44
+    },
+    {
+      "text": "放",
+      "startSeconds": 22.0,
+      "endSeconds": 22.08
+    },
+    {
+      "text": "大",
+      "startSeconds": 22.08,
+      "endSeconds": 22.32
+    },
+    {
+      "text": "边",
+      "startSeconds": 22.32,
+      "endSeconds": 22.56
+    },
+    {
+      "text": "缘",
+      "startSeconds": 22.56,
+      "endSeconds": 22.88
+    },
+    {
+      "text": "再",
+      "startSeconds": 22.88,
+      "endSeconds": 23.12
+    },
+    {
+      "text": "检",
+      "startSeconds": 23.12,
+      "endSeconds": 23.36
+    },
+    {
+      "text": "查",
+      "startSeconds": 23.36,
+      "endSeconds": 23.68
+    },
+    {
+      "text": "有",
+      "startSeconds": 23.68,
+      "endSeconds": 23.76
+    },
+    {
+      "text": "没",
+      "startSeconds": 23.76,
+      "endSeconds": 23.92
+    },
+    {
+      "text": "有",
+      "startSeconds": 23.92,
+      "endSeconds": 24.0
+    },
+    {
+      "text": "多",
+      "startSeconds": 24.0,
+      "endSeconds": 24.32
+    },
+    {
+      "text": "留",
+      "startSeconds": 24.32,
+      "endSeconds": 24.64
+    },
+    {
+      "text": "或",
+      "startSeconds": 24.64,
+      "endSeconds": 24.8
+    },
+    {
+      "text": "漏",
+      "startSeconds": 24.8,
+      "endSeconds": 25.12
+    },
+    {
+      "text": "掉",
+      "startSeconds": 25.12,
+      "endSeconds": 25.28
+    },
+    {
+      "text": "的",
+      "startSeconds": 25.28,
+      "endSeconds": 25.36
+    },
+    {
+      "text": "细",
+      "startSeconds": 25.36,
+      "endSeconds": 25.6
+    },
+    {
+      "text": "节",
+      "startSeconds": 25.6,
+      "endSeconds": 26.0
+    },
+    {
+      "text": "这",
+      "startSeconds": 26.56,
+      "endSeconds": 26.72
+    },
+    {
+      "text": "里",
+      "startSeconds": 26.72,
+      "endSeconds": 26.88
+    },
+    {
+      "text": "用",
+      "startSeconds": 26.88,
+      "endSeconds": 27.04
+    },
+    {
+      "text": "合",
+      "startSeconds": 27.04,
+      "endSeconds": 27.28
+    },
+    {
+      "text": "成",
+      "startSeconds": 27.28,
+      "endSeconds": 27.44
+    },
+    {
+      "text": "插",
+      "startSeconds": 27.44,
+      "endSeconds": 27.68
+    },
+    {
+      "text": "画",
+      "startSeconds": 27.68,
+      "endSeconds": 28.0
+    },
+    {
+      "text": "演",
+      "startSeconds": 28.0,
+      "endSeconds": 28.16
+    },
+    {
+      "text": "示",
+      "startSeconds": 28.16,
+      "endSeconds": 28.4
+    },
+    {
+      "text": "处",
+      "startSeconds": 28.4,
+      "endSeconds": 28.64
+    },
+    {
+      "text": "理",
+      "startSeconds": 28.64,
+      "endSeconds": 28.8
+    },
+    {
+      "text": "原",
+      "startSeconds": 28.8,
+      "endSeconds": 28.88
+    },
+    {
+      "text": "理",
+      "startSeconds": 28.88,
+      "endSeconds": 29.28
+    },
+    {
+      "text": "并",
+      "startSeconds": 29.52,
+      "endSeconds": 29.68
+    },
+    {
+      "text": "没",
+      "startSeconds": 29.68,
+      "endSeconds": 29.76
+    },
+    {
+      "text": "有",
+      "startSeconds": 29.76,
+      "endSeconds": 29.92
+    },
+    {
+      "text": "实",
+      "startSeconds": 29.92,
+      "endSeconds": 30.16
+    },
+    {
+      "text": "际",
+      "startSeconds": 30.16,
+      "endSeconds": 30.4
+    },
+    {
+      "text": "运",
+      "startSeconds": 30.4,
+      "endSeconds": 30.56
+    },
+    {
+      "text": "行",
+      "startSeconds": 30.56,
+      "endSeconds": 30.8
+    },
+    {
+      "text": "模",
+      "startSeconds": 30.8,
+      "endSeconds": 30.96
+    },
+    {
+      "text": "型",
+      "startSeconds": 30.96,
+      "endSeconds": 31.36
+    }
+  ],
+  "assessment": {
+    "errors": [],
+    "flags": [
+      {
+        "kind": "zero-duration-item",
+        "itemIndex": 30,
+        "seconds": 9.44
+      },
+      {
+        "kind": "zero-duration-item",
+        "itemIndex": 63,
+        "seconds": 18.48
+      }
+    ],
+    "gaps": [
+      {
+        "leftItem": 2,
+        "rightItem": 3,
+        "startSeconds": 0.88,
+        "endSeconds": 0.96,
+        "durationSeconds": 0.07999999999999996
+      },
+      {
+        "leftItem": 9,
+        "rightItem": 10,
+        "startSeconds": 2.64,
+        "endSeconds": 3.2,
+        "durationSeconds": 0.56
+      },
+      {
+        "leftItem": 10,
+        "rightItem": 11,
+        "startSeconds": 3.68,
+        "endSeconds": 4.08,
+        "durationSeconds": 0.3999999999999999
+      },
+      {
+        "leftItem": 20,
+        "rightItem": 21,
+        "startSeconds": 6.56,
+        "endSeconds": 7.04,
+        "durationSeconds": 0.4800000000000004
+      },
+      {
+        "leftItem": 21,
+        "rightItem": 22,
+        "startSeconds": 7.12,
+        "endSeconds": 7.2,
+        "durationSeconds": 0.08000000000000007
+      },
+      {
+        "leftItem": 26,
+        "rightItem": 27,
+        "startSeconds": 8.48,
+        "endSeconds": 8.56,
+        "durationSeconds": 0.08000000000000007
+      },
+      {
+        "leftItem": 33,
+        "rightItem": 34,
+        "startSeconds": 10.32,
+        "endSeconds": 10.88,
+        "durationSeconds": 0.5600000000000005
+      },
+      {
+        "leftItem": 42,
+        "rightItem": 43,
+        "startSeconds": 12.88,
+        "endSeconds": 13.04,
+        "durationSeconds": 0.15999999999999837
+      },
+      {
+        "leftItem": 44,
+        "rightItem": 45,
+        "startSeconds": 13.28,
+        "endSeconds": 13.44,
+        "durationSeconds": 0.16000000000000014
+      },
+      {
+        "leftItem": 46,
+        "rightItem": 47,
+        "startSeconds": 14.08,
+        "endSeconds": 14.16,
+        "durationSeconds": 0.08000000000000007
+      },
+      {
+        "leftItem": 50,
+        "rightItem": 51,
+        "startSeconds": 15.28,
+        "endSeconds": 15.76,
+        "durationSeconds": 0.4800000000000004
+      },
+      {
+        "leftItem": 52,
+        "rightItem": 53,
+        "startSeconds": 16.24,
+        "endSeconds": 16.48,
+        "durationSeconds": 0.240000000000002
+      },
+      {
+        "leftItem": 64,
+        "rightItem": 65,
+        "startSeconds": 18.88,
+        "endSeconds": 19.28,
+        "durationSeconds": 0.40000000000000213
+      },
+      {
+        "leftItem": 76,
+        "rightItem": 77,
+        "startSeconds": 21.44,
+        "endSeconds": 22.0,
+        "durationSeconds": 0.5599999999999987
+      },
+      {
+        "leftItem": 94,
+        "rightItem": 95,
+        "startSeconds": 26.0,
+        "endSeconds": 26.56,
+        "durationSeconds": 0.5599999999999987
+      },
+      {
+        "leftItem": 107,
+        "rightItem": 108,
+        "startSeconds": 29.28,
+        "endSeconds": 29.52,
+        "durationSeconds": 0.23999999999999844
+      }
+    ],
+    "cuts": [
+      {
+        "afterPhase": 0,
+        "leftItem": 9,
+        "rightItem": 10,
+        "leftEndSeconds": 2.64,
+        "rightStartSeconds": 3.2,
+        "cutSeconds": 2.92,
+        "policy": "midpoint of [last-left-token end, first-right-token start]",
+        "gapSeconds": 0.56
+      },
+      {
+        "afterPhase": 1,
+        "leftItem": 20,
+        "rightItem": 21,
+        "leftEndSeconds": 6.56,
+        "rightStartSeconds": 7.04,
+        "cutSeconds": 6.8,
+        "policy": "midpoint of [last-left-token end, first-right-token start]",
+        "gapSeconds": 0.4800000000000004
+      },
+      {
+        "afterPhase": 2,
+        "leftItem": 33,
+        "rightItem": 34,
+        "leftEndSeconds": 10.32,
+        "rightStartSeconds": 10.88,
+        "cutSeconds": 10.600000000000001,
+        "policy": "midpoint of [last-left-token end, first-right-token start]",
+        "gapSeconds": 0.5600000000000005
+      },
+      {
+        "afterPhase": 3,
+        "leftItem": 42,
+        "rightItem": 43,
+        "leftEndSeconds": 12.88,
+        "rightStartSeconds": 13.04,
+        "cutSeconds": 12.96,
+        "policy": "midpoint of [last-left-token end, first-right-token start]",
+        "gapSeconds": 0.15999999999999837
+      },
+      {
+        "afterPhase": 4,
+        "leftItem": 64,
+        "rightItem": 65,
+        "leftEndSeconds": 18.88,
+        "rightStartSeconds": 19.28,
+        "cutSeconds": 19.08,
+        "policy": "midpoint of [last-left-token end, first-right-token start]",
+        "gapSeconds": 0.40000000000000213
+      },
+      {
+        "afterPhase": 5,
+        "leftItem": 94,
+        "rightItem": 95,
+        "leftEndSeconds": 26.0,
+        "rightStartSeconds": 26.56,
+        "cutSeconds": 26.28,
+        "policy": "midpoint of [last-left-token end, first-right-token start]",
+        "gapSeconds": 0.5599999999999987
+      }
+    ],
+    "boundariesSeconds": [
+      0,
+      2.92,
+      6.8,
+      10.600000000000001,
+      12.96,
+      19.08,
+      26.28,
+      31.555875
+    ],
+    "prospectiveCueFramesAt30Fps": [
+      {
+        "phaseIndex": 0,
+        "fps": 30,
+        "roundedSourceStartFrame": 0,
+        "roundedSourceEndFrame": 88,
+        "durationFrames": 88
+      },
+      {
+        "phaseIndex": 1,
+        "fps": 30,
+        "roundedSourceStartFrame": 88,
+        "roundedSourceEndFrame": 204,
+        "durationFrames": 116
+      },
+      {
+        "phaseIndex": 2,
+        "fps": 30,
+        "roundedSourceStartFrame": 204,
+        "roundedSourceEndFrame": 318,
+        "durationFrames": 114
+      },
+      {
+        "phaseIndex": 3,
+        "fps": 30,
+        "roundedSourceStartFrame": 318,
+        "roundedSourceEndFrame": 389,
+        "durationFrames": 71
+      },
+      {
+        "phaseIndex": 4,
+        "fps": 30,
+        "roundedSourceStartFrame": 389,
+        "roundedSourceEndFrame": 572,
+        "durationFrames": 183
+      },
+      {
+        "phaseIndex": 5,
+        "fps": 30,
+        "roundedSourceStartFrame": 572,
+        "roundedSourceEndFrame": 788,
+        "durationFrames": 216
+      },
+      {
+        "phaseIndex": 6,
+        "fps": 30,
+        "roundedSourceStartFrame": 788,
+        "roundedSourceEndFrame": 947,
+        "durationFrames": 159
+      }
+    ],
+    "prospectiveFramePolicy": "JS Math.round(source seconds * 30); final source end uses ceil as existing renderer; diagnostic only",
+    "coverageEndpoints": "0 and final source container duration are technical coverage, not speech boundaries",
+    "tokenMatchMeaning": "forced model copies supplied words; exact token match is not independent ASR or speech verification",
+    "timestampRepairs": []
+  },
+  "boundaryAuditions": [
+    {
+      "path": "auditions/boundary-01.wav",
+      "sha256": "cd15324d8dc5a291ffa7dee7bba14de63686a24ef4c585371e63923be47554c0",
+      "sourceClipStartFrame": 22720,
+      "sourceClipEndFrame": 70720,
+      "sourceClipStartSeconds": 1.42,
+      "sourceClipEndSeconds": 4.42,
+      "cutRelativeSample": 24000,
+      "proposedCutSeconds": 2.92,
+      "quantizedCutSeconds": 2.92,
+      "leftText": "一张图，怎样只留下主体？",
+      "rightText": "rembg 先让模型预测前景蒙版。"
+    },
+    {
+      "path": "auditions/boundary-02.wav",
+      "sha256": "d61476d3530c1e26b4ab7f6c7d5a1b79eca6923877c1e28d5d530d7986184b53",
+      "sourceClipStartFrame": 84800,
+      "sourceClipEndFrame": 132800,
+      "sourceClipStartSeconds": 5.3,
+      "sourceClipEndSeconds": 8.3,
+      "cutRelativeSample": 24000,
+      "proposedCutSeconds": 6.8,
+      "quantizedCutSeconds": 6.8,
+      "leftText": "rembg 先让模型预测前景蒙版。",
+      "rightText": "白色区域保留，黑色区域变透明。"
+    },
+    {
+      "path": "auditions/boundary-03.wav",
+      "sha256": "59b227cf6f6611dc28bd0c3327d83baebe173c202e4b82296d676e43cd97b0a2",
+      "sourceClipStartFrame": 145600,
+      "sourceClipEndFrame": 193600,
+      "sourceClipStartSeconds": 9.1,
+      "sourceClipEndSeconds": 12.1,
+      "cutRelativeSample": 24000,
+      "proposedCutSeconds": 10.600000000000001,
+      "quantizedCutSeconds": 10.6,
+      "leftText": "白色区域保留，黑色区域变透明。",
+      "rightText": "把这张蒙版盖回原图，"
+    },
+    {
+      "path": "auditions/boundary-04.wav",
+      "sha256": "58a785fca8a99b6a7e4c3151eab7b4b27c4405e1820c76144084d67c289bb9f4",
+      "sourceClipStartFrame": 183360,
+      "sourceClipEndFrame": 231360,
+      "sourceClipStartSeconds": 11.46,
+      "sourceClipEndSeconds": 14.46,
+      "cutRelativeSample": 24000,
+      "proposedCutSeconds": 12.96,
+      "quantizedCutSeconds": 12.96,
+      "leftText": "把这张蒙版盖回原图，",
+      "rightText": "背景消失，主体留下。注意，同一个主体，没有重新画一遍。"
+    },
+    {
+      "path": "auditions/boundary-05.wav",
+      "sha256": "ce637bcbd08c316b95e9d5871a3307be8994fcd5f692cf746d7705c300f6f4b8",
+      "sourceClipStartFrame": 281280,
+      "sourceClipEndFrame": 329280,
+      "sourceClipStartSeconds": 17.58,
+      "sourceClipEndSeconds": 20.58,
+      "cutRelativeSample": 24000,
+      "proposedCutSeconds": 19.08,
+      "quantizedCutSeconds": 19.08,
+      "leftText": "背景消失，主体留下。注意，同一个主体，没有重新画一遍。",
+      "rightText": "它现在可以放到新的背景里。放大边缘，再检查有没有多留或漏掉的细节。"
+    },
+    {
+      "path": "auditions/boundary-06.wav",
+      "sha256": "603a0def432c6e477d2672200143111069f4f601b8fdf3a578388d880212cb4a",
+      "sourceClipStartFrame": 396480,
+      "sourceClipEndFrame": 444480,
+      "sourceClipStartSeconds": 24.78,
+      "sourceClipEndSeconds": 27.78,
+      "cutRelativeSample": 24000,
+      "proposedCutSeconds": 26.28,
+      "quantizedCutSeconds": 26.28,
+      "leftText": "它现在可以放到新的背景里。放大边缘，再检查有没有多留或漏掉的细节。",
+      "rightText": "这里用合成插画演示处理原理，并没有实际运行模型。"
+    }
+  ],
+  "processorFileSha256": "f8ce37bfbe49ff74b27c9a0d8e5b49171b28f57cbfeb9739bd1393e149b64575",
+  "timestampResolution": {
+    "modelTimestampSegmentTimeMilliseconds": 80.0,
+    "rawClassifierResolutionSeconds": 0.08,
+    "upstreamRepairOutputUnit": "integer milliseconds",
+    "returnedItemsDisplayDecimalPlaces": 3,
+    "note": "Returned three-decimal seconds do not imply millisecond alignment accuracy; repaired values may leave the classifier grid."
+  },
+  "elapsedSeconds": 7.218705500010401,
+  "technicalValidationOnly": "Actual correctness requires listening. Supplied transcript is not independently verified."
+}

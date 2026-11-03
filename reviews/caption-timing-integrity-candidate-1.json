@@ -1,0 +1,97 @@
+{
+  "candidate": "caption-timing-integrity-candidate-1",
+  "baseCommit": "2a3b66d8e51f3afb24b02882e95cd5a9275daf31",
+  "branch": "codex/caption-timing-integrity",
+  "candidateManifest": "work/caption-timing-integrity/candidate-1/manifest.json",
+  "candidateManifestSha256": "5fdf0e8433c3892c241f9e688dcfe30a4fbb5dbe62462b4fcfb92811b7eaa287",
+  "activeRoles": [
+    "product",
+    "reliability",
+    "evidence",
+    "video_quality"
+  ],
+  "reports": {
+    "product": {
+      "verdict": "PASS",
+      "scope": "bounded engineering contract only",
+      "path": "work/caption-timing-integrity/judges/candidate-1/product/report.md",
+      "sha256": "ca0ee420846d3c749b7001834dcdceac52198c624b54865426c7948f17510e19"
+    },
+    "reliability": {
+      "verdict": "PASS",
+      "scope": "bounded engineering contract only",
+      "path": "work/caption-timing-integrity/judges/candidate-1/reliability/report.md",
+      "sha256": "763dd254dd3e431a98d580aa4e1894a7edd005e9c93a2c5c210d3aeb96c92976"
+    },
+    "evidence": {
+      "verdict": "PASS",
+      "scope": "bounded engineering contract only",
+      "path": "work/caption-timing-integrity/judges/candidate-1/evidence/report.md",
+      "sha256": "26d86573cf222844f7c8ef7a48d4120d17c79a967027a77c8eecbc07ac647096"
+    },
+    "video_quality": {
+      "verdict": "UNVERIFIED",
+      "scope": "actual AV evidence missing; engineering declaration checks only",
+      "path": "work/caption-timing-integrity/judges/candidate-1/video_quality/report.md",
+      "sha256": "fe3c19737f98e720b57ffdd4c43e9549c504ba17ee968db1331b79cee8221f84"
+    }
+  },
+  "overallVerdict": "UNVERIFIED",
+  "allActiveRolesPass": false,
+  "overallAudiovisualRelease": "NOT_APPROVED",
+  "findings": [
+    {
+      "id": "J3-MINOR-01",
+      "severity": "minor",
+      "status": "retained limitation",
+      "description": "Earliest focused failure retained as explicitly disclosed summary/excerpt, not complete raw stdout; no replacement log fabricated."
+    },
+    {
+      "id": "J4-AV-01",
+      "severity": "major",
+      "status": "UNVERIFIED",
+      "description": "Missing actual listening, reliable reviewed cue boundaries and new continuous audiovisual candidate; blocks overall AV release/all-role PASS."
+    }
+  ],
+  "validation": {
+    "typecheckExit": 0,
+    "testFilesPassed": 37,
+    "testsPassed": 307,
+    "testsSkipped": 2,
+    "testsTotal": 309,
+    "fullSuiteExit": 0,
+    "resultsPath": "work/caption-timing-integrity/candidate-1-validation/direct-results.json",
+    "resultsSha256": "8ed8ec5c5d0082d5ee6078c638177ce02510ce3ef900845141ac26bc56ae569a",
+    "sameFrozenSourceRechecked": true
+  },
+  "recoveredRecordings": [
+    {
+      "name": "rea",
+      "sha256": "67fd6babc763d5f2b8e7e754238286738a5d5ce025b7f7e1517d363abc612c10",
+      "bytes": 830285,
+      "durationSeconds": 50.83425
+    },
+    {
+      "name": "rembg",
+      "sha256": "31c470430fff5f25995b98ff7194af8057c488acd426d6b6cd0cfa5dbb03b4d5",
+      "bytes": 521831,
+      "durationSeconds": 31.555875
+    },
+    {
+      "name": "rembg-revision",
+      "sha256": "3952cd7489a39bceef4a1efb09c975f930a8fa63981fc459d15465b73ad4f51f",
+      "bytes": 513054,
+      "durationSeconds": 31.007313
+    }
+  ],
+  "actualListening": "UNVERIFIED",
+  "actualSubtitleSync": "UNVERIFIED",
+  "continuousAv": "UNVERIFIED",
+  "g6": "pending",
+  "ownerAcceptance": "pending",
+  "newVideoProduced": false,
+  "newVoiceGenerated": false,
+  "paidCalls": 0,
+  "pushed": false,
+  "rawEvidenceStorage": "Local ignored work/; absent on another machine unless explicitly transferred. No historical reports rewritten."
+}

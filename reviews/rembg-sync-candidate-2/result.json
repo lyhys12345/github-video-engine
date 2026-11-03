@@ -1,0 +1,124 @@
+{
+  "candidate": "rembg-sync-candidate-2",
+  "status": "UNVERIFIED",
+  "conditionalEngineering": "completed under owner AV deferral; not an all-role PASS",
+  "frozenManifest": {
+    "path": "reviews/rembg-sync-candidate-2/frozen-manifest.json",
+    "sha256": "4c96c26e364dca2c1eda1efce5bbf0196de774866779af577bd81be39613f566",
+    "sourceFiles": 388,
+    "evidenceFiles": 429
+  },
+  "activeRoles": [
+    "product",
+    "reliability",
+    "evidence",
+    "video_quality",
+    "content_facts",
+    "security"
+  ],
+  "reports": [
+    {
+      "role": "product",
+      "status": "PASS",
+      "report": "reviews/rembg-sync-candidate-2/roles/product.md",
+      "sha256": "25de0bd4cc1d8e6c2fd2a035d604266b7d897d8445a3da3d73842ab119f2f63c",
+      "rawDirectory": "work/unreviewed-preview-v1/judges/candidate-2/product",
+      "scope": "bounded engineering; whole continuous AV/listening and G6 not approved"
+    },
+    {
+      "role": "reliability",
+      "status": "PASS",
+      "report": "reviews/rembg-sync-candidate-2/roles/reliability.md",
+      "sha256": "ad34f9f1c7bf0fa8738b483c4509eaf8be57689188774e6f372081bfdf4c8b7a",
+      "rawDirectory": "work/unreviewed-preview-v1/judges/candidate-2/reliability",
+      "scope": "bounded engineering; whole continuous AV/listening and G6 not approved"
+    },
+    {
+      "role": "evidence",
+      "status": "PASS",
+      "report": "reviews/rembg-sync-candidate-2/roles/evidence.md",
+      "sha256": "932546789a3998d2b16991db8b30812840a9884125808ce021aa2d30ee3d7eea",
+      "rawDirectory": "work/unreviewed-preview-v1/judges/candidate-2/evidence",
+      "scope": "bounded engineering; whole continuous AV/listening and G6 not approved"
+    },
+    {
+      "role": "video_quality",
+      "status": "UNVERIFIED",
+      "report": "reviews/rembg-sync-candidate-2/roles/video_quality.md",
+      "sha256": "217b693ba57ada3e74e522db0e02cf9db71a1d592078070410ef1380118b194e",
+      "rawDirectory": "work/unreviewed-preview-v1/judges/candidate-2/video_quality",
+      "scope": "bounded engineering; whole continuous AV/listening and G6 not approved"
+    },
+    {
+      "role": "content_facts",
+      "status": "PASS",
+      "report": "reviews/rembg-sync-candidate-2/roles/content_facts.md",
+      "sha256": "0ee18d3ecf5f98edb416acd36267b7489908e1b07b160f8d86b8cfdc278f77ef",
+      "rawDirectory": "work/unreviewed-preview-v1/judges/candidate-2/content_facts",
+      "scope": "bounded engineering; whole continuous AV/listening and G6 not approved"
+    },
+    {
+      "role": "security",
+      "status": "PASS",
+      "report": "reviews/rembg-sync-candidate-2/roles/security.md",
+      "sha256": "2c0d9f0f19443c582def97c1039bf26d14bae660fc41a55cb2fe73f7b015a545",
+      "rawDirectory": "work/unreviewed-preview-v1/judges/candidate-2/security",
+      "scope": "bounded engineering; whole continuous AV/listening and G6 not approved"
+    }
+  ],
+  "visualObserver": {
+    "path": "reviews/rembg-sync-candidate-2/visual-observer.md",
+    "sha256": "555978d9deeef450dea06400b9f0e3c29cc93bb0a28561ed49d893769b37ab2e",
+    "scope": "13 actual PNGs only; no continuous motion/audio/G6"
+  },
+  "validation": {
+    "typecheck": "PASS",
+    "testFiles": 38,
+    "passed": 346,
+    "platformSkipped": 2,
+    "raw": "work/unreviewed-preview-v1/validation",
+    "fullDecodeBoth": "PASS",
+    "intermediatePcmPreservationBoth": "exact full source PCM after 0.4s silent lead; silent tail 0.610729s",
+    "retainedFailedControl": "default negotiated sample format differed in 258 PCM samples by one signed16 LSB; explicit fltp reference exactly matches; not evidence of hearing"
+  },
+  "media": [
+    {
+      "mode": "unreviewed-preview",
+      "path": "work/rembg-sync-v1/review-preview-candidate-1/segment.mp4",
+      "sha256": "4c7c2e856dee456779a5acbcb6e106ba34db56a4400cba6767b7a9cc04f78c2f",
+      "bytes": 2289288,
+      "frames": 977,
+      "fps": 30,
+      "seconds": 32.56666666666667
+    },
+    {
+      "mode": "owner-boundary-reviewed",
+      "path": "work/rembg-sync-v1/owner-reviewed-candidate-2/segment.mp4",
+      "sha256": "a045b9b610c6752026b26539116bd4fe8d8c986b768bb2d7c3574ed0e4aff960",
+      "bytes": 2220748,
+      "frames": 977,
+      "fps": 30,
+      "seconds": 32.56666666666667
+    }
+  ],
+  "ownerBoundaryReview": {
+    "path": "reviews/rembg-sync-candidate-2/owner-boundary-review.json",
+    "sha256": "5129be1c9af25167be09adf49aca74a1a2c30b0b7760555c01bb483d737e0a40",
+    "response": "六处已听审，切点均合适",
+    "scope": "six internal subtitle boundaries only"
+  },
+  "independentTimingListening": "UNVERIFIED",
+  "speechContentListening": "UNVERIFIED",
+  "continuousAudiovisualReview": "UNVERIFIED",
+  "ownerFinalAcceptance": "pending",
+  "g6": "pending",
+  "unresolvedBlockerOrMajorReported": false,
+  "preservation": "Original proposals, first pending preview, failures, prior reports and UNVERIFIED remain. Media/models/raw logs stay ignored/local; separate transfer required. Copied reports/receipts/manifest are byte-identical audit copies, not edits to frozen candidate. Only post-freeze documentation and review records changed.",
+  "prohibitions": {
+    "paidApiCalls": false,
+    "newVoiceGeneration": false,
+    "targetProjectExecution": false,
+    "fullFilm": false,
+    "deploymentOrPublication": false
+  }
+}

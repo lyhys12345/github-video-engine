@@ -1,0 +1,148 @@
+{
+  "candidate": "local-alignment-candidate-2",
+  "candidateManifestSha256": "483a55281818d60519ff645a5e3444a2626d8330ffd02c8adf4a5a9c869c632b",
+  "candidateManifestPath": "work/local-alignment-v1/candidates/candidate-2/manifest.json",
+  "activeRoles": [
+    "product",
+    "reliability",
+    "evidence",
+    "video_quality",
+    "security"
+  ],
+  "reports": {
+    "product": {
+      "verdict": "PASS",
+      "path": "work/local-alignment-v1/judges/candidate-2/product/report.md",
+      "sha256": "400efa3e68ef65b37a21867eda7ccc0f5dd8bebeb57ddd92a3691de1e022a6b5",
+      "scope": "bounded unreviewed-proposal checkpoint only"
+    },
+    "reliability": {
+      "verdict": "PASS",
+      "path": "work/local-alignment-v1/judges/candidate-2/reliability/report.md",
+      "sha256": "789ad4518be92908ad90b7a944b2fd21c983ad421e8353741b3175d5154556b6",
+      "scope": "bounded unreviewed-proposal checkpoint only"
+    },
+    "evidence": {
+      "verdict": "PASS",
+      "path": "work/local-alignment-v1/judges/candidate-2/evidence/report.md",
+      "sha256": "545f2df8056f6aae912985041271cdb473322c458b0544cd7b53c3e690e78790",
+      "scope": "bounded unreviewed-proposal checkpoint only"
+    },
+    "video_quality": {
+      "verdict": "UNVERIFIED",
+      "path": "work/local-alignment-v1/judges/candidate-2/video_quality/report.md",
+      "sha256": "d497faf1125245110ab1d6c259b8febc4e3849f7f73ff5f23a2667c2eb7afe5d",
+      "scope": "perceptual review missing; technical proposal checks only"
+    },
+    "security": {
+      "verdict": "PASS",
+      "path": "work/local-alignment-v1/judges/candidate-2/security/report.md",
+      "sha256": "efd9fc372ce75bd7a0b14ee0ff71d98edd5b1fac5a8611bf2704f124f94f4d1c",
+      "scope": "bounded unreviewed-proposal checkpoint only"
+    }
+  },
+  "overallVerdict": "UNVERIFIED",
+  "allActiveRolesPass": false,
+  "model": {
+    "repository": "mlx-community/Qwen3-ForcedAligner-0.6B-8bit",
+    "revision": "0e1a68e91d815300c7c9754b2a7639378b23db15",
+    "bytes": 1276474460,
+    "files": 10,
+    "rawClassifierResolutionMs": 80
+  },
+  "validation": {
+    "manifestSha256": "483a55281818d60519ff645a5e3444a2626d8330ffd02c8adf4a5a9c869c632b",
+    "sourceFilesVerified": 25,
+    "evidenceFilesVerified": 57,
+    "workspaceSourceMatches": true,
+    "focusedTestsPassed": 19,
+    "schemaRejectsBothUnreviewedDrafts": true,
+    "recordings": [
+      {
+        "recording": "rembg",
+        "cuts": [
+          2.92,
+          6.8,
+          10.600000000000001,
+          12.96,
+          19.08,
+          26.28
+        ],
+        "auditions": 6,
+        "allAuditionsExactPcmSlices": true,
+        "repairCount": 0,
+        "zeroDurationItems": [
+          {
+            "token": "域",
+            "kind": "zero-duration-item",
+            "itemIndex": 30,
+            "seconds": 9.44
+          },
+          {
+            "token": "一",
+            "kind": "zero-duration-item",
+            "itemIndex": 63,
+            "seconds": 18.48
+          }
+        ],
+        "timestampClassifierResolutionMs": 80,
+        "containerMinusPcmSeconds": -6.249999999852207e-05,
+        "elapsedSeconds": 7.218705500010401
+      },
+      {
+        "recording": "rea",
+        "cuts": [
+          5.6,
+          11.719999999999999,
+          17.72,
+          26.28,
+          31.16,
+          36.44,
+          42.96
+        ],
+        "auditions": 7,
+        "allAuditionsExactPcmSlices": true,
+        "repairCount": 1,
+        "zeroDurationItems": [
+          {
+            "token": "js",
+            "kind": "zero-duration-item",
+            "itemIndex": 35,
+            "seconds": 11.44
+          }
+        ],
+        "timestampClassifierResolutionMs": 80,
+        "containerMinusPcmSeconds": -6.25000000056275e-05,
+        "elapsedSeconds": 6.737700082943775
+      }
+    ],
+    "actualListening": "UNVERIFIED",
+    "g6": "pending"
+  },
+  "drafts": [
+    {
+      "recording": "rembg",
+      "path": "work/local-alignment-v1/rembg-candidate-2/draft.json",
+      "reviewPath": "work/local-alignment-v1/rembg-candidate-2/review.md"
+    },
+    {
+      "recording": "rea",
+      "path": "work/local-alignment-v1/rea-candidate-2/draft.json",
+      "reviewPath": "work/local-alignment-v1/rea-candidate-2/review.md"
+    }
+  ],
+  "renderable": false,
+  "independentTimingReview": "UNVERIFIED",
+  "speechContentReview": "UNVERIFIED",
+  "ownerAcceptance": "pending",
+  "g6": "pending",
+  "newNarrationSynthesized": false,
+  "newVideoProduced": false,
+  "remoteProviderCalls": 0,
+  "priorFailurePreserved": "candidate1 preflight incorrectly required tokenizer.json, whereas pinned data uses vocab.json+merges.txt; failed source/logs retained; validator fixed without model or allowlist substitution",
+  "reviewLimits": [
+    "Derived ignored __pycache__ appeared during early imports; manifest-listed file bytes unchanged; source later set read-only and reviewers instructed PYTHONDONTWRITEBYTECODE=1.",
+    "J3 frozen TypeScript schema import lacked src/core/util.js; original failed log preserved, matching workspace schema verified and both actual drafts rejected."
+  ],
+  "gitDelivery": "local checkpoint commit; no push, deployment or publication"
+}
