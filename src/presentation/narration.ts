@@ -21,18 +21,50 @@ export const voiceReview = {voice: 'local-import', transcriptVerification: 'call
   alignment: 'clip-level-measured; speech alignment unverified', semanticReview: 'pending',
   editorialReview: 'pending', audiovisualReview: 'pending', ownerAcceptance: 'pending'} as const;
 
-export const VoiceSpec = z.strictObject({schemaVersion: z.literal('presentation-voice-bindings/1.0'),
+const commonClip = z.strictObject({beatId: Id, receiptFingerprint: Hash, receiptSha256: Hash, sourceAudioSha256: Hash,
+  transcript: z.string().min(1).max(120), transcriptSha256: Hash,
+  startOffsetFrames: z.number().int().min(0).max(PRESENTATION_MAX_FRAMES - 1)});
+const captionSample = z.number().int().min(0).max(MAX_PCM / 2);
+const authoredCaption = z.strictObject({
+  startChar: z.number().int().min(0).max(2000), endChar: z.number().int().min(1).max(2000),
+  startSample: captionSample, endSample: captionSample,
+});
+const commonVoice = z.strictObject({
   planTaskId: Hash, planManifestSha256: Hash, proposalHash: Hash, playbackRate: z.literal(1),
   voicePolicy: z.enum(['caller-declared-local-import', 'windows-sapi-zira-technical-fixture']),
-  clips: z.array(z.strictObject({beatId: Id, receiptFingerprint: Hash, receiptSha256: Hash, sourceAudioSha256: Hash,
-    transcript: z.string().min(1).max(120), transcriptSha256: Hash,
-    startOffsetFrames: z.number().int().min(0).max(PRESENTATION_MAX_FRAMES - 1)})).min(1).max(20)});
+});
+export const VoiceSpec = z.discriminatedUnion('schemaVersion', [
+  commonVoice.extend({schemaVersion: z.literal('presentation-voice-bindings/1.0'), clips: z.array(commonClip).min(1).max(20)}),
+  commonVoice.extend({schemaVersion: z.literal('presentation-voice-bindings/1.1'),
+    clips: z.array(commonClip.extend({transcript: z.string().min(1).max(2000),
+      captions: z.array(authoredCaption).min(1).max(40)})).min(1).max(20)}),
+]);
 export type VoiceSpec = z.infer<typeof VoiceSpec>;
 type Clip = VoiceSpec['clips'][number];
 type Beat = CompiledPresentation['beats'][number];
 type LocalAudio = Awaited<ReturnType<typeof readLocalTts>>;
 
 const voiceError = (code: string, message: string): never => {throw new EngineError(code, message);};
+const captionWeight = (text: string) =>
+  [...text].reduce((sum, character) => sum + (character.codePointAt(0)! > 127 ? 2 : 1), 0);
+const fitsCaption = (text: string) => !/[\r\n\p{C}]/u.test(text) && !!text.trim() && captionWeight(text) <= 100;
+
+function captionText(clip: Extract<Clip, {captions: unknown}>) {
+  const characters = [...clip.transcript];
+  let nextChar = 0;
+  const texts = clip.captions.map(({startChar, endChar}) => {
+    if (startChar !== nextChar || endChar <= startChar || endChar > characters.length) {
+      voiceError('VOICE_CAPTION_TEXT', 'Captions must partition the exact transcript for ' + clip.beatId);
+    }
+    nextChar = endChar;
+    const original = characters.slice(startChar, endChar).join('');
+    const text = original.trim();
+    if (/[\p{C}\p{Zl}\p{Zp}]/u.test(original) || !fitsCaption(text)) voiceError('VOICE_CAPTION_LIMIT', 'Use shorter single-line captions for ' + clip.beatId);
+    return text;
+  });
+  if (nextChar !== characters.length) voiceError('VOICE_CAPTION_TEXT', 'Captions must cover the full transcript for ' + clip.beatId);
+  return texts;
+}
 
 export function matchVoice(plan: CompiledPresentation, spec: VoiceSpec) {
   if (plan.proposalHash !== spec.proposalHash) voiceError('VOICE_PARENT', 'Voice proposal hash differs.');
@@ -44,8 +76,8 @@ export function matchVoice(plan: CompiledPresentation, spec: VoiceSpec) {
     if (clip.transcript !== beat.narration || sha256(clip.transcript) !== clip.transcriptSha256) {
       voiceError('VOICE_TRANSCRIPT', 'Exact narration and transcript hash differ for ' + beat.id);
     }
-    if (/[\r\n\p{C}]/u.test(clip.transcript) || !clip.transcript.trim() ||
-        [...clip.transcript].reduce((sum, character) => sum + (character.codePointAt(0)! > 127 ? 2 : 1), 0) > 100) {
+    if ('captions' in clip) captionText(clip);
+    else if (!fitsCaption(clip.transcript)) {
       voiceError('VOICE_CAPTION_LIMIT', 'Use a shorter single-line transcript and matching recording for ' + beat.id);
     }
     return {beat, clip};
@@ -105,6 +137,36 @@ export function placement(beat: Beat, clip: Clip, pcm: Buffer, source: LocalAudi
 }
 
 export type Cue = ReturnType<typeof placement>;
+export type CaptionCue = Pick<Cue, 'beatId' | 'startSample' | 'endSample' | 'startFrame' | 'endFrame' | 'transcript'>;
+const MIN_CAPTION_SAMPLES = RATE / 2;
+const MAX_CAPTION_WEIGHT_PER_SECOND = 20;
+const captionMilliseconds = (sample: number) => Math.round(sample / RATE * 1000);
+
+export function projectCaptions(clip: Clip, recording: Cue): CaptionCue[] {
+  if (!('captions' in clip)) return [recording];
+  const texts = captionText(clip);
+  let previousEndSample = 0;
+  let previousEndFrame = recording.startFrame;
+  return clip.captions.map((caption, index) => {
+    const startSample = recording.startSample + caption.startSample;
+    const endSample = recording.startSample + caption.endSample;
+    const startFrame = Math.floor(startSample / FRAME_SAMPLES);
+    const endFrame = Math.ceil(endSample / FRAME_SAMPLES);
+    if (caption.startSample < previousEndSample || caption.endSample <= caption.startSample ||
+        caption.endSample > recording.sampleCount || startFrame < previousEndFrame ||
+        captionMilliseconds(startSample) >= captionMilliseconds(endSample)) {
+      voiceError('VOICE_CAPTION_TIMING', 'Captions must fit the recording without overlapping after frame projection for ' + clip.beatId);
+    }
+    const minimumSamples = Math.max(MIN_CAPTION_SAMPLES, captionWeight(texts[index]!) * RATE / MAX_CAPTION_WEIGHT_PER_SECOND);
+    if (endSample - startSample < minimumSamples) {
+      voiceError('VOICE_CAPTION_DURATION',
+        'Caption ' + (index + 1) + ' needs at least ' + (minimumSamples / RATE) + ' seconds for ' + clip.beatId);
+    }
+    previousEndSample = caption.endSample;
+    previousEndFrame = endFrame;
+    return {beatId: recording.beatId, startSample, endSample, startFrame, endFrame, transcript: texts[index]!};
+  });
+}
 
 export function mixClips(totalFrames: number, clips: {cue: Cue; pcm: Buffer}[]) {
   const mix = Buffer.alloc(totalFrames * FRAME_SAMPLES * 2);
@@ -112,10 +174,13 @@ export function mixClips(totalFrames: number, clips: {cue: Cue; pcm: Buffer}[]) 
   return mix;
 }
 
-export function voiceCaptions(cues: Cue[]) {
+export function voiceCaptions(cues: CaptionCue[], authored = false) {
   const timestamp = (sample: number, round: (x: number) => number) => new Date(round(sample / RATE * 1000)).toISOString().slice(11, 23);
   const escape = (s: string) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-  return Buffer.from('WEBVTT\n\nNOTE Clip-level measured placement. Caller-declared transcript; speech alignment unverified.\n\n' +
-    cues.map(cue => timestamp(cue.startSample, Math.floor) + ' --> ' + timestamp(cue.endSample, Math.ceil) +
+  const note = authored ? 'Caller-declared caption timing and transcript; speech alignment unverified.' :
+    'Clip-level measured placement. Caller-declared transcript; speech alignment unverified.';
+  return Buffer.from('WEBVTT\n\nNOTE ' + note + '\n\n' +
+    cues.map(cue => timestamp(cue.startSample, authored ? Math.round : Math.floor) + ' --> ' +
+      timestamp(cue.endSample, authored ? Math.round : Math.ceil) +
       '\n' + escape(cue.transcript) + '\n').join('\n'));
 }

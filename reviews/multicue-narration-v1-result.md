@@ -1,0 +1,9 @@
+# Multi-cue narration verification
+
+Version 1.1 binds a whole original-speed recording per beat to an ordered, complete partition of its transcript and caller-declared sample intervals. It checks coverage, bounds, projected frames and a minimum display-duration heuristic; this does not prove speech alignment or readability. Version 1.0 remains supported.
+
+Actual Express technical preview: 20 seconds, 480 frames, four English Zira recordings and eight cues; H.264/AAC full decode passed and PCM remained unchanged. Video SHA-256 `a8947d80fe20d98ee5d5129ec3de19094a4af9122cf91c6e86aae727db83101a`. Media and artifacts remain on the originating machine at `C:/Users/luyuh/Documents/Codex/gve-multi-caption-v1/work/express-multicue-evidence/` and are not in Git. This is not Chen, a formal film, or continuous listening.
+
+Independent architecture review ran typecheck, 52 focused tests, 23 negative cases and 100 timing projections; four historical narrated tasks produced 255 byte-identical exported files. Independent reliability review reran 10 tests and read completed old and new tasks through fresh CLI processes; interruption during a new 1.1 render was not retested. Product/video review examined actual frames at four subtitle transitions and 360px scaled images: these short English captions were discernible with no gap or overlap in sampled frames. Platform overlays, long and multilingual captions, continuous viewing, hearing and word alignment remain unverified. Raw reports are alongside this summary.
+
+Integrated `pnpm typecheck` passed and `pnpm test` exited zero: 47 Vitest files / 408 tests passed; mechanism tests: 2 passed, 1 real-media test skipped. Some suite tests explicitly use mocks. These results do not close the preexisting legacy generic export issues or owner audiovisual approval.

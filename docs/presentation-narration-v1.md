@@ -40,7 +40,20 @@ Every beat must have exactly one complete clip. The technical fixture policy `wi
 
 Voice binding verifies local import receipts and original bytes, repeats FFprobe container measurements, then fully decodes each recording to 48 kHz mono PCM16 at its original playback rate. Each presentation frame spans 2,000 samples. A clip is copied in full to its sample offset, with silence in unused regions. Empty audio and digital silence are rejected. If it cannot fit, the error reports the beat, actual samples, available samples and minimum extra frames where measurable in scope. Edit the affected beat's duration and build a new plan, then bind it explicitly. The selected [plan version](presentation-duration-v1.1.md) sets the total duration limit. A permanent invalid binding remains in history and requires corrected input. Cancelled local tasks can be retried by repeating the same request.
 
-The VTT uses each clip's measured start and end, rounded outward to milliseconds. The burned captions use the same cue data, rounded outward to frames. Narration is kept exact in the ledger. The bounded display accepts short single-line text. Use additional authored beats with corresponding recordings for longer text. Event frames remain author-controlled. The ledger includes their offsets relative to the clip. Word-level alignment, semantic review and owner listening remain pending.
+Binding version `presentation-voice-bindings/1.0` displays one short caption for each clip. Its VTT rounds the measured clip boundaries outward to milliseconds, and burned captions round them outward to frames. Existing task IDs retain their original ledger and captions.
+
+Use `presentation-voice-bindings/1.1` to display several short captions over one continuous recording. The clip retains the exact full transcript and matching local-import receipt. Add a `captions` array to each clip. For a transcript of `First sentence. Second sentence.`, use ranges like these.
+
+```json
+[
+  {"startChar": 0, "endChar": 15, "startSample": 0, "endSample": 96000},
+  {"startChar": 15, "endChar": 32, "startSample": 96000, "endSample": 192000}
+]
+```
+
+Character ranges are zero-based, half-open Unicode code-point ranges and must partition the exact transcript in order. Spaces between words remain in the ranges. Display trims edge whitespace. Each clip supports up to 40 short single-line cues within the existing display width limit. The sample ranges are half-open at 48 kHz, relative to the start of the decoded clip, and must stay inside it. Gaps are allowed. Each cue must last at least 0.5 seconds and meet a limit of 20 weighted characters per second. Count ASCII code points once and other code points twice, as in the display width check. This timing guard does not establish human readability. The ranges must remain disjoint after rounding outward to frames. For adjacent cues, a boundary divisible by 2,000 samples gives an exact frame transition. VTT rounds these authored times to the nearest millisecond. Both surfaces use the same derived cues.
+
+The 1.1 ledger retains the original recording placements in `cues` and the derived subtitle placements in `captionCues`. Cue timing is caller-declared. It does not affect the decoded audio, playback rate, or event frames. Event offsets are measured from the recording start. Speech alignment, semantic review and owner listening remain pending.
 
 Narrated export includes the H.264/AAC movie, VTT, sampled PNGs, pinned editable plan and proposal, exact local import receipts and original recordings, normalized clips, PCM mix and cue ledger. AAC is a lossy carrier. The reference PCM is the basis for verifying exact sample placements. For a voice-only export, use `--kind voice`. For existing silent preview records, keep using `--kind preview`. Silent rendering still uses `--mode silent` and beat-timed script VTT.
 

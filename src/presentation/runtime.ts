@@ -18,7 +18,7 @@ import {ancestors, boundedFile, preflightStatePath, readTask} from '../story-pla
 import {loadAuthoringProposal} from '../workflow/agent-authoring.js';
 import type {WorkflowStore} from '../workflow/store.js';
 import {compilePresentation, type CompiledPresentation} from './compile.js';
-import {decodeClip, FRAME_SAMPLES, loadClip, matchVoice, MAX_PCM, mixClips, NARRATED_KIND, placement, RATE,
+import {decodeClip, FRAME_SAMPLES, loadClip, matchVoice, MAX_PCM, mixClips, NARRATED_KIND, placement, projectCaptions, RATE,
   voiceCaptions, VOICE_KIND, voiceReview, VoiceSpec} from './narration.js';
 import {EXTENDED_RENDER_PROFILE, EXTENDED_VERIFY_DEADLINE, EXTENDED_WORKER_DEADLINE, extendedRanges,
   MAX_MOVIE_BYTES, MAX_PART_BYTES, MAX_SAMPLE_BYTES, MAX_SAMPLES, requireExtendedDisk} from './duration.js';
@@ -228,7 +228,7 @@ function sampleFrames(plan: CompiledPresentation, cues: {startFrame: number; end
     const ending = plan.endingTitle.visibleFromFrame;
     for (const frame of [ending - 1, ending, ending + 1]) if (frame >= 0) frames.add(frame);
   }
-  for (const cue of cues) frames.add(cue.startFrame);
+  for (const cue of cues) if (frames.size < MAX_SAMPLES) frames.add(cue.startFrame);
   if (extended) for (const [first] of extendedRanges(plan.timeline.totalFrames)) {
     for (const frame of [first, first - 1]) if (frames.size < MAX_SAMPLES && frame >= 0) frames.add(frame);
   }
@@ -273,21 +273,24 @@ async function voiceFiles(data: string, input: z.infer<typeof VoiceInput>, id: s
     files.set(`clips/${index}.pcm`, pcm);
     sourceFiles.set(`original/${index}.audio`, source.audio);
     sourceFiles.set(`original/${index}.receipt.json`, source.receiptBytes);
-    placed.push({pcm, cue});
+    placed.push({pcm, cue, captions: projectCaptions(clip, cue)});
   }
   const cues = placed.map(item => item.cue);
+  const captionCues = placed.flatMap(item => item.captions);
+  const authoredCaptions = input.spec.schemaVersion === 'presentation-voice-bindings/1.1';
   const mix = mixClips(plan.compiled.timeline.totalFrames, placed);
   files.set('narration.pcm', mix);
-  files.set('captions.vtt', voiceCaptions(cues));
+  files.set('captions.vtt', voiceCaptions(captionCues, authoredCaptions));
   files.set('bindings.json', json(input.spec));
-  const ledger = {schemaVersion: 'presentation-voice-ledger/1.0', taskId: id, ...input,
+  const ledger = {schemaVersion: authoredCaptions ? 'presentation-voice-ledger/1.1' : 'presentation-voice-ledger/1.0', taskId: id, ...input,
     sampleRate: RATE, sampleFormat: 's16le-mono', playbackRate: 1, mixedPcmSha256: sha256(mix), cues,
+    ...(authoredCaptions ? {captionTiming: 'caller-declared' as const, captionCues} : {}),
     events: plan.compiled.trace.map(event => ({frame: event.frame, beatId: event.beatId, kind: event.kind,
       claimIds: event.claimIds, sample: event.frame * FRAME_SAMPLES,
       relativeToClipStartSamples: event.frame * FRAME_SAMPLES - cues.find(cue => cue.beatId === event.beatId)!.startSample})),
     review: voiceReview};
   files.set('voice-manifest.json', json(ledger));
-  return {files, sourceFiles, plan, cues, ledger};
+  return {files, sourceFiles, plan, captionCues, ledger};
 }
 
 async function checkedVoice(data: string, id: string, signal: AbortSignal) {
@@ -301,7 +304,7 @@ async function checkedVoice(data: string, id: string, signal: AbortSignal) {
 }
 
 export async function bindPresentationVoice(data: string, path: string, signal: AbortSignal, onTask?: (id: string) => void) {
-  const spec = VoiceSpec.parse(decode(await boundedFile(resolve(path), 80_000)));
+  const spec = VoiceSpec.parse(decode(await boundedFile(resolve(path), 256_000)));
   data = await preflight(data);
   const {plan} = await voicePlan(data, spec, signal);
   const decoderVersions = async (workSignal: AbortSignal) => Object.fromEntries(await Promise.all(
@@ -394,7 +397,7 @@ export async function renderPresentation(data: string, planTaskId: string, signa
   if (resumeTaskId !== undefined && taskId !== resumeTaskId) {
     throw new EngineError('PRESENTATION_RESUME_INPUT', 'The current renderer or inputs differ from the recorded task. Repeat render explicitly to create a new task.');
   }
-  const samples = sampleFrames(plan.compiled, voice?.cues, extended);
+  const samples = sampleFrames(plan.compiled, voice?.captionCues, extended);
   checkAbort(signal);
   onTask?.(taskId);
   const runner = new TaskRunner(data);
@@ -408,7 +411,7 @@ export async function renderPresentation(data: string, planTaskId: string, signa
       await writeFile(join(work, 'public', 'font.ttf'), font, {flag: 'wx'});
       const workerInput = join(work, 'input.json');
       await writeFile(workerInput, json({entry: join(projectRoot, 'src/presentation/composition.tsx'), browser: env.browser,
-        props: voice ? {...plan.compiled, cues: voice.cues.map(({startFrame, endFrame, transcript}) =>
+        props: voice ? {...plan.compiled, cues: voice.captionCues.map(({startFrame, endFrame, transcript}) =>
           ({startFrame, endFrame, transcript}))} : plan.compiled,
         sampleFrames: samples, geometry: {...GEOMETRY, fps: plan.compiled.timeline.fps},
         ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {})}), {flag: 'wx'});
@@ -490,7 +493,7 @@ export async function readPresentation(data: string, id: string, requested: Pres
       sha256(voice!.files.get('voice-manifest.json')!) !== input.voiceManifestSha256)) fail('Preview voice binding differs.');
   const extended = plan.compiled.timeline.totalFrames > PRESENTATION_LEGACY_MAX_FRAMES;
   if (extended !== (input.renderProfile === EXTENDED_RENDER_PROFILE)) fail('Preview duration profile differs from its parent.');
-  const samples = sampleFrames(plan.compiled, voice?.cues, extended);
+  const samples = sampleFrames(plan.compiled, voice?.captionCues, extended);
   const files = await readArtifacts(data, task, ['preview.mp4', 'captions.vtt', 'preview-manifest.json', ...samples.map(frame => `samples/${frame}.png`)], signal);
   const manifest = decode(files.get('preview-manifest.json')!);
   const probe = manifest.media?.probe, stream = probe?.streams?.[0], audio = probe?.streams?.[1];

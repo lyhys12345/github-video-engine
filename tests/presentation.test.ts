@@ -5,12 +5,14 @@ import {expect, it} from 'vitest';
 import type {StoryProposal} from '../src/contracts/authoring.js';
 import {PresentationPlan} from '../src/contracts/presentation.js';
 import {canonical, sha256} from '../src/core/util.js';
+import {command} from '../src/core/process.js';
+import {ffmpegPath} from '../src/providers/local.js';
 import {PAPER_BIRD_SHA256} from '../src/presentation/asset.js';
 import {presentationCommand} from '../src/presentation/cli.js';
 import {compilePresentation} from '../src/presentation/compile.js';
 import {presentationFrame} from '../src/presentation/frame-state.js';
 import {bindPresentationVoice, checkPresentationPayload, PREVIEW_KIND, readPresentation, renderPresentation} from '../src/presentation/runtime.js';
-import {FRAME_SAMPLES, MAX_PCM, mixClips, placement, voiceCaptions, VOICE_KIND, VoiceSpec} from '../src/presentation/narration.js';
+import {FRAME_SAMPLES, MAX_PCM, matchVoice, mixClips, placement, projectCaptions, voiceCaptions, VOICE_KIND, VoiceSpec} from '../src/presentation/narration.js';
 import {extendedRanges, FRAME_CHUNK, MAX_MOVIE_BYTES, requireExtendedDisk} from '../src/presentation/duration.js';
 import {produceTts} from '../src/tts/runtime.js';
 import {ArtifactStore} from '../src/assets/store.js';
@@ -278,10 +280,13 @@ it.runIf(process.platform === 'win32' && !!process.env.SystemRoot)('verifies loc
     return {planTaskId: result.taskId, planManifestSha256: sha256(read.files!.get('plan-manifest.json')!)};
   };
   const parent = await build();
-  const audio = await readFile('fixtures/tts-synthetic.mp3');
+  const audioPath = join(root, 'test-tone.wav');
+  await command(ffmpegPath(), ['-v', 'error', '-nostdin', '-n', '-stream_loop', '1', '-i',
+    'fixtures/tts-synthetic.mp3', '-c:a', 'pcm_s16le', audioPath]);
+  const audio = await readFile(audioPath);
   const text = authored.proposal.beats[0]!.narration;
   const imported = await produceTts({schemaVersion: '1.0', provider: 'local-import', text, voiceLabel: 'Synthetic tone test',
-    mediaType: 'audio/mpeg', sourceSha256: sha256(audio)}, data, signal, {audioPath: 'fixtures/tts-synthetic.mp3'});
+    mediaType: 'audio/wav', sourceSha256: sha256(audio)}, data, signal, {audioPath});
   const clip = {beatId: authored.proposal.beats[0]!.id, receiptFingerprint: imported.fingerprint, receiptSha256: imported.receiptArtifact.sha256,
     sourceAudioSha256: sha256(audio), transcript: text, transcriptSha256: sha256(text), startOffsetFrames: 1};
   const spec = {schemaVersion: 'presentation-voice-bindings/1.0', ...parent, proposalHash: submitted.hash, playbackRate: 1,
@@ -296,6 +301,29 @@ it.runIf(process.platform === 'win32' && !!process.env.SystemRoot)('verifies loc
   await expect(bind({...spec, clips: [{...clip, startOffsetFrames: 71}]})).rejects.toMatchObject({code: 'VOICE_DOES_NOT_FIT'});
   const first = await bind(spec);
   await expect(bind(spec)).resolves.toMatchObject({taskId: first.taskId, cached: true});
+  const old = await readPresentation(data, first.taskId, 'voice', signal);
+  const multi = {...spec, schemaVersion: 'presentation-voice-bindings/1.1',
+    clips: [{...clip, captions: [
+      {startChar: 0, endChar: 2, startSample: 0, endSample: FRAME_SAMPLES * 12},
+      {startChar: 2, endChar: [...text].length, startSample: FRAME_SAMPLES * 12, endSample: FRAME_SAMPLES * 24},
+    ]}]};
+  const split = await bind(multi);
+  expect(split).toMatchObject({schemaVersion: 'presentation-voice-ledger/1.1', captionTiming: 'caller-declared', captionCues: [
+    {startFrame: 1, endFrame: 13}, {startFrame: 13, endFrame: 25},
+  ]});
+  expect(split.cues).toEqual(first.cues);
+  expect(split.mixedPcmSha256).toBe(first.mixedPcmSha256);
+  await expect(bind(multi)).resolves.toMatchObject({taskId: split.taskId, cached: true});
+  const splitFiles = await readPresentation(data, split.taskId, 'voice', signal);
+  expect(splitFiles.files!.get('captions.vtt')!.toString()).toContain('00:00:00.042 --> 00:00:00.542');
+  expect(splitFiles.files!.get('narration.pcm')).toEqual(old.files!.get('narration.pcm'));
+  const retimed = structuredClone(multi);
+  retimed.clips[0]!.captions[1]!.endSample += FRAME_SAMPLES;
+  const changed = await bind(retimed);
+  expect(changed.taskId).not.toBe(split.taskId);
+  expect(changed.mixedPcmSha256).toBe(split.mixedPcmSha256);
+  expect((await readPresentation(data, first.taskId, 'voice', signal)).files).toEqual(old.files);
+  expect((await readPresentation(data, split.taskId, 'voice', signal)).files).toEqual(splitFiles.files);
   authored.plan.beats[0]!.frames += 2;
   const edited = await build();
   await expect(renderPresentation(data, edited.planTaskId, signal, undefined, first.taskId)).rejects.toMatchObject({code: 'VOICE_PARENT'});
@@ -309,3 +337,49 @@ it.runIf(process.platform === 'win32' && !!process.env.SystemRoot)('verifies loc
   expect(restored.files!.get('original/0.audio')).toEqual(audio);
   expect(restored.status).toMatchObject({integrity: 'verified', review: {speechContentReview: 'unverified', ownerListening: 'pending'}});
 }, 60_000);
+
+it('projects Unicode transcript ranges and rejects caption text and timing that cannot be displayed safely', () => {
+  const authored = example(1);
+  const first = '🙂' + 'A'.repeat(75);
+  const second = ' ' + 'B'.repeat(75);
+  const text = first + second;
+  authored.proposal.beats[0]!.narration = text;
+  authored.plan.beats[0]!.frames = 240;
+  authored.plan.proposalHash = sha256(canonical(authored.proposal));
+  const plan = compilePresentation(authored.proposal, PresentationPlan.parse(authored.plan));
+  const split = [...first].length;
+  const cap = [...text].length;
+  const spec = VoiceSpec.parse({schemaVersion: 'presentation-voice-bindings/1.1',
+    planTaskId: '4'.repeat(64), planManifestSha256: '5'.repeat(64), proposalHash: plan.proposalHash, playbackRate: 1,
+    voicePolicy: 'caller-declared-local-import', clips: [{beatId: plan.beats[0]!.id,
+      receiptFingerprint: '6'.repeat(64), receiptSha256: '7'.repeat(64), sourceAudioSha256: '8'.repeat(64),
+      transcript: text, transcriptSha256: sha256(text), startOffsetFrames: 2, captions: [
+        {startChar: 0, endChar: split, startSample: 0, endSample: 192000},
+        {startChar: split, endChar: cap, startSample: 192000, endSample: 384000},
+      ]}]});
+  if (spec.schemaVersion !== 'presentation-voice-bindings/1.1') throw new Error('Expected authored captions');
+  const clip = spec.clips[0]!;
+  const recording = {beatId: clip.beatId, startSample: 4000, endSample: 388000, sampleCount: 384000,
+    startFrame: 2, endFrame: 194} as ReturnType<typeof placement>;
+  expect(matchVoice(plan, spec)).toHaveLength(1);
+  expect(VoiceSpec.safeParse({...spec, clips: [{...clip,
+    captions: Array.from({length: 41}, () => clip.captions[0]!),
+  }]}).success).toBe(false);
+  expect(() => projectCaptions({...clip, captions: [
+    {...clip.captions[0]!, endChar: 110}, {...clip.captions[1]!, startChar: 110},
+  ]}, recording)).toThrow(expect.objectContaining({code: 'VOICE_CAPTION_LIMIT'}));
+  const projected = projectCaptions(clip, recording);
+  expect(projected.map(cue => [cue.transcript, cue.startFrame, cue.endFrame])).toEqual([[first, 2, 98], [second.trim(), 98, 194]]);
+  for (const [change, code] of [
+    [{startChar: split + 1}, 'VOICE_CAPTION_TEXT'], [{startChar: split - 1}, 'VOICE_CAPTION_TEXT'],
+    [{endChar: cap - 1}, 'VOICE_CAPTION_TEXT'], [{endSample: 384001}, 'VOICE_CAPTION_TIMING'],
+    [{startSample: 191999}, 'VOICE_CAPTION_TIMING'], [{startSample: 383999}, 'VOICE_CAPTION_TIMING'],
+    [{endSample: 194000}, 'VOICE_CAPTION_DURATION'], [{endSample: 300000}, 'VOICE_CAPTION_DURATION'],
+  ] as const) {
+    expect(() => projectCaptions({...clip, captions: [clip.captions[0]!, {...clip.captions[1]!, ...change}]}, recording))
+      .toThrow(expect.objectContaining({code}));
+  }
+  expect(() => projectCaptions({...clip, captions: [
+    {...clip.captions[0]!, startSample: 0, endSample: 192100}, {...clip.captions[1]!, startSample: 192150},
+  ]}, recording)).toThrow(expect.objectContaining({code: 'VOICE_CAPTION_TIMING'}));
+});
