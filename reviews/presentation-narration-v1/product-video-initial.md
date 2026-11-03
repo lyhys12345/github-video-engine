@@ -1,0 +1,26 @@
+# Independent product and video review — narration freeze v1
+
+Candidate: `C:/Users/luyuh/Documents/Codex/gve-presentation-narration-freeze-v1/candidate.json` SHA-256 `0a3b53df40561913ad8cdc7caf6106257d49cd7a5de1c45676564f9eae0bb767`. All 553 manifest entries matched their declared hashes and lengths. The operator and narration contract and J1/J4 role rules were read; builder and other judges' conclusions were not used. Work was isolated under this `judge-product-visual` directory, using the frozen engine and a copy of state; no target repository was executed.
+
+## Verdict and limits
+
+**Product: UNVERIFIED overall.** Both existing project bindings, baseline preview status and export succeeded; independently changing one clip offset created new voice tasks and two actual noncached narrated preview renders succeeded. Negative cases below were rejected. I did not independently export or inspect the newly rendered versions, test a duration change, or establish that all original artifacts remain intact after the change. Text mismatch was tested at binding validation, not via a complete edited-plan revision. The fixture identifies its imported voice as Microsoft Zira Desktop; its label and transcript are caller declarations, not verified speaker identity or verified spoken content. These observations cannot prove that an arbitrary dishonest Chen label is impossible.
+
+**Video quality: UNVERIFIED overall.** Static inspection and technical decoding observations are below; continuous viewing, listening, naturalness, speech content, exact speech alignment, semantic/editorial review, and owner acceptance were not performed. Owner deferral of listening is a separate permission, not an artistic pass. An AAC stream does not establish audible or intelligible speech.
+
+## Independently exercised paths
+
+- Existing `express-bindings.json` voice bind succeeded cached, task `7001d9868a95f2b95248b457bad4b911c70b49347e9bedf7d6fd44cd6b3e9b33`; rembg succeeded cached, task `3920d496aa53cdd9a17c53d711b03067466579ae2389a841dda1e2fb4fb0df98`.
+- In scratch I incremented the first clip's start offset by one frame in each binding. New voice tasks succeeded noncached (`a17d555acca1f20c5a8cf3bac4200cef45a91d3b9939aee56adcf3378c78036d`, `21df20879fe769490bdd3987c15f7c3ba1008dfda085aab0223b0bb1af833e49`); actual narrated preview renders succeeded noncached (`c760291cf32922581e9c8e4b684fbd71ef618a8079c2cfeb9778d1667efd4410`, `a96eab44b302b77f3747abb72232d2cd3df8589d0674c6ef0b34ae72310ac940`). Their export, media content, and old-artifact retention were not independently checked.
+- Baseline status and exports succeeded for Express preview `cc06313b6aba522f69c4631cf5ab7e17e4be5e5e0a61703723df2c17638b56da` and rembg `b5d578bc68f8092f25b5cd4b79d4cbff3612e97ad372c4ff2f9ffbb3b87038d9`; status reported integrity verified. Scratch exports are in `express-export` and `rembg-export`.
+- Modified binding transcript with its recomputed digest but inconsistent with plan: `VOICE_TRANSCRIPT`, exit 1. Wrong source-audio digest: `VOICE_RECEIPT`, exit 1. First clip offset 119 frames: `VOICE_DOES_NOT_FIT`, exit 1, 154752 actual samples versus 2000 available. Narrated mode without a voice task: `USAGE`, exit 1. These tests establish rejection of the specific examples, not all malformed or unsupported input.
+
+## Actual media checks
+
+From the exported baseline MP4s, ffprobe showed 720×1280 H.264 at 24 fps and mono AAC at 48 kHz. Express has 480 frames / 20 seconds, SHA-256 `a085206167bc3564826ba9dadc88f5de125f4efbeebc8898180cc5854f8b86`; rembg has 540 frames / 22.5 seconds, SHA-256 `a98ad137285eccdd6cc69d4361e124724fddb70c7b763c34c57d0b7827a98b7d`. Full ffmpeg decode to null completed with exit 0 for both.
+
+I extracted and individually inspected 360×640 images from the actual MP4s. Express frames: 6, 7, 36, 84, 120, 123, 189, 243, 319, 363, 424, 479 (`express-frames`). rembg: 6, 7, 40, 95, 99, 154, 195, 270, 315, 371, 411, 472, 539 (`rembg-frames`). Frame 6 has no caption and frame 7 has the first caption, consistent with the first VTT cue around 0.291 seconds. Captions are burned into the lower bar. Express presents request/response and labels the scene an illustration with no observed execution. rembg shows the bird, request, mask/cutout treatment and labels. Across inspected stills I observed no decisive picture–label contradiction; this limited finding does not establish that the motion or narration explains causality clearly throughout.
+
+**Readability risk, minor / device-dependent:** on 360-pixel-wide frames long command text is very small, and subtitles sit close to the lower video edge (approximately 11 pixels bottom margin at this scale). Real phone playback, platform overlays and accessibility/safe areas were not tested. The actual visual material consists of diagrammatic illustration; assessment of pacing, transitions, audience comprehension and whether the finished moving presentation feels like slides requires continuous viewing.
+
+VTT cue boundaries are measured at clip level and transcripts are caller-declared; neither establishes word-level sync or content heard. The artifact's own review metadata keeps speech content, voice similarity, owner listening, alignment, semantic/editorial/audiovisual review and acceptance pending. No claim of Chen voice or of successful natural speech is made by this review.

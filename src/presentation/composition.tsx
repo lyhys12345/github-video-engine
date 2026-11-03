@@ -77,7 +77,8 @@ function ImageChoice({plan, frame}: {plan: CompiledPresentation; frame: ReturnTy
   </div>;
 }
 
-const Presentation: React.FC<CompiledPresentation> = (plan) => {
+type Props = CompiledPresentation & {cues?: {startFrame: number; endFrame: number; transcript: string}[]};
+const Presentation: React.FC<Props> = (plan) => {
   const frame = useCurrentFrame();
   const [handle] = useState(() => delayRender('Load pinned presentation font'));
   const [ready, setReady] = useState(false);
@@ -88,17 +89,23 @@ const Presentation: React.FC<CompiledPresentation> = (plan) => {
   if (!ready) return null;
   const current = presentationFrame(plan, frame);
   const titleLength = characters(current.beat.title);
+  const cue = plan.cues?.find(item => frame >= item.startFrame && frame < item.endFrame);
   return <AbsoluteFill style={{fontFamily: 'GVE Presentation, sans-serif', background: '#f3f1e7', color: ink, padding: '54px 54px 45px'}}>
-    <div style={{color: '#8c4736', fontSize: 22, fontWeight: 700}}>Silent · Illustration · No observed execution</div>
+    <div style={{color: '#8c4736', fontSize: 22, fontWeight: 700}}>{plan.cues ? 'Local voice · Illustration · No observed execution' : 'Silent · Illustration · No observed execution'}</div>
     <div style={{fontSize: titleLength > 45 ? 30 : titleLength > 25 ? 38 : 48, fontWeight: 800, lineHeight: 1.12,
       height: 175, marginTop: 22, overflowWrap: 'anywhere'}}>{current.beat.title}</div>
     {plan.moduleId === 'http-exchange/1' ? <Http plan={plan} frame={current}/> : <ImageChoice plan={plan} frame={current}/>}
     <div style={{position: 'absolute', bottom: 130, left: 54, right: 54, height: 6, borderRadius: 6, background: border}}>
       <div style={{width: `${100 * (frame + 1) / plan.timeline.totalFrames}%`, height: '100%', borderRadius: 6, background: accent}}/>
     </div>
+    {cue && <div style={{position: 'absolute', bottom: 23, left: 54, right: 54, color: '#fff', background: ink, padding: '10px 16px',
+      borderRadius: 12, textAlign: 'center', fontSize: cue.transcript.length > 60 ? 18 : 25, lineHeight: 1.15,
+      overflowWrap: 'anywhere', whiteSpace: 'pre-wrap'}}>
+      {cue.transcript}
+    </div>}
   </AbsoluteFill>;
 };
 
 registerRoot(() => <Composition id="BoundedStorySegment" component={Presentation} width={720} height={1280}
-  fps={24} durationInFrames={24} defaultProps={{} as CompiledPresentation}
+  fps={24} durationInFrames={24} defaultProps={{} as Props}
   calculateMetadata={({props}) => ({durationInFrames: props.timeline.totalFrames, fps: props.timeline.fps})}/>);

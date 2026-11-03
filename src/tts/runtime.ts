@@ -8,7 +8,7 @@ import {ArtifactSchema,type Artifact} from '../contracts/runtime.js';
 import {EngineError,checkAbort} from '../core/errors.js';
 import {canonical,sha256} from '../core/util.js';
 import {command} from '../core/process.js';
-import {ffmpegPath,ffprobePath} from '../providers/local.js';
+import {ffmpegPath,ffprobePath,localAudioInput} from '../providers/local.js';
 import {ElevenLabsProvider,TtsSpecSchema,ttsFingerprint,ttsInput,type TtsSpec,type TtsProvider} from '../providers/tts.js';
 import {ancestors,boundedFile,preflightStatePath} from '../story-planner/runtime.js';
 import {StorySchema} from '../contracts/story.js';
@@ -35,11 +35,11 @@ export async function measureTtsAudio(bytes:Buffer,signal:AbortSignal,mediaType:
  const dir=await mkdtemp(join(tmpdir(),'gve-tts-media-'));const path=join(dir,'audio.bin');
  try{checkAbort(signal);await writeFile(path,bytes,{flag:'wx'});
   let probe:{streams?:{codec_type?:string}[];format?:{duration?:string;format_name?:string}};
-  try{probe=JSON.parse(await command(ffprobePath(),['-v','error','-show_streams','-show_format','-of','json',path],{signal,timeout:30000}));}catch{checkAbort(signal);return fail('TTS_MEDIA','Audio could not be probed');}
+  try{probe=JSON.parse(await command(ffprobePath(),['-v','error',...localAudioInput,'-show_streams','-show_format','-of','json',path],{signal,timeout:30000}));}catch{checkAbort(signal);return fail('TTS_MEDIA','Audio could not be probed');}
   const streams=probe.streams??[],seconds=Number(probe.format?.duration);
   if(streams.length!==1||streams[0]?.codec_type!=='audio'||!Number.isFinite(seconds)||seconds<=0||seconds>600)fail('TTS_MEDIA','Expected one audio-only stream with duration in (0,600] seconds');
   const format=({'audio/mpeg':'mp3','audio/wav':'wav','audio/flac':'flac'} as Record<string,string>)[mediaType];if(!format||!probe.format?.format_name?.split(',').includes(format))fail('TTS_MEDIA','Declared audio type does not match measured container');
-  try{await command(ffmpegPath(),['-v','error','-xerror','-i',path,'-map','0:a:0','-f','null','-'],{signal,timeout:30000});}catch{checkAbort(signal);return fail('TTS_MEDIA','Audio failed full decode');}
+  try{await command(ffmpegPath(),['-v','error','-xerror','-nostdin',...localAudioInput,'-i',path,'-map','0:a:0','-f','null','-'],{signal,timeout:30000});}catch{checkAbort(signal);return fail('TTS_MEDIA','Audio failed full decode');}
   return seconds;
  }finally{await rm(dir,{recursive:true,force:true});}
 }
@@ -86,6 +86,27 @@ export async function produceTts(raw:unknown,data:string,signal:AbortSignal,opti
  }finally{db.close();}
 }
 export async function statusTts(data:string,id:string){hash.parse(id);const db=await openState(data,false);try{const request=validateRequest(db,id),result=outcome(db,id);if(result?.state==='succeeded'){const checked=await verifiedReceipt(new ArtifactStore(data),db,id);return{fingerprint:id,state:'succeeded',integrity:'verified',...checked};}return{fingerprint:id,state:'held',reservationMicros:request.estimate,actualChargeMicros:null,code:result?.code??'TTS_INTERRUPTED_OR_RUNNING',replay:'forbidden; inspect provider usage manually',review:'pending-owner-listening'};}finally{db.close();}}
+
+export async function readLocalTts(data: string, id: string) {
+  const status = await statusTts(data, id);
+  if (!('receipt' in status) || !status.receipt || !status.receiptArtifact) {
+    return fail('TTS_HELD', 'Expected a successful verified local import.');
+  }
+  const {receipt, receiptArtifact} = status;
+  // The fingerprint is over the canonical input with adapterVersion, while the
+  // public import schema accepts only request fields.
+  const {adapterVersion: _adapterVersion, ...raw} = receipt.input as Record<string, unknown>;
+  const spec = TtsSpecSchema.safeParse({...raw, schemaVersion: '1.0'});
+  if (!spec.success || spec.data.provider !== 'local-import' || canonical(ttsInput(spec.data)) !== canonical(receipt.input) ||
+      receipt.chargeBasis !== 'local-import-no-provider-call' || receipt.requestId !== null ||
+      receipt.estimatedMaxChargeMicros !== 0 || receipt.artifact.sha256 !== spec.data.sourceSha256 ||
+      receipt.artifact.mediaType !== spec.data.mediaType || receipt.voiceLabel !== spec.data.voiceLabel) {
+    return fail('TTS_INTEGRITY', 'Expected exact local import receipt and source audio.');
+  }
+  const store = new ArtifactStore(data);
+  return {input: spec.data, receipt, receiptArtifact, receiptBytes: await verifiedBytes(store, receiptArtifact),
+    audio: await verifiedBytes(store, receipt.artifact)};
+}
 export async function exportTts(data:string,id:string,out:string,signal:AbortSignal,binding:{story:unknown;shotId:string}){
  hash.parse(id);checkAbort(signal);const state=await statusTts(data,id);if(!('receipt' in state))return fail('TTS_HELD','Only successful verified audio can be exported');
  const receipt=state.receipt!,story=StorySchema.parse(binding.story),shot=story.shots.find(s=>s.id===binding.shotId),input=receipt.input as {text?:string};if(!shot||shot.narration!==input.text)return fail('TTS_TRANSCRIPT','Export requires exact current story shot narration');
