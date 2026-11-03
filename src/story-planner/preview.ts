@@ -41,6 +41,9 @@ const json = (value: unknown) => JSON.stringify(value, null, 2) + '\n';
 
 function planPreview(pack: Pack, mode: z.infer<typeof Mode>, presentation?: z.infer<typeof Presentation>) {
   if (!pack.input.sourceStory) throw new EngineError('PREVIEW_STORY_BINDING', 'Preview requires a repository-bound asset task.');
+  if (pack.input.sourceStory.adaptation && (mode !== 'silent' || presentation !== AUDIENCE_PRESENTATION)) {
+    throw new EngineError('PREVIEW_ADAPTATION', 'Mapped previews require --mode silent --presentation audience-v1.');
+  }
   const animation = compileAnimation(pack.input.story, pack.input.animation);
   const {fps, totalFrames} = animation;
   if (totalFrames < 1 || totalFrames > fps * 60 || animation.shots.length > 12 ||
@@ -244,7 +247,7 @@ async function checkedPreview(data: string, id: string, includeFiles: boolean) {
       leaseExpiresAt: new Date(task.leaseUntil).toISOString(), retryable: expired && task.attempt < MAX_ATTEMPTS}};
   }
   const pack = await checkedPack(data, input.assetTaskId);
-  const {samples, sourceStory} = planPreview(pack, input.mode, input.presentation);
+  const {props, samples, sourceStory} = planPreview(pack, input.mode, input.presentation);
   if (sha256(pack.files.get('manifest.json')!) !== input.assetManifestSha256) {
     throw new EngineError('PREVIEW_INTEGRITY', 'Asset manifest hash differs from committed preview input.');
   }
@@ -267,6 +270,22 @@ async function checkedPreview(data: string, id: string, includeFiles: boolean) {
   const files = new Map<string, Buffer>();
   for (const file of result.files) {
     const bytes = await read(file.artifact);
+    if (sourceStory.adaptation && file.path === 'preview.json') {
+      const manifest = JSON.parse(bytes.toString('utf8'));
+      const movie = result.files.find(item => item.path === 'preview.mp4')!;
+      if (canonical(manifest.sourceStory) !== canonical(sourceStory) || manifest.taskId !== id ||
+          manifest.assetTaskId !== input.assetTaskId || manifest.assetManifestSha256 !== input.assetManifestSha256 ||
+          manifest.mode !== 'silent' || manifest.presentation !== AUDIENCE_PRESENTATION ||
+          canonical(manifest.timeline) !== canonical(props.timeline) || canonical(manifest.audience) !== canonical(props.audience) ||
+          canonical(manifest.samples) !== canonical(samples) || manifest.media?.sha256 !== movie.artifact.sha256 ||
+          manifest.media.fullDecodeExit !== 0 || manifest.voice?.status !== 'omitted-explicitly' ||
+          manifest.continuousAv !== 'UNVERIFIED' || manifest.listening !== 'UNVERIFIED' || manifest.ownerAcceptance !== 'pending') {
+        throw new EngineError('PREVIEW_INTEGRITY', 'Mapped preview receipt differs from the committed asset, presentation or media.');
+      }
+    }
+    if (sourceStory.adaptation && file.path === 'captions.vtt' && !bytes.equals(Buffer.from(captionFile(props)))) {
+      throw new EngineError('PREVIEW_INTEGRITY', 'Mapped captions differ from the committed storyboard.');
+    }
     if (includeFiles) files.set(file.path, bytes);
   }
   if (includeFiles) for (const [path, bytes] of pack.files) files.set('editable/' + path, bytes);
@@ -283,5 +302,8 @@ export async function exportStoryPreview(data: string, id: string, output: strin
   checkAbort(signal);
   const preview = await checkedPreview(data, id, true);
   if (!preview.files) throw new EngineError('PREVIEW_EXPORT', 'Preview has no committed successful output.');
+  if (preview.status.sourceStory.adaptation && publication !== RECEIPT_PUBLICATION) {
+    throw new EngineError('PREVIEW_ADAPTATION', 'Mapped previews require receipt-v1 publication.');
+  }
   return publishAssetFiles(data, id, output, preview.files, signal, publication);
 }

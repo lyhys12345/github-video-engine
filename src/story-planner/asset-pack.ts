@@ -5,6 +5,7 @@ import {resolve,dirname,join,relative,isAbsolute,sep} from 'node:path';
 import {tmpdir} from 'node:os';
 import {z} from 'zod';
 import {StorySchema,type Story} from '../contracts/story.js';
+import {AdaptationBinding, AdaptationMaterial} from '../contracts/proposal-mapping.js';
 import {ArtifactSchema} from '../contracts/runtime.js';
 import {ArtifactStore} from '../assets/store.js';
 import {TaskRunner} from '../orchestrator/tasks.js';
@@ -18,6 +19,7 @@ import {compileStory} from './compile.js';
 import {VoiceBindingSchema} from './voice-handoff.js';
 import {deriveResearchHandoff} from './research-handoff.js';
 import {renderFramePreview} from './frame-preview.js';
+import {compileProposalMapping} from './proposal-mapping.js';
 
 export const ASSET_PACK_KIND='experimental-story-asset-pack-v1';
 const MAX_AUDIO=50_000_000,MAX_TOTAL_AUDIO=100_000_000;
@@ -29,10 +31,10 @@ const Probe=z.discriminatedUnion('ok',[
  z.object({ok:z.literal(true),shotId:z.string(),measuredSeconds:z.number().finite().positive(),audioStreams:z.literal(1),videoStreams:z.literal(0)}).strict(),
  z.object({ok:z.literal(false),shotId:z.string(),code:z.string(),message:z.string()}).strict(),
 ]);
-const SourceStory=z.object({taskId:hash,graphHash:hash,repositoryBinding:RepositoryBindingSchema}).strict();
-const Input=z.object({previewFormat:z.enum(['2','3']).optional(),sourceStory:SourceStory.optional(),story:StorySchema,animation:AnimationSchema,voice:z.object({schemaVersion:z.literal('1.0'),storyId:z.string(),voiceLabel:z.string().min(1).max(300),clips:z.array(Clip).max(100)}).strict(),sources:z.array(z.object({id:z.string(),sha256:hash,bytes:z.number().int().positive().max(2_000_000)}).strict()).max(8),probe:z.object({tool:z.literal('ffprobe'),version:z.string().max(1000),receipts:z.array(Probe).max(100)}).strict(),compiler:z.array(z.object({file:z.string(),sha256:hash}).strict()).min(1).max(30)}).strict();
+const SourceStory=z.object({taskId:hash,graphHash:hash,repositoryBinding:RepositoryBindingSchema,adaptation:AdaptationBinding.optional()}).strict();
+const Input=z.object({previewFormat:z.enum(['2','3']).optional(),sourceStory:SourceStory.optional(),material:AdaptationMaterial.optional(),story:StorySchema,animation:AnimationSchema,voice:z.object({schemaVersion:z.literal('1.0'),storyId:z.string(),voiceLabel:z.string().min(1).max(300),clips:z.array(Clip).max(100)}).strict(),sources:z.array(z.object({id:z.string(),sha256:hash,bytes:z.number().int().positive().max(2_000_000)}).strict()).max(8),probe:z.object({tool:z.literal('ffprobe'),version:z.string().max(1000),receipts:z.array(Probe).max(100)}).strict(),compiler:z.array(z.object({file:z.string(),sha256:hash}).strict()).min(1).max(30)}).strict();
 type PackInput=z.infer<typeof Input>;
-const File=z.object({path:z.string().regex(/^(story|portable-story|animation|compiled|research-handoff|voice-bindings|voice-handoff|probe-receipts|provenance|manifest)\.json$|^index\.html$|^sources\/[a-z][a-z0-9-]{0,63}\.txt$|^audio\/[a-z][a-z0-9-]{0,63}\.bin$|^frames\/[a-z][a-z0-9-]{0,63}-(early|middle|late)\.svg$/),artifact:ArtifactSchema}).strict();
+const File=z.object({path:z.string().regex(/^(story|portable-story|animation|compiled|research-handoff|voice-bindings|voice-handoff|probe-receipts|provenance|manifest|proposal|mapping)\.json$|^index\.html$|^sources\/[a-z][a-z0-9-]{0,63}\.txt$|^audio\/[a-z][a-z0-9-]{0,63}\.bin$|^frames\/[a-z][a-z0-9-]{0,63}-(early|middle|late)\.svg$/),artifact:ArtifactSchema}).strict();
 const Result=z.object({schemaVersion:z.literal('1.0'),kind:z.literal(ASSET_PACK_KIND),review:z.literal('pending'),files:z.array(File).min(12).max(420)}).strict();
 const compilerFiles=['story-planner/asset-pack.ts','story-planner/animation.ts','story-planner/frame-preview.ts','story-planner/compile.ts','story-planner/runtime.ts','story-planner/research-handoff.ts','story-planner/voice-handoff.ts','story-planner/cli.ts','contracts/story.ts','contracts/evidence-plan.ts','contracts/runtime.ts','contracts/planning.ts','contracts/video.ts','assets/store.ts','orchestrator/tasks.ts','operations/usage.ts','core/util.ts','core/errors.ts','core/process.ts','providers/local.ts'];
 const fingerprint=(input:PackInput)=>sha256(canonical({version:'production-task-v1',kind:ASSET_PACK_KIND,input}));
@@ -55,9 +57,19 @@ function deriveFiles(input:PackInput,sources:Map<string,Buffer>,audio:Map<string
   const prefix=repositoryBinding.repository+'/blob/'+repositoryBinding.commit+'/';
   if(graphHash!==sha256(canonical(story))||story.evidence.sources.some(s=>!s.url.startsWith(prefix)))throw new EngineError('ASSET_STORY_BINDING','Asset sources and graph must match the bound Story');
  }
+ if(input.material||input.sourceStory?.adaptation){
+  const material=AdaptationMaterial.parse(input.material);
+  const mapped=compileProposalMapping(material,story.evidence.sources);
+  if(canonical(input.sourceStory?.adaptation)!==canonical(mapped.adaptation)||
+     canonical(input.sourceStory?.repositoryBinding)!==canonical(material.proposal.binding)||
+     canonical(story)!==canonical(mapped.story)||canonical(input.animation)!==canonical(mapped.animation)||audio.size){
+   throw new EngineError('ASSET_ADAPTATION','Asset task differs from its committed silent proposal mapping');
+  }
+ }
  const provenance={schemaVersion:'1.0',scope:'authored-diagnostic-illustration-not-observed-execution',review:'pending',...(input.sourceStory?{sourceStory:input.sourceStory}:{}),storyId:story.id,disclosure:story.evidence.disclosure,sources:story.evidence.sources.map(s=>({...s,path:`sources/${s.id}.txt`})),claims:story.evidence.claims,authoredAnimation:input.animation,parameterBasis:'All rule ranges, rates, mappings, artwork and choreography are author-selected illustrations; citations do not establish their numerical values or observed results.'};
  const provenanceBytes=json(provenance),files=new Map<string,Buffer>();const put=(path:string,value:unknown)=>files.set(path,Buffer.from(json(value)));
  put('story.json',story);put('portable-story.json',{...story,evidence:{...story.evidence,sources:provenance.sources}});put('animation.json',input.animation);put('compiled.json',compiled);put('research-handoff.json',deriveResearchHandoff({graph:story,sources:[...sources].map(([id,bytes])=>({id,bytes}))}));put('voice-bindings.json',input.voice);put('voice-handoff.json',voice);put('probe-receipts.json',input.probe);files.set('provenance.json',Buffer.from(provenanceBytes));
+ if(input.material){files.set('proposal.json',Buffer.from(canonical(input.material.proposal)));files.set('mapping.json',Buffer.from(canonical(input.material.mapping)));}
  for(const [id,b] of sources)files.set(`sources/${id}.txt`,b);for(const [id,b] of audio)files.set(`audio/${id}.bin`,b);
  const samples=[];
  for(const shot of compiled.shots)for(const [label,fraction] of [['early',.1],['middle',.5],['late',.9]] as const){const frame=shot.startFrame+Math.floor((shot.endFrame-shot.startFrame-1)*fraction),path=`frames/${shot.shotId}-${label}.svg`;files.set(path,Buffer.from(renderFramePreview(compiled,frame,{story,provenanceSha256:sha256(provenanceBytes)},input.previewFormat??'legacy')));samples.push({shotId:shot.shotId,label,frame,path});}
@@ -70,16 +82,26 @@ function deriveFiles(input:PackInput,sources:Map<string,Buffer>,audio:Map<string
 /** Capture immutable input bytes before probing. Status/export never read original paths or run tools. */
 export async function planAssetPack(spec:string,root:string,animationPath:string,voicePath:string,data:string,signal:AbortSignal){
  checkAbort(signal);
- return planCapturedAssetPack(await captureEvidence(spec,root),animationPath,voicePath,data,signal);
+ return planCapturedAssetPack(await captureEvidence(spec,root),{animationPath,voicePath},data,signal);
 }
 export async function planAssetPackFromStoryTask(storyTask:string,animationPath:string,voicePath:string,data:string,signal:AbortSignal){
  checkAbort(signal);
- const {snapshot,sourceStory}=await loadBoundStory(data,storyTask);
- return planCapturedAssetPack(snapshot,animationPath,voicePath,data,signal,sourceStory);
+ const {snapshot,sourceStory,material}=await loadBoundStory(data,storyTask);
+ if(material)throw new EngineError('ASSET_ADAPTATION','Repeat project adapt-proposal to plan the committed silent mapping');
+ return planCapturedAssetPack(snapshot,{animationPath,voicePath},data,signal,sourceStory);
 }
-async function planCapturedAssetPack(snapshot:StorySnapshot,animationPath:string,voicePath:string,data:string,signal:AbortSignal,sourceStory?:z.infer<typeof SourceStory>){
- const animation=AnimationSchema.parse(parse(await boundedFile(resolve(animationPath))));compileAnimation(snapshot.graph,animation);
- const rawVoice=VoiceBindingSchema.parse(parse(await boundedFile(resolve(voicePath))));
+export async function planMappedAssetPack(storyTask:string,data:string,signal:AbortSignal){
+ const {snapshot,sourceStory,material}=await loadBoundStory(data,storyTask);
+ if(!material)throw new EngineError('ASSET_ADAPTATION','Expected a mapped proposal Story task');
+ return planCapturedAssetPack(snapshot,{material},data,signal,sourceStory);
+}
+async function planCapturedAssetPack(snapshot:StorySnapshot,source:{animationPath:string;voicePath:string}|{material:AdaptationMaterial},data:string,signal:AbortSignal,sourceStory?:z.infer<typeof SourceStory>){
+ const material='material'in source?source.material:undefined;
+ const animation='material'in source?compileProposalMapping(source.material,snapshot.graph.evidence.sources).animation:
+  AnimationSchema.parse(parse(await boundedFile(resolve(source.animationPath))));
+ compileAnimation(snapshot.graph,animation);
+ const rawVoice='material'in source?{schemaVersion:'1.0' as const,storyId:snapshot.graph.id,voiceLabel:'Explicitly silent mapping',clips:[]}:
+  VoiceBindingSchema.parse(parse(await boundedFile(resolve(source.voicePath))));
  if(rawVoice.voiceLabel.length>300)throw new Error('Voice label exceeds bounded length');
  const voice={...rawVoice,clips:rawVoice.clips.map(c=>({...c,path:`audio/${c.shotId}.bin`,bytes:1}))};validateVoice(snapshot.graph,voice);
  const audio=new Map<string,Buffer>();let total=0;for(const c of rawVoice.clips){checkAbort(signal);const b=await boundedFile(resolve(c.path),MAX_AUDIO);if(sha256(b)!==c.sha256)throw new Error('Voice content hash mismatch');total+=b.length;if(total>MAX_TOTAL_AUDIO)throw new Error('Audio snapshot exceeds total byte limit');audio.set(c.shotId,b);voice.clips.find(x=>x.shotId===c.shotId)!.bytes=b.length;}
@@ -88,8 +110,9 @@ async function planCapturedAssetPack(snapshot:StorySnapshot,animationPath:string
   let versionError:unknown;try{probe.version=(await command(ffprobePath(),['-version'],{signal,timeout:30000})).split(/\r?\n/)[0]!.slice(0,1000);}catch(e){checkAbort(signal);versionError=e;probe.version='unavailable';}
   for(const [shotId,b] of audio){checkAbort(signal);try{if(versionError)throw versionError;const path=join(dir,shotId+'.bin');await writeFile(path,b,{flag:'wx'});const raw=JSON.parse(await command(ffprobePath(),['-v','error','-show_streams','-show_format','-of','json',...localAudioInput,path],{signal,timeout:30000}));const streams=raw.streams??[],duration=Number(raw.format?.duration);if(streams.filter((s:{codec_type:string})=>s.codec_type==='audio').length!==1||streams.some((s:{codec_type:string})=>s.codec_type==='video')||!Number.isFinite(duration)||duration<=0)throw new Error('Expected one measurable audio stream and no video');probe.receipts.push({ok:true,shotId,measuredSeconds:duration,audioStreams:1,videoStreams:0});}catch(e){checkAbort(signal);const error=errorInfo(e);probe.receipts.push({ok:false,shotId,code:error.code,message:'Local audio probe failed: '+error.message.replaceAll(dir,'<owned-audio-snapshot>').slice(0,1200)});}}
  }finally{await rm(dir,{recursive:true,force:true});}}
- const compiler=await Promise.all([...compilerFiles.map(file=>({file,path:resolve(import.meta.dirname,'..',file)})),...['package.json','pnpm-lock.yaml','tsconfig.json'].map(file=>({file,path:resolve(import.meta.dirname,'../..',file)}))].map(async ({file,path})=>({file,sha256:sha256(await readFile(path))})));
- const input=Input.parse({previewFormat:'3',...(sourceStory?{sourceStory}:{}),story:snapshot.graph,animation,voice,sources:snapshot.sources.map(s=>({id:s.id,sha256:sha256(s.bytes),bytes:s.bytes.length})),probe,compiler}),id=fingerprint(input);
+ const mappingFiles=material?['contracts/authoring.ts','contracts/proposal-mapping.ts','story-planner/proposal-mapping.ts','story-planner/audience-plan.ts']:[];
+ const compiler=await Promise.all([...([...compilerFiles,...mappingFiles].map(file=>({file,path:resolve(import.meta.dirname,'..',file)}))),...['package.json','pnpm-lock.yaml','tsconfig.json'].map(file=>({file,path:resolve(import.meta.dirname,'../..',file)}))].map(async ({file,path})=>({file,sha256:sha256(await readFile(path))})));
+ const input=Input.parse({previewFormat:'3',...(sourceStory?{sourceStory}:{}),...(material?{material}:{}),story:snapshot.graph,animation,voice,sources:snapshot.sources.map(s=>({id:s.id,sha256:sha256(s.bytes),bytes:s.bytes.length})),probe,compiler}),id=fingerprint(input);
  data=resolve(data);preflightStatePath(data);await ancestors(data);
  if(sourceStory){
   await ancestors(join(data,'tmp'));
@@ -104,6 +127,12 @@ async function planCapturedAssetPack(snapshot:StorySnapshot,animationPath:string
 
 export async function checkedPack(data:string,id:string){
  const task=await readTask(data,id,ASSET_PACK_KIND),input=Input.parse(task.input);if(fingerprint(input)!==id)throw new Error('Asset pack identity mismatch');
+ if(input.material){
+  const bound=await loadBoundStory(data,input.sourceStory?.taskId??'');
+  if(canonical(bound.material)!==canonical(input.material)||canonical(bound.sourceStory)!==canonical(input.sourceStory)||canonical(bound.snapshot.graph)!==canonical(input.story)){
+   throw new EngineError('ASSET_ADAPTATION','Mapped asset input differs from the committed Story task');
+  }
+ }
  if(task.state!=='succeeded'||!task.result)throw new Error('Asset pack has no successful committed output');const store=new ArtifactStore(data);
  const read=async(a:z.infer<typeof ArtifactSchema>)=>{if(a.inputFingerprint!==id)throw new Error('Artifact fingerprint mismatch');const b=await boundedFile(store.path(a),MAX_AUDIO);if(b.length!==a.bytes||sha256(b)!==a.sha256)throw new Error('Asset pack artifact missing or damaged');return b;};
  const result=Result.parse(parse(await read(task.result)));if(canonical(result.files.map(f=>canonical(f.artifact)).sort())!==canonical(task.outputs.map(a=>canonical(a)).sort()))throw new Error('Asset pack output binding mismatch');
@@ -126,6 +155,10 @@ export type Publication=typeof RECEIPT_PUBLICATION|typeof LEGACY_PUBLICATION;
 
 export async function exportAssetPack(data:string,id:string,out:string,signal:AbortSignal,publication?:Publication){
  checkAbort(signal);const checked=await checkedPack(data,id);
+ if(checked.input.material){
+  if(publication===LEGACY_PUBLICATION)throw new EngineError('ASSET_ADAPTATION','Mapped assets require receipt-v1 publication');
+  publication=RECEIPT_PUBLICATION;
+ }
  return publishAssetFiles(data,id,out,checked.files,signal,publication);
 }
 

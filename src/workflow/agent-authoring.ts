@@ -193,7 +193,7 @@ export async function submitAuthoringProposal(store: WorkflowStore, id: string, 
   return {...reviewState(proposal, hash), reused};
 }
 
-async function loadAuthoringProposal(store: WorkflowStore, id: string, hash: string, signal: AbortSignal) {
+export async function loadAuthoringProposal(store: WorkflowStore, id: string, hash: string, signal: AbortSignal) {
   checkAbort(signal);
   const record = store.proposalRecord(id, hash);
   const bytes = await boundedFile(store.artifacts.path(record.artifact), proposalLimit);
