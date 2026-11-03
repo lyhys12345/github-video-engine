@@ -26,7 +26,7 @@
     "test:final": "vitest run tests/final-finishing.test.ts tests/finalization.test.ts tests/final-delivery.test.ts tests/final-audit.test.ts tests/owned-runtime.test.ts tests/editable-snapshot.test.ts",
     "test:evidence-plan": "vitest run tests/evidence-plan.test.ts",
     "schemas:evidence-plan": "tsx src/evidence-planner/export.ts",
-    "test:mechanism": "tsx --test tests/mechanism-pilot.node.ts tests/mechanism-publication.node.ts"
+    "test:mechanism": "tsx --test tests/mechanism-pilot.node.ts tests/mechanism-publication.node.ts tests/mechanism-media.node.ts"
   },
   "dependencies": {
     "@remotion/bundler": "4.0.538",

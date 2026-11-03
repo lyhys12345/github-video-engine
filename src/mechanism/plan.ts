@@ -160,5 +160,6 @@ export async function loadMechanism(data: string, sidecar: Buffer) {
     for (const ref of [rule.provenance, rule.lessThan.provenance, rule.addPerEligibleUpdate.provenance]) verifyBeat(ref);
   }
   demand(covered.size === graph.shots.length, 'every Story shot must be covered');
-  return {plan, sidecarHash: sha256(sidecar), sourceOrigin: 'standalone captured sources; no Git association' as const};
+  return {plan, snapshot: story.snapshot, sidecarHash: sha256(sidecar),
+    sourceOrigin: 'standalone captured sources; no Git association' as const};
 }

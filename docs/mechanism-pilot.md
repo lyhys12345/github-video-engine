@@ -28,3 +28,22 @@ Stable global entities are declared and local mappings are validated as authored
 The two pilot commands publish mechanism files on Windows using the system Windows PowerShell host. The native helper opens each directory component by handle, rejects reparse points, reserves a new preview directory in the same operation that locks it, and creates files relative to that handle. The same helper exclusively creates the prepare command's sidecar. It refuses existing destinations and leaves any unknown or partial content in place. A preview manifest is created after the payloads. A failed or interrupted publish can leave an incomplete output that requires a fresh destination for retry. Other operating systems are rejected until they have a safe publisher. The existing Story task and CAS use their own unchanged publication path.
 
 Sidecar text and exact quotations are checked against XML 1.0 character constraints before publication. SVG markup is still escaped. A malformed character is rejected instead of silently dropping or rewriting it.
+
+## Eight-second media task
+
+With a verified standalone Story and sidecar in the same task state used above:
+
+```powershell
+pnpm exec tsx scripts/mechanism-media.ts render ./pilot-state ./pilot-sidecar.json
+pnpm exec tsx scripts/mechanism-media.ts status ./pilot-state TASK_ID
+pnpm exec tsx scripts/mechanism-media.ts resume ./pilot-state TASK_ID
+pnpm exec tsx scripts/mechanism-media.ts export ./pilot-state TASK_ID ./new-review
+```
+
+Render prints the task identity before starting local media work. It binds the exact sidecar, Story task and captured source manifest, rendering implementation, geometry and local tool identity. Rendered artifacts commit to the existing TaskRunner and CAS. Interrupted tasks can resume by task ID using the saved sidecar and verified Story task. A changed implementation or runtime environment requires a new task identity. A successful task can be checked and exported without reading the original sidecar file or opening a browser.
+
+The review directory contains the silent eight-second H.264 MP4, model trace with one state mapping per output frame, Remotion PNG samples, a media probe and the captured source and input closure. The export uses the native Windows publisher and refuses an existing destination. REA's external HTML is exported as captured text, with its separate provenance in the Story graph. The fill source is a locally authored hypothetical specification. Nothing executes target source content.
+
+The eight-second clock samples the declared model timeline at 24 FPS. It compresses the authored check schedule and is separate from both target game time and the Story narration estimate. Very closely spaced updates can fall between rendered frames. The trace preserves every model check. The renderer adds no narration, audio synthesis or release approval.
+
+The media task needs an installed Chrome-family browser, FFmpeg and FFprobe. It uses local Remotion and performs a complete decode before committing. For the focused real-media recovery test set `GVE_TEST_MECHANISM_MEDIA=1` and run `pnpm exec tsx --test tests/mechanism-media.node.ts`.
