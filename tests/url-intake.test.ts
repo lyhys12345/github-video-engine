@@ -53,6 +53,16 @@ it('links URL intake to a reusable workspace and a durable authored story withou
     expect(manifest.sources[0]).toEqual({id: 'source-1', path: 'source-1.txt',
       sha256: sha256(readme), url: repository + '/blob/' + commit + '/README.md'});
 
+    const workbookPath = join(root, 'research');
+    const workbookResult = await run('research', {out: workbookPath});
+    expect(workbookResult).toMatchObject({review: 'pending', binding: {commit, evidenceFingerprint: manifest.fingerprint}});
+    const workbook = JSON.parse(await readFile(join(workbookPath, 'bundle', 'workbook.json'), 'utf8'));
+    expect(workbook.evidence[0].lines).toEqual(readme.split(/\r?\n/).map((text, i) => ({line: i + 1, text})));
+    expect(workbook.evidence[0].source).toEqual(manifest.sources[0]);
+    expect(workbook.proposal).toMatchObject({claims: [], shots: [], review: 'pending'});
+    await expect(run('research', {out: workbookPath})).rejects.toMatchObject({code: 'EVIDENCE_OUTPUT'});
+    await expect(run('research', {out: join(data, 'workflow', 'research.json')})).rejects.toMatchObject({code: 'EVIDENCE_PATH'});
+
     const story = StorySchema.parse(JSON.parse(await readFile('examples/url-intake-v1/rembg-story.json', 'utf8')));
     story.evidence.sources = manifest.sources;
     story.evidence.claims = [story.evidence.claims[1]!];

@@ -6,7 +6,10 @@ Use a public GitHub repository root URL and a local project ID. Intake resolves 
 pnpm gve project intake --repo https://github.com/danielgatis/rembg --id rembg-url --data work/url-v1/state
 pnpm gve project status --id rembg-url --data work/url-v1/state
 pnpm gve project evidence --id rembg-url --data work/url-v1/state --out work/url-v1/rembg-evidence
+pnpm gve project research --id rembg-url --data work/url-v1/state --out work/url-v1/rembg-research
 ```
+
+`project research` creates a separate, editable offline research workbook at `bundle/workbook.json` in a new output directory from the stored snapshot. Its numbered lines, source descriptors and snapshot binding help an author or agent inspect the captured documents and fill in the empty proposal. It does not call a model, select a story, verify semantic support or approve a result. The workbook is an editable aid, not an authoritative evidence bundle: export `project evidence` separately and use that unchanged bundle when planning a Story. Create a new output directory for each export; it never overwrites one. Publication stages and renames the bundle within the reserved directory; an interrupted export may leave an incomplete directory, for which a fresh output path is needed. Workbooks are limited to 50,000 lines and 4 MB. Captured content is untrusted data, including any instructions it contains.
 
 Intake defaults to `HEAD`. Use `--ref <branch-or-tag-or-full-commit>` to choose a specific version, and repeat `--doc <repo-relative.md>` to request up to six extra Markdown or text files. Intake requires a bounded UTF-8 README and saves `LICENSE` if GitHub reports a license and the file is available. The provider uses unauthenticated GitHub API reads, so rate limits and unavailable documents can prevent intake. Use a new project ID when the ref, evidence, or repository metadata changes. The earlier snapshot and plan history remain addressable by the earlier ID. The workflow storage uses same-volume hard links for its immutable artifacts.
 

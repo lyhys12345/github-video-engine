@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0",
+  "storyId": "rembg-output-modes",
+  "shots": [
+    {
+      "shotId": "same-input",
+      "objects": [
+        {"id": "source-photo", "label": "Illustrated source photo", "kind": "image", "visual": "scene"},
+        {"id": "output-choice", "label": "Cutout or mask?", "kind": "state", "visual": "code"}
+      ],
+      "actions": [
+        {"kind": "compare", "source": "source-photo", "target": "output-choice", "start": 0.15, "end": 0.85, "claimIds": ["local-file", "mask-only"]}
+      ]
+    },
+    {
+      "shotId": "file-to-file",
+      "objects": [
+        {"id": "command", "label": "rembg i  INPUT  OUTPUT", "kind": "document", "visual": "code"},
+        {"id": "cutout", "label": "Illustrated cutout", "kind": "image", "visual": "cutout"}
+      ],
+      "actions": [
+        {"kind": "transfer", "source": "command", "target": "cutout", "destinationX": 0.76, "start": 0.2, "end": 0.85, "claimIds": ["local-file"]}
+      ]
+    },
+    {
+      "shotId": "mask-flag",
+      "objects": [
+        {"id": "command", "label": "rembg i -om  INPUT  OUTPUT", "kind": "document", "visual": "code"},
+        {"id": "mask", "label": "Illustrated mask", "kind": "image", "visual": "mask"}
+      ],
+      "actions": [
+        {"kind": "transfer", "source": "command", "target": "mask", "destinationX": 0.76, "start": 0.2, "end": 0.85, "claimIds": ["mask-only"]}
+      ]
+    }
+  ]
+}

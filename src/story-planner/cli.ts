@@ -6,17 +6,38 @@ import {planAnimationTask,inspectAnimationTask,exportAnimationTask} from './anim
 import {planStory,statusStory,exportStory,diffStory,writeStoryDiff} from './runtime.js';
 import {buildResearchHandoff} from './research-handoff.js';
 import {canonical,sha256} from '../core/util.js';
-import {planAssetPack,planAssetPackFromStoryTask,statusAssetPack,exportAssetPack} from './asset-pack.js';
+import {planAssetPack,planAssetPackFromStoryTask,statusAssetPack,exportAssetPack,RECEIPT_PUBLICATION,LEGACY_PUBLICATION,type Publication} from './asset-pack.js';
+import {AUDIENCE_PRESENTATION} from './audience-plan.js';
+import {renderStoryPreview,statusStoryPreview,exportStoryPreview} from './preview.js';
 const usage='story plan --spec <graph.json> --root <source-root> --data <state> --out <new-directory> | story status --task <id> --data <state> | story export --task <id> --data <state> --out <new-directory> | story diff --before <task-id> --after <task-id> --data <state> [--out <new-report.json>]';
 export async function storyCommand(positionals:string[],values:Record<string,unknown>,signal:AbortSignal){
+ if(values.publication!==undefined&&(!['asset-export','preview-export'].includes(positionals[1]!)||
+   (values.publication!==RECEIPT_PUBLICATION&&values.publication!==LEGACY_PUBLICATION))){
+  throw new EngineError('USAGE','Only story asset-export and story preview-export support --publication receipt-v1|legacy-v2.');
+ }
+ const publication=values.publication as Publication|undefined;
+ if(positionals.length===2&&['preview-render','preview-status','preview-export'].includes(positionals[1]!)){
+  const action=positionals[1],keys=['task','data',...(action==='preview-render'?['mode']:action==='preview-export'?['out']:[])];
+  if(Object.entries(values).some(([key,value])=>value!==undefined&&!keys.includes(key) && !(action==='preview-render'&&key==='presentation') && !(action==='preview-export'&&key==='publication'))||
+    keys.some(key=>typeof values[key]!=='string'||!String(values[key]).trim())||
+    (action==='preview-render'&&values.mode!=='silent'&&values.mode!=='narrated') ||
+    (values.presentation!==undefined&&values.presentation!==AUDIENCE_PRESENTATION)){
+   throw new EngineError('USAGE',`story ${action} --task <id> --data <state>${action==='preview-render'?' --mode silent|narrated [--presentation audience-v1]':action==='preview-export'?' --out <new-directory>':''}`);
+  }
+  const data=String(values.data),task=String(values.task);
+  if(action==='preview-render')return renderStoryPreview(data,task,values.mode as 'silent'|'narrated',signal,
+   id=>console.error(JSON.stringify({taskId:id,stage:'story-preview'})), values.presentation as typeof AUDIENCE_PRESENTATION | undefined);
+  if(action==='preview-status')return statusStoryPreview(data,task);
+  return exportStoryPreview(data,task,String(values.out),signal,publication);
+ }
  if(positionals.length===2&&['asset-plan','asset-status','asset-export'].includes(positionals[1]!)){
   const action=positionals[1],byTask=action==='asset-plan'&&values.task!==undefined,allowed=action==='asset-plan'?[...(byTask?['task']:['spec','root']),'plan','voice','data']:action==='asset-status'?['task','data']:['task','data','out'];
-  if(Object.entries(values).some(([k,v])=>v!==undefined&&!allowed.includes(k))||allowed.some(k=>typeof values[k]!=='string'||!String(values[k]).trim()))throw new EngineError('USAGE',`story ${action} requires ${allowed.map(k=>'--'+k).join(' ')}`);
+  if(Object.entries(values).some(([k,v])=>v!==undefined&&!allowed.includes(k)&&!(action==='asset-export'&&k==='publication'))||allowed.some(k=>typeof values[k]!=='string'||!String(values[k]).trim()))throw new EngineError('USAGE',`story ${action} requires ${allowed.map(k=>'--'+k).join(' ')}`);
   const v=(k:string)=>String(values[k]);
   if(byTask)return planAssetPackFromStoryTask(v('task'),v('plan'),v('voice'),v('data'),signal);
   if(action==='asset-plan')return planAssetPack(v('spec'),v('root'),v('plan'),v('voice'),v('data'),signal);
   if(action==='asset-status')return statusAssetPack(v('data'),v('task'));
-  return exportAssetPack(v('data'),v('task'),v('out'),signal);
+  return exportAssetPack(v('data'),v('task'),v('out'),signal,publication);
  }
  if(positionals.length===2&&positionals[1]==='research-plan'){
   const keys=['spec','root','data','out'];

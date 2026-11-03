@@ -1,11 +1,23 @@
-import {test,expect} from 'vitest';
-import {readFile,writeFile,mkdir,readdir,lstat,symlink,unlink} from 'node:fs/promises';
+import {test,expect,vi} from 'vitest';
+import {readFile,writeFile,mkdir,readdir,lstat,symlink,unlink,rename} from 'node:fs/promises';
 import {join,relative,resolve} from 'node:path';
 import {exportFinalDelivery,type FinalDeliveryContext} from '../src/workflow/final-delivery.js';
 import {canonical,sha256} from '../src/core/util.js';
 import {projectRoot} from '../src/providers/local.js';
 import {finalizationFixture,mockFinalReview} from './finalization-support.js';
 import {command} from '../src/core/process.js';
+
+const observation=vi.hoisted(()=>({onMissing:undefined as ((path:string)=>Promise<void>)|undefined}));
+vi.mock('node:fs/promises',async importOriginal=>{
+ const fs=await importOriginal<typeof import('node:fs/promises')>();
+ return {...fs,lstat:async (...args:Parameters<typeof fs.lstat>)=>{
+  try{return await fs.lstat(...args);}
+  catch(error){
+   if((error as NodeJS.ErrnoException).code==='ENOENT')await observation.onMissing?.(String(args[0]));
+   throw error;
+  }
+ }};
+});
 
 async function fixture(){
  const f=await finalizationFixture();try{const prepared=await f.store.prepare('demo'),result=await f.store.run('demo',prepared.id,new AbortController().signal),revision=await f.base.store.workflow.revision('demo'),readthrough=await f.base.store.readMeasured(f.base.design);
@@ -71,6 +83,25 @@ test('destination ancestor junction and source-closure junction are rejected wit
 
 test('concurrent identical exports publish one complete directory and clean owned staging only (MOCK media)',async()=>{
  const x=await fixture();try{const results=await Promise.all([exportFinalDelivery(x.context,x.out),exportFinalDelivery(x.context,x.out)]);expect(results.map(r=>r.cached).sort()).toEqual([false,true]);expect(results[0]!.manifestSha256).toBe(results[1]!.manifestSha256);const m=await manifest(x.out);for(const e of m.files)expect(sha256(await readFile(join(x.out,e.path)))).toBe(e.sha256);expect((await readdir(x.f.base.root)).filter(p=>p.startsWith('.gve-delivery-'))).toEqual([]);}finally{await x.f.close();}
+});
+
+test('a complete delivery appearing just after a missing destination probe is reused',async()=>{
+ const x=await fixture();
+ try{
+  const other=join(x.f.base.root,'completed-by-other-writer');
+  const winner=await exportFinalDelivery(x.context,other);
+  let raced=false;
+  observation.onMissing=async path=>{
+   if(path!==x.out||raced)return;
+   raced=true;
+   await rename(other,x.out);
+  };
+  const result=await exportFinalDelivery(x.context,x.out);
+  expect(raced).toBe(true);
+  expect(result).toMatchObject({cached:true,manifestSha256:winner.manifestSha256});
+  expect(await exists(other)).toBe(false);
+  expect((await readdir(x.f.base.root)).filter(p=>p.startsWith('.gve-delivery-'))).toEqual([]);
+ }finally{observation.onMissing=undefined;await x.f.close();}
 });
 
 test('engineering lock requires exact full-render task provenance and records it in delivered manifests (MOCK Judge/media)',async()=>{

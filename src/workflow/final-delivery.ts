@@ -99,7 +99,22 @@ export async function exportFinalDelivery(context:FinalDeliveryContext,output:st
  put('README.md',`# ${md(prepared.project.name)} — local engineering delivery\n\nStatus: ${status}. Historical M2 G4 remains UNVERIFIED; no G6 or publication is implied. The owner explicitly deferred perceptual AV review to final review.\n\nmaster.mp4 is the clean master; captioned.mp4 is the captioned local platform variant. Independent narration, SRT/VTT, cover, timeline, source/evidence, usage, authority and technical/deferred-review records are included. Caption timing is sentence/scene-level.\n\neditable-project contains its own source, pinned dependency lock and local font/audio assets. See its README for installation and actual rerender commands. A source/JSON export alone is not proof that its installation/render was executed; consult the separate milestone execution evidence.\n\nThe delivery manifest hashes the delivered files. Later node_modules and proposed-render directories created inside the editable project are local working files, outside that immutable delivery manifest and outside approval. An edited tracked source/input/media file makes this directory conflict with an idempotent re-export; choose a new delivery path.\n`);
  const entries:DeliveryFile[]=[...files].sort(([a],[b])=>a.localeCompare(b)).map(([path,b])=>({path,sha256:sha256(b),bytes:b.length}));
  const manifest={schemaVersion:'final-delivery/1.0',projectId:final.projectId,fullTaskId,packageHash:final.packageHash,planRevision:final.planRevision,authorizationHash:final.authorization.sha256,masterHash:final.master.sha256,captionedHash:final.captioned.sha256,engineSourceCodeHash:prepared.environment.codeHash??null,createdAt:prepared.createdAt,status,deferredAv:true,finalHumanAcceptance:'pending',engineeringLock:engineeringLock!==null,files:entries};const manifestBytes=json(manifest),manifestHash=sha256(manifestBytes);
- async function existing(){try{const stat=await lstat(out);if(!stat.isDirectory()||stat.isSymbolicLink())fail('FINAL_EXPORT_CONFLICT','Existing delivery target is not a regular directory');const actual=await regular(out,'delivery-manifest.json',TEXT_LIMIT);if(!actual.equals(manifestBytes))fail('FINAL_EXPORT_CONFLICT','Existing delivery has a different manifest; choose a new output path');for(const entry of entries){const b=await regular(out,entry.path,FILE_LIMIT);if(b.length!==entry.bytes||sha256(b)!==entry.sha256)fail('FINAL_EXPORT_CONFLICT','Existing delivered file was changed: '+entry.path);}return true;}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT'){try{await lstat(out);}catch(missing){if((missing as NodeJS.ErrnoException).code==='ENOENT')return false;throw missing;}fail('FINAL_EXPORT_CONFLICT','Existing delivery is incomplete; choose a new output path');}throw e;}}
+ async function existing(){
+  // An absent target may be published by a concurrent writer immediately after this observation.
+  // The later pre-rename or rename-conflict check verifies that writer's complete delivery.
+  const stat=await lstat(out).catch(error=>{if((error as NodeJS.ErrnoException).code==='ENOENT')return null;throw error;});
+  if(!stat)return false;
+  if(!stat.isDirectory()||stat.isSymbolicLink())fail('FINAL_EXPORT_CONFLICT','Existing delivery target is not a regular directory');
+  try{
+   const actual=await regular(out,'delivery-manifest.json',TEXT_LIMIT);
+   if(!actual.equals(manifestBytes))fail('FINAL_EXPORT_CONFLICT','Existing delivery has a different manifest; choose a new output path');
+   for(const entry of entries){const b=await regular(out,entry.path,FILE_LIMIT);if(b.length!==entry.bytes||sha256(b)!==entry.sha256)fail('FINAL_EXPORT_CONFLICT','Existing delivered file was changed: '+entry.path);}
+   return true;
+  }catch(error){
+   if((error as NodeJS.ErrnoException).code==='ENOENT')fail('FINAL_EXPORT_CONFLICT','Existing delivery is incomplete; choose a new output path');
+   throw error;
+  }
+ }
  const result=(cached:boolean)=>({directory:out,manifestSha256:manifestHash,files:entries,editableProject:join(out,'editable-project'),cached,status,deferredAv:true,finalHumanAcceptance:'pending' as const});await destinationParent(parent,false);if(await existing())return result(true);
  // Only the requested destination parent is created. Never remove or replace an existing output.
  await destinationParent(parent,true);const stage=await mkdtemp(join(parent,'.gve-delivery-'));let published=false;

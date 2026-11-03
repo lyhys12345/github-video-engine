@@ -18,4 +18,27 @@ for(const target of ['story.json','animation.json','source'])it('rejects coheren
  await expect(planAnimationTask('examples/story-planner-v1/rembg.json','.','examples/story-planner-v1/rembg-animation.json',dir,signal)).rejects.toThrow();
 });
 it('atomic export preserves an existing destination and permits a separate complete export',async()=>{const {dir,id}=await setup(),out=join(dir,'out.json');await writeFile(out,'owner edit');await expect(exportAnimationTask(dir,id,out)).rejects.toThrow();expect(await readFile(out,'utf8')).toBe('owner edit');await exportAnimationTask(dir,id,join(dir,'fresh.json'));expect(JSON.parse(await readFile(join(dir,'fresh.json'),'utf8')).state).toBe('succeeded');});
-it('real process killed after staging leaves no published partial file and can export again',async()=>{const {dir,id}=await setup(),out=join(dir,'interrupted.json');const child=fork(resolve('tests/animation-export-child.ts'),[dir,id,out],{execArgv:['--import','tsx'],stdio:['ignore','pipe','pipe','ipc']});let errors='';child.stderr?.on('data',b=>errors+=b);try{const msg:any=await new Promise((yes,no)=>{const timer=setTimeout(()=>no(new Error('No export barrier: '+errors)),15000);child.once('message',m=>{clearTimeout(timer);yes(m);});child.once('exit',code=>{clearTimeout(timer);no(new Error('Early exit '+code+errors));});});expect(JSON.parse(await readFile(msg.staged,'utf8')).state).toBe('succeeded');await expect(access(out)).rejects.toThrow();await new Promise<void>(yes=>{child.once('exit',()=>yes());child.kill('SIGKILL');});await expect(access(out)).rejects.toThrow();await exportAnimationTask(dir,id,out);expect(JSON.parse(await readFile(out,'utf8')).state).toBe('succeeded');}finally{child.kill('SIGKILL');}},20000);
+it('real process killed after staging leaves no published partial file and can export again',async()=>{
+ const {dir,id}=await setup(),out=join(dir,'interrupted.json');
+ const child=fork(resolve('tests/animation-export-child.ts'),[dir,id,out],{execArgv:['--import','tsx'],stdio:['ignore','pipe','pipe','ipc']});
+ const exited=new Promise(resolve=>child.once('exit',(code,signal)=>resolve({code,signal})));
+ let errors='';
+ child.stderr?.on('data',b=>errors+=b);
+ try{
+  const msg=await new Promise<{staged:string}>((yes,no)=>{
+   const timer=setTimeout(()=>no(new Error('No export barrier: '+errors)),15000);
+   child.once('message',message=>{clearTimeout(timer);yes(message as {staged:string});});
+   child.once('exit',code=>{clearTimeout(timer);no(new Error('Early exit '+code+errors));});
+  });
+  expect(JSON.parse(await readFile(msg.staged,'utf8')).state).toBe('succeeded');
+  await expect(access(out)).rejects.toThrow();
+  expect(child.kill('SIGKILL')).toBe(true);
+  expect(await exited).toEqual({code:null,signal:'SIGKILL'});
+  await expect(access(out)).rejects.toThrow();
+  await exportAnimationTask(dir,id,out);
+  expect(JSON.parse(await readFile(out,'utf8')).state).toBe('succeeded');
+ }finally{
+  if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');
+  await exited;
+ }
+},20000);

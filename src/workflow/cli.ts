@@ -4,7 +4,7 @@ import {checkAbort,EngineError} from '../core/errors.js';
 import {researchRepository} from '../providers/github-readonly.js';
 import {WorkflowStore} from './store.js';
 import {Id} from '../contracts/video.js';
-import {exportProjectEvidence,planProjectStory} from './project-evidence.js';
+import {exportProjectEvidence,exportProjectResearch,planProjectStory} from './project-evidence.js';
 import {ancestors} from '../story-planner/runtime.js';
 type Options={root?:string;spec?:string;data?:string;repo?:string;ref?:string;doc?:string[];out?:string;id?:string;snapshot?:string;plan?:string;gate?:string;candidate?:string;rules?:string;delegation?:string};
 export async function readJson(path:string){try{const info=await stat(path);if(!info.isFile()||info.size>4_000_000)throw new EngineError('WORKFLOW_SIZE','Workflow inputs must be regular JSON files up to 4 MB');return JSON.parse((await readFile(path,'utf8')).replace(/^\uFEFF/,'')) as unknown;}catch(error){if(error instanceof EngineError)throw error;throw new EngineError('INVALID_JSON',`Cannot read JSON ${path}: ${String(error)}`);}}
@@ -33,13 +33,13 @@ export async function workflowCommand(positionals:string[],options:Options,signa
   }
   const data=resolve(options.data??process.env.GVE_DATA??'.gve');
   const workflow=join(data,'workflow');
-  if(action==='intake'||action==='evidence'||action==='story'){
+  if(action==='intake'||action==='evidence'||action==='research'||action==='story'){
     const common=['data','id'];
-    const allowed=action==='intake'?[...common,'repo','ref','doc']:action==='evidence'?[...common,'out']:[...common,'spec','root','out'];
-    const required=action==='intake'?['repo']:action==='evidence'?['out']:['spec','root','out'];
+    const allowed=action==='intake'?[...common,'repo','ref','doc']:action==='evidence'||action==='research'?[...common,'out']:[...common,'spec','root','out'];
+    const required=action==='intake'?['repo']:action==='evidence'||action==='research'?['out']:['spec','root','out'];
     if(!Id.safeParse(options.id).success||Object.entries(options).some(([key,value])=>value!==undefined&&!allowed.includes(key))||
         required.some(key=>!String(options[key as keyof Options]??'').trim())){
-      throw new EngineError('USAGE','project intake --repo <url> --id <id> | project evidence --id <id> --out <directory> | project story --id <id> --spec <story.json> --root <evidence-bundle> --out <directory>');
+      throw new EngineError('USAGE','project intake --repo <url> --id <id> | project evidence --id <id> --out <directory> | project research --id <id> --out <directory> | project story --id <id> --spec <story.json> --root <evidence-bundle> --out <directory>');
     }
     checkAbort(signal);
     await ancestors(workflow);
@@ -63,6 +63,7 @@ export async function workflowCommand(positionals:string[],options:Options,signa
     const store=new WorkflowStore(workflow);
     try{
       if(action==='evidence')return await exportProjectEvidence(store,options.id!,options.out!,signal);
+      if(action==='research')return await exportProjectResearch(store,options.id!,options.out!,signal);
       return await planProjectStory(store,options.id!,options.spec!,options.root!,data,options.out!,signal);
     }finally{store.close();}
   }

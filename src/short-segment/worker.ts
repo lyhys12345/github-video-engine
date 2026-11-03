@@ -16,11 +16,12 @@ try{
  try{browser=await openBrowser('chrome',{browserExecutable:input.browser,logLevel:'error'});}finally{clearTimeout(startupTimeout);}
  await writeFile(join(dir,'progress.json'),JSON.stringify({stage:'sampling',workerPid:process.pid}));
  const composition=await selectComposition({serveUrl,id:'BoundedStorySegment',inputProps:input.props,puppeteerInstance:browser});
- if(composition.durationInFrames!==input.props.timeline.totalFrames||composition.durationInFrames>1800||composition.fps!==30||composition.width!==1080||composition.height!==1920)throw Error('Bounded segment scope mismatch');
+ const {fps,width,height}=input.geometry??{fps:30,width:1080,height:1920};
+ if(composition.durationInFrames!==input.props.timeline.totalFrames||composition.durationInFrames>3600||composition.durationInFrames>fps*60||composition.fps!==fps||composition.width!==width||composition.height!==height)throw Error('Bounded segment scope mismatch');
  await mkdir(join(dir,'samples'));
  for(const frame of input.sampleFrames)await renderStill({serveUrl,composition,inputProps:input.props,puppeteerInstance:browser,frame,output:join(dir,'samples',`${frame}.png`),imageFormat:'png',cancelSignal,overwrite:false});
  await writeFile(join(dir,'progress.json'),JSON.stringify({stage:'rendering',workerPid:process.pid}));
  await renderMedia({serveUrl,composition,inputProps:input.props,puppeteerInstance:browser,outputLocation:join(dir,'silent.mp4'),codec:'h264',pixelFormat:'yuv420p',muted:true,concurrency:2,logLevel:'error',cancelSignal,overwrite:false,onProgress:p=>{if(p.renderedFrames%100===0)console.log(JSON.stringify({renderedFrames:p.renderedFrames,encodedFrames:p.encodedFrames}));}});
- await writeFile(join(dir,'worker-result.json'),JSON.stringify({success:true,frames:composition.durationInFrames,fps:30,width:1080,height:1920,workerPid:process.pid},null,2));
+ await writeFile(join(dir,'worker-result.json'),JSON.stringify({success:true,frames:composition.durationInFrames,fps,width,height,workerPid:process.pid},null,2));
  await writeFile(join(dir,'progress.json'),JSON.stringify({stage:'completed',workerPid:process.pid}));
 }catch(e){console.error(e);process.exitCode=1;}finally{clearTimeout(deadline);await browser?.close({silent:true});process.removeListener('disconnect',stop);if(process.connected)process.disconnect();}

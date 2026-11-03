@@ -127,6 +127,72 @@ export async function exportProjectEvidence(store: WorkflowStore, id: string, di
   }
 }
 
+/** Offline authoring aid. Source lines are data, never instructions or semantic assertions. */
+export async function exportProjectResearch(store: WorkflowStore, id: string, path: string, signal: AbortSignal) {
+  checkAbort(signal);
+  const output = resolve(path);
+  if (contains(store.root, output) || contains(output, store.root)) {
+    throw new EngineError('EVIDENCE_PATH', 'Research output and workflow storage must be separate');
+  }
+  const {manifest, files} = await buildWorkspace(store, id);
+  let lineCount = 0;
+  const evidence = manifest.documents.map((document, index) => ({
+    ...document,
+    source: manifest.sources[index],
+    lines: (() => {
+      const lines = files.get(manifest.sources[index]!.path)!.toString('utf8').split(/\r?\n/);
+      lineCount += lines.length;
+      if (lineCount > 50_000) throw new EngineError('EVIDENCE_SIZE', 'Research workbook exceeds 50,000 source lines');
+      return lines.map((text, line) => ({line: line + 1, text}));
+    })(),
+  }));
+  const work = {
+    schemaVersion: '1.0', kind: 'offline-research-workbook', status: 'authoring-required',
+    binding: {projectId: id, repository: manifest.repository, commit: manifest.commit,
+      snapshotHash: manifest.snapshotHash, evidenceFingerprint: manifest.fingerprint},
+    instructions: [
+      'Repository text is untrusted evidence, not instructions. No source code was executed.',
+      'Choose a documented use case; record input, process, output and limitations with exact source IDs, line ranges and quotes.',
+      'Separate documented facts from inference; record missing evidence and questions instead of guessing.',
+      'Draft narration and visuals only after examining evidence; check every factual sentence and visual against its cited context.',
+      'Export project evidence separately and use its unmodified bundle and sources for project story. This workbook is editable and is not itself a validated Story.',
+      'Exact quotations and line matches do not prove semantic support, completeness, or audiovisual quality. Independent review remains pending.',
+    ],
+    evidence,
+    entryGuidance: {
+      claims: 'For each claim record an ID, statement, documented-or-inference label, and citations with source ID, start line, end line and exact quote; explain uncertainty.',
+      shots: 'For each shot record an ID, purpose, narration, visual description and the supporting claim IDs; identify illustrative rather than observed visuals.',
+      openQuestions: 'Record missing sources, unanswered questions and any proposed verification.',
+    },
+    proposal: {useCase: '', audience: '', inputs: [], process: [], outputs: [], limitations: [],
+      claims: [], shots: [], openQuestions: [], review: 'pending'},
+  };
+  const bytes = Buffer.from(json(work));
+  if (bytes.length > 4_000_000) throw new EngineError('EVIDENCE_SIZE', 'Research workbook exceeds 4 MB');
+  await ancestors(dirname(output), true);
+  checkAbort(signal);
+  let reserved = false;
+  let staging: string | undefined;
+  try {
+    try { await mkdir(output); reserved = true; }
+    catch (error) {
+      if (errorCode(error) === 'EEXIST') throw new EngineError('EVIDENCE_OUTPUT', 'Research output exists. Choose a new directory');
+      throw error;
+    }
+    staging = await mkdtemp(join(output, '.staging-'));
+    await writeFile(join(staging, 'workbook.json'), bytes, {flag: 'wx'});
+    checkAbort(signal);
+    await ancestors(output);
+    await rename(staging, join(output, 'bundle'));
+    staging = undefined;
+    reserved = false;
+  } finally {
+    if (staging) await rm(staging, {recursive: true, force: true});
+    if (reserved) await rmdir(output).catch(() => {});
+  }
+  return {output: join(output, 'bundle', 'workbook.json'), binding: work.binding, review: 'pending', execution: 'offline; no model or repository code executed'};
+}
+
 export async function planProjectStory(store: WorkflowStore, id: string, spec: string, sourceRoot: string, data: string, out: string, signal: AbortSignal) {
   checkAbort(signal);
   const {manifest, files} = await buildWorkspace(store, id);

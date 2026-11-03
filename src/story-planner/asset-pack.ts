@@ -1,4 +1,6 @@
-import {readFile,writeFile,mkdir,mkdtemp,rename,rm,lstat,readdir,rmdir} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,mkdtemp,rename,rm,lstat,readdir,link} from 'node:fs/promises';
+import {randomUUID} from 'node:crypto';
+import {DatabaseSync} from 'node:sqlite';
 import {resolve,dirname,join,relative,isAbsolute,sep} from 'node:path';
 import {tmpdir} from 'node:os';
 import {z} from 'zod';
@@ -9,7 +11,7 @@ import {TaskRunner} from '../orchestrator/tasks.js';
 import {canonical,sha256} from '../core/util.js';
 import {EngineError,checkAbort,errorInfo} from '../core/errors.js';
 import {command} from '../core/process.js';
-import {ffprobePath} from '../providers/local.js';
+import {ffprobePath,localAudioInput} from '../providers/local.js';
 import {captureEvidence,boundedFile,ancestors,preflightStatePath,verifyCaptured,readTask,loadBoundStory,RepositoryBindingSchema,type StorySnapshot} from './runtime.js';
 import {AnimationSchema,compileAnimation} from './animation.js';
 import {compileStory} from './compile.js';
@@ -84,7 +86,7 @@ async function planCapturedAssetPack(snapshot:StorySnapshot,animationPath:string
  const probe:PackInput['probe']={tool:'ffprobe',version:'not-invoked-no-clips',receipts:[]};
  if(audio.size){const dir=await mkdtemp(join(tmpdir(),'gve-asset-probe-'));try{
   let versionError:unknown;try{probe.version=(await command(ffprobePath(),['-version'],{signal,timeout:30000})).split(/\r?\n/)[0]!.slice(0,1000);}catch(e){checkAbort(signal);versionError=e;probe.version='unavailable';}
-  for(const [shotId,b] of audio){checkAbort(signal);try{if(versionError)throw versionError;const path=join(dir,shotId+'.bin');await writeFile(path,b,{flag:'wx'});const raw=JSON.parse(await command(ffprobePath(),['-v','error','-show_streams','-show_format','-of','json',path],{signal,timeout:30000}));const streams=raw.streams??[],duration=Number(raw.format?.duration);if(streams.filter((s:{codec_type:string})=>s.codec_type==='audio').length!==1||streams.some((s:{codec_type:string})=>s.codec_type==='video')||!Number.isFinite(duration)||duration<=0)throw new Error('Expected one measurable audio stream and no video');probe.receipts.push({ok:true,shotId,measuredSeconds:duration,audioStreams:1,videoStreams:0});}catch(e){checkAbort(signal);const error=errorInfo(e);probe.receipts.push({ok:false,shotId,code:error.code,message:'Local audio probe failed: '+error.message.replaceAll(dir,'<owned-audio-snapshot>').slice(0,1200)});}}
+  for(const [shotId,b] of audio){checkAbort(signal);try{if(versionError)throw versionError;const path=join(dir,shotId+'.bin');await writeFile(path,b,{flag:'wx'});const raw=JSON.parse(await command(ffprobePath(),['-v','error','-show_streams','-show_format','-of','json',...localAudioInput,path],{signal,timeout:30000}));const streams=raw.streams??[],duration=Number(raw.format?.duration);if(streams.filter((s:{codec_type:string})=>s.codec_type==='audio').length!==1||streams.some((s:{codec_type:string})=>s.codec_type==='video')||!Number.isFinite(duration)||duration<=0)throw new Error('Expected one measurable audio stream and no video');probe.receipts.push({ok:true,shotId,measuredSeconds:duration,audioStreams:1,videoStreams:0});}catch(e){checkAbort(signal);const error=errorInfo(e);probe.receipts.push({ok:false,shotId,code:error.code,message:'Local audio probe failed: '+error.message.replaceAll(dir,'<owned-audio-snapshot>').slice(0,1200)});}}
  }finally{await rm(dir,{recursive:true,force:true});}}
  const compiler=await Promise.all([...compilerFiles.map(file=>({file,path:resolve(import.meta.dirname,'..',file)})),...['package.json','pnpm-lock.yaml','tsconfig.json'].map(file=>({file,path:resolve(import.meta.dirname,'../..',file)}))].map(async ({file,path})=>({file,sha256:sha256(await readFile(path))})));
  const input=Input.parse({previewFormat:'3',...(sourceStory?{sourceStory}:{}),story:snapshot.graph,animation,voice,sources:snapshot.sources.map(s=>({id:s.id,sha256:sha256(s.bytes),bytes:s.bytes.length})),probe,compiler}),id=fingerprint(input);
@@ -100,7 +102,7 @@ async function planCapturedAssetPack(snapshot:StorySnapshot,animationPath:string
  try{const task=await runner.run(ASSET_PACK_KIND,input,async(_dir,workSignal)=>{checkAbort(workSignal);const derived=deriveFiles(input,new Map(snapshot.sources.map(s=>[s.id,s.bytes])),audio),outputs=[];for(const [path,bytes] of derived.files){checkAbort(workSignal);const artifact=await runner.artifacts.commit(bytes,path.endsWith('.txt')?'text/plain':path.endsWith('.svg')?'image/svg+xml':path.endsWith('.html')?'text/html':path.endsWith('.bin')?'application/octet-stream':'application/json','PUBLISH',id);outputs.push({path,artifact});}return{value:{schemaVersion:'1.0',kind:ASSET_PACK_KIND,review:'pending',files:outputs},outputs:outputs.map(x=>x.artifact)};},signal,{attempts:3,timeoutMs:120000});await statusAssetPack(data,id);return{taskId:id,cached:task.cached,state:'succeeded',scope:'bounded authored SVG asset pack; no movie',review:'pending'};}finally{runner.close();}
 }
 
-async function checkedPack(data:string,id:string){
+export async function checkedPack(data:string,id:string){
  const task=await readTask(data,id,ASSET_PACK_KIND),input=Input.parse(task.input);if(fingerprint(input)!==id)throw new Error('Asset pack identity mismatch');
  if(task.state!=='succeeded'||!task.result)throw new Error('Asset pack has no successful committed output');const store=new ArtifactStore(data);
  const read=async(a:z.infer<typeof ArtifactSchema>)=>{if(a.inputFingerprint!==id)throw new Error('Artifact fingerprint mismatch');const b=await boundedFile(store.path(a),MAX_AUDIO);if(b.length!==a.bytes||sha256(b)!==a.sha256)throw new Error('Asset pack artifact missing or damaged');return b;};
@@ -110,7 +112,7 @@ async function checkedPack(data:string,id:string){
  if(canonical(input.sources.map(s=>s.id))!==canonical(input.story.evidence.sources.map(s=>s.id)))throw new Error('Source coverage mismatch');
  const audio=new Map(input.voice.clips.map(c=>{const b=files.get(c.path);if(!b||b.length!==c.bytes||sha256(b)!==c.sha256)throw new Error('Audio snapshot input mismatch');return[c.shotId,b] as const;}));
  const derived=deriveFiles(input,sources,audio);if(files.size!==derived.files.size)throw new Error('Asset pack file coverage mismatch');for(const [path,b] of derived.files)if(!files.has(path)||sha256(files.get(path)!)!==sha256(b))throw new Error('Asset pack derivation mismatch: '+path);
- return{task,result,input,...derived};
+ return{task,result,input,audio,...derived};
 }
 export async function statusAssetPack(data:string,id:string){
  const task=await readTask(data,id,ASSET_PACK_KIND);Input.parse(task.input);if(task.state!=='succeeded')return{taskId:id,state:task.state,attempt:task.attempt,error:task.error,integrity:'no committed successful pack',review:'pending'};
@@ -118,9 +120,138 @@ export async function statusAssetPack(data:string,id:string){
 }
 const inside=(root:string,path:string)=>{const r=relative(root,path);return !isAbsolute(r)&&r!=='..'&&!r.startsWith('..'+sep);};
 /** Publish one complete bundle inside an exclusively reserved output. Never overwrite user files. */
-export async function exportAssetPack(data:string,id:string,out:string,signal:AbortSignal){
- checkAbort(signal);data=resolve(data);out=resolve(out);if(inside(data,out)||inside(out,data))throw new Error('Output and task state overlap');const checked=await checkedPack(data,id);await ancestors(dirname(out),true);await ancestors(out);
- await mkdir(out);let stage:string|undefined,complete=false;
- try{await writeFile(join(out,'.asset-pack-owner.json'),json({schemaVersion:'1.0',taskId:id}),{flag:'wx'});stage=await mkdtemp(join(out,'.asset-staging-'));for(const [path,bytes] of checked.files){checkAbort(signal);const dest=join(stage,...path.split('/'));await mkdir(dirname(dest),{recursive:true});await writeFile(dest,bytes,{flag:'wx'});}checkAbort(signal);await ancestors(out);await rename(stage,join(out,'bundle'));stage=undefined;complete=true;return{taskId:id,output:out,bundle:join(out,'bundle'),review:'pending'};
- }finally{if(stage)await rm(stage,{recursive:true,force:true});if(!complete){const names=await readdir(out).catch(()=>[]);if(names.length===1&&names[0]==='.asset-pack-owner.json'){await rm(join(out,names[0]));await rmdir(out);}}}
+export const RECEIPT_PUBLICATION='receipt-v1';
+export const LEGACY_PUBLICATION='legacy-v2';
+export type Publication=typeof RECEIPT_PUBLICATION|typeof LEGACY_PUBLICATION;
+
+export async function exportAssetPack(data:string,id:string,out:string,signal:AbortSignal,publication?:Publication){
+ checkAbort(signal);const checked=await checkedPack(data,id);
+ return publishAssetFiles(data,id,out,checked.files,signal,publication);
+}
+
+export async function publishAssetFiles(data:string,id:string,out:string,files:ReadonlyMap<string,Buffer>,signal:AbortSignal,publication?:Publication){
+ checkAbort(signal);data=resolve(data);out=resolve(out);
+ if(inside(data,out)||inside(out,data))throw new Error('Output and task state overlap');
+ await ancestors(dirname(out),true);await ancestors(out);
+ const markerName='.asset-pack-owner.json', marker=join(out,markerName), bundle=join(out,'bundle');
+ const refuse=()=>new EngineError('ASSET_EXPORT_EXISTS','EEXIST: Destination is complete, unrelated, or has no matching ownership record. Choose a new output directory.');
+ const entries=[...files].map(([path,bytes])=>({path,sha256:sha256(bytes),bytes:bytes.length})).sort((a,b)=>a.path.localeCompare(b.path));
+ const payloadSha256=sha256(canonical(entries.map(({path,sha256})=>[path,sha256])));
+ const receiptMode=publication===RECEIPT_PUBLICATION;
+ const version=receiptMode?'3.0':'2.0';
+ const Owner=z.object({schemaVersion:z.literal(version),taskId:hash,output:z.string(),
+  payloadSha256:hash,token:z.string().uuid()}).strict();
+ let reserved=false;
+ try{await mkdir(out);reserved=true;}
+ catch(error){if((error as NodeJS.ErrnoException).code!=='EEXIST')throw error;}
+ if(reserved)await writeFile(marker,json({schemaVersion:version,taskId:id,output:out,payloadSha256,token:randomUUID()}),{flag:'wx'});
+ const readOwner=async()=>{try{return Owner.parse(parse(await boundedFile(marker,4096)));}catch{throw refuse();}};
+ const owner=await readOwner();
+ if(owner.taskId!==id||owner.output!==out||owner.payloadSha256!==payloadSha256)throw refuse();
+ const lockName=`.asset-lock-${owner.token}.sqlite`, stagePrefix=`.asset-staging-${owner.token}-`;
+ const receiptPrefix=`.asset-published-${owner.token}-`, draftPrefix=`.asset-draft-${owner.token}-`;
+ const isNamedJson=(name:string,prefix:string)=>name.startsWith(prefix)&&/^[A-Za-z0-9]{6}\.json$/.test(name.slice(prefix.length));
+ const receiptBytes=(suffix:string)=>Buffer.from(json({schemaVersion:'1.0',publication:RECEIPT_PUBLICATION,
+  taskId:id,bundle:stagePrefix+suffix,payloadSha256,files:entries}));
+ const lockPath=join(out,lockName);
+ const inspect=async()=>{
+  const names=await readdir(out);
+  for(const name of names){
+   if(name===markerName)continue;
+   if(name==='bundle')throw refuse();
+   const info=await lstat(join(out,name));
+   if(name===lockName&&info.isFile()&&!info.isSymbolicLink()&&info.size===0)continue;
+   if(name.startsWith(stagePrefix)&&/^[A-Za-z0-9]{6}$/.test(name.slice(stagePrefix.length))&&info.isDirectory()&&!info.isSymbolicLink())continue;
+   if(receiptMode&&(isNamedJson(name,receiptPrefix)||isNamedJson(name,draftPrefix))&&info.isFile()&&!info.isSymbolicLink())continue;
+   throw refuse();
+  }
+  if(canonical(await readOwner())!==canonical(owner))throw refuse();
+ };
+ const verifyTree=async(root:string)=>{
+  await ancestors(root);
+  const remaining=new Set(files.keys());
+  const walk=async(directory:string,prefix='')=>{
+   for(const name of await readdir(directory)){
+    checkAbort(signal);
+    const path=prefix+name, full=join(directory,name), info=await lstat(full);
+    if(info.isDirectory()&&!info.isSymbolicLink()&&entries.some(entry=>entry.path.startsWith(path+'/'))){
+     await walk(full,path+'/');continue;
+    }
+    const expected=files.get(path);
+    if(!expected||!info.isFile()||info.isSymbolicLink()||!expected.equals(await boundedFile(full,expected.length))){
+     throw new EngineError('ASSET_EXPORT_STAGE','Exported files changed during publication.');
+    }
+    remaining.delete(path);
+   }
+  };
+  await walk(root);
+  if(remaining.size)throw new EngineError('ASSET_EXPORT_STAGE','Export files are missing.');
+ };
+ await inspect();
+ // The database stays empty. Its OS lock is released when the writer exits, including on a hard kill.
+ const lock=new DatabaseSync(lockPath);
+ try{
+  try{lock.exec('PRAGMA busy_timeout=0; PRAGMA journal_mode=MEMORY; BEGIN IMMEDIATE');}
+  catch(error){if((error as {errcode?:number}).errcode===5)throw new EngineError('ASSET_EXPORT_BUSY','Another process is publishing this destination.','retryable');throw error;}
+  await inspect();
+  const verifyReceipt=async(receipt:string,versionDir:string,bytes:Buffer)=>{
+   const identity=await lstat(versionDir,{bigint:true});
+   if(!identity.isDirectory()||identity.isSymbolicLink()||!bytes.equals(await boundedFile(receipt,bytes.length))){
+    throw new EngineError('ASSET_EXPORT_STAGE','Publication receipt changed.');
+   }
+   await verifyTree(versionDir);
+   const current=await lstat(versionDir,{bigint:true});
+   if(!current.isDirectory()||current.isSymbolicLink()||current.dev!==identity.dev||current.ino!==identity.ino||
+      !bytes.equals(await boundedFile(receipt,bytes.length))){
+    throw new EngineError('ASSET_EXPORT_STAGE','Publication receipt or version changed.');
+   }
+  };
+  const result=(versionDir:string,receipt:string,bytes:Buffer,reused:boolean)=>({
+   taskId:id,output:out,bundle:versionDir,publication:RECEIPT_PUBLICATION,receipt,receiptSha256:sha256(bytes),reused,review:'pending',
+  });
+  let committed:ReturnType<typeof result>|undefined;
+  if(receiptMode)for(const name of await readdir(out)){
+   if(!isNamedJson(name,receiptPrefix))continue;
+   const suffix=name.slice(receiptPrefix.length,-5);
+   const expected=receiptBytes(suffix), receipt=join(out,name), versionDir=join(out,stagePrefix+suffix);
+   try{await verifyReceipt(receipt,versionDir,expected);}catch{checkAbort(signal);continue;}
+   if(committed)throw new EngineError('ASSET_EXPORT_AMBIGUOUS','More than one valid published version exists. Preserve them and choose a fresh output directory.');
+   committed=result(versionDir,receipt,expected,true);
+  }
+  if(committed)return committed;
+  const stage=await mkdtemp(join(out,stagePrefix));
+  const identity=await lstat(stage,{bigint:true});
+  const checkStage=async(path=stage)=>{
+   const current=await lstat(path,{bigint:true});
+   if(!current.isDirectory()||current.isSymbolicLink()||current.dev!==identity.dev||current.ino!==identity.ino){
+    throw new EngineError('ASSET_EXPORT_STAGE','The staging directory changed during export.');
+   }
+  };
+  for(const [path,bytes] of files){
+   checkAbort(signal);
+   const dest=join(stage,...path.split('/'));
+   if(!inside(stage,dest)||dest===stage)throw new Error('Unsafe asset output path');
+   await checkStage();
+   await ancestors(dirname(dest),true);await checkStage();
+   await writeFile(dest,bytes,{flag:'wx'});
+  }
+  checkAbort(signal);await ancestors(out);await inspect();
+  await checkStage();await verifyTree(stage);await checkStage();
+  if(receiptMode){
+   const suffix=stage.slice(-6), bytes=receiptBytes(suffix);
+   const draft=join(out,draftPrefix+suffix+'.json'), receipt=join(out,receiptPrefix+suffix+'.json');
+   await writeFile(draft,bytes,{flag:'wx'});
+   checkAbort(signal);
+   // A receipt is a no-replace publication of expected hashes. The payload never moves.
+   await link(draft,receipt);
+   await checkStage();await verifyReceipt(receipt,stage,bytes);await checkStage();
+   return result(stage,receipt,bytes,false);
+  }
+  await rename(stage,bundle);
+  await checkStage(bundle);await verifyTree(bundle);await checkStage(bundle);
+  return{taskId:id,output:out,bundle,review:'pending'};
+ }finally{
+  // Failed stages remain outside the bundle; never delete an interrupted path which may have been replaced.
+  lock.close();
+ }
 }

@@ -17,6 +17,7 @@ export async function browserPath(): Promise<string> {
 }
 export const ffmpegPath = () => process.env.GVE_FFMPEG || 'ffmpeg';
 export const ffprobePath = () => process.env.GVE_FFPROBE || 'ffprobe';
+export const localAudioInput = ['-protocol_whitelist', 'file', '-format_whitelist', 'wav,mp3,flac,ogg,aac,mov,matroska,asf,aiff'] as const;
 export async function environment(): Promise<Record<string, string>> {
   if (Number(process.versions.node.split('.')[0]) !== 24) throw new EngineError('NODE_VERSION', 'M0 requires Node 24.x');
   const browser = await browserPath(); const browserStat = await stat(browser);

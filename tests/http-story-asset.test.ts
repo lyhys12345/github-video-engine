@@ -67,9 +67,19 @@ it('creates an editable asset pack from a repository-bound Story task after the 
   const sourceStory = {taskId: bound.taskId, repositoryBinding: {repository, commit, projectId: 'http-test'}};
   expect(taskStatus).toMatchObject({integrity: 'verified', review: 'pending', sourceStory,
     voice: {timingBasis: 'estimate-only', clips: []}});
+  await expect(storyCommand(['story', 'preview-render'], {task: first.taskId, data}, signal))
+    .rejects.toMatchObject({code: 'USAGE'});
+  await expect(storyCommand(['story', 'preview-render'], {task: first.taskId, data, mode: 'narrated'}, signal))
+    .rejects.toMatchObject({code: 'PREVIEW_NARRATION'});
   const out = join(root, 'asset');
   await storyCommand(['story', 'asset-export'], {task: first.taskId, data, out}, signal);
   const bundle = join(out, 'bundle');
+  const versioned = await storyCommand(['story', 'asset-export'], {task: first.taskId, data,
+    out: join(root,'asset-receipt'), publication: 'receipt-v1'}, signal);
+  if(!('receipt' in versioned)||typeof versioned.receipt!=='string'||!('bundle' in versioned)||typeof versioned.bundle!=='string'||
+    !('receiptSha256' in versioned)||typeof versioned.receiptSha256!=='string')throw new Error('Missing publication receipt');
+  expect(sha256(await readFile(versioned.receipt))).toBe(versioned.receiptSha256);
+  expect(await readFile(join(versioned.bundle,'manifest.json'))).toEqual(await readFile(join(bundle,'manifest.json')));
   expect(await readJson(join(bundle, 'manifest.json'))).toMatchObject({sourceStory, previewFormat: '3', samples: expect.any(Array)});
   expect((await readJson(join(bundle, 'manifest.json'))).samples).toHaveLength(9);
   expect(await readJson(join(bundle, 'provenance.json'))).toMatchObject({sourceStory, claims: story.evidence.claims});
