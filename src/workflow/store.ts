@@ -12,10 +12,13 @@ import {checkAbort,EngineError} from '../core/errors.js';
 import {projectRoot} from '../providers/local.js';
 import {checkGateV2} from '../evaluation/judge-gate.mjs';
 import {publishReviewExport} from './review-export.js';
+import type {StoryProposal} from '../contracts/authoring.js';
 
 const ProjectRow=z.object({id:Id,repository:z.string(),snapshotHash:Hash,currentRevision:Hash.nullable(),createdAt:z.string(),updatedAt:z.string()}).strict();
 const SnapshotRow=z.object({hash:Hash,artifact:ArtifactSchema,createdAt:z.string()}).strict();
 const RevisionRow=z.object({hash:Hash,projectId:Id,snapshotHash:Hash,artifact:ArtifactSchema,createdAt:z.string()}).strict();
+export const AuthoringProposalRow=z.object({hash:Hash,projectId:Id,snapshotHash:Hash,artifact:ArtifactSchema}).strict();
+export const AUTHORING_WORKFLOW_DB_VERSION = 2;
 const ApprovalRow=z.object({projectId:Id,revisionHash:Hash,gate:z.enum(GATES),artifact:ArtifactSchema,recordedAt:z.string(),actor:z.literal('delegated-judge'),candidateHash:Hash,activeRoles:z.array(z.string()).min(3)}).strict();
 type Revision=z.infer<typeof RevisionRow>;
 const ReviewBinding=z.object({projectId:Id,revisionHash:Hash,gates:z.array(z.enum(GATES)).min(1)}).strict();
@@ -49,13 +52,14 @@ export function validatePlan(value:unknown,snapshot:RepositorySnapshot,snapshotH
 
 export class WorkflowStore{
   readonly db:DatabaseSync;readonly artifacts:ArtifactStore;readonly root:string;readonly reviewRoot:string;
-  constructor(root:string,options:{reviewRoot?:string}={}){
+  constructor(root:string,options:{reviewRoot?:string;authoring?:boolean}={}){
     this.root=resolve(root);this.reviewRoot=resolve(options.reviewRoot??projectRoot);mkdirSync(this.root,{recursive:true});
     this.artifacts=new ArtifactStore(this.root);this.db=new DatabaseSync(join(this.root,'workflow.sqlite'));
     this.db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;');
-    const version=this.db.prepare('PRAGMA user_version').get() as {user_version:number};
-    if(version.user_version>1){this.db.close();throw new EngineError('WORKFLOW_DB_VERSION','Workflow database is newer than this engine');}
-    this.db.exec(`
+    try {this.tx(()=>{
+      const {user_version: version}=this.db.prepare('PRAGMA user_version').get() as {user_version:number};
+      if(version>AUTHORING_WORKFLOW_DB_VERSION)throw new EngineError('WORKFLOW_DB_VERSION','Workflow database is newer than this engine');
+      this.db.exec(`
       CREATE TABLE IF NOT EXISTS sources(hash TEXT PRIMARY KEY,data TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY,data TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS revisions(hash TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),data TEXT NOT NULL);
@@ -67,8 +71,15 @@ export class WorkflowStore{
       CREATE TRIGGER IF NOT EXISTS no_revision_delete BEFORE DELETE ON revisions BEGIN SELECT RAISE(ABORT,'Plan revisions are immutable'); END;
       CREATE TRIGGER IF NOT EXISTS no_approval_update BEFORE UPDATE ON approvals BEGIN SELECT RAISE(ABORT,'Approval history is immutable'); END;
       CREATE TRIGGER IF NOT EXISTS no_approval_delete BEFORE DELETE ON approvals BEGIN SELECT RAISE(ABORT,'Approval history is immutable'); END;
-      PRAGMA user_version=1;
-    `);
+      `);
+      if(version === 0)this.db.exec('PRAGMA user_version=1;');
+      if(options.authoring && version < AUTHORING_WORKFLOW_DB_VERSION)this.db.exec(`
+        CREATE TABLE IF NOT EXISTS authoring_proposals(hash TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),data TEXT NOT NULL);
+        CREATE TRIGGER IF NOT EXISTS no_authoring_proposal_update BEFORE UPDATE ON authoring_proposals BEGIN SELECT RAISE(ABORT,'Authoring proposals are immutable'); END;
+        CREATE TRIGGER IF NOT EXISTS no_authoring_proposal_delete BEFORE DELETE ON authoring_proposals BEGIN SELECT RAISE(ABORT,'Authoring proposals are immutable'); END;
+        PRAGMA user_version=${AUTHORING_WORKFLOW_DB_VERSION};
+      `);
+    });}catch(error){this.db.close();throw error;}
   }
   close(){this.db.close();}
   private tx<T>(fn:()=>T):T{this.db.exec('BEGIN IMMEDIATE');try{const result=fn();this.db.exec('COMMIT');return result;}catch(error){this.db.exec('ROLLBACK');throw error;}}
@@ -82,10 +93,11 @@ export class WorkflowStore{
     if(snapshot.repository!==project.repository)throw new EngineError('PROJECT_INTEGRITY','Project repository differs from its stored source snapshot');
     return snapshot;
   }
-  async create(id:string,value:unknown,options:{preserveExistingSource?:boolean}={}){
+  async create(id:string,value:unknown,options:{preserveExistingSource?:boolean;expectedSnapshot?:string}={}){
     parse(Id,id,'project ID');const snapshot=validateSnapshot(value),hash=sourceFingerprint(snapshot);
     const artifact=await this.artifacts.commit(canonical(snapshot),'application/json','VALIDATE',hash);
     return this.tx(()=>{
+      if(options.expectedSnapshot&&this.project(id).snapshotHash!==options.expectedSnapshot)throw new EngineError('WORKFLOW_CHANGED','Source changed during capture. Obtain a new authoring work package');
       const now=new Date().toISOString();this.db.prepare('INSERT OR IGNORE INTO sources(hash,data) VALUES(?,?)').run(hash,canonical({hash,artifact,createdAt:now}));
       const existing=this.db.prepare('SELECT data FROM projects WHERE id=?').get(id);
       if(existing){const prior=parse(ProjectRow,JSON.parse(existing.data as string),'stored project');if(prior.repository!==snapshot.repository)throw new EngineError('PROJECT_REPOSITORY','Existing project ID belongs to another repository');
@@ -98,6 +110,36 @@ export class WorkflowStore{
     });
   }
   private revisionRecord(id:string,hash:string):Revision{parse(Hash,hash,'revision hash');const row=this.db.prepare('SELECT data FROM revisions WHERE hash=? AND project_id=?').get(hash,id);if(!row)throw new EngineError('REVISION_NOT_FOUND','Plan revision not found');const value=parse(RevisionRow,JSON.parse(row.data as string),'stored revision');if(value.hash!==hash||value.projectId!==id)throw new EngineError('PLAN_INTEGRITY','Stored revision identity mismatch');return value;}
+  proposalRecord(id: string, hash: string) {
+    parse(Hash, hash, 'proposal hash');
+    const row = this.db.prepare('SELECT data FROM authoring_proposals WHERE hash=? AND project_id=?').get(hash, id);
+    if (!row) throw new EngineError('PROPOSAL_NOT_FOUND', 'Authoring proposal was not found for this project');
+    const record = parse(AuthoringProposalRow, JSON.parse(String(row.data)), 'stored proposal');
+    if (record.hash !== hash || record.projectId !== id || record.artifact.sha256 !== hash || record.artifact.inputFingerprint !== record.snapshotHash) {
+      throw new EngineError('PROPOSAL_INTEGRITY', 'Stored proposal identity mismatch');
+    }
+    return record;
+  }
+  async saveValidatedProposal(proposal: StoryProposal, signal: AbortSignal) {
+    const {projectId, snapshotHash} = proposal.binding;
+    const bytes = canonical(proposal);
+    const hash = sha256(bytes);
+    checkAbort(signal);
+    const artifact = await this.artifacts.commit(bytes, 'application/json', 'VALIDATE', snapshotHash);
+    checkAbort(signal);
+    return this.tx(() => {
+      if (this.project(projectId).snapshotHash !== snapshotHash) {
+        throw new EngineError('WORKFLOW_CHANGED', 'Source changed during proposal submission. Obtain a new authoring work package.');
+      }
+      const {changes} = this.db.prepare('INSERT OR IGNORE INTO authoring_proposals(hash,project_id,data) VALUES(?,?,?)')
+        .run(hash, projectId, canonical({hash, projectId, snapshotHash, artifact}));
+      const stored = this.proposalRecord(projectId, hash);
+      if (stored.snapshotHash !== snapshotHash || stored.artifact.bytes !== artifact.bytes) {
+        throw new EngineError('PROPOSAL_INTEGRITY', 'Stored proposal artifact differs from the validated submission');
+      }
+      return {hash, reused: changes === 0};
+    });
+  }
   async revision(id:string,hash?:string){const project=this.project(id);const target=hash??project.currentRevision;if(!target)throw new EngineError('PLAN_REQUIRED','Import a planning package first');const record=this.revisionRecord(id,target);
     const payload=await this.artifacts.readJson<{snapshotHash:string;plan:unknown}>(record.artifact);if(sha256(canonical(payload))!==target||payload.snapshotHash!==record.snapshotHash)throw new EngineError('PLAN_INTEGRITY','Plan revision fingerprint mismatch');
     const snapshot=await this.source(record.snapshotHash);const plan=validatePlan(payload.plan,snapshot,record.snapshotHash);if(plan.projectId!==id)throw new EngineError('PLAN_PROJECT','Stored plan belongs to another project');return{record,plan,snapshot,payload};}

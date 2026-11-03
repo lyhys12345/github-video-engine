@@ -6,7 +6,8 @@ import {WorkflowStore} from './store.js';
 import {Id} from '../contracts/video.js';
 import {exportProjectEvidence,exportProjectResearch,planProjectStory} from './project-evidence.js';
 import {ancestors} from '../story-planner/runtime.js';
-type Options={root?:string;spec?:string;data?:string;repo?:string;ref?:string;doc?:string[];out?:string;id?:string;snapshot?:string;plan?:string;gate?:string;candidate?:string;rules?:string;delegation?:string};
+import {captureAuthoringText, exportAuthoringProposal, openAuthoring, statusAuthoringProposal, submitAuthoringProposal} from './agent-authoring.js';
+type Options={root?:string;spec?:string;data?:string;repo?:string;ref?:string;doc?:string[];out?:string;id?:string;snapshot?:string;plan?:string;gate?:string;candidate?:string;rules?:string;delegation?:string;proposal?:string};
 export async function readJson(path:string){try{const info=await stat(path);if(!info.isFile()||info.size>4_000_000)throw new EngineError('WORKFLOW_SIZE','Workflow inputs must be regular JSON files up to 4 MB');return JSON.parse((await readFile(path,'utf8')).replace(/^\uFEFF/,'')) as unknown;}catch(error){if(error instanceof EngineError)throw error;throw new EngineError('INVALID_JSON',`Cannot read JSON ${path}: ${String(error)}`);}}
 async function checkDatabaseFiles(database:string) {
   const entries = await Promise.all(['','-wal','-shm','-journal'].map(async suffix => {
@@ -33,6 +34,24 @@ export async function workflowCommand(positionals:string[],options:Options,signa
   }
   const data=resolve(options.data??process.env.GVE_DATA??'.gve');
   const workflow=join(data,'workflow');
+  if(action==='author'||action==='capture-text'||action==='submit-proposal'||action==='proposal-status'||action==='export-proposal'){
+    const required = action==='author'?['out']:action==='proposal-status'?['proposal']:action==='export-proposal'?['proposal','out']:['spec'];
+    if(!Id.safeParse(options.id).success || required.some(key=>!String(options[key as keyof Options]??'').trim()) ||
+        Object.entries(options).some(([key,value])=>value!==undefined&&!['id','data',...required].includes(key))){
+      throw new EngineError('USAGE','project author --id <id> --out <directory> | project capture-text|submit-proposal --id <id> --spec <json> | project proposal-status|export-proposal --id <id> --proposal <hash> [--out <directory>]');
+    }
+    checkAbort(signal);
+    await ancestors(workflow);
+    if(!await checkDatabaseFiles(join(workflow,'workflow.sqlite')))throw new EngineError('WORKFLOW_NOT_FOUND','Existing workflow state is required');
+    const store=new WorkflowStore(workflow,{authoring:true});
+    try{
+      if(action==='author')return await openAuthoring(store,options.id!,options.out!,signal);
+      if(action==='capture-text')return await captureAuthoringText(store,options.id!,options.spec!,signal);
+      if(action==='submit-proposal')return await submitAuthoringProposal(store,options.id!,options.spec!,signal);
+      if(action==='proposal-status')return await statusAuthoringProposal(store,options.id!,options.proposal!,signal);
+      return await exportAuthoringProposal(store,options.id!,options.proposal!,options.out!,signal);
+    }finally{store.close();}
+  }
   if(action==='intake'||action==='evidence'||action==='research'||action==='story'){
     const common=['data','id'];
     const allowed=action==='intake'?[...common,'repo','ref','doc']:action==='evidence'||action==='research'?[...common,'out']:[...common,'spec','root','out'];
@@ -52,7 +71,7 @@ export async function workflowCommand(positionals:string[],options:Options,signa
       const store=new WorkflowStore(workflow);
       try{
         const project=await store.create(options.id!,snapshot,{preserveExistingSource:true});
-        return{project,commit:snapshot.commit,state:'EVIDENCE_CAPTURED',next:'Export the evidence workspace with project evidence and author a story'};
+        return{project,commit:snapshot.commit,state:'EVIDENCE_CAPTURED',next:'Open a pinned session authoring work package with project author'};
       }finally{store.close();}
     }
     if(!db)throw new EngineError('WORKFLOW_NOT_FOUND','Existing workflow state is required');

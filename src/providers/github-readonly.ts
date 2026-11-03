@@ -1,11 +1,13 @@
+import {createHash} from 'node:crypto';
+import {z} from 'zod';
 import {RepositorySnapshotSchema, RepositoryUrl, type RepositorySnapshot} from '../contracts/planning.js';
-import {EngineError} from '../core/errors.js';
+import {checkAbort, EngineError} from '../core/errors.js';
 import {sha256} from '../core/util.js';
 
 export type ReadonlyTransport = (url: string, signal?: AbortSignal) => Promise<unknown>;
 export async function githubGetJson(url: string, signal?: AbortSignal): Promise<unknown> {
   const parsed = new URL(url);
-  if (parsed.protocol!=='https:' || parsed.hostname!=='api.github.com' || parsed.port || parsed.username || parsed.password || !/^\/repos\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(?:\/(?:commits\/[^/]+|readme|contents\/[A-Za-z0-9_.%/-]+))?$/.test(parsed.pathname) || [...parsed.searchParams.keys()].some((key)=>key!=='ref')) throw new EngineError('SOURCE_URL','Only constructed public GitHub repository API requests are allowed');
+  if (parsed.protocol!=='https:' || parsed.hostname!=='api.github.com' || parsed.port || parsed.username || parsed.password || !/^\/repos\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(?:\/(?:commits\/[^/]+|readme|contents\/[A-Za-z0-9_.%/-]+|git\/(?:commits|trees|blobs)\/[a-f0-9]{40}))?$/.test(parsed.pathname) || [...parsed.searchParams.keys()].some((key)=>key!=='ref')) throw new EngineError('SOURCE_URL','Only constructed public GitHub repository API requests are allowed');
   let response:Response;
   try {response=await fetch(url,{method:'GET',redirect:'error',signal:AbortSignal.any([AbortSignal.timeout(15_000),...(signal?[signal]:[])]),headers:{Accept:'application/vnd.github+json','User-Agent':'github-video-engine-readonly/0.1','X-GitHub-Api-Version':'2022-11-28'}});}
   catch(error){throw signal?.aborted?new EngineError('CANCELLED','Source request cancelled','cancelled'):new EngineError('SOURCE_NETWORK',`GitHub request failed: ${String(error)}`,'retryable');}
@@ -25,6 +27,84 @@ export async function githubGetJson(url: string, signal?: AbortSignal): Promise<
   finally { reader.releaseLock(); }
   try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); }
   catch { throw new EngineError('SOURCE_FORMAT','GitHub did not return valid JSON'); }
+}
+
+export const TextCaptureLimits = {filesPerRequest: 3, totalFiles: 8, pathComponents: 4, fileBytes: 200_000, totalBytes: 1_200_000} as const;
+export const TextCapturePath = z.string().max(160)
+  .regex(/^[A-Za-z0-9_.\/-]+\.(?:md|txt|js|mjs|cjs|ts|tsx|jsx|py|rs|go|json)$/i)
+  .refine(path => {
+    const parts = path.split('/');
+    return parts.length <= TextCaptureLimits.pathComponents && parts.every(part => part && part !== '.' && part !== '..');
+  });
+
+const gitHash = z.string().regex(/^[a-f0-9]{40}$/);
+const gitCommit = z.object({sha: gitHash, tree: z.object({sha: gitHash})});
+const gitTree = z.object({sha: gitHash, truncated: z.boolean(), tree: z.array(z.object({path: z.string(), mode: z.string(), type: z.string(), sha: gitHash}))});
+const gitBlob = z.object({sha: gitHash, encoding: z.literal('base64'), size: z.number().int().min(1).max(TextCaptureLimits.fileBytes), content: z.string()});
+
+/** Explicit bounded text reads at the existing commit. Each path is resolved through ordinary Git tree entries. */
+export async function captureRepositoryText(snapshot: RepositorySnapshot, requested: string[], signal: AbortSignal, transport: ReadonlyTransport = githubGetJson) {
+  const {filesPerRequest, totalFiles, fileBytes, totalBytes} = TextCaptureLimits;
+  if (requested.length < 1 || requested.length > filesPerRequest || new Set(requested).size !== requested.length ||
+      requested.some(path => !TextCapturePath.safeParse(path).success || snapshot.documents.some(document => document.path === path))) {
+    throw new EngineError('SOURCE_PATH', 'Request one to three unique, safe, uncaptured repository text paths');
+  }
+  const documents = [...snapshot.documents];
+  let size = documents.reduce((sum, document) => sum + Buffer.byteLength(document.content), 0);
+  if (documents.length + requested.length > totalFiles || size >= totalBytes) {
+    throw new EngineError('SOURCE_BUDGET', 'Text capture would exceed the total source budget');
+  }
+  const base = 'https://api.github.com/repos' + new URL(RepositoryUrl.parse(snapshot.repository)).pathname + '/git/';
+  const get = async <T>(schema: z.ZodType<T>, path: string) => {
+    checkAbort(signal);
+    const result = schema.safeParse(await transport(base + path, signal));
+    if (!result.success) throw new EngineError('SOURCE_FORMAT', 'GitHub returned invalid Git data for ' + path);
+    return result.data;
+  };
+  const commit = await get(gitCommit, 'commits/' + gitHash.parse(snapshot.commit));
+  if (commit.sha !== snapshot.commit) throw new EngineError('SOURCE_FORMAT', 'Git commit identity differs from the frozen commit');
+  const trees = new Map<string, z.infer<typeof gitTree>>();
+  for (const path of requested) {
+    const parts = path.split('/');
+    let sha = commit.tree.sha;
+    for (const [index, name] of parts.entries()) {
+      let tree = trees.get(sha);
+      if (!tree) {
+        tree = await get(gitTree, 'trees/' + sha);
+        if (tree.sha !== sha) throw new EngineError('SOURCE_FORMAT', 'Git tree identity mismatch');
+        if (tree.truncated) throw new EngineError('SOURCE_TREE_TRUNCATED', 'GitHub did not return a complete tree for ' + path);
+        trees.set(sha, tree);
+      }
+      const entries = tree.tree.filter(entry => entry.path === name);
+      const entry = entries[0];
+      const last = index === parts.length - 1;
+      if (entries.length !== 1 || !entry || (last
+        ? entry.type !== 'blob' || !['100644', '100755'].includes(entry.mode)
+        : entry.type !== 'tree' || entry.mode !== '040000')) {
+        throw new EngineError('SOURCE_ENTRY', 'Expected an ordinary Git file without symlinks or submodules: ' + path);
+      }
+      sha = entry.sha;
+    }
+    const blob = await get(gitBlob, 'blobs/' + sha);
+    const encoded = blob.content.replace(/[\r\n]/g, '');
+    if (encoded.length > Math.ceil(fileBytes / 3) * 4) throw new EngineError('SOURCE_SIZE', 'Git blob exceeds byte limit: ' + path);
+    const bytes = Buffer.from(encoded, 'base64');
+    const gitDigest = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+    if (blob.sha !== sha || gitDigest !== sha || blob.size !== bytes.length || bytes.toString('base64') !== encoded) {
+      throw new EngineError('SOURCE_INTEGRITY', 'Git blob bytes do not match the tree entry: ' + path);
+    }
+    size += bytes.length;
+    if (size > totalBytes) throw new EngineError('SOURCE_BUDGET', 'Text capture exceeds the total byte budget: ' + path);
+    let content: string;
+    try {
+      content = new TextDecoder('utf-8', {fatal: true, ignoreBOM: true}).decode(bytes);
+      if (content.includes('\0')) throw new Error('NUL byte');
+    } catch {
+      throw new EngineError('SOURCE_ENCODING', 'Git blob must be inert UTF-8 text: ' + path);
+    }
+    documents.push({path, url: `${snapshot.repository}/blob/${snapshot.commit}/${path}`, sha256: sha256(bytes), content});
+  }
+  return {...snapshot, documents};
 }
 
 export async function researchRepository(repository: string, requestedRef='HEAD', extraDocuments: string[]=[], transport: ReadonlyTransport=githubGetJson, signal?: AbortSignal): Promise<RepositorySnapshot> {

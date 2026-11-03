@@ -39,6 +39,7 @@ public static class MechanismPublication
 
     private const uint ReadDirectoryAndSync = 0x100081; // FILE_LIST_DIRECTORY activates share checks.
     private const uint WriteAndSync = 0x100002;
+    private const uint ReadAttributes = 0x80;
     private const uint ShareReadOnly = 1;
     private const uint OpenExisting = 1;
     private const uint CreateNew = 2;
@@ -46,7 +47,7 @@ public static class MechanismPublication
     // Paths below the drive root are opened one component at a time relative to the checked parent.
     // The retained handles disallow other writers and renames. Newly created directories are
     // returned already locked, so no pathname is ever reopened after an unprotected mkdir.
-    private static SafeFileHandle Relative(SafeFileHandle parent, string component, bool directory, bool create)
+    private static SafeFileHandle Relative(SafeFileHandle parent, string component, bool directory, bool create, bool inspectFile = false)
     {
         IntPtr text = Marshal.StringToHGlobalUni(component);
         IntPtr name = IntPtr.Zero;
@@ -63,7 +64,9 @@ public static class MechanismPublication
             const uint OpenReparsePoint = 0x200000;
             const uint SynchronousIo = 0x20;
             uint type = directory ? 1u : 0x40u; // FILE_DIRECTORY_FILE or FILE_NON_DIRECTORY_FILE
-            int status = NtCreateFile(out handle, directory ? ReadDirectoryAndSync : WriteAndSync,
+            uint access = !directory && create ? WriteAndSync : ReadDirectoryAndSync;
+            if (inspectFile) access |= ReadAttributes;
+            int status = NtCreateFile(out handle, access,
                 ref attributes, out io, IntPtr.Zero, 0, ShareReadOnly, create ? CreateNew : OpenExisting,
                 type | OpenReparsePoint | SynchronousIo, IntPtr.Zero, 0);
             if (status < 0)
@@ -80,13 +83,33 @@ public static class MechanismPublication
         }
     }
 
-    private static void RequirePlainDirectory(SafeFileHandle handle)
+    private static void RequirePlain(SafeFileHandle handle, bool directory)
     {
         FileTag info;
         if (!GetFileInformationByHandleEx(handle, 9, out info, (uint)Marshal.SizeOf(typeof(FileTag))))
             throw new Win32Exception(Marshal.GetLastWin32Error());
-        if ((info.Attributes & 0x410) != 0x10)
-            throw new IOException("Publication requires ordinary directories; reparse points are forbidden.");
+        if ((info.Attributes & 0x410) != (directory ? 0x10u : 0u))
+            throw new IOException("Publication requires ordinary files and directories; reparse points are forbidden.");
+    }
+
+    private static bool NameExists(Win32Exception error)
+    {
+        return error.NativeErrorCode == 80 || error.NativeErrorCode == 183;
+    }
+
+    private static SafeFileHandle OpenOrCreateParent(SafeFileHandle parent, string component)
+    {
+        try { return Relative(parent, component, true, false); }
+        catch (Win32Exception error)
+        {
+            if (error.NativeErrorCode != 2 && error.NativeErrorCode != 3) throw;
+        }
+        try { return Relative(parent, component, true, true); }
+        catch (Win32Exception error)
+        {
+            if (!NameExists(error)) throw;
+            return Relative(parent, component, true, false);
+        }
     }
 
     private static void RequireComponent(string part)
@@ -96,8 +119,58 @@ public static class MechanismPublication
             throw new IOException("Invalid publication path component.");
     }
 
-    public static void Publish(string output, bool directory, string[] names, string[] payloads)
+    private static void ExactFiles(SafeFileHandle parent, string output, bool create, string[] names, string[] payloads)
     {
+        var handles = new List<SafeFileHandle>();
+        var streams = new List<FileStream>();
+        try
+        {
+            for (int fileIndex = 0; fileIndex < names.Length; fileIndex++)
+            {
+                string name = names[fileIndex];
+                byte[] expected = Convert.FromBase64String(payloads[fileIndex]);
+                SafeFileHandle file = Relative(parent, name, false, create, true);
+                handles.Add(file);
+                RequirePlain(file, false);
+                var stream = new FileStream(file, create ? FileAccess.Write : FileAccess.Read);
+                streams.Add(stream);
+                if (create)
+                {
+                    stream.Write(expected, 0, expected.Length);
+                    stream.Flush();
+                }
+                else
+                {
+                    if (stream.Length != expected.Length)
+                        throw new IOException("Existing output has a different file: " + name);
+                    var actual = new byte[8192];
+                    for (int offset = 0; offset < expected.Length;)
+                    {
+                        int count = stream.Read(actual, 0, Math.Min(actual.Length, expected.Length - offset));
+                        if (count == 0) throw new IOException("Incomplete output file: " + name);
+                        for (int index = 0; index < count; index++)
+                            if (actual[index] != expected[offset + index])
+                                throw new IOException("Existing output has a different file: " + name);
+                        offset += count;
+                    }
+                }
+            }
+            var expectedNames = new HashSet<string>(names, StringComparer.Ordinal);
+            foreach (string path in Directory.EnumerateFileSystemEntries(output))
+                if (!expectedNames.Remove(Path.GetFileName(path)))
+                    throw new IOException("Output contains an unexpected entry.");
+            if (expectedNames.Count != 0) throw new IOException("Output is incomplete.");
+        }
+        finally
+        {
+            for (int i = streams.Count - 1; i >= 0; i--) streams[i].Dispose();
+            for (int i = handles.Count - 1; i >= 0; i--) handles[i].Dispose();
+        }
+    }
+
+    public static void Publish(string output, bool directory, string[] names, string[] payloads, bool exactReview)
+    {
+        if (exactReview && !directory) throw new IOException("Exact review publication requires a directory.");
         string root = Path.GetPathRoot(output);
         if (root == null || root.Length != 3 || root[1] != ':' || root[2] != (char)92)
             throw new IOException("Publication requires an absolute local drive path.");
@@ -117,13 +190,26 @@ public static class MechanismPublication
                 throw new Win32Exception(error);
             }
             handles.Add(parent);
-            RequirePlainDirectory(parent);
+            RequirePlain(parent, true);
             int folders = directory ? parts.Length : parts.Length - 1;
+            bool createReview = true;
             for (int i = 0; i < folders; i++)
             {
-                parent = Relative(parent, parts[i], true, directory && i == parts.Length - 1);
+                bool create = directory && i == parts.Length - 1;
+                try { parent = exactReview && !create ? OpenOrCreateParent(parent, parts[i]) : Relative(parent, parts[i], true, create); }
+                catch (Win32Exception error)
+                {
+                    if (!exactReview || !create || !NameExists(error)) throw;
+                    parent = Relative(parent, parts[i], true, false);
+                    createReview = false;
+                }
                 handles.Add(parent);
-                RequirePlainDirectory(parent);
+                RequirePlain(parent, true);
+            }
+            if (exactReview)
+            {
+                ExactFiles(parent, output, createReview, names, payloads);
+                return;
             }
             for (int i = 0; i < names.Length; i++)
             {
@@ -143,4 +229,4 @@ public static class MechanismPublication
 
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding($false, $true)
 $request = [Console]::In.ReadToEnd() | ConvertFrom-Json
-[MechanismPublication]::Publish($request.output, $request.directory, [string[]]$request.names, [string[]]$request.payloads)
+[MechanismPublication]::Publish($request.output, $request.directory, [string[]]$request.names, [string[]]$request.payloads, $request.exactReview -eq $true)

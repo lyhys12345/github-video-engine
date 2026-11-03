@@ -14,11 +14,19 @@ export function requireMechanismPublisher() {
 export async function publishMechanism(
   output: string, files: ReadonlyMap<string, string | Buffer>, directory = true,
 ) {
+  return publishNative(output, files, directory, false);
+}
+
+export async function publishExactReview(output: string, files: ReadonlyMap<string, Buffer>) {
+  return publishNative(output, files, true, true);
+}
+
+async function publishNative(output: string, files: ReadonlyMap<string, string | Buffer>, directory: boolean, exactReview: boolean) {
   const host = requireMechanismPublisher();
   if (!directory && files.size !== 1) throw new Error('MECHANISM: file publication requires one payload');
   const script = resolve(import.meta.dirname, '../..', publisherScript);
   const request = JSON.stringify({
-    output: resolve(output), directory, names: [...files.keys()],
+    output: resolve(output), directory, exactReview, names: [...files.keys()],
     payloads: [...files.values()].map(value => Buffer.from(value).toString('base64')),
   });
   await new Promise<void>((done, fail) => {

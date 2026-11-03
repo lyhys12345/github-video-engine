@@ -4,6 +4,7 @@ import {checkAbort, EngineError} from '../core/errors.js';
 import {canonical, sha256} from '../core/util.js';
 import {ancestors, boundedFile, captureEvidence, planCapturedStory} from '../story-planner/runtime.js';
 import type {WorkflowStore} from './store.js';
+import type {RepositorySnapshot} from '../contracts/planning.js';
 
 const json = (value: unknown) => JSON.stringify(value, null, 2) + '\n';
 const errorCode = (error: unknown) => (error as NodeJS.ErrnoException).code;
@@ -12,9 +13,14 @@ const contains = (root: string, path: string) => {
   return !isAbsolute(rel) && rel !== '..' && !rel.startsWith('..' + sep);
 };
 
-async function buildWorkspace(store: WorkflowStore, id: string) {
+export async function buildWorkspace(store: WorkflowStore, id: string, snapshotHash?: string) {
   const project = store.project(id);
-  const snapshot = await store.currentSource(project);
+  const hash = snapshotHash ?? project.snapshotHash;
+  const snapshot = await store.currentSource({...project, snapshotHash: hash});
+  return evidenceWorkspace(id, hash, snapshot);
+}
+
+export function evidenceWorkspace(id: string, hash: string, snapshot: RepositorySnapshot) {
   // Numeric names avoid interpreting any repository pathname as a local pathname.
   const sources = snapshot.documents.map((document, index) => ({
     id: 'source-' + (index + 1),
@@ -26,7 +32,7 @@ async function buildWorkspace(store: WorkflowStore, id: string) {
     schemaVersion: '1.0',
     kind: 'repository-evidence-workspace',
     projectId: id,
-    snapshotHash: project.snapshotHash,
+    snapshotHash: hash,
     repository: snapshot.repository,
     commit: snapshot.commit,
     name: snapshot.name,

@@ -7,7 +7,10 @@ import {z} from 'zod';
 import {ArtifactSchema,JobSchema,JobStepSchema,ErrorSchema,EvaluationResultSchema,STAGES} from '../contracts/runtime.js';
 import {Hash,Id} from '../contracts/video.js';
 import {ProductionPackageSchema,ReadthroughSchema} from '../contracts/production.js';
-import {validateSnapshot,validatePlan,sourceFingerprint} from '../workflow/store.js';
+import {AUTHORING_WORKFLOW_DB_VERSION,AuthoringProposalRow,validateSnapshot,validatePlan,sourceFingerprint} from '../workflow/store.js';
+import {StoryProposal} from '../contracts/authoring.js';
+import {evidenceWorkspace} from '../workflow/project-evidence.js';
+import {verifyProposal} from '../workflow/agent-authoring.js';
 import {canonical,sha256} from '../core/util.js';
 import {UsageEventSchema,summarizeUsage,TASKS_DB_VERSION,USAGE_SCHEMA_SQL} from './usage.js';
 import {validateRepairRows} from '../contracts/revision.js';
@@ -36,6 +39,11 @@ required['tasks.usage_events']=['id','task_id','attempt','phase','data'];
 expectedForeignKeys['tasks.usage_events']=[['task_id','tasks','id']];
 triggerDefinitions.usage_update_forbidden=['usage_events','UPDATE','Usage history is immutable'];
 triggerDefinitions.usage_delete_forbidden=['usage_events','DELETE','Usage history is immutable'];
+primaryKeys['workflow.authoring_proposals']=['hash'];
+required['workflow.authoring_proposals']=['project_id','data'];
+expectedForeignKeys['workflow.authoring_proposals']=[['project_id','projects','id']];
+triggerDefinitions.no_authoring_proposal_update=['authoring_proposals','UPDATE','Authoring proposals are immutable'];
+triggerDefinitions.no_authoring_proposal_delete=['authoring_proposals','DELETE','Authoring proposals are immutable'];
 primaryKeys['production.repair_scopes']=['id'];primaryKeys['production.repair_rounds']=['id'];
 required['production.repair_scopes']=['project_id','plan_revision','data'];required['production.repair_rounds']=['scope_id','request_id','round','data'];
 expectedForeignKeys['production.repair_rounds']=[['scope_id','repair_scopes','id']];
@@ -81,10 +89,12 @@ export async function auditRuntime(dataRoot:string):Promise<AuditReport>{
     info.capturedAt=new Date().toISOString();info.snapshotMethod='bounded-stable-main-and-WAL-copy; readonly SQLite scratch connection';const schemaSize=db.prepare("SELECT COUNT(*) AS n,COALESCE(SUM(length(CAST(sql AS BLOB))),0) AS bytes FROM sqlite_schema").get()!;assert(Number(schemaSize.n)<=1000&&Number(schemaSize.bytes)<=1_000_000,'Schema text/count bound exceeded');const schema=db.prepare("SELECT type,name,sql FROM sqlite_schema WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all();
     info.userVersion=Number(db.prepare('PRAGMA user_version').get()!.user_version);info.schemaSha256=sha256(canonical(schema));info.schema=schema;
     const withUsage=kind==='tasks'&&info.userVersion===TASKS_DB_VERSION,withRepairs=kind==='production'&&info.userVersion===PRODUCTION_DB_VERSION;
-    assert(kind==='tasks'?[0,TASKS_DB_VERSION].includes(info.userVersion):kind==='production'?[0,PRODUCTION_DB_VERSION].includes(info.userVersion):info.userVersion===1,'Unsupported '+kind+' user_version '+info.userVersion);
-    const layout:Record<string,string[]>=withUsage?{...layouts[kind],usage_events:['seq','id','task_id','attempt','phase','data']}:withRepairs?{...layouts[kind],repair_scopes:['id','project_id','plan_revision','data'],repair_rounds:['id','scope_id','request_id','round','data']}:layouts[kind]!;
+    const withAuthoring=kind==='workflow'&&info.userVersion===AUTHORING_WORKFLOW_DB_VERSION;
+    assert(kind==='tasks'?[0,TASKS_DB_VERSION].includes(info.userVersion):kind==='production'?[0,PRODUCTION_DB_VERSION].includes(info.userVersion):info.userVersion===1||withAuthoring,'Unsupported '+kind+' user_version '+info.userVersion);
+    const layout:Record<string,string[]>=withUsage?{...layouts[kind],usage_events:['seq','id','task_id','attempt','phase','data']}:withRepairs?{...layouts[kind],repair_scopes:['id','project_id','plan_revision','data'],repair_rounds:['id','scope_id','request_id','round','data']}:withAuthoring?{...layouts[kind],authoring_proposals:['hash','project_id','data']}:layouts[kind]!;
     if(withRepairs)validateProductionSchema(db,1);
-    const historyTriggers=withUsage?[...triggers[kind]!,'usage_update_forbidden','usage_delete_forbidden']:triggers[kind]!;
+    const historyTriggers=withUsage?[...triggers[kind]!,'usage_update_forbidden','usage_delete_forbidden']:
+      withAuthoring?[...triggers[kind]!,'no_authoring_proposal_update','no_authoring_proposal_delete']:triggers[kind]!;
     const actual=schema.filter(s=>s.type==='table').map(s=>s.name).sort();assert(canonical(actual)===canonical(Object.keys(layout).sort()),'Unsupported table layout');
     for(const name of historyTriggers){const [table,operation,message,when]=triggerDefinitions[name]!;const expected=`CREATE TRIGGER ${name} BEFORE ${operation} ON ${table}${when?' WHEN '+when:''} BEGIN SELECT RAISE(ABORT,'${message}'); END`;assert(schema.some(s=>s.type==='trigger'&&s.name===name&&normalizedSql(s.sql)===normalizedSql(expected)),'Missing/unsupported history-preservation trigger '+name);}
     for(const[t,columns]of Object.entries(layout)){const metadata=db.prepare('PRAGMA table_info('+t+')').all(),key=kind+'.'+t;assert(canonical(metadata.map(c=>c.name))===canonical(columns),'Unsupported column layout '+t);for(const c of metadata){const index=primaryKeys[key]!.indexOf(c.name as string);assert(c.type===((c.name==='seq'||(key==='tasks.usage_events'&&c.name==='attempt')||(key==='production.repair_rounds'&&c.name==='round'))?'INTEGER':'TEXT')&&Number(c.pk)===(index<0?0:index+1)&&Number(c.notnull)===(required[key]!.includes(c.name as string)?1:0)&&c.dflt_value===null,'Unsupported column constraints '+key+'.'+c.name);}const fk=db.prepare('PRAGMA foreign_key_list('+t+')').all().map(f=>[f.from,f.table,f.to]);const order=(a:unknown,b:unknown)=>canonical(a).localeCompare(canonical(b));assert(canonical(fk.sort(order))===canonical((expectedForeignKeys[key]??[]).slice().sort(order)),'Unsupported foreign-key layout '+key);if(key==='jobs.jobs'){const indexes=db.prepare('PRAGMA index_list(jobs)').all();assert(indexes.some(i=>Number(i.unique)===1&&canonical(db!.prepare('SELECT name FROM pragma_index_info(?) ORDER BY seqno').all(String(i.name)).map(c=>c.name))===canonical(['fingerprint'])),'Missing unique job fingerprint constraint');}}
@@ -170,6 +180,18 @@ export async function auditRuntime(dataRoot:string):Promise<AuditReport>{
  for(const row of get('workflow.sources'))await guard('source:'+row.hash,async()=>{const r=Source.parse(row.value),s=validateSnapshot(await readArtifact(r.artifact,'workflow','source'));assert(row.hash===r.hash&&sourceFingerprint(s)===r.hash,'Source row/content fingerprint mismatch');sourceMap.set(r.hash,s);});
  for(const row of get('workflow.revisions'))await guard('revision:'+row.hash,async()=>{const r=Revision.parse(row.value),p=await readArtifact(r.artifact,'workflow','revision');assert(row.hash===r.hash&&row.project_id===r.projectId&&sha256(canonical(p))===r.hash&&p.snapshotHash===r.snapshotHash,'Revision SQL/JSON/payload binding mismatch');const source=sourceMap.get(r.snapshotHash);assert(source,'Revision source missing');const plan=validatePlan(p.plan,source as any,r.snapshotHash);assert(plan.projectId===r.projectId,'Plan project mismatch');revisionMap.set(r.hash,{...r,plan});versions.push({kind:'revision',hash:r.hash,projectId:r.projectId,snapshotHash:r.snapshotHash});});
  for(const row of get('workflow.projects'))await guard('project:'+row.id,()=>{const p=Project.parse(row.value);assert(row.id===p.id,'Project SQL/JSON identity mismatch');assert(sourceMap.has(p.snapshotHash),'Project source missing');if(p.currentRevision){const r=revisionMap.get(p.currentRevision);assert(r?.projectId===p.id&&r.snapshotHash===p.snapshotHash,'Current revision source/project mismatch');}versions.push({kind:'project-selection',projectId:p.id,snapshotHash:p.snapshotHash,currentRevision:p.currentRevision});});
+ for(const row of get('workflow.authoring_proposals'))await guard('authoring-proposal:'+row.hash,async()=>{
+   const record=AuthoringProposalRow.parse(row.value);
+   const proposal=StoryProposal.parse(await readArtifact(record.artifact,'workflow','authoring-proposal'));
+   assert(row.hash===record.hash&&row.project_id===record.projectId&&record.artifact.sha256===record.hash&&
+     sha256(canonical(proposal))===record.hash&&record.artifact.inputFingerprint===record.snapshotHash,'Proposal SQL/JSON/payload binding mismatch');
+   const project=get('workflow.projects').find(p=>p.id===record.projectId)?.value;
+   const source=sourceMap.get(record.snapshotHash);
+   assert(project&&source&&source.repository===project.repository,'Proposal source missing or belongs to another repository');
+   verifyProposal(proposal,evidenceWorkspace(record.projectId,record.snapshotHash,validateSnapshot(source)));
+   versions.push({kind:'authoring-proposal',hash:record.hash,projectId:record.projectId,snapshotHash:record.snapshotHash,
+     stale:project.snapshotHash!==record.snapshotHash,semanticReview:'pending'});
+ });
  for(const row of get('production.packages'))await guard('package:'+row.hash,async()=>{const r=Package.parse(row.value),design=await readArtifact(r.artifact,'production','package');assert(row.hash===r.hash&&sha256(canonical(design))===r.hash&&design.projectId===r.projectId&&design.planRevision===r.planRevision,'Package SQL/JSON/payload fingerprint mismatch');let legacy=false;const result=ProductionPackageSchema.safeParse(design);if(!result.success){const without=structuredClone(design);without.authorization??={};without.authorization.motionAudioScriptId='legacy-unselected-line';const historical=!get('production.selected').some(s=>s.hash===r.hash);assert(historical&&design.authorization?.motionAudioScriptId===undefined&&ProductionPackageSchema.safeParse(without).success,'Package shape is invalid for current schema');legacy=true;add('legacy-package:'+r.hash,true,'Intact historical schemaVersion1.0 package predates required motionAudioScriptId; not eligible for current production.','warning');}
  const rev=revisionMap.get(r.planRevision);assert(rev?.projectId===r.projectId,'Package revision missing or belongs to another project');const measured=ReadthroughSchema.parse(await readArtifact(design.readthrough,'production','readthrough'));assert(measured.projectId===r.projectId&&measured.planRevision===r.planRevision,'Readthrough binding mismatch');assert(get('tasks.tasks').some(t=>t.value.state==='succeeded'&&t.value.kind==='readthrough'&&t.value.result?.sha256===design.readthrough.sha256),'Readthrough lacks successful task provenance');assert(canonical(measured.lines.map(l=>[l.id,l.text]))===canonical(rev.plan.script.map((s:Row)=>[s.id,s.narration])),'Readthrough differs from script');assert(canonical(design.scenes.map((s:Row)=>[s.scriptId,s.claimIds]))===canonical(rev.plan.script.map((s:Row)=>[s.id,s.claimIds])),'Package scenes differ from script');packageMap.set(r.hash,{...r,design,legacy});versions.push({kind:'package',hash:r.hash,projectId:r.projectId,planRevision:r.planRevision,compatibility:legacy?'legacy-historical':'current'});(report.costs as Row).approvedZeroPolicies.push({packageHash:r.hash,maxPaidUsd:design.authorization.maxPaidUsd});});
  for(const row of get('production.selected'))await guard('selection:'+row.project_id,()=>{const p=packageMap.get(row.hash);assert(p&&p.projectId===row.project_id,'Selected package missing or project mismatch');const current=get('workflow.projects').find(p=>p.id===row.project_id)?.value;versions.push({kind:'package-selection',projectId:row.project_id,packageHash:row.hash,stale:!current||current.currentRevision!==p.planRevision});});

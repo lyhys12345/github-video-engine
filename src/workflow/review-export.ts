@@ -2,6 +2,7 @@ import {lstat, mkdtemp, readFile, rename, rm, writeFile} from 'node:fs/promises'
 import {dirname, join} from 'node:path';
 import {checkAbort, EngineError} from '../core/errors.js';
 import {ancestors} from '../story-planner/runtime.js';
+import {publishExactReview} from '../mechanism/publish.js';
 
 const errorCode = (error: unknown) => (error as NodeJS.ErrnoException).code;
 async function optionalStat(path: string) {
@@ -25,10 +26,23 @@ async function reviewParent(parent: string, create = false) {
   }
 }
 
-export async function publishReviewExport(output: string, files: readonly [string, Buffer][], signal: AbortSignal) {
+export async function publishReviewExport(output: string, files: readonly [string, Buffer][], signal: AbortSignal, options: {exactFiles?: boolean} = {}) {
   checkAbort(signal);
   const parent = dirname(output);
   const conflict = () => new EngineError('EXPORT_EXISTS', 'Existing review export is incomplete, linked or different. Choose a new output directory');
+  if (options.exactFiles) {
+    if (process.platform !== 'win32' || !process.env.SystemRoot) {
+      throw new EngineError('AUTHORING_PLATFORM', 'Safe authoring publication requires a local Windows drive');
+    }
+    try {
+      // Create directly through held native handles. Incomplete outputs remain for inspection.
+      await publishExactReview(output, new Map(files));
+    } catch (cause) {
+      throw new EngineError('EXPORT_EXISTS', 'Could not safely create or verify the authoring output. Inspect the path or choose a new directory. ' + String(cause));
+    }
+    checkAbort(signal);
+    return;
+  }
   async function exactExisting() {
     await reviewParent(parent);
     const target = await optionalStat(output);
