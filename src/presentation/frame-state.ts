@@ -1,6 +1,6 @@
-import type {CompiledPresentation} from './compile.js';
+import type {CompiledLegacy} from './compile.js';
 
-export function presentationFrame(plan: CompiledPresentation, frame: number) {
+export function presentationFrame(plan: CompiledLegacy, frame: number) {
   const beat = plan.beats.find(row => frame >= row.start && frame < row.end);
   if (!beat) throw new Error('Frame outside presentation timeline');
   const events = plan.trace.filter(event => event.frame <= frame);

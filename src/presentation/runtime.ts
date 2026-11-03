@@ -28,6 +28,9 @@ export const PREVIEW_KIND = 'repository-presentation-preview-v1';
 const FONT_SHA = 'a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da';
 const GEOMETRY = {width: 720, height: 1280};
 const RETRIES = 3;
+const requireQueueMigration = (): never => {
+  throw new EngineError('PRESENTATION_MIGRATION', 'Queue plan 1.2 is historical. Use schemaVersion 1.3 for new plans and previews. Existing tasks remain available through status, export and successful render-task resume.');
+};
 const review = {semanticReview: 'pending', editorialReview: 'pending', audiovisualReview: 'pending', voice: 'omitted-explicitly', ownerAcceptance: 'pending'} as const;
 const Source = z.strictObject({id: Id, path: z.string().regex(/^source-[1-8]\.txt$/), url: z.string().max(600), sha256: Hash});
 const PlanInput = z.strictObject({projectId: Id, proposal: StoryProposal, plan: PresentationPlan, evidenceSha256: Hash,
@@ -35,7 +38,7 @@ const PlanInput = z.strictObject({projectId: Id, proposal: StoryProposal, plan: 
 type PlanInput = z.infer<typeof PlanInput>;
 const PreviewInput = z.strictObject({planTaskId: Hash, planManifestSha256: Hash, mode: z.literal('silent'),
   fontSha256: z.literal(FONT_SHA), environment: z.record(z.string(), z.string()),
-  renderProfile: z.literal(EXTENDED_RENDER_PROFILE).optional()});
+  renderProfile: z.literal(EXTENDED_RENDER_PROFILE).optional(), rendererSha256: Hash.optional()});
 const VoiceInput = z.strictObject({spec: VoiceSpec, decoder: z.record(z.string(), z.string()), implementationSha256: Hash});
 const NarratedInput = PreviewInput.extend({mode: z.literal('narrated'), voiceTaskId: Hash, voiceManifestSha256: Hash});
 const Result = z.strictObject({kind: z.enum([PLAN_KIND, PREVIEW_KIND, VOICE_KIND, NARRATED_KIND]), files: z.array(z.strictObject({
@@ -184,13 +187,19 @@ export async function createPresentation(store: WorkflowStore, id: string, propo
   const plan = PresentationPlan.safeParse(value);
   if (!plan.success) throw new EngineError('PRESENTATION_SCHEMA', 'Expected a bounded presentation plan. ' +
     plan.error.issues.slice(0, 6).map(issue => issue.path.join('.') + ' ' + issue.message).join(', '));
+  if (plan.data.schemaVersion === '1.2') requireQueueMigration();
   const {proposal, bytes, workspace} = await loadAuthoringProposal(store, id, proposalHash, signal);
   if (bytes.length > 300_000) throw new EngineError('PRESENTATION_SIZE', 'Presentation proposal exceeds 300 kB.');
   const assertCurrent = () => {
     if (store.project(id).snapshotHash !== proposal.binding.snapshotHash) throw new EngineError('AUTHORING_STALE', 'Select a proposal for the current source revision.');
   };
   const compiled = compilePresentation(proposal, plan.data);
-  const compiler = await Promise.all(['src/contracts/presentation.ts', 'src/presentation/compile.ts', 'src/presentation/asset.ts', 'src/presentation/runtime.ts']
+  const queueImplementation = compiled.moduleId === 'concurrency-queue/1' ? [
+    'src/contracts/authoring.ts', 'src/contracts/concurrency-queue.ts', 'src/presentation/concurrency-queue.ts',
+    'src/presentation/queue-frame.ts', 'src/presentation/queue-composition.tsx', 'src/presentation/composition.tsx',
+  ] : [];
+  const compiler = await Promise.all(['src/contracts/presentation.ts', 'src/presentation/compile.ts', 'src/presentation/asset.ts',
+    'src/presentation/runtime.ts', ...queueImplementation]
     .map(async path => ({path, sha256: sha256(await boundedFile(join(projectRoot, path)))})));
   const input = PlanInput.parse({projectId: id, proposal, plan: plan.data, sources: workspace.manifest.sources,
     evidenceSha256: sha256(workspace.files.get('evidence.json')!), compiler});
@@ -215,6 +224,10 @@ export async function createPresentation(store: WorkflowStore, id: string, propo
 
 function sampleFrames(plan: CompiledPresentation, cues: {startFrame: number; endFrame: number}[] = [], extended = false) {
   const frames = new Set([0, plan.timeline.totalFrames - 1, ...plan.beats.map(beat => beat.start)]);
+  if (plan.moduleId === 'concurrency-queue/1' && plan.endingTitle) {
+    const ending = plan.endingTitle.visibleFromFrame;
+    for (const frame of [ending - 1, ending, ending + 1]) if (frame >= 0) frames.add(frame);
+  }
   for (const cue of cues) frames.add(cue.startFrame);
   if (extended) for (const [first] of extendedRanges(plan.timeline.totalFrames)) {
     for (const frame of [first, first - 1]) if (frames.size < MAX_SAMPLES && frame >= 0) frames.add(frame);
@@ -222,7 +235,10 @@ function sampleFrames(plan: CompiledPresentation, cues: {startFrame: number; end
   for (const cue of cues) if (frames.size < MAX_SAMPLES && cue.endFrame < plan.timeline.totalFrames) frames.add(cue.endFrame);
   for (const [index, event] of plan.trace.entries()) {
     const next = plan.trace[index + 1]?.frame ?? plan.timeline.totalFrames;
-    for (const frame of [event.frame - 1, event.frame, Math.min(event.frame + 24, next - 1)]) {
+    const anchors = 'motionFrames' in event ?
+      [event.frame - 1, event.frame, event.frame + Math.floor(event.motionFrames / 2), event.frame + event.motionFrames] :
+      [event.frame - 1, event.frame, Math.min(event.frame + 24, next - 1)];
+    for (const frame of anchors) {
       if (frame >= 0 && frames.size < MAX_SAMPLES) frames.add(frame);
     }
   }
@@ -356,14 +372,21 @@ export async function renderPresentation(data: string, planTaskId: string, signa
   checkAbort(signal);
   data = await preflight(data);
   const plan = await checkedPlan(data, planTaskId, signal);
+  if (plan.compiled.moduleId === 'concurrency-queue/1' && !plan.compiled.endingTitle) requireQueueMigration();
   const voice = voiceTaskId === undefined ? undefined : await checkedVoice(data, voiceTaskId, signal);
   if (voice && voice.input.spec.planTaskId !== planTaskId) throw new EngineError('VOICE_PARENT', 'Bind the voice to this exact plan task.');
   const font = await boundedFile(join(projectRoot, 'assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf'), 30_000_000);
   if (sha256(font) !== FONT_SHA) fail('Pinned presentation font differs.');
   const env = await environment();
   const extended = plan.compiled.timeline.totalFrames > PRESENTATION_LEGACY_MAX_FRAMES;
+  const rendererSha256 = async () => sha256(canonical(await Promise.all([
+    'src/presentation/composition.tsx', 'src/presentation/queue-composition.tsx', 'src/presentation/queue-frame.ts',
+    'src/short-segment/worker.ts', 'src/presentation/runtime.ts', 'src/presentation/duration.ts',
+  ].map(async path => sha256(await boundedFile(join(projectRoot, path)))))));
+  const queueRenderer = plan.compiled.moduleId === 'concurrency-queue/1' ? await rendererSha256() : undefined;
   const base = {planTaskId, planManifestSha256: sha256(plan.files.get('plan-manifest.json')!), fontSha256: FONT_SHA, environment: env,
-    ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {})};
+    ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {}),
+    ...(queueRenderer ? {rendererSha256: queueRenderer} : {})};
   const input = voice ? NarratedInput.parse({...base, mode: 'narrated', voiceTaskId,
     voiceManifestSha256: sha256(voice.files.get('voice-manifest.json')!)}) : PreviewInput.parse({...base, mode: 'silent'});
   const kind = voice ? NARRATED_KIND : PREVIEW_KIND;
@@ -406,7 +429,9 @@ export async function renderPresentation(data: string, planTaskId: string, signa
         ...(voice ? ['-map', '1:a:0', '-c:a', 'aac', '-b:a', '128k'] : []), '-movflags', '+faststart', movie],
       {signal: workSignal, timeout});
       const probe = await verifyMovie(movie, {mode: input.mode, timeline: plan.compiled.timeline}, workSignal, timeout);
-      if (canonical(await environment()) !== canonical(env)) fail('Renderer environment changed during presentation.');
+      if (canonical(await environment()) !== canonical(env) || (queueRenderer && queueRenderer !== await rendererSha256())) {
+        fail('Renderer environment or implementation changed during presentation.');
+      }
       const video = await boundedFile(movie, MAX_MOVIE_BYTES);
       const files = new Map<string, Buffer>([['preview.mp4', video],
         ['captions.vtt', voice ? voice.files.get('captions.vtt')! : captions(plan.compiled)]]);
@@ -459,6 +484,7 @@ export async function readPresentation(data: string, id: string, requested: Pres
   const input = kind === 'narrated' ? NarratedInput.parse(task.input) : PreviewInput.parse(task.input);
   const plan = await checkedPlan(data, input.planTaskId, signal);
   if (sha256(plan.files.get('plan-manifest.json')!) !== input.planManifestSha256) fail('Preview parent plan manifest differs.');
+  if ((plan.compiled.moduleId === 'concurrency-queue/1') !== !!input.rendererSha256) fail('Preview renderer fingerprint differs from its module.');
   const voice = input.mode === 'narrated' ? await checkedVoice(data, input.voiceTaskId, signal) : undefined;
   if (input.mode === 'narrated' && (voice!.input.spec.planTaskId !== input.planTaskId ||
       sha256(voice!.files.get('voice-manifest.json')!) !== input.voiceManifestSha256)) fail('Preview voice binding differs.');

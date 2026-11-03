@@ -1,7 +1,8 @@
 import type {StoryProposal} from '../contracts/authoring.js';
-import {PRESENTATION_FPS, presentationMaxFrames, type PresentationEventKind, type PresentationPlan} from '../contracts/presentation.js';
+import {PRESENTATION_FPS, presentationMaxFrames, type LegacyPlan, type PresentationEventKind, type PresentationPlan, type QueuePlan} from '../contracts/presentation.js';
 import {EngineError} from '../core/errors.js';
 import {canonical, sha256} from '../core/util.js';
+import {compileQueue, type CompiledQueue} from './concurrency-queue.js';
 import {PAPER_BIRD, PAPER_BIRD_SHA256} from './asset.js';
 
 type Transition = {from: readonly string[]; to: string; roles: readonly string[]; parameters: readonly string[]};
@@ -24,19 +25,33 @@ const fail = (code: string, message: string): never => {throw new EngineError(co
 const subset = (ids: string[], allowed: string[]) => new Set(ids).size === ids.length && ids.every(id => allowed.includes(id));
 const labelLength = (text: string) => [...text].length;
 
+export function compilePresentation(proposal: StoryProposal, plan: LegacyPlan): CompiledLegacy;
+export function compilePresentation(proposal: StoryProposal, plan: QueuePlan): CompiledQueue;
+export function compilePresentation(proposal: StoryProposal, plan: PresentationPlan): CompiledLegacy | CompiledQueue;
 export function compilePresentation(proposal: StoryProposal, plan: PresentationPlan) {
   if (sha256(canonical(proposal)) !== plan.proposalHash || proposal.authoringRequestId !== plan.authoringRequestId ||
       canonical(proposal.binding) !== canonical(plan.binding)) {
     fail('PRESENTATION_BINDING', 'Presentation differs from the saved proposal, request or evidence revision.');
   }
-  const module = plan.module;
-  const isHttp = module.id === 'http-exchange/1';
-  const family = isHttp ? 'http' : 'image-mask';
-  if (proposal.mechanisms.some(mechanism => mechanism.adapterCandidate !== family)) {
-    fail('PRESENTATION_UNSUPPORTED', 'The proposal contains a mechanism without the selected built-in presentation capability.');
-  }
+
   if (proposal.beats.length !== plan.beats.length || proposal.beats.some((beat, index) => beat.id !== plan.beats[index]!.beatId)) {
     fail('PRESENTATION_BEATS', 'Every proposal beat must map once in its original order.');
+  }
+  if (plan.schemaVersion === '1.2' || plan.schemaVersion === '1.3') return compileQueue(proposal, plan);
+  return compileLegacy(proposal, plan);
+}
+
+function compileLegacy(proposal: StoryProposal, plan: LegacyPlan) {
+  const module = plan.module;
+  let family: 'http' | 'image-mask';
+  switch (module.id) {
+    case 'http-exchange/1': family = 'http'; break;
+    case 'image-output-choice/1': family = 'image-mask'; break;
+    default: return fail('PRESENTATION_UNSUPPORTED', 'Unknown presentation module.');
+  }
+  const isHttp = module.id === 'http-exchange/1';
+  if (proposal.mechanisms.some(mechanism => mechanism.adapterCandidate !== family)) {
+    fail('PRESENTATION_UNSUPPORTED', 'The proposal contains a mechanism without the selected built-in presentation capability.');
   }
   const labels = Object.fromEntries(Object.entries(module.entities).map(([role, id]) => {
     const entity = proposal.entities.find(candidate => candidate.id === id);
@@ -112,4 +127,5 @@ export function compilePresentation(proposal: StoryProposal, plan: PresentationP
     asset: isHttp ? null : {...module.asset, content: PAPER_BIRD},
   };
 }
+export type CompiledLegacy = ReturnType<typeof compileLegacy>;
 export type CompiledPresentation = ReturnType<typeof compilePresentation>;

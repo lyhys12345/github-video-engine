@@ -52,6 +52,7 @@ function example(count: number, mode: 'http' | 'image-mask' = 'http', sourceBind
     beats: proposal.beats.map((beat, index) => ({beatId: beat.id, frames: 72, events: names.flatMap((kind, at) =>
       Math.min(at, count - 1) === index ? [{kind, atFrame: at + 2, claimIds: ['fact']}] : [])})),
   });
+  if (plan.schemaVersion === '1.2' || plan.schemaVersion === '1.3') throw new Error('Expected the legacy fixture plan');
   return {proposal, plan};
 }
 
@@ -198,7 +199,7 @@ it('version-gates the frame, beat and event boundaries and partitions exact abso
   }
   authored.plan.beats[0]!.events.at(-1)!.atFrame = 7199;
   const last = compilePresentation(authored.proposal, PresentationPlan.parse(authored.plan));
-  expect(presentationFrame(last, 7199).state).toBe('responded');
+  expect(last.trace.at(-1)).toMatchObject({frame: 7199, after: 'responded'});
   authored.plan.beats[0]!.events.at(-1)!.atFrame = 7200;
   expect(PresentationPlan.safeParse(authored.plan).success).toBe(false);
   for (const frame of [NaN, 1440, 1441.5, 7201]) {

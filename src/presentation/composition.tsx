@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {AbsoluteFill, Composition, cancelRender, continueRender, delayRender, registerRoot, staticFile, useCurrentFrame} from 'remotion';
-import type {CompiledPresentation} from './compile.js';
+import type {CompiledLegacy, CompiledPresentation} from './compile.js';
+import {ConcurrencyQueue} from './queue-composition.js';
+import {queueTitle} from './queue-frame.js';
 import {presentationFrame} from './frame-state.js';
 
 const ink = '#122d38';
@@ -10,10 +12,10 @@ const border = '#b7cdc7';
 const panel: React.CSSProperties = {border: '2px solid ' + border, borderRadius: 24, background: '#fafaf2', padding: '24px 28px'};
 const token: React.CSSProperties = {borderRadius: 16, padding: '12px 20px', color: 'white', background: accent,
   textAlign: 'center', lineHeight: 1.2, overflowWrap: 'anywhere', fontWeight: 700};
-const value = (plan: CompiledPresentation, key: string) => String(plan.parameters[key]?.value ?? '');
+const value = (plan: CompiledLegacy, key: string) => String(plan.parameters[key]?.value ?? '');
 const characters = (text: string) => [...text].length;
 
-function Http({plan, frame}: {plan: CompiledPresentation; frame: ReturnType<typeof presentationFrame>}) {
+function Http({plan, frame}: {plan: CompiledLegacy; frame: ReturnType<typeof presentationFrame>}) {
   const has = (kind: string) => frame.events.some(event => event.kind === kind);
   const hasRequest = has('request'), matched = has('match'), responded = has('respond');
   const request = value(plan, 'method') + ' ' + value(plan, 'path');
@@ -42,7 +44,7 @@ function Http({plan, frame}: {plan: CompiledPresentation; frame: ReturnType<type
   </div>;
 }
 
-function Subject({plan, form}: {plan: CompiledPresentation; form: 'input' | 'cutout' | 'mask'}) {
+function Subject({plan, form}: {plan: CompiledLegacy; form: 'input' | 'cutout' | 'mask'}) {
   const asset = plan.asset!.content;
   return <svg role="img" aria-label={plan.labels[form]} viewBox={`0 0 ${asset.viewport.join(' ')}`} style={{width: '100%', display: 'block', borderRadius: 15}}>
     <defs><pattern id={`grid-${form}`} width="20" height="20" patternUnits="userSpaceOnUse">
@@ -54,7 +56,7 @@ function Subject({plan, form}: {plan: CompiledPresentation; form: 'input' | 'cut
   </svg>;
 }
 
-function ImageChoice({plan, frame}: {plan: CompiledPresentation; frame: ReturnType<typeof presentationFrame>}) {
+function ImageChoice({plan, frame}: {plan: CompiledLegacy; frame: ReturnType<typeof presentationFrame>}) {
   const {state} = frame;
   const choice = state.startsWith('mask') ? 'mask' : state.startsWith('cutout') ? 'cutout' : undefined;
   const forms: ('cutout' | 'mask')[] = state === 'comparison' ? ['cutout', 'mask'] : state === 'cutout' || state === 'mask' ? [state] : [];
@@ -87,14 +89,18 @@ const Presentation: React.FC<Props> = (plan) => {
     void font.load().then(loaded => {document.fonts.add(loaded);setReady(true);continueRender(handle);}).catch(cancelRender);
   }, [handle]);
   if (!ready) return null;
-  const current = presentationFrame(plan, frame);
-  const titleLength = characters(current.beat.title);
+  const beat = plan.beats.find(row => frame >= row.start && frame < row.end);
+  if (!beat) throw new Error('Frame outside presentation timeline');
+  const title = plan.moduleId === 'concurrency-queue/1' ? queueTitle(plan, beat, frame) : beat.title;
+  const titleLength = characters(title);
   const cue = plan.cues?.find(item => frame >= item.startFrame && frame < item.endFrame);
   return <AbsoluteFill style={{fontFamily: 'GVE Presentation, sans-serif', background: '#f3f1e7', color: ink, padding: '54px 54px 45px'}}>
     <div style={{color: '#8c4736', fontSize: 22, fontWeight: 700}}>{plan.cues ? 'Local voice · Illustration · No observed execution' : 'Silent · Illustration · No observed execution'}</div>
     <div style={{fontSize: titleLength > 45 ? 30 : titleLength > 25 ? 38 : 48, fontWeight: 800, lineHeight: 1.12,
-      height: 175, marginTop: 22, overflowWrap: 'anywhere'}}>{current.beat.title}</div>
-    {plan.moduleId === 'http-exchange/1' ? <Http plan={plan} frame={current}/> : <ImageChoice plan={plan} frame={current}/>}
+      height: 175, marginTop: 22, overflowWrap: 'anywhere'}}>{title}</div>
+    {plan.moduleId === 'concurrency-queue/1' ? <ConcurrencyQueue plan={plan} frame={frame}/> :
+      plan.moduleId === 'http-exchange/1' ? <Http plan={plan} frame={presentationFrame(plan, frame)}/> :
+      <ImageChoice plan={plan} frame={presentationFrame(plan, frame)}/>}
     <div style={{position: 'absolute', bottom: 130, left: 54, right: 54, height: 6, borderRadius: 6, background: border}}>
       <div style={{width: `${100 * (frame + 1) / plan.timeline.totalFrames}%`, height: '100%', borderRadius: 6, background: accent}}/>
     </div>

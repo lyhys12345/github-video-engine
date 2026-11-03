@@ -1,6 +1,6 @@
 import {dirname, isAbsolute, relative, resolve, sep} from 'node:path';
 import {z} from 'zod';
-import {AuthoringBinding, StoryProposal} from '../contracts/authoring.js';
+import {AuthoringBinding, LegacyStoryProposal, QueueStoryProposal, StoryProposal} from '../contracts/authoring.js';
 import {Hash} from '../contracts/video.js';
 import {checkAbort, EngineError} from '../core/errors.js';
 import {canonical, sha256} from '../core/util.js';
@@ -17,6 +17,7 @@ const lineConvention = 'One-based inclusive lines. Split CRLF and LF; join compl
 const adapters = {
   http: 'Existing HTTP renderer is limited to supported request/response story operations.',
   'image-mask': 'Existing image renderer is limited to supported mask story operations.',
+  'concurrency-queue': 'Proposal 1.1 maps explicit task lifecycle events into presentation 1.3. Plan 1.2 is historical.',
   'scalar-rule': 'Existing scalar renderer requires a separately authored rule specification.',
   unmapped: 'No existing adapter is identified for this mechanism.',
 } as const;
@@ -132,7 +133,7 @@ export async function openAuthoring(store: WorkflowStore, id: string, directory:
   const request = identity(manifest);
   const packet = {
     schemaVersion: '1.0', kind: 'session-agent-authoring-work-package', state: 'awaiting-author', ...request,
-    contract, capabilityVersion, sourceManifest: 'evidence.json', proposalSchema: 'proposal.schema.json', captureSchema: 'capture.schema.json',
+    contract, capabilityVersion, sourceManifest: 'evidence.json', proposalSchema: 'proposal.schema.json', queueProposalSchema: 'proposal-queue.schema.json', captureSchema: 'capture.schema.json',
     draft: 'proposal-draft.json', captureLimits: TextCaptureLimits, lineConvention,
     evidence: manifest.sources.map(source => ({sourceId: source.id, raw: source.path, numbered: source.id + '.lines.txt'})),
     renderCapabilities: adapters,
@@ -141,6 +142,7 @@ export async function openAuthoring(store: WorkflowStore, id: string, directory:
       'Choose a documented use case. Specify the input, process, output and scope; distinguish quoted facts, inferences and visual examples.',
       'If needed, write a capture-text request with schemaVersion, authoringRequestId, binding and files containing path and purpose. Reopen the work package after capture.',
       'Copy the draft to a separate editable file. Write a proposal using the schema, stable entity IDs, explicit claim links and exact citations.',
+      'Use proposal 1.1 and the queue proposal schema when explicitly mapping the fixed concurrency-queue capability.',
       'Run project submit-proposal --spec <completed.json>. Export the returned hash with project export-proposal --proposal <hash>.',
       'Source and reference checks do not prove entailment or coverage. Factual, editorial and audiovisual review remain pending.',
     ],
@@ -148,7 +150,8 @@ export async function openAuthoring(store: WorkflowStore, id: string, directory:
   const draft = {schemaVersion: '1.0', kind: 'session-story-proposal', ...request, authorship: {kind: 'session-agent'},
     useCase: {title: '', audience: '', question: '', scope: '', exclusions: [], goalClaimIds: [], inputClaimIds: [],
       processClaimIds: [], outputClaimIds: [], limitationClaimIds: []}, claims: [], entities: [], mechanisms: [], beats: [], openQuestions: []};
-  files.set('proposal.schema.json', json(z.toJSONSchema(StoryProposal)));
+  files.set('proposal.schema.json', json(z.toJSONSchema(LegacyStoryProposal)));
+  files.set('proposal-queue.schema.json', json(z.toJSONSchema(QueueStoryProposal)));
   files.set('capture.schema.json', json(z.toJSONSchema(captureSpec)));
   files.set('proposal-draft.json', json(draft));
   for (const source of manifest.sources) {

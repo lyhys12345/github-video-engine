@@ -1,11 +1,12 @@
 import {z} from 'zod';
-import {AuthoringBinding, StoryProposal} from './authoring.js';
+import {AuthoringBinding, ProposalAuthorship} from './authoring.js';
+import {QueueEvent, QueueModule} from './concurrency-queue.js';
 import {Hash, Id} from './video.js';
 
 export const PRESENTATION_FPS = 24;
 export const PRESENTATION_LEGACY_MAX_FRAMES = PRESENTATION_FPS * 60;
 export const PRESENTATION_MAX_FRAMES = PRESENTATION_FPS * 300;
-export const presentationMaxFrames = (version: '1.0' | '1.1') =>
+export const presentationMaxFrames = (version: '1.0' | '1.1' | '1.2' | '1.3') =>
   version === '1.0' ? PRESENTATION_LEGACY_MAX_FRAMES : PRESENTATION_MAX_FRAMES;
 const evidence = z.strictObject({claimId: Id, citationIndex: z.number().int().min(0).max(7)});
 const fact = <T extends z.ZodType>(value: T) => z.strictObject({value, evidence});
@@ -32,9 +33,9 @@ const image = z.strictObject({
 export const PresentationEventKind = z.enum([
   'listen', 'request', 'match', 'respond', 'show-input', 'select-cutout', 'show-cutout', 'select-mask', 'show-mask', 'compare',
 ]);
-export const PresentationPlan = z.strictObject({
+const legacyPlan = z.strictObject({
   schemaVersion: z.enum(['1.0', '1.1']), kind: z.literal('session-presentation-plan'),
-  proposalHash: Hash, authoringRequestId: Hash, binding: AuthoringBinding, authorship: StoryProposal.shape.authorship,
+  proposalHash: Hash, authoringRequestId: Hash, binding: AuthoringBinding, authorship: ProposalAuthorship,
   module: z.discriminatedUnion('id', [http, image]),
   beats: z.array(z.strictObject({
     beatId: Id, frames: z.number().int().min(24).max(PRESENTATION_MAX_FRAMES),
@@ -42,7 +43,14 @@ export const PresentationPlan = z.strictObject({
       claimIds: z.array(Id).min(1).max(20),
     })).max(12),
   })).min(1).max(20),
-}).superRefine((plan, context) => {
+});
+const queuePlan = legacyPlan.extend({
+  schemaVersion: z.literal('1.2'),
+  module: QueueModule,
+  beats: z.array(legacyPlan.shape.beats.element.extend({events: z.array(QueueEvent).max(24)})).min(1).max(20),
+});
+const queueEndingPlan = queuePlan.extend({schemaVersion: z.literal('1.3')});
+export const PresentationPlan = z.discriminatedUnion('schemaVersion', [legacyPlan, queuePlan, queueEndingPlan]).superRefine((plan, context) => {
   const max = presentationMaxFrames(plan.schemaVersion);
   for (const [index, beat] of plan.beats.entries()) {
     if (beat.frames > max) context.addIssue({code: 'custom', path: ['beats', index, 'frames'], message: 'Beat exceeds plan version frame limit'});
@@ -52,5 +60,7 @@ export const PresentationPlan = z.strictObject({
     }
   }
 });
+export type QueuePlan = z.infer<typeof queuePlan> | z.infer<typeof queueEndingPlan>;
+export type LegacyPlan = z.infer<typeof legacyPlan>;
 export type PresentationPlan = z.infer<typeof PresentationPlan>;
 export type PresentationEventKind = z.infer<typeof PresentationEventKind>;

@@ -20,7 +20,7 @@ export const AuthoringBinding = z.strictObject({
   evidenceFingerprint: Hash,
 });
 
-export const StoryProposal = z.strictObject({
+export const LegacyStoryProposal = z.strictObject({
   schemaVersion: z.literal('1.0'),
   kind: z.literal('session-story-proposal'),
   authoringRequestId: Hash,
@@ -74,6 +74,15 @@ export const StoryProposal = z.strictObject({
   })).min(1).max(20),
   openQuestions: z.array(text(500)).max(30),
 });
+
+export const QueueStoryProposal = LegacyStoryProposal.extend({
+  schemaVersion: z.literal('1.1'),
+  mechanisms: z.array(LegacyStoryProposal.shape.mechanisms.element.extend({
+    adapterCandidate: z.literal('concurrency-queue'),
+  })).min(1).max(20),
+});
+export const StoryProposal = z.discriminatedUnion('schemaVersion', [LegacyStoryProposal, QueueStoryProposal]);
+export const ProposalAuthorship = LegacyStoryProposal.shape.authorship;
 
 export type AuthoringBinding = z.infer<typeof AuthoringBinding>;
 export type StoryProposal = z.infer<typeof StoryProposal>;
