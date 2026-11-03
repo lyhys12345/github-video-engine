@@ -6,13 +6,14 @@ import {planAnimationTask,inspectAnimationTask,exportAnimationTask} from './anim
 import {planStory,statusStory,exportStory,diffStory,writeStoryDiff} from './runtime.js';
 import {buildResearchHandoff} from './research-handoff.js';
 import {canonical,sha256} from '../core/util.js';
-import {planAssetPack,statusAssetPack,exportAssetPack} from './asset-pack.js';
+import {planAssetPack,planAssetPackFromStoryTask,statusAssetPack,exportAssetPack} from './asset-pack.js';
 const usage='story plan --spec <graph.json> --root <source-root> --data <state> --out <new-directory> | story status --task <id> --data <state> | story export --task <id> --data <state> --out <new-directory> | story diff --before <task-id> --after <task-id> --data <state> [--out <new-report.json>]';
 export async function storyCommand(positionals:string[],values:Record<string,unknown>,signal:AbortSignal){
  if(positionals.length===2&&['asset-plan','asset-status','asset-export'].includes(positionals[1]!)){
-  const action=positionals[1],allowed=action==='asset-plan'?['spec','root','plan','voice','data']:action==='asset-status'?['task','data']:['task','data','out'];
+  const action=positionals[1],byTask=action==='asset-plan'&&values.task!==undefined,allowed=action==='asset-plan'?[...(byTask?['task']:['spec','root']),'plan','voice','data']:action==='asset-status'?['task','data']:['task','data','out'];
   if(Object.entries(values).some(([k,v])=>v!==undefined&&!allowed.includes(k))||allowed.some(k=>typeof values[k]!=='string'||!String(values[k]).trim()))throw new EngineError('USAGE',`story ${action} requires ${allowed.map(k=>'--'+k).join(' ')}`);
   const v=(k:string)=>String(values[k]);
+  if(byTask)return planAssetPackFromStoryTask(v('task'),v('plan'),v('voice'),v('data'),signal);
   if(action==='asset-plan')return planAssetPack(v('spec'),v('root'),v('plan'),v('voice'),v('data'),signal);
   if(action==='asset-status')return statusAssetPack(v('data'),v('task'));
   return exportAssetPack(v('data'),v('task'),v('out'),signal);

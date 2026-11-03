@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "2.0",
+  "milestone": "HTTP-story-asset-v1",
+  "activeRoles": ["product", "reliability", "evidence", "content_facts", "security"],
+  "requiredCriteria": {
+    "product": ["H1", "H3", "H4"],
+    "reliability": ["H1", "H2", "H4"],
+    "evidence": ["H2", "H3", "H4"],
+    "content_facts": ["H1", "H3"],
+    "security": ["H2", "H4"]
+  },
+  "inactiveRoles": {
+    "video_quality": "The checkpoint exports diagnostic static frames and editable data without new video or audio"
+  }
+}

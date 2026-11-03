@@ -6,6 +6,8 @@ import {randomUUID} from 'node:crypto';
 import {z} from 'zod';
 import {ArtifactStore} from '../assets/store.js';
 import {ArtifactSchema,type Artifact} from '../contracts/runtime.js';
+import {RepositoryUrl} from '../contracts/planning.js';
+import {Id} from '../contracts/video.js';
 import {StorySchema,type Story} from '../contracts/story.js';
 import {TaskRunner,type TaskRecord} from '../orchestrator/tasks.js';
 import {EngineError,checkAbort} from '../core/errors.js';
@@ -19,8 +21,11 @@ const hash=z.string().regex(/^[a-f0-9]{64}$/),FILE_LIMIT=2_000_000,TOTAL_LIMIT=1
 const File=z.object({path:z.string().min(1),artifact:ArtifactSchema}).strict();
 const Result=z.object({schemaVersion:z.enum(['1.0','1.1']),stage:z.literal(stage),review:z.literal('pending'),graphHash:hash,files:z.array(File).min(5).max(30)}).strict();
 type PlanResult=z.infer<typeof Result>;
-type Snapshot={graph:Story;sources:{id:string;bytes:Buffer}[]};
-type RepositoryBinding={projectId:string;repository:string;commit:string;snapshotHash:string;evidenceFingerprint:string};
+export type StorySnapshot={graph:Story;sources:{id:string;bytes:Buffer}[]};
+export const RepositoryBindingSchema=z.object({
+ projectId:Id,repository:RepositoryUrl,commit:z.string().regex(/^[a-f0-9]{40}$/),snapshotHash:hash,evidenceFingerprint:hash,
+}).strict();
+type RepositoryBinding=z.infer<typeof RepositoryBindingSchema>;
 const fail=(code:string,message:string):never=>{throw new EngineError(code,message);};
 const json=(v:unknown)=>JSON.stringify(v,null,2)+'\n';
 function safeRelative(p:string){if(!p||p.length>260||p.includes('\\')||isAbsolute(p)||/[\x00-\x1f\x7f:]/.test(p)||p.split('/').some(s=>!s||s==='.'||s==='..'))fail('EXPLAIN_PATH','Expected a safe relative path');return p;}
@@ -30,14 +35,14 @@ async function exists(path:string){try{return await lstat(path);}catch(e){if((e 
 export async function boundedFile(path:string,max=FILE_LIMIT){await ancestors(dirname(path));const s=await lstat(path);if(!s.isFile()||s.isSymbolicLink()||s.size>max)fail('EXPLAIN_INPUT','Expected a bounded regular file');const b=await readFile(path);if(b.length!==s.size)fail('EXPLAIN_INPUT','File changed during read');return b;}
 function parseJson(b:Buffer){try{return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(b).replace(/^\uFEFF/,''));}catch{fail('EXPLAIN_JSON','Expected valid UTF-8 JSON');}}
 export function verifyCaptured(graph:Story,sources:{id:string;bytes:Buffer}[]){const map=new Map(sources.map(s=>[s.id,s.bytes]));for(const s of graph.evidence.sources){const b=map.get(s.id);if(!b||sha256(b)!==s.sha256)fail('EXPLAIN_SOURCE','Source hash mismatch: '+s.id);let text:string;try{text=new TextDecoder('utf-8',{fatal:true}).decode(b);}catch{fail('EXPLAIN_SOURCE','Source is not UTF-8: '+s.id);}for(const c of graph.evidence.claims)for(const q of c.citations.filter(q=>q.document===s.id)){const lines=text!.split(/\r?\n/);if(q.endLine>lines.length||lines.slice(q.startLine-1,q.endLine).join('\n')!==q.quote)fail('EXPLAIN_CITATION','Exact cited lines do not match source for '+c.id);}}}
-export async function captureEvidence(spec:string,root:string):Promise<Snapshot>{
+export async function captureEvidence(spec:string,root:string):Promise<StorySnapshot>{
  const graph=StorySchema.parse(parseJson(await boundedFile(resolve(spec))));
  if(graph.evidence.sources.length>8||graph.evidence.claims.length>100||graph.evidence.objects.length>100||graph.evidence.actors.length>30)fail('EXPLAIN_LIMIT','Graph exceeds bounded planning limits');
- await ancestors(resolve(root));const base=await realpath(root),sources:Snapshot['sources']=[];let total=0;
+ await ancestors(resolve(root));const base=await realpath(root),sources:StorySnapshot['sources']=[];let total=0;
  for(const s of graph.evidence.sources){safeRelative(s.path);const path=resolve(base,s.path);if(!inside(base,path))fail('EXPLAIN_PATH','Source outside root');const b=await boundedFile(path);if(!inside(base,await realpath(path)))fail('EXPLAIN_PATH','Source outside real root');total+=b.length;if(total>TOTAL_LIMIT)fail('EXPLAIN_LIMIT','Source snapshot exceeds byte limit');sources.push({id:s.id,bytes:b});}
  verifyCaptured(graph,sources);return{graph,sources};
 }
-const compilerFiles=['src/contracts/evidence-plan.ts','src/contracts/story.ts','src/story-planner/compile.ts','src/story-planner/research-handoff.ts','src/story-planner/runtime.ts','src/story-planner/cli.ts','src/core/util.ts','src/core/errors.ts','src/orchestrator/tasks.ts','src/assets/store.ts','src/contracts/runtime.ts','src/operations/usage.ts'];
+const compilerFiles=['src/contracts/evidence-plan.ts','src/contracts/story.ts','src/contracts/planning.ts','src/contracts/video.ts','src/story-planner/compile.ts','src/story-planner/research-handoff.ts','src/story-planner/runtime.ts','src/story-planner/cli.ts','src/core/util.ts','src/core/errors.ts','src/orchestrator/tasks.ts','src/assets/store.ts','src/contracts/runtime.ts','src/operations/usage.ts'];
 async function compilerIdentity(){return Promise.all(compilerFiles.map(async path=>({path,sha256:sha256(await boundedFile(resolve(import.meta.dirname,'../..',path)))})));}
 export function reviewPacket(graph:Story,plan:ReturnType<typeof compileStory>){const escape=(s:string)=>s.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]!)).replace(/[\\`*_{}\[\]()!#>|~+\-=.]/g,'\\$&');return '# Experimental story — review required\n\nAgent-authored interpretation; citations prove provenance, not truth. Timings are estimates, not recorded audio. No media generated.\n\nEstimated duration: '+plan.estimatedSeconds+' s; frame rate: '+plan.fps+' fps.\n\n'+plan.shots.map(s=>`## ${escape(s.id)} (${s.startFrame/plan.fps}–${s.endFrame/plan.fps} s; frames ${s.startFrame}–${s.endFrame})\n\n${escape(s.narration)}\n\nVisual: ${escape(s.visual)}\n\nClaims: ${s.claimIds.map(escape).join(', ')}`).join('\n\n')+'\n\n## Evidence references\n\n'+graph.evidence.claims.map(c=>`- ${escape(c.id)} (${c.kind}): ${escape(c.statement)}; ${c.citations.map(q=>`${escape(q.document)} lines ${q.startLine}–${q.endLine}`).join(', ')}`).join('\n')+'\n';}
 async function preflightOutput(out:string,data:string,taskId?:string){if(inside(out,data)||inside(data,out))fail('EXPLAIN_PATH','Output and task-state directories must not overlap');await ancestors(dirname(out));const s=await exists(out);if(s&&(s.isSymbolicLink()||!s.isDirectory()))fail('EXPLAIN_OUTPUT','Output must be a new regular directory');if(s){if(!await exists(join(out,'bundle','manifest.json')))fail('EXPLAIN_OUTPUT','Refusing unrelated or incomplete existing output');await ancestors(join(out,'bundle'));const m=parseJson(await boundedFile(join(out,'bundle','manifest.json')));if(m.stage!==stage||taskId&&m.taskId!==taskId)fail('EXPLAIN_OUTPUT','Output belongs to different inputs');}}
@@ -47,7 +52,7 @@ export function preflightStatePath(data:string){if(process.platform!=='win32')re
 export async function planStory(spec:string,root:string,data:string,out:string,signal:AbortSignal){
  return planCapturedStory(await captureEvidence(spec,root),data,out,signal);
 }
-export async function planCapturedStory(snapshot:Snapshot,data:string,out:string,signal:AbortSignal,repositoryBinding?:RepositoryBinding){
+export async function planCapturedStory(snapshot:StorySnapshot,data:string,out:string,signal:AbortSignal,repositoryBinding?:RepositoryBinding){
  compileStory(snapshot.graph);checkAbort(signal);data=resolve(data);preflightStatePath(data);out=resolve(out);await ancestors(data);await preflightOutput(out,data);
  const sources=await compilerIdentity(),input={stage,projectId:snapshot.graph.id,graph:snapshot.graph,sourceBytes:snapshot.sources.map(s=>({id:s.id,sha256:sha256(s.bytes),bytes:s.bytes.length})),compiler:sources,...(repositoryBinding?{repositoryBinding}:{})};
  const id=fingerprint(input);await preflightOutput(out,data,id);const runner=new TaskRunner(data);
@@ -93,6 +98,16 @@ async function verifyResult(store:ArtifactStore,task:TaskRecord):Promise<Checked
  if(result.schemaVersion==='1.1' && canonical(parseJson(get('research-handoff.json')))!==canonical(deriveResearchHandoff({graph,sources})))fail('EXPLAIN_INTEGRITY','Research handoff mismatch');
  const manifest=parseJson(get('manifest.json'));const expectedManifest={schemaVersion:'1.0',stage,taskId:task.id,review:'pending',graphHash:result.graphHash,scope:'agent-curated experimental complete story plan; no media or approval',...(input.repositoryBinding?{repositoryBinding:input.repositoryBinding}:{}),files:result.files.filter(f=>f.path!=='manifest.json').map(f=>({path:f.path,sha256:f.artifact.sha256,bytes:f.artifact.bytes}))};if(canonical(manifest)!==canonical(expectedManifest)||payloads.size!==(result.schemaVersion==='1.1'?6:5)+sources.length)fail('EXPLAIN_INTEGRITY','Manifest/file closure mismatch');
  return{task,result,graph,payloads,repositoryBinding:input.repositoryBinding};
+}
+/** Recover the exact authored story and pinned bytes from a successful URL-bound task. */
+export async function loadBoundStory(data:string,id:string){
+ const task=await readTask(data,id),checked=await verifyResult(new ArtifactStore(data),task);
+ if(!checked.repositoryBinding)fail('STORY_REPOSITORY_REQUIRED','Asset planning from a task requires a repository-bound project story');
+ const repositoryBinding=RepositoryBindingSchema.parse(checked.repositoryBinding);
+ const prefix=repositoryBinding.repository+'/blob/'+repositoryBinding.commit+'/';
+ if(checked.graph.evidence.sources.some(s=>!s.url.startsWith(prefix)))fail('STORY_REPOSITORY_REQUIRED','Stored Story sources are not pinned to the task repository and commit');
+ const snapshot:StorySnapshot={graph:checked.graph,sources:checked.graph.evidence.sources.map(s=>({id:s.id,bytes:checked.payloads.get('sources/'+s.id+'.txt')!}))};
+ return{snapshot,sourceStory:{taskId:id,graphHash:checked.result.graphHash,repositoryBinding}};
 }
 async function publishBundle(out:string,checked:Checked,signal:AbortSignal){out=resolve(out);await ancestors(dirname(out),true);let reserved=false,staging:string|undefined;const owner=randomUUID(),marker=join(out,'.explain-owner.json');
  try{try{await mkdir(out);reserved=true;await writeFile(marker,json({schemaVersion:'1.0',taskId:checked.task.id,owner}),{flag:'wx'});}catch(e){if((e as NodeJS.ErrnoException).code!=='EEXIST')throw e;const info=await lstat(out);if(info.isSymbolicLink()||!info.isDirectory())fail('EXPLAIN_OUTPUT','Refusing linked output');const rootItems=(await readdir(out)).sort();if(canonical(rootItems)!==canonical(['.explain-owner.json','bundle']))fail('EXPLAIN_OUTPUT','Refusing incomplete or unrelated existing output');const m=parseJson(await boundedFile(marker));if(m.taskId!==checked.task.id)fail('EXPLAIN_OUTPUT','Existing output belongs to different inputs');

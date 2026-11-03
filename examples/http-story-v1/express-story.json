@@ -1,0 +1,165 @@
+{
+  "schemaVersion": "1.0",
+  "id": "express-root-route",
+  "name": "Where does Hello World come from?",
+  "evidence": {
+    "schemaVersion": "1.0",
+    "id": "express-root-route",
+    "name": "Where does Hello World come from?",
+    "audience": "Developers new to server routing",
+    "interpretation": "agent-curated-semantic-graph-not-automatic-source-understanding",
+    "sources": [
+      {
+        "id": "source-1",
+        "path": "source-1.txt",
+        "url": "https://github.com/expressjs/express/blob/43fca52d28a422c8be48fd489cbd4f2d6152bab6/Readme.md",
+        "sha256": "3cf5f3e224dbb9b5e2bc0ac255871de453762ae7a277f868da5f4a69d6ff2509"
+      }
+    ],
+    "claims": [
+      {
+        "id": "example-listens",
+        "statement": "The README example calls app.listen on port 3000.",
+        "kind": "documented",
+        "citations": [
+          {
+            "document": "source-1",
+            "startLine": 45,
+            "endLine": 47,
+            "quote": "app.listen(3000, () => {\n  console.log('Server is running on http://localhost:3000')\n})"
+          }
+        ],
+        "rationale": "The call and printed URL identify the example port."
+      },
+      {
+        "id": "root-match",
+        "statement": "The README example registers a GET handler for the root path.",
+        "kind": "documented",
+        "citations": [
+          {
+            "document": "source-1",
+            "startLine": 41,
+            "endLine": 43,
+            "quote": "app.get('/', (req, res) => {\n  res.send('Hello World')\n})"
+          }
+        ],
+        "rationale": "app.get registers the route at slash and receives a handler."
+      },
+      {
+        "id": "send-greeting",
+        "statement": "The registered handler sends the string Hello World.",
+        "kind": "documented",
+        "citations": [
+          {
+            "document": "source-1",
+            "startLine": 41,
+            "endLine": 43,
+            "quote": "app.get('/', (req, res) => {\n  res.send('Hello World')\n})"
+          }
+        ],
+        "rationale": "The handler body explicitly passes that string to res.send."
+      }
+    ],
+    "objects": [
+      {
+        "id": "get-root",
+        "label": "GET /",
+        "kind": "http-request"
+      },
+      {
+        "id": "get-handler",
+        "label": "Root handler",
+        "kind": "route-handler"
+      },
+      {
+        "id": "greeting",
+        "label": "Hello World",
+        "kind": "http-response"
+      }
+    ],
+    "actors": [
+      {
+        "id": "express",
+        "label": "Express",
+        "role": "tool"
+      }
+    ],
+    "operations": [
+      {
+        "id": "match-request",
+        "kind": "match-route",
+        "input": "get-root",
+        "output": "get-handler",
+        "dependsOn": [],
+        "claimIds": [
+          "root-match"
+        ],
+        "actorIds": [
+          "express"
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "send-body",
+        "kind": "send-response",
+        "input": "get-handler",
+        "output": "greeting",
+        "dependsOn": [
+          "match-request"
+        ],
+        "claimIds": [
+          "send-greeting"
+        ],
+        "actorIds": [
+          "express"
+        ],
+        "parameters": {}
+      }
+    ],
+    "disclosure": "Illustrative walkthrough of the pinned README. The client request and response are diagrams. The Express server was not run."
+  },
+  "timing": {
+    "fps": 30,
+    "chineseCharsPerSecond": 4,
+    "wordsPerSecond": 2.6
+  },
+  "shots": [
+    {
+      "id": "send-request",
+      "beat": "hook",
+      "narration": "Where does Hello World come from? Imagine a client asking the Express example server on port three thousand for GET slash.",
+      "visual": "Show the client request moving toward the example server on port 3000.",
+      "claimIds": [
+        "example-listens",
+        "root-match"
+      ],
+      "visualSeconds": 6,
+      "holdSeconds": 0.5,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "match-route",
+      "beat": "mechanism",
+      "narration": "In the example, app dot get registers a handler for that method and path. The route connects the request to its handler.",
+      "visual": "Keep the GET / card and reveal the matching handler with a distinct route icon.",
+      "claimIds": [
+        "root-match"
+      ],
+      "visualSeconds": 7,
+      "holdSeconds": 0.5,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "return-body",
+      "beat": "example",
+      "narration": "The handler calls response dot send with Hello World. That is the answer the client is meant to receive.",
+      "visual": "Follow the arrow from the handler back to the client, where the example response is labeled Hello World.",
+      "claimIds": [
+        "send-greeting"
+      ],
+      "visualSeconds": 7,
+      "holdSeconds": 0.5,
+      "transitionSeconds": 0
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "1.0",
+  "storyId": "express-root-route",
+  "shots": [
+    {
+      "shotId": "send-request",
+      "objects": [
+        {
+          "id": "request",
+          "label": "Client request · GET /",
+          "kind": "state",
+          "visual": "request"
+        },
+        {
+          "id": "server",
+          "label": "Example · port 3000",
+          "kind": "actor",
+          "visual": "code"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "transfer",
+          "source": "request",
+          "target": "server",
+          "start": 0.14,
+          "end": 0.54,
+          "claimIds": [
+            "example-listens",
+            "root-match"
+          ]
+        },
+        {
+          "kind": "emphasize",
+          "target": "server",
+          "start": 0.54,
+          "end": 0.83,
+          "claimIds": [
+            "example-listens"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "match-route",
+      "objects": [
+        {
+          "id": "request",
+          "label": "GET /",
+          "kind": "state",
+          "visual": "request"
+        },
+        {
+          "id": "handler",
+          "label": "Root handler",
+          "kind": "state",
+          "visual": "route"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "transfer",
+          "source": "request",
+          "target": "handler",
+          "start": 0.15,
+          "end": 0.64,
+          "claimIds": [
+            "root-match"
+          ]
+        },
+        {
+          "kind": "emphasize",
+          "target": "handler",
+          "start": 0.65,
+          "end": 0.9,
+          "claimIds": [
+            "root-match"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "return-body",
+      "objects": [
+        {
+          "id": "response",
+          "label": "Client receives Hello World",
+          "kind": "document",
+          "visual": "response"
+        },
+        {
+          "id": "handler",
+          "label": "Root handler",
+          "kind": "state",
+          "visual": "route"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "transfer",
+          "source": "handler",
+          "target": "response",
+          "start": 0.14,
+          "end": 0.67,
+          "claimIds": [
+            "send-greeting"
+          ],
+          "destinationX": 0.3
+        },
+        {
+          "kind": "emphasize",
+          "target": "response",
+          "start": 0.68,
+          "end": 0.92,
+          "claimIds": [
+            "send-greeting"
+          ]
+        }
+      ]
+    }
+  ]
+}

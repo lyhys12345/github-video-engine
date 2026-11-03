@@ -169,7 +169,10 @@
                   "image",
                   "mask",
                   "cutout",
-                  "demo"
+                  "demo",
+                  "http-request",
+                  "route-handler",
+                  "http-response"
                 ]
               }
             },
@@ -233,7 +236,9 @@
                   "control",
                   "segment",
                   "extract",
-                  "composite"
+                  "composite",
+                  "match-route",
+                  "send-response"
                 ]
               },
               "input": {
