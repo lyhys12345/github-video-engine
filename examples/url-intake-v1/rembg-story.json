@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "1.0",
+  "id": "rembg-output-modes",
+  "name": "Two ways to look at a background removal",
+  "evidence": {
+    "schemaVersion": "1.0",
+    "id": "rembg-output-modes",
+    "name": "Two ways to look at a background removal",
+    "audience": "Designers new to command-line image tools",
+    "interpretation": "agent-curated-semantic-graph-not-automatic-source-understanding",
+    "sources": [
+      {
+        "id": "source-1",
+        "path": "source-1.txt",
+        "url": "https://github.com/danielgatis/rembg/blob/e2c2e3f72701357b9bb3f2be32a4330d74ce8f47/README.md",
+        "sha256": "8455c52c60130199ab61858d359f2d25440dd95772844e2b3a037e490b31179d"
+      }
+    ],
+    "claims": [
+      {
+        "id": "local-file",
+        "statement": "The README shows a local-file command with separate input and output paths.",
+        "kind": "documented",
+        "citations": [
+          {
+            "document": "source-1",
+            "startLine": 127,
+            "endLine": 131,
+            "quote": "**Remove background from a local file:**\n\n```shell\nrembg i path/to/input.png path/to/output.png\n```"
+          }
+        ],
+        "rationale": "The example explicitly names the input and output image paths."
+      },
+      {
+        "id": "mask-only",
+        "statement": "Adding -om asks for the mask alone.",
+        "kind": "documented",
+        "citations": [
+          {
+            "document": "source-1",
+            "startLine": 148,
+            "endLine": 152,
+            "quote": "**Return only the mask:**\n\n```shell\nrembg i -om path/to/input.png path/to/output.png\n```"
+          }
+        ],
+        "rationale": "The README labels the -om command as returning only the mask."
+      }
+    ],
+    "objects": [
+      {
+        "id": "photo",
+        "label": "Illustrative input photo",
+        "kind": "image"
+      },
+      {
+        "id": "mask",
+        "label": "Illustrative mask",
+        "kind": "mask"
+      }
+    ],
+    "actors": [
+      {
+        "id": "rembg-cli",
+        "label": "rembg CLI",
+        "role": "tool"
+      }
+    ],
+    "operations": [
+      {
+        "id": "request-mask",
+        "kind": "segment",
+        "input": "photo",
+        "output": "mask",
+        "dependsOn": [],
+        "claimIds": [
+          "mask-only"
+        ],
+        "actorIds": [
+          "rembg-cli"
+        ],
+        "parameters": {}
+      }
+    ],
+    "disclosure": "The photo and mask are schematic illustrations. The repository commands were read from the pinned README and were not run."
+  },
+  "timing": {
+    "fps": 30,
+    "chineseCharsPerSecond": 4,
+    "wordsPerSecond": 2.6
+  },
+  "shots": [
+    {
+      "id": "same-input",
+      "beat": "hook",
+      "narration": "Start with a photo. Do you want the background removed, or do you want just the mask?",
+      "visual": "Hold a schematic photo on the left. Reveal two labeled destinations, background removal and mask only.",
+      "claimIds": [
+        "local-file",
+        "mask-only"
+      ],
+      "visualSeconds": 5,
+      "holdSeconds": 0.5,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "file-to-file",
+      "beat": "mechanism",
+      "narration": "For background removal, the README shows rembg i with a source image and a destination path.",
+      "visual": "Follow the source-file chip into the command. Highlight the two paths in order. Show a schematic output.",
+      "claimIds": [
+        "local-file"
+      ],
+      "visualSeconds": 6,
+      "holdSeconds": 0.5,
+      "transitionSeconds": 0.2
+    },
+    {
+      "id": "mask-flag",
+      "beat": "example",
+      "narration": "Add dash O M to ask for the mask alone. The input stays the same, and the requested output changes.",
+      "visual": "Keep the photo and two paths fixed. Highlight -om and change the output panel to an illustrated mask. Label both panels as schematic.",
+      "claimIds": [
+        "mask-only",
+        "local-file"
+      ],
+      "visualSeconds": 7,
+      "holdSeconds": 0.5,
+      "transitionSeconds": 0
+    }
+  ]
+}

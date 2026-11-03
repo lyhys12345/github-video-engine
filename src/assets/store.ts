@@ -1,10 +1,17 @@
-import {mkdir, open, link, unlink, readFile, stat} from 'node:fs/promises';
-import {resolve, join} from 'node:path';
+import {mkdir, open, link, unlink, readFile, lstat} from 'node:fs/promises';
+import {dirname, resolve, join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {ArtifactSchema, type Artifact, type Stage} from '../contracts/runtime.js';
 import {fileHash, sha256} from '../core/util.js';
 import {EngineError} from '../core/errors.js';
 const extensionFor=(mediaType:string)=>({'video/mp4':'mp4','image/png':'png','audio/wav':'wav','audio/flac':'flac','audio/mpeg':'mp3','text/vtt':'vtt','text/plain':'txt','application/zip':'zip','font/ttf':'ttf'}[mediaType]??'json');
+
+async function requireArtifactDirectory(path: string) {
+  const info = await lstat(path);
+  if (!info.isDirectory() || info.isSymbolicLink()) {
+    throw new EngineError('ARTIFACT_PATH', 'Artifact storage directories must be regular directories');
+  }
+}
 
 export class ArtifactStore {
   readonly root: string;
@@ -19,8 +26,14 @@ export class ArtifactStore {
   async verify(artifact: Artifact): Promise<void> {
     const path = this.path(artifact);
     try {
-      if ((await stat(path)).size !== artifact.bytes || await fileHash(path) !== artifact.sha256) throw new Error('Hash or size mismatch');
-    } catch (error) { throw new EngineError('INTEGRITY', `Artifact ${artifact.sha256} is missing or damaged: ${String(error)}. Restore the original blob; immutable records are never overwritten.`); }
+      await requireArtifactDirectory(this.root);
+      await requireArtifactDirectory(dirname(path));
+      const info = await lstat(path);
+      if (!info.isFile() || info.isSymbolicLink()) {
+        throw new EngineError('ARTIFACT_PATH', 'Artifact must be a regular file');
+      }
+      if (info.size !== artifact.bytes || await fileHash(path) !== artifact.sha256) throw new Error('Hash or size mismatch');
+    } catch (error) { if (error instanceof EngineError) throw error; throw new EngineError('INTEGRITY', `Artifact ${artifact.sha256} is missing or damaged: ${String(error)}. Restore the original blob; immutable records are never overwritten.`); }
   }
   async readJson<T>(artifact: Artifact): Promise<T> { await this.verify(artifact); return JSON.parse(await readFile(this.path(artifact), 'utf8')) as T; }
   async commit(data: Buffer | string, mediaType: string, producingStage: Stage, inputFingerprint: string): Promise<Artifact> {
@@ -31,7 +44,10 @@ export class ArtifactStore {
     const artifact: Artifact = {schemaVersion: '1.0', id: hash, sha256: hash, bytes: bytes.length, mediaType,
       storage: `${hash.slice(0, 2)}/${hash}.${extension}`, producingStage, inputFingerprint, createdAt: new Date().toISOString(), integrity: 'verified'};
     const dir = join(this.root, hash.slice(0, 2));
+    await mkdir(this.root, {recursive: true});
+    await requireArtifactDirectory(this.root);
     await mkdir(dir, {recursive: true});
+    await requireArtifactDirectory(dir);
     const temp = join(dir, `.partial-${randomUUID()}`);
     const handle = await open(temp, 'wx');
     try { await handle.writeFile(bytes); await handle.sync(); } finally { await handle.close(); }

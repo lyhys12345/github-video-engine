@@ -6,6 +6,8 @@ A local TypeScript engine for evidence-backed GitHub project explainer videos. T
 
 **Current state:** durable jobs, immutable artifacts, read-only research, versioned planning contracts, local Remotion/FFmpeg rendering, and the public evidence-planning CLI are implemented. M0–M4 engineering records are historical; final creative/continuous audiovisual acceptance remains separate. The latest development regression ran **233 tests across 23 files**, including 16 planning-runtime tests. Counts are tied to their recorded source versions, not a claim that a fresh checkout has already been tested.
 
+To start from a public GitHub URL, use `project intake`, export the pinned evidence workspace with `project evidence`, then supply an authored story through `project story`. See [the URL intake workflow](docs/url-intake-v1.md).
+
 The `explain` path is an explicitly experimental **18-second mechanism-plan compiler**. It consumes agent-curated semantic evidence graphs; it is not automatic URL understanding or the approved approximately three-minute REA story. An additive experimental story contract now supports content-led timing up to five minutes, persisted asset packs, continuous segment rendering and a bounded TTS adapter; see HANDOFF.md and docs/story-planning-v1.md for the current checkpoint. See [planning runtime](docs/planning-runtime-v1.md), [current engineering result](reviews/planning-runtime-v1/RESULT.md), and [repository scope](docs/repository-setup.md).
 
 ## Requirements

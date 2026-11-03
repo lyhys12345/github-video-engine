@@ -1,12 +1,13 @@
 import {it,expect} from 'vitest';
-import {readFile,writeFile,rm} from 'node:fs/promises';
+import {mkdir,readFile,readdir,symlink,writeFile,rm} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {WorkflowStore,validateSnapshot,validatePlan,sourceFingerprint} from '../src/workflow/store.js';
 import {canonical,sha256} from '../src/core/util.js';
 import {PlanningPackageSchema} from '../src/contracts/planning.js';
 import {command} from '../src/core/process.js';
 import {sourceFixture,planFixture,workflowRoot,reviewFixture} from './workflow-support.js';
-import {readJson} from '../src/workflow/cli.js';
+import {readJson,workflowCommand} from '../src/workflow/cli.js';
+import {EngineError} from '../src/core/errors.js';
 
 it('validates source URL/hash/version and exact evidence quote locations',()=>{
   const snapshot=sourceFixture(),hash=sourceFingerprint(snapshot),plan=planFixture(snapshot);expect(validateSnapshot(snapshot)).toEqual(snapshot);expect(validatePlan(plan,snapshot,hash)).toEqual(plan);
@@ -34,6 +35,75 @@ it('exports an immutable review input whose byte hash equals revision identity',
   const root=await workflowRoot('export');const store=new WorkflowStore(join(root,'data'));await store.create('demo',sourceFixture());const revision=await store.importPlan('demo',planFixture());
   const exported=await store.export('demo',join(root,'out'));expect(sha256(await readFile(exported.reviewInput))).toBe(revision.hash);expect(await store.export('demo',join(root,'out'))).toEqual(exported);
   await writeFile(exported.reviewMarkdown,'tampered');await expect(store.export('demo',join(root,'out'))).rejects.toMatchObject({code:'EXPORT_EXISTS'});store.close();
+});
+it('keeps a conflicting generic review directory untouched and publishes identical concurrent exports together',async()=>{
+  const root=await workflowRoot('export-atomic'),store=new WorkflowStore(join(root,'data'));
+  try {
+    await store.create('demo',sourceFixture());await store.importPlan('demo',planFixture());
+    const conflict=join(root,'conflict');
+    await mkdir(conflict);
+    await writeFile(join(conflict,'review.md'),'owner note');
+    await expect(store.export('demo',conflict)).rejects.toMatchObject({code:'EXPORT_EXISTS'});
+    expect(await readdir(conflict)).toEqual(['review.md']);
+    expect(await readFile(join(conflict,'review.md'),'utf8')).toBe('owner note');
+    const output=join(root,'published');
+    const [first,second]=await Promise.all([store.export('demo',output),store.export('demo',output)]);
+    expect(first).toEqual(second);
+    expect((await readdir(output)).sort()).toEqual(['review-input.json','review.md']);
+    expect(sha256(await readFile(first.reviewInput))).toBe(first.revisionHash);
+    expect((await readdir(root)).filter(name=>name.startsWith('.gve-review-'))).toEqual([]);
+  } finally {store.close();}
+});
+it('refuses generic review export through a real leaf or ancestor junction',async()=>{
+  const root=await workflowRoot('export-link'),store=new WorkflowStore(join(root,'data'));
+  try {
+    await store.create('demo',sourceFixture());await store.importPlan('demo',planFixture());
+    const outside=join(root,'outside'),alias=join(root,'alias');
+    await mkdir(outside);
+    await writeFile(join(outside,'KEEP'),'retain');
+    await symlink(outside,alias,process.platform==='win32'?'junction':'dir');
+    await expect(store.export('demo',alias)).rejects.toMatchObject({code:'EXPORT_EXISTS'});
+    await expect(store.export('demo',join(alias,'nested','export'))).rejects.toMatchObject({code:'EXPORT_PATH'});
+    expect(await readdir(outside)).toEqual(['KEEP']);
+    expect(await readFile(join(outside,'KEEP'),'utf8')).toBe('retain');
+  } finally {store.close();}
+});
+it('refuses a pre-cancelled generic export before creating workflow state or output',async()=>{
+  const root=await workflowRoot('export-abort'),data=join(root,'data'),out=join(root,'out');
+  const signal=AbortSignal.abort(new EngineError('CANCELLED','pre-cancelled review','cancelled'));
+  await expect(workflowCommand(['project','export'],{data,id:'demo',out},signal)).rejects.toMatchObject({code:'CANCELLED'});
+  expect(await readdir(root)).toEqual([]);
+});
+
+it('removes generic export staging when a real staged write triggers cancellation',async()=>{
+  const root=await workflowRoot('export-inflight'),data=join(root,'data'),out=join(root,'out');
+  const store=new WorkflowStore(join(data,'workflow'));
+  try{await store.create('demo',sourceFixture());await store.importPlan('demo',planFixture());}finally{store.close();}
+  // Inject the abort in an isolated process after the first real staging write finishes.
+  const script=`
+    import assert from 'node:assert/strict';
+    import {createRequire,syncBuiltinESMExports} from 'node:module';
+    import {basename,dirname} from 'node:path';
+    const fs=createRequire(import.meta.url)('node:fs/promises');
+    const {EngineError}=await import('./src/core/errors.ts');
+    const control=new AbortController();
+    const writeFile=fs.writeFile;
+    let injected=false;
+    fs.writeFile=async (target,...args)=>{
+      await writeFile(target,...args);
+      if(basename(dirname(target)).startsWith('.gve-review-')){
+        injected=true;
+        control.abort(new EngineError('CANCELLED','cancel after staging','cancelled'));
+      }
+    };
+    syncBuiltinESMExports();
+    const {workflowCommand}=await import('./src/workflow/cli.ts');
+    const [data,out]=process.argv.slice(1);
+    await assert.rejects(workflowCommand(['project','export'],{data,id:'demo',out},control.signal),{code:'CANCELLED'});
+    assert.equal(injected,true);
+  `;
+  await command(process.execPath,['--import','tsx','--input-type=module','-e',script,data,out]);
+  expect(await readdir(root)).toEqual(['data']);
 });
 it('binds delegated G1/G2 approvals, rejects skipped stages and never creates direct-human final approval',async()=>{
   const root=await workflowRoot('approve');const store=new WorkflowStore(join(root,'data'),{reviewRoot:root});await store.create('demo',sourceFixture());await store.importPlan('demo',planFixture());const r=await reviewFixture(root,store);

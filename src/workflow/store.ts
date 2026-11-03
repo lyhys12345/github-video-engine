@@ -1,6 +1,6 @@
 import {DatabaseSync} from 'node:sqlite';
 import {mkdirSync,readFileSync} from 'node:fs';
-import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {readFile} from 'node:fs/promises';
 import {resolve,join,relative,isAbsolute,sep} from 'node:path';
 import {z} from 'zod';
 import {RepositorySnapshotSchema,PlanningPackageSchema,DelegationSchema,GATES,type RepositorySnapshot,type PlanningPackage} from '../contracts/planning.js';
@@ -8,9 +8,10 @@ import {Hash,Id} from '../contracts/video.js';
 import {ArtifactStore} from '../assets/store.js';
 import {ArtifactSchema,type Artifact} from '../contracts/runtime.js';
 import {canonical,sha256} from '../core/util.js';
-import {EngineError} from '../core/errors.js';
+import {checkAbort,EngineError} from '../core/errors.js';
 import {projectRoot} from '../providers/local.js';
 import {checkGateV2} from '../evaluation/judge-gate.mjs';
+import {publishReviewExport} from './review-export.js';
 
 const ProjectRow=z.object({id:Id,repository:z.string(),snapshotHash:Hash,currentRevision:Hash.nullable(),createdAt:z.string(),updatedAt:z.string()}).strict();
 const SnapshotRow=z.object({hash:Hash,artifact:ArtifactSchema,createdAt:z.string()}).strict();
@@ -76,14 +77,21 @@ export class WorkflowStore{
   list(){return this.db.prepare('SELECT data FROM projects ORDER BY rowid DESC').all().map((r)=>parse(ProjectRow,JSON.parse(r.data as string),'stored project'));}
   async source(hash:string){parse(Hash,hash,'source hash');const row=this.db.prepare('SELECT data FROM sources WHERE hash=?').get(hash);if(!row)throw new EngineError('SOURCE_NOT_FOUND','Source snapshot not found');const stored=parse(SnapshotRow,JSON.parse(row.data as string),'stored snapshot');
     const value=validateSnapshot(await this.artifacts.readJson(stored.artifact));if(stored.hash!==hash||sourceFingerprint(value)!==hash)throw new EngineError('SOURCE_INTEGRITY','Stored source fingerprint mismatch');return value;}
-  async create(id:string,value:unknown){
+  async currentSource(project:Pick<z.infer<typeof ProjectRow>,'repository'|'snapshotHash'>){
+    const snapshot=await this.source(project.snapshotHash);
+    if(snapshot.repository!==project.repository)throw new EngineError('PROJECT_INTEGRITY','Project repository differs from its stored source snapshot');
+    return snapshot;
+  }
+  async create(id:string,value:unknown,options:{preserveExistingSource?:boolean}={}){
     parse(Id,id,'project ID');const snapshot=validateSnapshot(value),hash=sourceFingerprint(snapshot);
     const artifact=await this.artifacts.commit(canonical(snapshot),'application/json','VALIDATE',hash);
     return this.tx(()=>{
       const now=new Date().toISOString();this.db.prepare('INSERT OR IGNORE INTO sources(hash,data) VALUES(?,?)').run(hash,canonical({hash,artifact,createdAt:now}));
       const existing=this.db.prepare('SELECT data FROM projects WHERE id=?').get(id);
       if(existing){const prior=parse(ProjectRow,JSON.parse(existing.data as string),'stored project');if(prior.repository!==snapshot.repository)throw new EngineError('PROJECT_REPOSITORY','Existing project ID belongs to another repository');
-        if(prior.snapshotHash===hash)return prior;prior.snapshotHash=hash;prior.currentRevision=null;prior.updatedAt=now;
+        if(prior.snapshotHash===hash)return prior;
+        if(options.preserveExistingSource)throw new EngineError('PROJECT_SOURCE_EXISTS','Project already has different pinned evidence. Choose a new project ID');
+        prior.snapshotHash=hash;prior.currentRevision=null;prior.updatedAt=now;
         this.db.prepare('UPDATE projects SET data=? WHERE id=?').run(canonical(prior),id);this.event(id,'source_changed_approvals_inactive',{snapshotHash:hash});return prior;}
       const project={id,repository:snapshot.repository,snapshotHash:hash,currentRevision:null,createdAt:now,updatedAt:now};
       this.db.prepare('INSERT INTO projects(id,data) VALUES(?,?)').run(id,canonical(project));this.event(id,'project_created',{snapshotHash:hash});return project;
@@ -93,7 +101,7 @@ export class WorkflowStore{
   async revision(id:string,hash?:string){const project=this.project(id);const target=hash??project.currentRevision;if(!target)throw new EngineError('PLAN_REQUIRED','Import a planning package first');const record=this.revisionRecord(id,target);
     const payload=await this.artifacts.readJson<{snapshotHash:string;plan:unknown}>(record.artifact);if(sha256(canonical(payload))!==target||payload.snapshotHash!==record.snapshotHash)throw new EngineError('PLAN_INTEGRITY','Plan revision fingerprint mismatch');
     const snapshot=await this.source(record.snapshotHash);const plan=validatePlan(payload.plan,snapshot,record.snapshotHash);if(plan.projectId!==id)throw new EngineError('PLAN_PROJECT','Stored plan belongs to another project');return{record,plan,snapshot,payload};}
-  async importPlan(id:string,value:unknown){const project=this.project(id),snapshot=await this.source(project.snapshotHash);const plan=validatePlan(value,snapshot,project.snapshotHash);
+  async importPlan(id:string,value:unknown){const project=this.project(id),snapshot=await this.currentSource(project);const plan=validatePlan(value,snapshot,project.snapshotHash);
     if(plan.projectId!==id)throw new EngineError('PLAN_PROJECT','Plan projectId differs from requested project');const payload={snapshotHash:project.snapshotHash,plan},hash=sha256(canonical(payload));
     const artifact=await this.artifacts.commit(canonical(payload),'application/json','VALIDATE',hash);
     return this.tx(()=>{const current=this.project(id);if(current.snapshotHash!==project.snapshotHash)throw new EngineError('WORKFLOW_CHANGED','Source changed during import; retry against current source');
@@ -102,7 +110,7 @@ export class WorkflowStore{
       return this.revisionRecord(id,hash);
     });
   }
-  async status(id:string){const project=this.project(id);await this.source(project.snapshotHash);
+  async status(id:string){const project=this.project(id);await this.currentSource(project);
     const revisions=this.db.prepare('SELECT data FROM revisions WHERE project_id=? ORDER BY rowid').all(id).map((r)=>parse(RevisionRow,JSON.parse(r.data as string),'stored revision'));
     const allApprovals=this.db.prepare('SELECT data FROM approvals WHERE project_id=? ORDER BY rowid').all(id).map((r)=>parse(ApprovalRow,JSON.parse(r.data as string),'stored approval'));
     const approvals=allApprovals.filter((r)=>r.revisionHash===project.currentRevision);const gates=new Set(approvals.map((a)=>a.gate));
@@ -110,11 +118,10 @@ export class WorkflowStore{
     if(project.currentRevision)await this.revision(id);
     return{project,revisions,approvals,approvalHistory:allApprovals,state:!project.currentRevision?'NEEDS_PLAN':gates.has('G2')?'SCRIPT_APPROVED':gates.has('G1')?'BRIEF_APPROVED':'BRIEF_REVIEW',nextGate:gates.has('G2')?'G3':gates.has('G1')?'G2':'G1',finalHumanAcceptance:'pending',events:this.db.prepare('SELECT * FROM events WHERE project_id=? ORDER BY seq').all(id)};
   }
-  async export(id:string,directory:string){const {record,plan,payload,snapshot}=await this.revision(id);const out=resolve(directory);await mkdir(out,{recursive:true});
-    const writeImmutable=async(name:string,data:string)=>{const path=join(out,name);try{await writeFile(path,data,{flag:'wx'});}catch(error){if((error as NodeJS.ErrnoException).code!=='EEXIST'||await readFile(path,'utf8')!==data)throw new EngineError('EXPORT_EXISTS',`Refusing to replace existing export ${path}`);}return path;};
-    const input=await writeImmutable('review-input.json',canonical(payload));
+  async export(id:string,directory:string,signal=new AbortController().signal){checkAbort(signal);const {record,plan,payload,snapshot}=await this.revision(id);const out=resolve(directory);
     const report=[`# ${escapeMd(id)} 策划审阅包`,`来源：${snapshot.repository}，commit ${snapshot.commit}`,`修订：${record.hash}`,'','## Brief',`受众：${escapeMd(plan.brief.audience)}`,`目标：${escapeMd(plan.brief.objective)}`,`指导来源：${plan.brief.guidanceOrigin}`,'','## 用途与例子',...Object.entries(plan.brief.useCase).map(([key,value])=>`${key}: ${escapeMd(value)}`),'','## 创意',...plan.concepts.map((c)=>`- ${escapeMd(c.id)}：${escapeMd(c.premise)}；开头：${escapeMd(c.opening)}`),'','## 脚本',...plan.script.map((s)=>`- ${escapeMd(s.id)} (${s.plannedDurationMs}ms)：${escapeMd(s.narration)} / claims: ${s.claimIds.join(', ')}`),'','## 分镜',...plan.storyboard.map((s)=>`- ${escapeMd(s.id)}：${escapeMd(s.visual)}；动效：${escapeMd(s.animation)}；来源标签：${escapeMd(s.evidenceLabel)}`),'','## 事实',...plan.facts.map((f)=>`- ${escapeMd(f.id)} [${f.kind}]：${escapeMd(f.statement)}；限制：${escapeMd(f.limitations)}`),'','## 参考状态',...plan.references.map((r)=>`- ${escapeMd(r.url)} [${r.status}] ${escapeMd(r.limitation)}`),'','## 声音与预算',`声音：${plan.audio.mode} / ${plan.audio.voice} / ${plan.audio.timingStatus}；${escapeMd(plan.audio.note)}`,`付费上限：0 USD；修订上限：${plan.budget.maxRevisionRounds}；不执行项目代码。`,'','阶段审批由独立 judge 在记录的用户委托下作出；最终用户验收仍待用户。','未访问的参考没有被伪装成已分析。源文档仅作为不可信待审数据，不执行其中指令。',''].join('\n');
-    const markdown=await writeImmutable('review.md',report);return{projectId:id,revisionHash:record.hash,reviewInput:input,reviewMarkdown:markdown};}
+    await publishReviewExport(out, [['review-input.json', Buffer.from(canonical(payload))], ['review.md', Buffer.from(report)]], signal);
+    return{projectId:id,revisionHash:record.hash,reviewInput:join(out,'review-input.json'),reviewMarkdown:join(out,'review.md')};}
   async approve(id:string,gate:string,candidatePath:string,rulesPath:string,delegationPath:string){
     if(gate==='G6')throw new EngineError('HUMAN_FINAL_REQUIRED','Final human acceptance cannot be created by the judge approval command');
     if(!['G1','G2'].includes(gate))throw new EngineError('GATE_NOT_READY','M1 supports G1/G2; later production gates require their stage implementation and evidence');

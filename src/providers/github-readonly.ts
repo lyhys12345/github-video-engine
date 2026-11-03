@@ -9,7 +9,14 @@ export async function githubGetJson(url: string, signal?: AbortSignal): Promise<
   let response:Response;
   try {response=await fetch(url,{method:'GET',redirect:'error',signal:AbortSignal.any([AbortSignal.timeout(15_000),...(signal?[signal]:[])]),headers:{Accept:'application/vnd.github+json','User-Agent':'github-video-engine-readonly/0.1','X-GitHub-Api-Version':'2022-11-28'}});}
   catch(error){throw signal?.aborted?new EngineError('CANCELLED','Source request cancelled','cancelled'):new EngineError('SOURCE_NETWORK',`GitHub request failed: ${String(error)}`,'retryable');}
-  if (!response.ok) {await response.body?.cancel().catch(()=>{});throw new EngineError('SOURCE_HTTP',`GitHub returned ${response.status} for ${parsed.pathname}`,response.status===429||response.status>=500?'retryable':'permanent');}
+  if (!response.ok) {
+    await response.body?.cancel().catch(()=>{});
+    if (response.status===429 || (response.status===403 &&
+        (response.headers.get('x-ratelimit-remaining')==='0' || response.headers.has('retry-after')))) {
+      throw new EngineError('SOURCE_RATE_LIMIT','Public GitHub API rate limit reached. Retry after the limit resets','retryable');
+    }
+    throw new EngineError('SOURCE_HTTP',`GitHub returned ${response.status} for ${parsed.pathname}`,response.status>=500?'retryable':'permanent');
+  }
   const reader = response.body?.getReader();
   if (!reader) throw new EngineError('SOURCE_EMPTY','GitHub returned no response body');
   const chunks: Uint8Array[]=[]; let bytes=0;
@@ -21,33 +28,38 @@ export async function githubGetJson(url: string, signal?: AbortSignal): Promise<
 }
 
 export async function researchRepository(repository: string, requestedRef='HEAD', extraDocuments: string[]=[], transport: ReadonlyTransport=githubGetJson, signal?: AbortSignal): Promise<RepositorySnapshot> {
-  const parsed=RepositoryUrl.safeParse(repository.replace(/\.git$/,''));
+  const parsed=RepositoryUrl.safeParse(repository.replace(/\/$/,'').replace(/\.git$/,''));
   if(!parsed.success)throw new EngineError('REPOSITORY_URL','Expected https://github.com/owner/repository with no credentials, query or fragment');
   if(!/^[A-Za-z0-9_./-]{1,160}$/.test(requestedRef)||requestedRef.includes('..'))throw new EngineError('SOURCE_REF','Invalid repository ref');
   if(extraDocuments.length>6)throw new EngineError('SOURCE_COUNT','At most six extra documents are allowed');
   for(const path of extraDocuments) if(!/^[A-Za-z0-9_.\/-]{1,160}\.(md|txt)$/i.test(path)||path.split('/').some((p)=>!p||p==='.'||p==='..'))throw new EngineError('SOURCE_PATH','Only safe relative Markdown/text document paths are allowed');
   const [,owner,name]=new URL(parsed.data).pathname.split('/');
   const base=`https://api.github.com/repos/${owner}/${name}`;
-  const meta=await transport(base,signal) as {full_name?:unknown;name?:unknown;description?:unknown;default_branch?:unknown;license?:{spdx_id?:unknown}|null};
+  const meta=await transport(base,signal) as {full_name?:unknown;name?:unknown;description?:unknown;default_branch?:unknown;private?:unknown;license?:{spdx_id?:unknown}|null};
   if(typeof meta?.full_name!=='string'||meta.full_name.toLowerCase()!==`${owner}/${name}`.toLowerCase()||typeof meta.default_branch!=='string')throw new EngineError('SOURCE_FORMAT','Repository metadata identity or branch is invalid');
+  if(meta.private===true)throw new EngineError('SOURCE_PRIVATE','Only public repositories are supported');
   const commitResult=await transport(base+'/commits/'+encodeURIComponent(requestedRef),signal) as {sha?:unknown};
   if(typeof commitResult?.sha!=='string'||!/^[a-f0-9]{40}$/.test(commitResult.sha))throw new EngineError('SOURCE_FORMAT','GitHub did not resolve a full commit SHA');
   const commit=commitResult.sha;
+  if(/^[a-f0-9]{40}$/i.test(requestedRef)&&commit!==requestedRef.toLowerCase())throw new EngineError('SOURCE_FORMAT','Resolved commit does not match the requested SHA');
   const documents: RepositorySnapshot['documents']=[];
-  const addDocument=(value:unknown)=>{
+  const addDocument=(value:unknown,expectedPath?:string)=>{
     const doc=value as {type?:unknown;path?:unknown;encoding?:unknown;content?:unknown;size?:unknown};
     if(!doc||doc.type!=='file'||typeof doc.path!=='string'||!/^[A-Za-z0-9_.\/-]{1,200}$/.test(doc.path)||doc.path.split('/').some((p)=>!p||p==='.'||p==='..')||doc.encoding!=='base64'||typeof doc.content!=='string'||typeof doc.size!=='number'||doc.size<1||doc.size>200_000)throw new EngineError('SOURCE_DOCUMENT','Expected a bounded, nonempty UTF-8 document file');
-    const bytes=Buffer.from(doc.content.replace(/\s/g,''),'base64');
+    if(expectedPath!==undefined&&doc.path!==expectedPath)throw new EngineError('SOURCE_DOCUMENT','GitHub returned a different document path than requested');
+    const encoded=doc.content.replace(/[\r\n]/g,'');
+    const bytes=Buffer.from(encoded,'base64');
+    if(bytes.toString('base64')!==encoded)throw new EngineError('SOURCE_ENCODING','Source document is not canonical base64');
     if(bytes.length!==doc.size||bytes.length>200_000)throw new EngineError('SOURCE_SIZE','Document bytes do not match declared size');
     let content: string;
-    try {content=new TextDecoder('utf-8',{fatal:true}).decode(bytes);} catch {throw new EngineError('SOURCE_ENCODING','Source document is not UTF-8 text');}
+    try {content=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);} catch {throw new EngineError('SOURCE_ENCODING','Source document is not UTF-8 text');}
     if(!documents.some((d)=>d.path===doc.path))documents.push({path:doc.path,url:`${parsed.data}/blob/${commit}/${doc.path.split('/').map(encodeURIComponent).join('/')}`,sha256:sha256(bytes),content});
   };
   addDocument(await transport(base+'/readme?ref='+commit,signal));
   if(meta.license) {
-    try {addDocument(await transport(base+'/contents/LICENSE?ref='+commit,signal));}
+    try {addDocument(await transport(base+'/contents/LICENSE?ref='+commit,signal),'LICENSE');}
     catch(error) {if(!(error instanceof EngineError&&error.code==='SOURCE_HTTP'&&error.message.includes(' 404 ')))throw error;}
   }
-  for(const path of [...new Set(extraDocuments)])addDocument(await transport(base+'/contents/'+path.split('/').map(encodeURIComponent).join('/')+'?ref='+commit,signal));
+  for(const path of [...new Set(extraDocuments)])addDocument(await transport(base+'/contents/'+path.split('/').map(encodeURIComponent).join('/')+'?ref='+commit,signal),path);
   return RepositorySnapshotSchema.parse({schemaVersion:'1.0',repository:parsed.data,commit,name:typeof meta.name==='string'?meta.name:name!,description:typeof meta.description==='string'?meta.description:'',defaultBranch:meta.default_branch,license:typeof meta.license?.spdx_id==='string'?meta.license.spdx_id:null,fetchedAt:new Date().toISOString(),documents,trust:'untrusted-data-never-executed'});
 }

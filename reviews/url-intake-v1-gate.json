@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "2.0",
+  "milestone": "URL-intake-v1",
+  "activeRoles": ["product", "reliability", "evidence", "content_facts", "security"],
+  "requiredCriteria": {
+    "product": ["U1", "U4", "U6", "U7"],
+    "reliability": ["U2", "U3", "U5", "U7"],
+    "evidence": ["U1", "U2", "U3", "U4", "U7"],
+    "content_facts": ["U2", "U4", "U6"],
+    "security": ["U5", "U6"]
+  },
+  "inactiveRoles": {
+    "video_quality": "No new audio or video is generated or presented for review"
+  }
+}

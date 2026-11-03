@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "1.0",
+  "projectId": "express-url",
+  "snapshotHash": "4f3d291c9f759f66dad3dd91964ff51fef5923b0069c13dd0cb185a1362d9ce8",
+  "facts": [
+    {
+      "id": "framework",
+      "statement": "Express describes itself as a minimalist web framework for Node.js.",
+      "kind": "documented",
+      "evidence": [
+        {
+          "document": "Readme.md",
+          "startLine": 8,
+          "endLine": 8,
+          "quote": "**Fast, unopinionated, minimalist web framework for [Node.js](https://nodejs.org).**"
+        }
+      ],
+      "limitations": "This is the project description. No performance comparison was tested."
+    },
+    {
+      "id": "example-route",
+      "statement": "The README registers a GET handler for / that sends Hello World.",
+      "kind": "documented",
+      "evidence": [
+        {
+          "document": "Readme.md",
+          "startLine": 41,
+          "endLine": 43,
+          "quote": "app.get('/', (req, res) => {\n  res.send('Hello World')\n})"
+        }
+      ],
+      "limitations": "Only the documented root route is depicted."
+    },
+    {
+      "id": "listen-port",
+      "statement": "The README example calls app.listen on port 3000.",
+      "kind": "documented",
+      "evidence": [
+        {
+          "document": "Readme.md",
+          "startLine": 45,
+          "endLine": 47,
+          "quote": "app.listen(3000, () => {\n  console.log('Server is running on http://localhost:3000')\n})"
+        }
+      ],
+      "limitations": "The example was read from source and was not executed."
+    }
+  ],
+  "brief": {
+    "audience": "Developers who have seen a browser request and are new to server routing",
+    "objective": "Trace one documented request from the root path to a response.",
+    "language": "en-US",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationSeconds": 30,
+    "useCase": {
+      "who": "A developer building a first Node.js HTTP example",
+      "situation": "The developer wants a root path that returns a greeting",
+      "input": "GET / on the example server",
+      "output": "Hello World",
+      "value": "The handler makes the example request and response explicit",
+      "evidenceKind": "documented-example"
+    },
+    "guidanceOrigin": "agent-proposed-defaults",
+    "styleDirection": "Illustrate the request, route match and response as three legible cards. Keep the example snippet legible on a phone."
+  },
+  "concepts": [
+    {
+      "id": "follow-request",
+      "premise": "Follow one request to the greeting.",
+      "opening": "Where does Hello World come from?",
+      "rationale": "A single request clarifies the role of the path and handler."
+    },
+    {
+      "id": "annotate-example",
+      "premise": "Read the minimal example line by line.",
+      "opening": "This is the line that answers the browser.",
+      "rationale": "Code annotations offer a compact walkthrough for a developer."
+    }
+  ],
+  "selectedConcept": "follow-request",
+  "script": [
+    {
+      "id": "listen",
+      "narration": "The Express README starts a Node.js example server on port three thousand. We will follow one request to see where its answer comes from.",
+      "caption": "One request to the example server",
+      "claimIds": [
+        "framework",
+        "listen-port"
+      ],
+      "plannedDurationMs": 10000
+    },
+    {
+      "id": "match",
+      "narration": "Send a GET request to the root path. In this example the matching line registers a handler for GET and slash.",
+      "caption": "GET / reaches the registered handler",
+      "claimIds": [
+        "example-route"
+      ],
+      "plannedDurationMs": 10000
+    },
+    {
+      "id": "respond",
+      "narration": "The handler calls response dot send with Hello World. That string is the example response. The animation traces the documented code.",
+      "caption": "The handler sends Hello World",
+      "claimIds": [
+        "example-route"
+      ],
+      "plannedDurationMs": 10000
+    }
+  ],
+  "storyboard": [
+    {
+      "id": "listener",
+      "scriptIds": [
+        "listen"
+      ],
+      "visual": "Show a browser card next to a server card labeled localhost:3000.",
+      "animation": "Emphasize the port and slide a request card toward the server.",
+      "evidenceLabel": "README lines 45–47"
+    },
+    {
+      "id": "route",
+      "scriptIds": [
+        "match"
+      ],
+      "visual": "Place a GET / card next to the app.get line.",
+      "animation": "Match the HTTP method and route path with a simple highlight.",
+      "evidenceLabel": "README lines 41–43"
+    },
+    {
+      "id": "response",
+      "scriptIds": [
+        "respond"
+      ],
+      "visual": "Show res.send beside a Hello World response card.",
+      "animation": "Move the response card back to the browser and hold.",
+      "evidenceLabel": "README lines 41–43"
+    }
+  ],
+  "references": [],
+  "audio": {
+    "mode": "preview-silent",
+    "voice": "Pending editorial selection",
+    "timingStatus": "estimated",
+    "note": "This is a review package with estimated script durations. No recording or render."
+  },
+  "budget": {
+    "maxPaidUsd": 0,
+    "maxRevisionRounds": 2,
+    "execution": "no-untrusted-repository-execution"
+  },
+  "origin": "agent-authored-not-an-automatic-model-api-call"
+}

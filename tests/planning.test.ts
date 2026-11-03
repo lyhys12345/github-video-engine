@@ -56,3 +56,32 @@ it('classifies network failures and caller cancellation and sets read-only bound
     const controller=new AbortController();controller.abort();await expect(githubGetJson(url,controller.signal)).rejects.toMatchObject({code:'CANCELLED',classification:'cancelled'});
   }finally{vi.unstubAllGlobals();}
 });
+
+it('reports an unauthenticated rate limit distinctly from a forbidden response',async()=>{
+  const url='https://api.github.com/repos/example/demo';
+  try {
+    for(const response of [new Response('',{status:429}),new Response('',{status:403,headers:{'x-ratelimit-remaining':'0'}})]){
+      vi.stubGlobal('fetch',vi.fn(async()=>response));
+      await expect(githubGetJson(url)).rejects.toMatchObject({code:'SOURCE_RATE_LIMIT',classification:'retryable'});
+    }
+    vi.stubGlobal('fetch',vi.fn(async()=>new Response('',{status:403})));
+    await expect(githubGetJson(url)).rejects.toMatchObject({code:'SOURCE_HTTP',classification:'permanent'});
+  } finally {vi.unstubAllGlobals();}
+});
+
+it('rejects mismatched full-SHA resolution and a mismatched explicit document path',async()=>{
+  const requests:string[]=[];
+  await expect(researchRepository('https://github.com/example/demo','b'.repeat(40),[],transport(requests))).rejects.toMatchObject({code:'SOURCE_FORMAT'});
+  expect(requests).toHaveLength(2);
+  await expect(researchRepository('https://github.com/example/demo','HEAD',['docs/other.md'],transport([]))).rejects.toMatchObject({code:'SOURCE_DOCUMENT'});
+});
+
+it('preserves UTF-8 BOM bytes and rejects noncanonical base64 and invalid UTF-8',async()=>{
+  const read=async (body:ReturnType<typeof document>) => researchRepository('https://github.com/example/demo','HEAD',[],
+    (url,signal)=>url.includes('/readme?')?Promise.resolve(body):transport([])(url,signal));
+  const bom='\uFEFF# Demo';
+  const result=await read(document('README.md',bom));
+  expect(result.documents[0]).toMatchObject({content:bom,sha256:sha256(bom)});
+  await expect(read({...document('README.md','x'),content:'eA==?'})).rejects.toMatchObject({code:'SOURCE_ENCODING'});
+  await expect(read({...document('README.md','x'),content:'/w=='})).rejects.toMatchObject({code:'SOURCE_ENCODING'});
+});
