@@ -3,7 +3,10 @@ import {AuthoringBinding, StoryProposal} from './authoring.js';
 import {Hash, Id} from './video.js';
 
 export const PRESENTATION_FPS = 24;
-export const PRESENTATION_MAX_FRAMES = PRESENTATION_FPS * 60;
+export const PRESENTATION_LEGACY_MAX_FRAMES = PRESENTATION_FPS * 60;
+export const PRESENTATION_MAX_FRAMES = PRESENTATION_FPS * 300;
+export const presentationMaxFrames = (version: '1.0' | '1.1') =>
+  version === '1.0' ? PRESENTATION_LEGACY_MAX_FRAMES : PRESENTATION_MAX_FRAMES;
 const evidence = z.strictObject({claimId: Id, citationIndex: z.number().int().min(0).max(7)});
 const fact = <T extends z.ZodType>(value: T) => z.strictObject({value, evidence});
 const roles = <T extends z.ZodRawShape>(value: T) => z.strictObject(value);
@@ -30,7 +33,7 @@ export const PresentationEventKind = z.enum([
   'listen', 'request', 'match', 'respond', 'show-input', 'select-cutout', 'show-cutout', 'select-mask', 'show-mask', 'compare',
 ]);
 export const PresentationPlan = z.strictObject({
-  schemaVersion: z.literal('1.0'), kind: z.literal('session-presentation-plan'),
+  schemaVersion: z.enum(['1.0', '1.1']), kind: z.literal('session-presentation-plan'),
   proposalHash: Hash, authoringRequestId: Hash, binding: AuthoringBinding, authorship: StoryProposal.shape.authorship,
   module: z.discriminatedUnion('id', [http, image]),
   beats: z.array(z.strictObject({
@@ -39,6 +42,15 @@ export const PresentationPlan = z.strictObject({
       claimIds: z.array(Id).min(1).max(20),
     })).max(12),
   })).min(1).max(20),
+}).superRefine((plan, context) => {
+  const max = presentationMaxFrames(plan.schemaVersion);
+  for (const [index, beat] of plan.beats.entries()) {
+    if (beat.frames > max) context.addIssue({code: 'custom', path: ['beats', index, 'frames'], message: 'Beat exceeds plan version frame limit'});
+    for (const [eventIndex, event] of beat.events.entries()) {
+      if (event.atFrame >= max) context.addIssue({code: 'custom', path: ['beats', index, 'events', eventIndex, 'atFrame'],
+        message: 'Event exceeds plan version frame limit'});
+    }
+  }
 });
 export type PresentationPlan = z.infer<typeof PresentationPlan>;
 export type PresentationEventKind = z.infer<typeof PresentationEventKind>;

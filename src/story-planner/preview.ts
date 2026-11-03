@@ -119,10 +119,10 @@ function reviewPage(mode: z.infer<typeof Mode>) {
 </body></html>\n`;
 }
 
-export async function verifyMovie(path: string, props: Pick<PreviewProps, 'mode' | 'timeline'>, signal: AbortSignal) {
+export async function verifyMovie(path: string, props: Pick<PreviewProps, 'mode' | 'timeline'>, signal: AbortSignal, timeout = 120_000) {
   const probe = JSON.parse(await command(ffprobePath(), [
     '-v', 'error', '-count_frames', '-show_streams', '-show_format', '-of', 'json', path,
-  ], {signal, timeout: 120_000}));
+  ], {signal, timeout}));
   const video = probe.streams.find((stream: {codec_type: string}) => stream.codec_type === 'video');
   const audio = probe.streams.find((stream: {codec_type: string}) => stream.codec_type === 'audio');
   const {fps, totalFrames} = props.timeline;
@@ -140,7 +140,7 @@ export async function verifyMovie(path: string, props: Pick<PreviewProps, 'mode'
       seconds: probe.format.duration, expected: props.timeline,
     }));
   }
-  await command(ffmpegPath(), ['-v', 'error', '-xerror', '-nostdin', '-i', path, '-f', 'null', '-'], {signal, timeout: 120_000});
+  await command(ffmpegPath(), ['-v', 'error', '-xerror', '-nostdin', '-i', path, '-f', 'null', '-'], {signal, timeout});
   return probe;
 }
 

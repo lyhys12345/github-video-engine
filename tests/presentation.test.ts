@@ -1,5 +1,6 @@
 import {readFile, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
+import {DatabaseSync} from 'node:sqlite';
 import {expect, it} from 'vitest';
 import type {StoryProposal} from '../src/contracts/authoring.js';
 import {PresentationPlan} from '../src/contracts/presentation.js';
@@ -8,8 +9,9 @@ import {PAPER_BIRD_SHA256} from '../src/presentation/asset.js';
 import {presentationCommand} from '../src/presentation/cli.js';
 import {compilePresentation} from '../src/presentation/compile.js';
 import {presentationFrame} from '../src/presentation/frame-state.js';
-import {bindPresentationVoice, readPresentation, renderPresentation} from '../src/presentation/runtime.js';
-import {mixClips, placement, voiceCaptions} from '../src/presentation/narration.js';
+import {bindPresentationVoice, checkPresentationPayload, PREVIEW_KIND, readPresentation, renderPresentation} from '../src/presentation/runtime.js';
+import {FRAME_SAMPLES, MAX_PCM, mixClips, placement, voiceCaptions, VOICE_KIND, VoiceSpec} from '../src/presentation/narration.js';
+import {extendedRanges, FRAME_CHUNK, MAX_MOVIE_BYTES, requireExtendedDisk} from '../src/presentation/duration.js';
 import {produceTts} from '../src/tts/runtime.js';
 import {ArtifactStore} from '../src/assets/store.js';
 import {workflowCommand} from '../src/workflow/cli.js';
@@ -116,6 +118,18 @@ it.runIf(process.platform === 'win32' && !!process.env.SystemRoot)('commits, ver
   await expect(presentationCommand(['presentation', 'render'], {task: first.taskId, data, mode: 'narrated'}, signal))
     .rejects.toMatchObject({code: 'USAGE'});
   const loaded = await readPresentation(data, first.taskId, 'plan', signal);
+  await expect(presentationCommand(['presentation', 'status'], {task: first.taskId, data}, signal))
+    .resolves.toMatchObject({kind: 'plan', integrity: 'verified'});
+  await expect(presentationCommand(['presentation', 'status'], {task: first.taskId, data, kind: 'narrated'}, signal))
+    .rejects.toMatchObject({code: 'PRESENTATION_TASK_KIND'});
+  await expect(presentationCommand(['presentation', 'status'], {task: 'invalid-id', data}, signal))
+    .rejects.toMatchObject({code: 'PRESENTATION_TASK_ID'});
+  await expect(presentationCommand(['presentation', 'status'], {task: '0'.repeat(64), data}, signal))
+    .rejects.toMatchObject({code: 'EXPLAIN_TASK'});
+  await expect(presentationCommand(['presentation', 'resume'], {task: first.taskId, data}, signal))
+    .rejects.toMatchObject({code: 'PRESENTATION_RESUME_KIND'});
+  await expect(presentationCommand(['presentation', 'export'], {task: first.taskId, data, out: join(root, 'detected-export')}, signal))
+    .resolves.toMatchObject({taskId: first.taskId});
   expect(loaded.files?.get('presentation.json')?.toString()).toBe(canonical(authored.plan));
   expect(loaded.files?.get('source-1.txt')?.toString()).toBe(fixture.documents[0]!.content);
 
@@ -133,6 +147,17 @@ it.runIf(process.platform === 'win32' && !!process.env.SystemRoot)('commits, ver
   await expect(readPresentation(data, first.taskId, 'plan', signal)).rejects.toMatchObject({code: 'PRESENTATION_INTEGRITY'});
   await writeFile(path, original);
   await expect(readPresentation(data, first.taskId, 'plan', signal)).resolves.toMatchObject({status: {integrity: 'verified'}});
+  const database = new DatabaseSync(join(data, 'tasks.sqlite'));
+  try {
+    const row = database.prepare('SELECT data FROM tasks WHERE id=?').get(first.taskId)!;
+    const record = JSON.parse(String(row.data));
+    const forgedId = 'f'.repeat(64);
+    record.id = forgedId;
+    record.kind = 'repository-presentation-narrated-preview-v1';
+    database.prepare('INSERT INTO tasks(id,data) VALUES(?,?)').run(forgedId, canonical(record));
+    await expect(presentationCommand(['presentation', 'status'], {task: forgedId, data}, signal))
+      .rejects.toMatchObject({code: 'EXPLAIN_INTEGRITY'});
+  } finally {database.close();}
 }, 60_000);
 
 it('uses the last decoded sample, rounds cues outward, and rejects overflow and digital silence', () => {
@@ -155,6 +180,83 @@ it('uses the last decoded sample, rounds cues outward, and rejects overflow and 
   expect(() => placement(beat, {...clip, startOffsetFrames: 71}, pcm, source))
     .toThrow(expect.objectContaining({code: 'VOICE_DOES_NOT_FIT', message: expect.stringContaining('"minAdditionalFrames":1')}));
   expect(() => placement(beat, clip, Buffer.alloc(4002), source)).toThrow(expect.objectContaining({code: 'VOICE_EMPTY'}));
+});
+
+it('version-gates the frame, beat and event boundaries and partitions exact absolute renderer frames', () => {
+  const authored = example(1);
+  authored.plan.schemaVersion = '1.1';
+  for (const frames of [24, 1440, 1441, 1464, 1800, 7199, 7200]) {
+    authored.plan.beats[0]!.frames = frames;
+    const compiled = compilePresentation(authored.proposal, PresentationPlan.parse(authored.plan));
+    expect(compiled.timeline).toEqual({fps: 24, totalFrames: frames});
+    if (frames > 1440) {
+      const ranges = extendedRanges(frames);
+      expect(ranges.flatMap(([first, last]) => Array.from({length: last - first + 1}, (_, index) => first + index)))
+        .toEqual(Array.from({length: frames}, (_, index) => index));
+      expect(ranges.every(([first, last]) => last - first + 1 <= FRAME_CHUNK)).toBe(true);
+    }
+  }
+  authored.plan.beats[0]!.events.at(-1)!.atFrame = 7199;
+  const last = compilePresentation(authored.proposal, PresentationPlan.parse(authored.plan));
+  expect(presentationFrame(last, 7199).state).toBe('responded');
+  authored.plan.beats[0]!.events.at(-1)!.atFrame = 7200;
+  expect(PresentationPlan.safeParse(authored.plan).success).toBe(false);
+  for (const frame of [NaN, 1440, 1441.5, 7201]) {
+    expect(() => extendedRanges(frame)).toThrow(expect.objectContaining({code: 'PRESENTATION_DURATION'}));
+  }
+  const legacy = example(2);
+  legacy.plan.beats[0]!.frames = 721;
+  legacy.plan.beats[1]!.frames = 720;
+  expect(() => compilePresentation(legacy.proposal, PresentationPlan.parse(legacy.plan)))
+    .toThrow(expect.objectContaining({code: 'PRESENTATION_DURATION'}));
+  legacy.plan.schemaVersion = '1.1';
+  legacy.plan.beats[0]!.frames = 3600;
+  legacy.plan.beats[1]!.frames = 3601;
+  expect(() => compilePresentation(legacy.proposal, PresentationPlan.parse(legacy.plan)))
+    .toThrow(expect.objectContaining({code: 'PRESENTATION_DURATION'}));
+});
+
+it('keeps the exact 300-second reference PCM, rejects one extra sample, and places an exact cue at the last frame', () => {
+  const authored = example(1);
+  authored.plan.schemaVersion = '1.1';
+  authored.plan.beats[0]!.frames = 7200;
+  const beat = compilePresentation(authored.proposal, authored.plan).beats[0]!;
+  const clip = {beatId: beat.id, receiptFingerprint: 'b'.repeat(64), receiptSha256: 'c'.repeat(64),
+    sourceAudioSha256: 'd'.repeat(64), transcript: 'Tail sample', transcriptSha256: sha256('Tail sample'), startOffsetFrames: 0};
+  const source = {receipt: {durationSeconds: 300}, input: {voiceLabel: 'Sample-boundary test', mediaType: 'audio/wav'}} as
+    Parameters<typeof placement>[3];
+  const pcm = Buffer.alloc(MAX_PCM);
+  pcm.writeInt16LE(10, 0);
+  pcm.writeInt16LE(1234, pcm.length - 2);
+  const cue = placement(beat, clip, pcm, source);
+  const mix = mixClips(7200, [{cue, pcm}]);
+  expect(mix.length).toBe(28_800_000);
+  expect(cue).toMatchObject({sampleCount: 14_400_000, endFrame: 7200});
+  expect(mix.readInt16LE(mix.length - 2)).toBe(1234);
+  const excess = Buffer.concat([pcm, Buffer.from([0x01, 0x00])]);
+  expect(() => placement(beat, clip, excess, source)).toThrow(expect.objectContaining({code: 'VOICE_DOES_NOT_FIT'}));
+  const binding = {schemaVersion: 'presentation-voice-bindings/1.0', planTaskId: 'a'.repeat(64), planManifestSha256: 'a'.repeat(64),
+    proposalHash: 'a'.repeat(64), voicePolicy: 'caller-declared-local-import', playbackRate: 1, clips: [{...clip, startOffsetFrames: 7199}]};
+  expect(VoiceSpec.safeParse(binding).success).toBe(true);
+  expect(VoiceSpec.safeParse({...binding, clips: [{...clip, startOffsetFrames: 7200}]}).success).toBe(false);
+  const lastCue = placement(beat, binding.clips[0]!, pcm.subarray(-FRAME_SAMPLES * 2), source);
+  expect(lastCue).toMatchObject({startFrame: 7199, endFrame: 7200, endSample: 14_400_000});
+  expect(voiceCaptions([lastCue]).toString()).toContain('00:04:59.958 --> 00:05:00.000');
+});
+
+it('fails the extended disk admission check when the work volume cannot be verified', async () => {
+  await expect(requireExtendedDisk('not-a-valid-scratch-path-3db55b7f', '.'))
+    .rejects.toMatchObject({code: 'PRESENTATION_DISK_BUDGET', classification: 'retryable'});
+});
+
+it('rejects oversized movies, declared aggregate PCM and excess result files before loading them', () => {
+  expect(() => checkPresentationPayload(PREVIEW_KIND, [{path: 'preview.mp4', bytes: MAX_MOVIE_BYTES + 1}]))
+    .toThrow(expect.objectContaining({code: 'PRESENTATION_PAYLOAD'}));
+  const clips = [0, 1, 2].map(index => ({path: index + '.pcm', bytes: MAX_PCM}));
+  expect(() => checkPresentationPayload(VOICE_KIND, clips.slice(0, 2))).not.toThrow();
+  expect(() => checkPresentationPayload(VOICE_KIND, clips)).toThrow(expect.objectContaining({code: 'PRESENTATION_PAYLOAD'}));
+  const files = Array.from({length: 61}, (_, index) => ({path: index + '.png', bytes: 1}));
+  expect(() => checkPresentationPayload(PREVIEW_KIND, files)).toThrow(expect.objectContaining({code: 'PRESENTATION_PAYLOAD'}));
 });
 
 it.runIf(process.platform === 'win32' && !!process.env.SystemRoot)('verifies local receipt, preserves voice revisions and rejects mismatched parents, text, coverage and CAS', async () => {

@@ -3,7 +3,7 @@ import {dirname, join, resolve} from 'node:path';
 import {z} from 'zod';
 import {ArtifactStore} from '../assets/store.js';
 import {StoryProposal} from '../contracts/authoring.js';
-import {PresentationPlan} from '../contracts/presentation.js';
+import {PRESENTATION_FPS, PRESENTATION_LEGACY_MAX_FRAMES, presentationMaxFrames, PresentationPlan} from '../contracts/presentation.js';
 import {ArtifactSchema} from '../contracts/runtime.js';
 import {Hash, Id} from '../contracts/video.js';
 import {EngineError, checkAbort} from '../core/errors.js';
@@ -18,14 +18,15 @@ import {ancestors, boundedFile, preflightStatePath, readTask} from '../story-pla
 import {loadAuthoringProposal} from '../workflow/agent-authoring.js';
 import type {WorkflowStore} from '../workflow/store.js';
 import {compilePresentation, type CompiledPresentation} from './compile.js';
-import {decodeClip, loadClip, matchVoice, MAX_PCM, mixClips, NARRATED_KIND, placement, RATE,
+import {decodeClip, FRAME_SAMPLES, loadClip, matchVoice, MAX_PCM, mixClips, NARRATED_KIND, placement, RATE,
   voiceCaptions, VOICE_KIND, voiceReview, VoiceSpec} from './narration.js';
+import {EXTENDED_RENDER_PROFILE, EXTENDED_VERIFY_DEADLINE, EXTENDED_WORKER_DEADLINE, extendedRanges,
+  MAX_MOVIE_BYTES, MAX_PART_BYTES, MAX_SAMPLE_BYTES, MAX_SAMPLES, requireExtendedDisk} from './duration.js';
 
 export const PLAN_KIND = 'repository-presentation-plan-v1';
 export const PREVIEW_KIND = 'repository-presentation-preview-v1';
 const FONT_SHA = 'a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da';
 const GEOMETRY = {width: 720, height: 1280};
-const MAX_MOVIE_BYTES = 80_000_000;
 const RETRIES = 3;
 const review = {semanticReview: 'pending', editorialReview: 'pending', audiovisualReview: 'pending', voice: 'omitted-explicitly', ownerAcceptance: 'pending'} as const;
 const Source = z.strictObject({id: Id, path: z.string().regex(/^source-[1-8]\.txt$/), url: z.string().max(600), sha256: Hash});
@@ -33,7 +34,8 @@ const PlanInput = z.strictObject({projectId: Id, proposal: StoryProposal, plan: 
   sources: z.array(Source).min(1).max(8), compiler: z.array(z.strictObject({path: z.string(), sha256: Hash})).min(1).max(20)});
 type PlanInput = z.infer<typeof PlanInput>;
 const PreviewInput = z.strictObject({planTaskId: Hash, planManifestSha256: Hash, mode: z.literal('silent'),
-  fontSha256: z.literal(FONT_SHA), environment: z.record(z.string(), z.string())});
+  fontSha256: z.literal(FONT_SHA), environment: z.record(z.string(), z.string()),
+  renderProfile: z.literal(EXTENDED_RENDER_PROFILE).optional()});
 const VoiceInput = z.strictObject({spec: VoiceSpec, decoder: z.record(z.string(), z.string()), implementationSha256: Hash});
 const NarratedInput = PreviewInput.extend({mode: z.literal('narrated'), voiceTaskId: Hash, voiceManifestSha256: Hash});
 const Result = z.strictObject({kind: z.enum([PLAN_KIND, PREVIEW_KIND, VOICE_KIND, NARRATED_KIND]), files: z.array(z.strictObject({
@@ -43,6 +45,25 @@ const json = (value: unknown) => Buffer.from(canonical(value));
 const decode = (bytes: Buffer) => JSON.parse(new TextDecoder('utf-8', {fatal: true}).decode(bytes));
 const fail = (message: string): never => {throw new EngineError('PRESENTATION_INTEGRITY', message);};
 const fingerprint = (kind: string, input: unknown) => sha256(canonical({version: 'production-task-v1', kind, input}));
+const perFileLimit = (path: string) =>
+  path === 'preview.mp4' ? MAX_MOVIE_BYTES : path.endsWith('.pcm') ? MAX_PCM : MAX_SAMPLE_BYTES;
+const payloadLimits = {
+  [PLAN_KIND]: 24_000_000,
+  [PREVIEW_KIND]: MAX_MOVIE_BYTES + (MAX_SAMPLES + 2) * MAX_SAMPLE_BYTES,
+  [NARRATED_KIND]: MAX_MOVIE_BYTES + (MAX_SAMPLES + 2) * MAX_SAMPLE_BYTES,
+  [VOICE_KIND]: 2 * MAX_PCM + 3 * MAX_SAMPLE_BYTES,
+} as const;
+
+export function checkPresentationPayload(kind: z.infer<typeof Result>['kind'], files: Iterable<{path: string; bytes: number}>) {
+  let total = 0, count = 0;
+  for (const {path, bytes} of files) {
+    total += bytes;
+    count++;
+    if (bytes < 1 || bytes > perFileLimit(path) || total > payloadLimits[kind] || count > 60) {
+      throw new EngineError('PRESENTATION_PAYLOAD', 'Presentation files exceed the bounded artifact payload.');
+    }
+  }
+}
 
 function taskCancellation(signal: AbortSignal) {
   const control = new AbortController();
@@ -86,13 +107,14 @@ async function readArtifacts(data: string, task: Awaited<ReturnType<typeof readT
       canonical(result.files.map(item => canonical(item.artifact)).sort()) !== canonical(task.outputs.map(item => canonical(item)).sort())) {
     fail('Presentation file or artifact closure differs.');
   }
+  checkPresentationPayload(result.kind, result.files.map(({path, artifact}) => ({path, bytes: artifact.bytes})));
   const files = new Map<string, Buffer>();
-  for (const file of result.files) files.set(file.path, await read(file.artifact,
-    file.path === 'preview.mp4' ? MAX_MOVIE_BYTES : file.path.endsWith('.pcm') ? MAX_PCM : 2_000_000));
+  for (const file of result.files) files.set(file.path, await read(file.artifact, perFileLimit(file.path)));
   return files;
 }
 
 async function writeArtifacts(runner: TaskRunner, kind: z.infer<typeof Result>['kind'], id: string, files: Map<string, Buffer>, signal: AbortSignal) {
+  checkPresentationPayload(kind, [...files].map(([path, bytes]) => ({path, bytes: bytes.length})));
   const entries: z.infer<typeof Result>['files'] = [];
   for (const [path, bytes] of files) {
     checkAbort(signal);
@@ -150,7 +172,7 @@ async function checkedPlan(data: string, id: string, signal: AbortSignal) {
   const files = await readArtifacts(data, task, names, signal);
   const derived = planFiles(input, compiled, id, files);
   for (const [path, bytes] of derived) if (!bytes.equals(files.get(path)!)) fail('Presentation plan derivation differs: ' + path);
-  return {files, compiled, task};
+  return {files, compiled, task, maxFrames: presentationMaxFrames(input.plan.schemaVersion)};
 }
 
 export async function createPresentation(store: WorkflowStore, id: string, proposalHash: string, spec: string, data: string, signal: AbortSignal) {
@@ -191,14 +213,17 @@ export async function createPresentation(store: WorkflowStore, id: string, propo
   } finally {runner.close();}
 }
 
-function sampleFrames(plan: CompiledPresentation, cues: {startFrame: number; endFrame: number}[] = []) {
+function sampleFrames(plan: CompiledPresentation, cues: {startFrame: number; endFrame: number}[] = [], extended = false) {
   const frames = new Set([0, plan.timeline.totalFrames - 1, ...plan.beats.map(beat => beat.start)]);
   for (const cue of cues) frames.add(cue.startFrame);
-  for (const cue of cues) if (frames.size < 48 && cue.endFrame < plan.timeline.totalFrames) frames.add(cue.endFrame);
+  if (extended) for (const [first] of extendedRanges(plan.timeline.totalFrames)) {
+    for (const frame of [first, first - 1]) if (frames.size < MAX_SAMPLES && frame >= 0) frames.add(frame);
+  }
+  for (const cue of cues) if (frames.size < MAX_SAMPLES && cue.endFrame < plan.timeline.totalFrames) frames.add(cue.endFrame);
   for (const [index, event] of plan.trace.entries()) {
     const next = plan.trace[index + 1]?.frame ?? plan.timeline.totalFrames;
     for (const frame of [event.frame - 1, event.frame, Math.min(event.frame + 24, next - 1)]) {
-      if (frame >= 0 && frames.size < 48) frames.add(frame);
+      if (frame >= 0 && frames.size < MAX_SAMPLES) frames.add(frame);
     }
   }
   return [...frames].sort((a, b) => a - b);
@@ -242,8 +267,8 @@ async function voiceFiles(data: string, input: z.infer<typeof VoiceInput>, id: s
   const ledger = {schemaVersion: 'presentation-voice-ledger/1.0', taskId: id, ...input,
     sampleRate: RATE, sampleFormat: 's16le-mono', playbackRate: 1, mixedPcmSha256: sha256(mix), cues,
     events: plan.compiled.trace.map(event => ({frame: event.frame, beatId: event.beatId, kind: event.kind,
-      claimIds: event.claimIds, sample: event.frame * 2000,
-      relativeToClipStartSamples: event.frame * 2000 - cues.find(cue => cue.beatId === event.beatId)!.startSample})),
+      claimIds: event.claimIds, sample: event.frame * FRAME_SAMPLES,
+      relativeToClipStartSamples: event.frame * FRAME_SAMPLES - cues.find(cue => cue.beatId === event.beatId)!.startSample})),
     review: voiceReview};
   files.set('voice-manifest.json', json(ledger));
   return {files, sourceFiles, plan, cues, ledger};
@@ -262,7 +287,7 @@ async function checkedVoice(data: string, id: string, signal: AbortSignal) {
 export async function bindPresentationVoice(data: string, path: string, signal: AbortSignal, onTask?: (id: string) => void) {
   const spec = VoiceSpec.parse(decode(await boundedFile(resolve(path), 80_000)));
   data = await preflight(data);
-  await voicePlan(data, spec, signal);
+  const {plan} = await voicePlan(data, spec, signal);
   const decoderVersions = async (workSignal: AbortSignal) => Object.fromEntries(await Promise.all(
     [ ['ffmpeg', ffmpegPath()], ['ffprobe', ffprobePath()] ].map(async ([name, executable]) =>
       [name, await command(executable!, ['-version'], {signal: workSignal, timeout: 10_000})])));
@@ -278,11 +303,12 @@ export async function bindPresentationVoice(data: string, path: string, signal: 
     const task = await runner.run(VOICE_KIND, input, async (directory, workSignal) => {
       const runtime = await createOwnedRuntimeTmp(directory);
       const result = await voiceFiles(data, input, taskId, workSignal,
-        (source, index) => decodeClip(source, runtime.directory, index, workSignal));
+        (source, index) => decodeClip(source, runtime.directory, index, plan.maxFrames, workSignal));
       if (canonical(await decoderVersions(workSignal)) !== canonical(input.decoder) ||
           await implementationSha256() !== input.implementationSha256) fail('Audio toolchain changed during binding.');
       return writeArtifacts(runner, VOICE_KIND, taskId, result.files, workSignal);
-    }, cancellation.signal, {attempts: RETRIES, timeoutMs: 240_000, beforeDiscardTemporary: cleanupOwnedRuntimeTmp});
+    }, cancellation.signal, {attempts: RETRIES, timeoutMs: plan.maxFrames > PRESENTATION_LEGACY_MAX_FRAMES ? 900_000 : 240_000,
+      beforeDiscardTemporary: cleanupOwnedRuntimeTmp});
     const result = await checkedVoice(data, taskId, signal);
     return {cached: task.cached, state: 'succeeded', ...result.ledger};
   } finally {cancellation.dispose(); runner.close();}
@@ -292,11 +318,41 @@ function previewManifest(input: z.infer<typeof PreviewInput> | z.infer<typeof Na
   samples: number[], movie: Buffer, probe: unknown) {
   return {kind: input.mode === 'silent' ? PREVIEW_KIND : NARRATED_KIND, taskId: id, ...input, binding: plan.binding,
     proposalHash: plan.proposalHash, planSha256: plan.planSha256, moduleId: plan.moduleId, timeline: plan.timeline, samples,
+    ...(input.renderProfile ? {frameRanges: extendedRanges(plan.timeline.totalFrames)} : {}),
     media: {sha256: sha256(movie), probe, fullDecodeExit: 0}, review: input.mode === 'silent' ? review : voiceReview};
 }
 
+async function videoInput(work: string, totalFrames: number, extended: boolean, signal: AbortSignal) {
+  const ranges = extended ? extendedRanges(totalFrames) : [[0, totalFrames - 1]];
+  let fullRange: boolean | undefined;
+  const names = [];
+  for (const [index, [first, last]] of ranges.entries()) {
+    const name = extended ? 'part-' + index + '.mp4' : 'silent.mp4';
+    const path = join(work, name);
+    if (extended) {
+      const info = await lstat(path);
+      if (!info.isFile() || info.isSymbolicLink() || !info.size || info.size > MAX_PART_BYTES) fail('Extended video part has invalid size or type.');
+    }
+    const probe = JSON.parse(await command(ffprobePath(), ['-v', 'error', ...(extended ? ['-count_frames'] : []),
+      '-show_streams', '-of', 'json', path], {signal, timeout: 120_000}));
+    const stream = probe.streams[0];
+    const currentRange = stream?.color_range === 'pc' || String(stream?.pix_fmt).startsWith('yuvj');
+    if (extended && (probe.streams.length !== 1 || stream?.codec_type !== 'video' || stream?.codec_name !== 'h264' ||
+      stream?.width !== GEOMETRY.width || stream?.height !== GEOMETRY.height || stream?.avg_frame_rate !== PRESENTATION_FPS + '/1' ||
+      Number(stream?.nb_read_frames) !== last! - first! + 1 || (fullRange !== undefined && fullRange !== currentRange))) {
+      fail('Extended video part differs from its exact frame range.');
+    }
+    fullRange = currentRange;
+    names.push(name);
+  }
+  if (!extended) return {args: ['-i', join(work, names[0]!)], fullRange};
+  const concat = join(work, 'parts.ffconcat');
+  await writeFile(concat, 'ffconcat version 1.0\n' + names.map(name => 'file ' + name + '\n').join(''), {flag: 'wx'});
+  return {args: ['-protocol_whitelist', 'file', '-f', 'concat', '-safe', '1', '-i', concat], fullRange};
+}
+
 export async function renderPresentation(data: string, planTaskId: string, signal: AbortSignal, onTask?: (id: string) => void,
-  voiceTaskId?: string) {
+  voiceTaskId?: string, resumeTaskId?: string) {
   checkAbort(signal);
   data = await preflight(data);
   const plan = await checkedPlan(data, planTaskId, signal);
@@ -305,12 +361,17 @@ export async function renderPresentation(data: string, planTaskId: string, signa
   const font = await boundedFile(join(projectRoot, 'assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf'), 30_000_000);
   if (sha256(font) !== FONT_SHA) fail('Pinned presentation font differs.');
   const env = await environment();
-  const base = {planTaskId, planManifestSha256: sha256(plan.files.get('plan-manifest.json')!), fontSha256: FONT_SHA, environment: env};
+  const extended = plan.compiled.timeline.totalFrames > PRESENTATION_LEGACY_MAX_FRAMES;
+  const base = {planTaskId, planManifestSha256: sha256(plan.files.get('plan-manifest.json')!), fontSha256: FONT_SHA, environment: env,
+    ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {})};
   const input = voice ? NarratedInput.parse({...base, mode: 'narrated', voiceTaskId,
     voiceManifestSha256: sha256(voice.files.get('voice-manifest.json')!)}) : PreviewInput.parse({...base, mode: 'silent'});
   const kind = voice ? NARRATED_KIND : PREVIEW_KIND;
   const taskId = fingerprint(kind, input);
-  const samples = sampleFrames(plan.compiled, voice?.cues);
+  if (resumeTaskId !== undefined && taskId !== resumeTaskId) {
+    throw new EngineError('PRESENTATION_RESUME_INPUT', 'The current renderer or inputs differ from the recorded task. Repeat render explicitly to create a new task.');
+  }
+  const samples = sampleFrames(plan.compiled, voice?.cues, extended);
   checkAbort(signal);
   onTask?.(taskId);
   const runner = new TaskRunner(data);
@@ -319,37 +380,40 @@ export async function renderPresentation(data: string, planTaskId: string, signa
     const task = await runner.run(kind, input, async (directory, workSignal) => {
       const runtime = await createOwnedRuntimeTmp(directory);
       const work = runtime.directory;
+      if (extended) await requireExtendedDisk(work, data);
       await mkdir(join(work, 'public'));
       await writeFile(join(work, 'public', 'font.ttf'), font, {flag: 'wx'});
       const workerInput = join(work, 'input.json');
       await writeFile(workerInput, json({entry: join(projectRoot, 'src/presentation/composition.tsx'), browser: env.browser,
         props: voice ? {...plan.compiled, cues: voice.cues.map(({startFrame, endFrame, transcript}) =>
           ({startFrame, endFrame, transcript}))} : plan.compiled,
-        sampleFrames: samples, geometry: {...GEOMETRY, fps: plan.compiled.timeline.fps}}), {flag: 'wx'});
+        sampleFrames: samples, geometry: {...GEOMETRY, fps: plan.compiled.timeline.fps},
+        ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {})}), {flag: 'wx'});
       await command(process.execPath, ['--import', 'tsx', join(projectRoot, 'src/short-segment/worker.ts'), workerInput], {
-        signal: workSignal, timeout: 660_000, cwd: projectRoot, env: {TEMP: work, TMP: work, TMPDIR: work},
+        signal: workSignal, timeout: extended ? EXTENDED_WORKER_DEADLINE + 60_000 : 660_000, cwd: projectRoot, env: {TEMP: work, TMP: work, TMPDIR: work},
       });
-      const raw = join(work, 'silent.mp4'), movie = join(work, 'preview.mp4');
-      const rawProbe = JSON.parse(await command(ffprobePath(), ['-v', 'error', '-show_streams', '-of', 'json', raw], {signal: workSignal, timeout: 120_000}));
-      const stream = rawProbe.streams[0];
-      const fullRange = stream?.color_range === 'pc' || String(stream?.pix_fmt).startsWith('yuvj');
+      const movie = join(work, 'preview.mp4');
+      const {args: videoArgs, fullRange} = await videoInput(work, plan.compiled.timeline.totalFrames, extended, workSignal);
       const pcmPath = join(work, 'narration.pcm');
       if (voice) await writeFile(pcmPath, voice.files.get('narration.pcm')!, {flag: 'wx'});
-      await command(ffmpegPath(), ['-v', 'error', '-xerror', '-nostdin', '-n', '-i', raw,
+      const filter = fullRange ? 'scale=in_range=pc:out_range=tv,format=yuv420p' : 'format=yuv420p';
+      const timeout = extended ? EXTENDED_VERIFY_DEADLINE : 120_000;
+      await command(ffmpegPath(), ['-v', 'error', '-xerror', '-nostdin', '-n', ...videoArgs,
         ...(voice ? ['-f', 's16le', '-ar', String(RATE), '-ac', '1', '-i', pcmPath] : []), '-map', '0:v:0', '-vf',
-        fullRange ? 'scale=in_range=pc:out_range=tv,format=yuv420p' : 'format=yuv420p',
+        extended ? filter + ',setpts=N/(' + PRESENTATION_FPS + '*TB)' : filter,
         '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-color_range', 'tv',
+        ...(extended ? ['-fps_mode', 'passthrough', '-maxrate', '1700k', '-bufsize', '3400k', '-fs', String(MAX_MOVIE_BYTES)] : []),
         ...(voice ? ['-map', '1:a:0', '-c:a', 'aac', '-b:a', '128k'] : []), '-movflags', '+faststart', movie],
-      {signal: workSignal, timeout: 120_000});
-      const probe = await verifyMovie(movie, {mode: input.mode, timeline: plan.compiled.timeline}, workSignal);
+      {signal: workSignal, timeout});
+      const probe = await verifyMovie(movie, {mode: input.mode, timeline: plan.compiled.timeline}, workSignal, timeout);
       if (canonical(await environment()) !== canonical(env)) fail('Renderer environment changed during presentation.');
       const video = await boundedFile(movie, MAX_MOVIE_BYTES);
       const files = new Map<string, Buffer>([['preview.mp4', video],
         ['captions.vtt', voice ? voice.files.get('captions.vtt')! : captions(plan.compiled)]]);
-      for (const frame of samples) files.set('samples/' + frame + '.png', await boundedFile(join(work, 'samples', frame + '.png')));
+      for (const frame of samples) files.set('samples/' + frame + '.png', await boundedFile(join(work, 'samples', frame + '.png'), MAX_SAMPLE_BYTES));
       files.set('preview-manifest.json', json(previewManifest(input, taskId, plan.compiled, samples, video, probe)));
       return writeArtifacts(runner, kind, taskId, files, workSignal);
-    }, cancellation.signal, {attempts: RETRIES, timeoutMs: 900_000, beforeDiscardTemporary: cleanupOwnedRuntimeTmp,
+    }, cancellation.signal, {attempts: RETRIES, timeoutMs: extended ? 3_000_000 : 900_000, beforeDiscardTemporary: cleanupOwnedRuntimeTmp,
       accounting: {provider: 'remotion-local', ratePolicy: 'local-zero-v1'}});
     await readPresentation(data, taskId, voice ? 'narrated' : 'preview', signal);
     return {taskId, planTaskId, cached: task.cached, state: 'succeeded', mode: input.mode, review: voice ? voiceReview : review};
@@ -358,24 +422,38 @@ export async function renderPresentation(data: string, planTaskId: string, signa
 
 type PresentationKind = 'plan' | 'preview' | 'voice' | 'narrated';
 const presentationKinds = {plan: PLAN_KIND, preview: PREVIEW_KIND, voice: VOICE_KIND, narrated: NARRATED_KIND} as const;
-export async function readPresentation(data: string, id: string, kind: PresentationKind, signal: AbortSignal) {
-  const task = await readTask(data, id, presentationKinds[kind]);
+const presentationInputs = {plan: PlanInput, preview: PreviewInput, voice: VoiceInput, narrated: NarratedInput};
+async function presentationTask(data: string, id: string, requested: PresentationKind | undefined, signal: AbortSignal) {
+  checkAbort(signal);
+  if (!Hash.safeParse(id).success) throw new EngineError('PRESENTATION_TASK_ID', 'Use a 64-character lowercase hexadecimal task ID.');
+  const task = await readTask(data, id, null);
+  const kind = (Object.keys(presentationKinds) as PresentationKind[]).find(key => presentationKinds[key] === task.kind);
+  if (!kind || (requested !== undefined && requested !== kind)) {
+    throw new EngineError('PRESENTATION_TASK_KIND', kind ?
+      'This is a ' + kind + ' task. Omit --kind or use --kind ' + kind + '.' : 'This task does not belong to presentation.');
+  }
+  if (!presentationInputs[kind].safeParse(task.input).success) fail('Persisted presentation input does not match its task kind.');
+  return {task, kind};
+}
+
+export async function readPresentation(data: string, id: string, requested: PresentationKind | undefined, signal: AbortSignal) {
+  const {task, kind} = await presentationTask(data, id, requested, signal);
   const statusReview = kind === 'narrated' || kind === 'voice' ? voiceReview : review;
   if (task.state !== 'succeeded') {
     const expired = task.state === 'running' && task.leaseUntil <= Date.now();
-    return {status: {taskId: id, state: expired ? 'interrupted' : task.state, attempt: task.attempt,
+    return {status: {taskId: id, kind, state: expired ? 'interrupted' : task.state, attempt: task.attempt,
       retryable: task.attempt < RETRIES && (expired || (task.state !== 'running' && task.error?.classification !== 'permanent')),
       error: task.error, review: statusReview}};
   }
   if (kind === 'plan') {
     const plan = await checkedPlan(data, id, signal);
-    return {files: plan.files, status: {taskId: id, state: task.state, attempt: task.attempt, integrity: 'verified',
+    return {files: plan.files, status: {taskId: id, kind, state: task.state, attempt: task.attempt, integrity: 'verified',
       binding: plan.compiled.binding, proposalHash: plan.compiled.proposalHash, planSha256: plan.compiled.planSha256,
       moduleId: plan.compiled.moduleId, timeline: plan.compiled.timeline, review}};
   }
   if (kind === 'voice') {
     const voice = await checkedVoice(data, id, signal);
-    return {files: new Map([...voice.files, ...voice.sourceFiles]), status: {taskId: id, state: task.state,
+    return {files: new Map([...voice.files, ...voice.sourceFiles]), status: {taskId: id, kind, state: task.state,
       attempt: task.attempt, integrity: 'verified', ledger: voice.ledger, review: statusReview}};
   }
   const input = kind === 'narrated' ? NarratedInput.parse(task.input) : PreviewInput.parse(task.input);
@@ -384,7 +462,9 @@ export async function readPresentation(data: string, id: string, kind: Presentat
   const voice = input.mode === 'narrated' ? await checkedVoice(data, input.voiceTaskId, signal) : undefined;
   if (input.mode === 'narrated' && (voice!.input.spec.planTaskId !== input.planTaskId ||
       sha256(voice!.files.get('voice-manifest.json')!) !== input.voiceManifestSha256)) fail('Preview voice binding differs.');
-  const samples = sampleFrames(plan.compiled, voice?.cues);
+  const extended = plan.compiled.timeline.totalFrames > PRESENTATION_LEGACY_MAX_FRAMES;
+  if (extended !== (input.renderProfile === EXTENDED_RENDER_PROFILE)) fail('Preview duration profile differs from its parent.');
+  const samples = sampleFrames(plan.compiled, voice?.cues, extended);
   const files = await readArtifacts(data, task, ['preview.mp4', 'captions.vtt', 'preview-manifest.json', ...samples.map(frame => `samples/${frame}.png`)], signal);
   const manifest = decode(files.get('preview-manifest.json')!);
   const probe = manifest.media?.probe, stream = probe?.streams?.[0], audio = probe?.streams?.[1];
@@ -398,12 +478,23 @@ export async function readPresentation(data: string, id: string, kind: Presentat
       !(voice ? voice.files.get('captions.vtt')! : captions(plan.compiled)).equals(files.get('captions.vtt')!)) fail('Preview media, captions or parent binding differs.');
   for (const [path, bytes] of plan.files) files.set('editable/' + path, bytes);
   if (voice) for (const [path, bytes] of [...voice.files, ...voice.sourceFiles]) files.set('voice/' + path, bytes);
-  return {files, status: {taskId: id, planTaskId: input.planTaskId, state: task.state, attempt: task.attempt, integrity: 'verified',
+  return {files, status: {taskId: id, kind, planTaskId: input.planTaskId, state: task.state, attempt: task.attempt, integrity: 'verified',
     binding: plan.compiled.binding, proposalHash: plan.compiled.proposalHash, planSha256: plan.compiled.planSha256,
     moduleId: plan.compiled.moduleId, timeline: plan.compiled.timeline, review: statusReview}};
 }
 
-export async function exportPresentation(data: string, id: string, kind: PresentationKind, output: string, signal: AbortSignal) {
+export async function resumePresentation(data: string, id: string, requested: PresentationKind | undefined, signal: AbortSignal,
+  onTask?: (id: string) => void) {
+  const {task, kind} = await presentationTask(data, id, requested, signal);
+  if (kind !== 'preview' && kind !== 'narrated') {
+    throw new EngineError('PRESENTATION_RESUME_KIND', 'Resume accepts a preview or narrated render task. For plan or voice tasks, repeat the original command.');
+  }
+  if (task.state === 'succeeded') return {...(await readPresentation(data, id, kind, signal)).status, cached: true};
+  const input = kind === 'narrated' ? NarratedInput.parse(task.input) : PreviewInput.parse(task.input);
+  return renderPresentation(data, input.planTaskId, signal, onTask, input.mode === 'narrated' ? input.voiceTaskId : undefined, id);
+}
+
+export async function exportPresentation(data: string, id: string, kind: PresentationKind | undefined, output: string, signal: AbortSignal) {
   const result = await readPresentation(data, id, kind, signal);
   if (!result.files) throw new EngineError('PRESENTATION_NOT_READY', 'Presentation task has no successful output to export.');
   return publishAssetFiles(data, id, output, result.files, signal, RECEIPT_PUBLICATION);

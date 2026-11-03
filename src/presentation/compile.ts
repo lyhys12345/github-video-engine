@@ -1,5 +1,5 @@
 import type {StoryProposal} from '../contracts/authoring.js';
-import {PRESENTATION_FPS, PRESENTATION_MAX_FRAMES, type PresentationEventKind, type PresentationPlan} from '../contracts/presentation.js';
+import {PRESENTATION_FPS, presentationMaxFrames, type PresentationEventKind, type PresentationPlan} from '../contracts/presentation.js';
 import {EngineError} from '../core/errors.js';
 import {canonical, sha256} from '../core/util.js';
 import {PAPER_BIRD, PAPER_BIRD_SHA256} from './asset.js';
@@ -96,8 +96,9 @@ export function compilePresentation(proposal: StoryProposal, plan: PresentationP
       visualDescription: authored.visual.description, visualClaimIds: authored.visual.claimIds,
       narrationClaimIds: authored.narrationClaimIds};
   });
-  if (frame > PRESENTATION_MAX_FRAMES || trace.length === 0) {
-    fail('PRESENTATION_DURATION', 'Presentation requires at least one event and a total duration at most 60 seconds.');
+  const maxFrames = presentationMaxFrames(plan.schemaVersion);
+  if (frame > maxFrames || trace.length === 0) {
+    fail('PRESENTATION_DURATION', 'Presentation requires at least one event and at most ' + maxFrames / PRESENTATION_FPS + ' seconds.');
   }
   if (Object.keys(parameters).some(id => !trace.some(event => transitions[event.kind]?.parameters.includes(id)))) {
     fail('PRESENTATION_PARAMETER', 'Each supplied parameter must be used by an authored event.');
