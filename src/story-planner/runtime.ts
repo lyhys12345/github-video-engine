@@ -99,6 +99,14 @@ async function verifyResult(store:ArtifactStore,task:TaskRecord):Promise<Checked
  const manifest=parseJson(get('manifest.json'));const expectedManifest={schemaVersion:'1.0',stage,taskId:task.id,review:'pending',graphHash:result.graphHash,scope:'agent-curated experimental complete story plan; no media or approval',...(input.repositoryBinding?{repositoryBinding:input.repositoryBinding}:{}),files:result.files.filter(f=>f.path!=='manifest.json').map(f=>({path:f.path,sha256:f.artifact.sha256,bytes:f.artifact.bytes}))};if(canonical(manifest)!==canonical(expectedManifest)||payloads.size!==(result.schemaVersion==='1.1'?6:5)+sources.length)fail('EXPLAIN_INTEGRITY','Manifest/file closure mismatch');
  return{task,result,graph,payloads,repositoryBinding:input.repositoryBinding};
 }
+/** Recover verified Story bytes without assigning standalone sources to a Git revision. */
+export async function loadStandaloneStory(data:string,id:string){
+ const task=await readTask(data,id),checked=await verifyResult(new ArtifactStore(data),task);
+ if(checked.repositoryBinding)fail('STORY_STANDALONE_REQUIRED','This pilot requires a standalone Story with no repository association');
+ const snapshot:StorySnapshot={graph:checked.graph,sources:checked.graph.evidence.sources.map(s=>({id:s.id,bytes:checked.payloads.get('sources/'+s.id+'.txt')!}))};
+ return{snapshot,taskId:id,graphHash:checked.result.graphHash};
+}
+
 /** Recover the exact authored story and pinned bytes from a successful URL-bound task. */
 export async function loadBoundStory(data:string,id:string){
  const task=await readTask(data,id),checked=await verifyResult(new ArtifactStore(data),task);
