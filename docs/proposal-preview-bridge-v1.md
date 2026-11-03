@@ -1,5 +1,7 @@
 # From a saved proposal to a short preview
 
+For a variable-beat, continuous scene, use the separate [presentation workflow](variable-presentation-v1.md). The three-beat path below retains its own contracts and history.
+
 Ask the session assistant to author a mapping for a saved proposal. The mapping chooses supported graph objects, storyboard roles, action intervals, and shot lengths. The program copies the proposal's narration, visual descriptions, selected claim text, and exact source citations. The proposal and mapping stay editable and versioned.
 
 ```sh

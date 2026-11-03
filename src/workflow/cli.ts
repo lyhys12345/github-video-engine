@@ -8,6 +8,7 @@ import {exportProjectEvidence,exportProjectResearch,planProjectStory} from './pr
 import {ancestors} from '../story-planner/runtime.js';
 import {captureAuthoringText, exportAuthoringProposal, openAuthoring, statusAuthoringProposal, submitAuthoringProposal} from './agent-authoring.js';
 import {adaptAuthoringProposal} from './adapt-proposal.js';
+import {createPresentation} from '../presentation/runtime.js';
 type Options={root?:string;spec?:string;data?:string;repo?:string;ref?:string;doc?:string[];out?:string;id?:string;snapshot?:string;plan?:string;gate?:string;candidate?:string;rules?:string;delegation?:string;proposal?:string};
 export async function readJson(path:string){try{const info=await stat(path);if(!info.isFile()||info.size>4_000_000)throw new EngineError('WORKFLOW_SIZE','Workflow inputs must be regular JSON files up to 4 MB');return JSON.parse((await readFile(path,'utf8')).replace(/^\uFEFF/,'')) as unknown;}catch(error){if(error instanceof EngineError)throw error;throw new EngineError('INVALID_JSON',`Cannot read JSON ${path}: ${String(error)}`);}}
 async function checkDatabaseFiles(database:string) {
@@ -35,11 +36,11 @@ export async function workflowCommand(positionals:string[],options:Options,signa
   }
   const data=resolve(options.data??process.env.GVE_DATA??'.gve');
   const workflow=join(data,'workflow');
-  if(action==='author'||action==='capture-text'||action==='submit-proposal'||action==='proposal-status'||action==='export-proposal'||action==='adapt-proposal'){
-    const required = action==='author'?['out']:action==='proposal-status'?['proposal']:action==='export-proposal'?['proposal','out']:action==='adapt-proposal'?['proposal','spec']:['spec'];
+  if(action==='author'||action==='capture-text'||action==='submit-proposal'||action==='proposal-status'||action==='export-proposal'||action==='adapt-proposal'||action==='presentation-plan'){
+    const required = action==='author'?['out']:action==='proposal-status'?['proposal']:action==='export-proposal'?['proposal','out']:action==='adapt-proposal'||action==='presentation-plan'?['proposal','spec']:['spec'];
     if(!Id.safeParse(options.id).success || required.some(key=>!String(options[key as keyof Options]??'').trim()) ||
         Object.entries(options).some(([key,value])=>value!==undefined&&!['id','data',...required].includes(key))){
-      throw new EngineError('USAGE','project author --id <id> --out <directory> | project capture-text|submit-proposal --id <id> --spec <json> | project proposal-status|export-proposal --id <id> --proposal <hash> [--out <directory>] | project adapt-proposal --id <id> --proposal <hash> --spec <mapping.json>');
+      throw new EngineError('USAGE','project author --id <id> --out <directory> | project capture-text|submit-proposal --id <id> --spec <json> | project proposal-status|export-proposal --id <id> --proposal <hash> [--out <directory>] | project adapt-proposal|presentation-plan --id <id> --proposal <hash> --spec <mapping.json>');
     }
     checkAbort(signal);
     await ancestors(workflow);
@@ -55,6 +56,7 @@ export async function workflowCommand(positionals:string[],options:Options,signa
       if(action==='submit-proposal')return await submitAuthoringProposal(store,options.id!,options.spec!,signal);
       if(action==='proposal-status')return await statusAuthoringProposal(store,options.id!,options.proposal!,signal);
       if(action==='adapt-proposal')return await adaptAuthoringProposal(store,options.id!,options.proposal!,options.spec!,data,signal);
+      if(action==='presentation-plan')return await createPresentation(store,options.id!,options.proposal!,options.spec!,data,signal);
       return await exportAuthoringProposal(store,options.id!,options.proposal!,options.out!,signal);
     }finally{store.close();}
   }

@@ -119,7 +119,7 @@ function reviewPage(mode: z.infer<typeof Mode>) {
 </body></html>\n`;
 }
 
-async function verifyMovie(path: string, props: PreviewProps, signal: AbortSignal) {
+export async function verifyMovie(path: string, props: Pick<PreviewProps, 'mode' | 'timeline'>, signal: AbortSignal) {
   const probe = JSON.parse(await command(ffprobePath(), [
     '-v', 'error', '-count_frames', '-show_streams', '-show_format', '-of', 'json', path,
   ], {signal, timeout: 120_000}));
