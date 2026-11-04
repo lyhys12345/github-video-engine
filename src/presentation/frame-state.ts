@@ -8,3 +8,14 @@ export function presentationFrame(plan: CompiledLegacy, frame: number) {
   const progress = latest ? Math.min(1, (frame - latest.frame) / 24) : 1;
   return {beat, state: latest?.after ?? plan.initialState, events, progress: progress * progress * (3 - 2 * progress)};
 }
+
+type Frame = ReturnType<typeof presentationFrame>;
+export const httpResponseArrived = (frame: Frame) =>
+  frame.events.some(event => event.kind === 'respond') && frame.progress >= .75;
+
+export function imageResultPanels(frame: Frame) {
+  const {state, progress} = frame;
+  const forms: ('cutout' | 'mask')[] = state === 'comparison' ? ['cutout', 'mask'] :
+    state === 'cutout' || state === 'mask' ? [state] : [];
+  return {forms, opacity: .35 + .65 * progress};
+}

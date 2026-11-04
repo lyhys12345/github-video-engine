@@ -13,7 +13,7 @@ import {storyCommand} from './story-planner/cli.js';
 import {explainCommand} from './evidence-planner/cli.js';
 import {ttsCommand} from './tts/cli.js';
 import {presentationCommand} from './presentation/cli.js';
-const help = 'Usage: pnpm gve tts dry-run/generate/import/status/export/huihui-generate/huihui-status/huihui-import/huihui-export | presentation voice-bind/render/status/resume/export/assemble/sequence-status/sequence-resume/sequence-export | doctor | render --spec <file> | jobs status/resume/cancel | research --repo <url> --out <snapshot> | explain plan --spec <graph> --root <source-root> --data <state> --out <new-directory> | explain status/export --task <id> --data <state> [--out <new-directory>] | explain diff --before <task-id> --after <task-id> --data <state> [--out <new-report.json>] | project intake/author/capture-text/submit-proposal/proposal-status/export-proposal/adapt-proposal/presentation-plan/evidence/story/create/import/status/export/approve --id <id> | production readthrough/import/revise/repairs/status/usage/stills/animatic/motion/export/approve --id <id> | final prepare/render/status/inspect/export/lock --id <id> | diff --kind plan|production --before <json> --after <json> [--out <new.json>] | audit --data <existing-directory> [--out <new-report.json>]';
+const help = 'Usage: pnpm gve tts dry-run/generate/import/status/export/huihui-generate/huihui-status/huihui-import/huihui-export | presentation voice-bind/render/status/resume/export/assemble/sequence-status/sequence-resume/sequence-export/timing-check/timing-check-status/timing-check-export | doctor | render --spec <file> | jobs status/resume/cancel | research --repo <url> --out <snapshot> | explain plan --spec <graph> --root <source-root> --data <state> --out <new-directory> | explain status/export --task <id> --data <state> [--out <new-directory>] | explain diff --before <task-id> --after <task-id> --data <state> [--out <new-report.json>] | project intake/author/capture-text/submit-proposal/proposal-status/export-proposal/adapt-proposal/presentation-plan/evidence/story/create/import/status/export/approve --id <id> | production readthrough/import/revise/repairs/status/usage/stills/animatic/motion/export/approve --id <id> | final prepare/render/status/inspect/export/lock --id <id> | diff --kind plan|production --before <json> --after <json> [--out <new.json>] | audit --data <existing-directory> [--out <new-report.json>]';
 let engine: Engine | undefined;
 const abort = new AbortController();
 const signalHandler = () => abort.abort(new EngineError('CANCELLED', 'Interrupted by user', 'cancelled'));
@@ -24,7 +24,13 @@ try {
   if (values.help || !command) { console.log(help); }
   else if(command==='tts'){console.log(JSON.stringify(await ttsCommand(positionals,values,abort.signal),null,2));}
   else if(command==='story'){console.log(JSON.stringify(await storyCommand(positionals,values,abort.signal),null,2));}
-  else if(command==='presentation'){console.log(JSON.stringify(await presentationCommand(positionals,values,abort.signal),null,2));}
+  else if (command === 'presentation') {
+    const result = await presentationCommand(positionals, values, abort.signal);
+    console.log(JSON.stringify(result, null, 2));
+    if (action === 'timing-check' && 'declaredTemporalChecks' in result && result.declaredTemporalChecks === 'failed') {
+      process.exitCode = 2;
+    }
+  }
   else if(command==='explain'){console.log(JSON.stringify(await explainCommand(positionals,values,abort.signal),null,2));}
   else if(command==='diff'){
     if(Object.entries(values).some(([key,value])=>value!==undefined&&!['kind','before','after','out'].includes(key)))throw new EngineError('USAGE','diff accepts only --kind, --before, --after and --out');

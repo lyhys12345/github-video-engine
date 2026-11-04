@@ -1,3 +1,4 @@
+import {spawnSync} from 'node:child_process';
 import {mkdtemp, readFile, rm, rmdir, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -15,6 +16,7 @@ import {assembleSequence} from '../src/presentation/sequence.js';
 import {sequenceAudio} from '../src/presentation/sequence-audio.js';
 import {compilePresentation} from '../src/presentation/compile.js';
 import {presentationFrame} from '../src/presentation/frame-state.js';
+import {checkPresentationTiming, exportPresentationTiming, statusPresentationTiming} from '../src/presentation/timing-check.js';
 import {bindPresentationVoice, checkPresentationPayload, PREVIEW_KIND, readPresentation, renderPresentation} from '../src/presentation/runtime.js';
 import {FRAME_SAMPLES, MAX_PCM, matchVoice, mixClips, placement, projectCaptions, voiceCaptions, VOICE_KIND, VoiceSpec} from '../src/presentation/narration.js';
 import {extendedRanges, FRAME_CHUNK, MAX_MOVIE_BYTES, requireExtendedDisk} from '../src/presentation/duration.js';
@@ -418,6 +420,63 @@ it.runIf(process.platform === 'win32' && !!process.env.SystemRoot)('verifies loc
   const splitFiles = await readPresentation(data, split.taskId, 'voice', signal);
   expect(splitFiles.files!.get('captions.vtt')!.toString()).toContain('00:00:00.042 --> 00:00:00.542');
   expect(splitFiles.files!.get('narration.pcm')).toEqual(old.files!.get('narration.pcm'));
+  const planFiles = (await readPresentation(data, parent.planTaskId, 'plan', signal)).files!;
+  const trace = planFiles.get('trace.json')!;
+  const voiceManifest = splitFiles.files!.get('voice-manifest.json')!;
+  const responseEvent = JSON.parse(trace.toString()).trace[3];
+  const responseCue = JSON.parse(voiceManifest.toString()).captionCues[1];
+  const assertion = {id: 'response-arrival', state: 'http-response-arrived', minContinuousFrames: 3,
+    cue: {beatId: clip.beatId, indexInBeat: 1, sha256: sha256(canonical(responseCue))},
+    event: {beatId: clip.beatId, indexInBeat: 3, sha256: sha256(canonical(responseEvent))}};
+  const timing = {schemaVersion: 'presentation-visual-cues/1.0', ...parent, traceSha256: sha256(trace),
+    voiceTaskId: split.taskId, voiceManifestSha256: sha256(voiceManifest), checks: [assertion]};
+  const timingPath = join(root, 'timing.json');
+  const timingCli = (...args: string[]) => spawnSync(process.execPath, ['--import', 'tsx', 'src/cli.ts', 'presentation',
+    ...args, '--data', data], {encoding: 'utf8', timeout: 20_000, windowsHide: true});
+  const verifyTiming = async (input: unknown) => {
+    await writeFile(timingPath, canonical(input) + '\n');
+    return checkPresentationTiming(data, timingPath, signal);
+  };
+  const passed = await verifyTiming(timing);
+  expect(passed).toMatchObject({state: 'succeeded', declaredTemporalChecks: 'passed', cached: false,
+    report: {speechAlignment: 'unverified', uncheckedCueCount: 1, undeclaredRelationships: 'unchecked',
+      checks: [{cueInterval: {startFrame: 13, endFrame: 25}, visualIntervals: [{startFrame: 22, endFrame: 72}],
+        longestOverlap: {frames: 3, interval: {startFrame: 22, endFrame: 25}}, verdict: 'passed'}]}});
+  expect(await verifyTiming(timing)).toMatchObject({taskId: passed.taskId, cached: true});
+  const passingCli = timingCli('timing-check', '--spec', timingPath);
+  expect(passingCli.status).toBe(0);
+  expect(JSON.parse(passingCli.stdout)).toMatchObject({taskId: passed.taskId, cached: true, declaredTemporalChecks: 'passed'});
+  await writeFile(timingPath, canonical({...timing, checks: [{...assertion, minContinuousFrames: 4}]}) + '\n');
+  const failingCli = timingCli('timing-check', '--spec', timingPath);
+  expect(failingCli.status).toBe(2);
+  const failed = JSON.parse(failingCli.stdout) as Awaited<ReturnType<typeof checkPresentationTiming>>;
+  expect(failed).toMatchObject({state: 'succeeded', declaredTemporalChecks: 'failed', report: {checks: [{verdict: 'failed'}]}});
+  expect(failed.taskId).not.toBe(passed.taskId);
+  const cachedFailure = timingCli('timing-check', '--spec', timingPath);
+  expect(cachedFailure.status).toBe(2);
+  expect(JSON.parse(cachedFailure.stdout)).toMatchObject({taskId: failed.taskId, cached: true, declaredTemporalChecks: 'failed'});
+  const failedStatus = timingCli('timing-check-status', '--task', failed.taskId);
+  expect(failedStatus.status).toBe(0);
+  expect(JSON.parse(failedStatus.stdout)).toMatchObject({taskId: failed.taskId, declaredTemporalChecks: 'failed'});
+  expect(await statusPresentationTiming(data, failed.taskId, signal)).toMatchObject({declaredTemporalChecks: 'failed', integrity: 'verified'});
+  const checkedExport = await exportPresentationTiming(data, failed.taskId, join(root, 'timing-check-export'), signal);
+  expect(checkedExport.declaredTemporalChecks).toBe('failed');
+  expect(await readFile(join(checkedExport.bundle, 'timing-spec.json'))).toEqual(await readFile(timingPath));
+  expect(await readFile(join(checkedExport.bundle, 'trace.json'))).toEqual(trace);
+  const failedExport = timingCli('timing-check-export', '--task', failed.taskId, '--out', join(root, 'timing-check-export'));
+  expect(failedExport.status).toBe(0);
+  expect(JSON.parse(failedExport.stdout)).toMatchObject({bundle: checkedExport.bundle, declaredTemporalChecks: 'failed'});
+  await expect(verifyTiming({...timing, checks: [assertion, {...assertion, id: 'duplicate'}]}))
+    .rejects.toMatchObject({code: 'PRESENTATION_TIMING_SPEC'});
+  await expect(verifyTiming({...timing, checks: [{...assertion, state: 'image-comparison-full'}]}))
+    .rejects.toMatchObject({code: 'PRESENTATION_TIMING_STATE'});
+  await expect(verifyTiming({...timing, checks: [{...assertion, cue: {...assertion.cue, sha256: '0'.repeat(64)}}]}))
+    .rejects.toMatchObject({code: 'PRESENTATION_TIMING_REFERENCE'});
+  await writeFile(timingPath, 'malformed');
+  const malformed = timingCli('timing-check', '--spec', timingPath);
+  expect(malformed.status).toBe(1);
+  expect(malformed.stdout).toBe('');
+  expect(malformed.stderr).toContain('PRESENTATION_TIMING_SPEC');
   const retimed = structuredClone(multi);
   retimed.clips[0]!.captions[1]!.endSample += FRAME_SAMPLES;
   const changed = await bind(retimed);

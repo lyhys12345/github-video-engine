@@ -1,9 +1,22 @@
 import {EngineError} from '../core/errors.js';
 import {assembleSequence, exportSequence, resumeSequence, statusSequence} from './sequence.js';
 import {bindPresentationVoice, exportPresentation, readPresentation, renderPresentation, resumePresentation} from './runtime.js';
+import {checkPresentationTiming, exportPresentationTiming, statusPresentationTiming} from './timing-check.js';
 
 export async function presentationCommand(positionals: string[], options: Record<string, unknown>, signal: AbortSignal) {
   const action = positionals[1];
+  if (action === 'timing-check' || action === 'timing-check-status' || action === 'timing-check-export') {
+    const required = ['data', action === 'timing-check' ? 'spec' : 'task', ...(action === 'timing-check-export' ? ['out'] : [])];
+    if (positionals.length !== 2 || required.some(key => typeof options[key] !== 'string' || !String(options[key]).trim()) ||
+        Object.entries(options).some(([key, value]) => value !== undefined && !required.includes(key))) {
+      throw new EngineError('USAGE', 'presentation timing-check --spec <spec> --data <state> | presentation timing-check-status --task <timing-task> --data <state> | presentation timing-check-export --task <timing-task> --data <state> --out <directory>');
+    }
+    const data = String(options.data);
+    if (action === 'timing-check') return checkPresentationTiming(data, String(options.spec), signal,
+      taskId => console.error(JSON.stringify({taskId, stage: 'presentation-timing-check'})));
+    if (action === 'timing-check-export') return exportPresentationTiming(data, String(options.task), String(options.out), signal);
+    return statusPresentationTiming(data, String(options.task), signal);
+  }
   if (action === 'assemble' || action === 'sequence-status' || action === 'sequence-resume' || action === 'sequence-export') {
     const required = ['data', action === 'assemble' ? 'spec' : 'task', ...(action === 'sequence-export' ? ['out'] : [])];
     if (positionals.length !== 2 || required.some(key => typeof options[key] !== 'string' || !String(options[key]).trim()) ||

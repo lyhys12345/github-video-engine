@@ -4,7 +4,7 @@ import {CAPTION_FONT_SIZE, CAPTION_FONT_WEIGHT, CAPTION_TEXT_WIDTH, type Caption
 import type {CompiledLegacy, CompiledPresentation} from './compile.js';
 import {ConcurrencyQueue} from './queue-composition.js';
 import {queueTitle} from './queue-frame.js';
-import {presentationFrame} from './frame-state.js';
+import {httpResponseArrived, imageResultPanels, presentationFrame} from './frame-state.js';
 
 const ink = '#122d38';
 const muted = '#607079';
@@ -19,10 +19,11 @@ const characters = (text: string) => [...text].length;
 function Http({plan, frame}: {plan: CompiledLegacy; frame: ReturnType<typeof presentationFrame>}) {
   const has = (kind: string) => frame.events.some(event => event.kind === kind);
   const hasRequest = has('request'), matched = has('match'), responded = has('respond');
+  const arrived = httpResponseArrived(frame);
   const request = value(plan, 'method') + ' ' + value(plan, 'path');
   // Keep the request on the connector so it never covers the listener or port.
   const requestY = !matched ? 140 + 130 * frame.progress : 270;
-  const clientText = responded && frame.progress >= .75 ? value(plan, 'body') : hasRequest ? request : '';
+  const clientText = arrived ? value(plan, 'body') : hasRequest ? request : '';
   const clientSize = characters(clientText) > 50 ? 18 : characters(clientText) > 27 ? 24 : 34;
   return <div style={{position: 'relative', height: 655}}>
     <div style={{...panel, height: 112}}>
@@ -39,9 +40,9 @@ function Http({plan, frame}: {plan: CompiledLegacy; frame: ReturnType<typeof pre
     </div>
     {hasRequest && !responded && <div style={{...token, position: 'absolute', width: 350, left: 'calc(50% - 175px)', top: requestY,
       fontSize: characters(request) > 24 ? 19 : 27, background: matched ? '#264657' : accent}}>{request}</div>}
-    {responded && frame.progress < .75 && <div style={{...token, position: 'absolute', width: 270, left: 'calc(50% - 135px)',
+    {responded && !arrived && <div style={{...token, position: 'absolute', width: 270, left: 'calc(50% - 135px)',
       top: 440 - 355 * frame.progress, fontSize: 27, background: '#994d3a'}}>{plan.labels.response}</div>}
-    {responded && frame.progress >= .75 && <div style={{position: 'absolute', bottom: 2, fontSize: 24, color: muted}}>{plan.labels.response}</div>}
+    {arrived && <div style={{position: 'absolute', bottom: 2, fontSize: 24, color: muted}}>{plan.labels.response}</div>}
   </div>;
 }
 
@@ -60,7 +61,7 @@ function Subject({plan, form}: {plan: CompiledLegacy; form: 'input' | 'cutout' |
 function ImageChoice({plan, frame}: {plan: CompiledLegacy; frame: ReturnType<typeof presentationFrame>}) {
   const {state} = frame;
   const choice = state.startsWith('mask') ? 'mask' : state.startsWith('cutout') ? 'cutout' : undefined;
-  const forms: ('cutout' | 'mask')[] = state === 'comparison' ? ['cutout', 'mask'] : state === 'cutout' || state === 'mask' ? [state] : [];
+  const {forms, opacity} = imageResultPanels(frame);
   return <div style={{height: 655}}>
     <div style={{...panel, maxWidth: 385, margin: '0 auto', opacity: state === 'ready' ? .35 : 1}}>
       <div style={{fontSize: 25, marginBottom: 8}}>{plan.labels.input}</div>
@@ -73,7 +74,7 @@ function ImageChoice({plan, frame}: {plan: CompiledLegacy; frame: ReturnType<typ
       })}
     </div>
     <div style={{display: 'flex', justifyContent: 'center', gap: 16}}>
-      {forms.map(form => <div key={form} style={{...panel, width: forms.length === 2 ? '48%' : '63%', opacity: .35 + .65 * frame.progress}}>
+      {forms.map(form => <div key={form} style={{...panel, width: forms.length === 2 ? '48%' : '63%', opacity}}>
         <div style={{fontSize: 24, marginBottom: 8}}>{plan.labels[form]}</div><Subject plan={plan} form={form}/>
       </div>)}
     </div>
