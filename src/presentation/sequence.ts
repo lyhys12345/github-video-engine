@@ -16,7 +16,9 @@ import {verifyMovie} from '../story-planner/preview.js';
 import {ancestors, boundedFile, readTask} from '../story-planner/runtime.js';
 import {WorkflowStore} from '../workflow/store.js';
 import {MAX_MOVIE_BYTES} from './duration.js';
+import {FRAME_SAMPLES, RATE} from './narration.js';
 import {preflightPresentationState, readPresentation, taskCancellation} from './runtime.js';
+import {SceneNarration, sequenceAudio, SequenceAudioMetadata} from './sequence-audio.js';
 
 const KIND = 'repository-presentation-sequence-v1';
 const ATTEMPTS = 3;
@@ -48,19 +50,23 @@ const LabeledSequence = LegacySequence.extend({
   schemaVersion: z.literal('presentation-sequence/1.1'),
   scenes: z.array(LabeledScene).min(2).max(4),
 });
-const LocalizedSequence = LegacySequence.extend({
-  schemaVersion: z.literal('presentation-sequence/1.2'),
+const LocalizedFields = LegacySequence.extend({
   locale: Locale,
   scenes: z.array(Scene.extend({openingCard: z.strictObject({title: CardTitle})})).min(2).max(4),
-}).superRefine((spec, ctx) => {
+});
+function checkTitles(spec: Pick<z.infer<typeof LocalizedFields>, 'locale' | 'scenes'>, ctx: z.RefinementCtx) {
   const titleSchema = spec.locale === 'en' ? EnglishTitle : ChineseTitle;
   for (const [index, scene] of spec.scenes.entries()) {
     if (!titleSchema.safeParse(scene.openingCard.title).success) {
       ctx.addIssue({code: 'custom', path: ['scenes', index, 'openingCard', 'title'], message: 'Title does not match the locale and length rules.'});
     }
   }
-});
-const Sequence = z.discriminatedUnion('schemaVersion', [LegacySequence, LabeledSequence, LocalizedSequence]);
+}
+const LocalizedSequence = LocalizedFields.extend({schemaVersion: z.literal('presentation-sequence/1.2')}).superRefine(checkTitles);
+const NarratedSequence = LocalizedFields.extend({
+  schemaVersion: z.literal('presentation-sequence/1.3'), mode: z.literal('narrated'),
+}).superRefine(checkTitles);
+const Sequence = z.discriminatedUnion('schemaVersion', [LegacySequence, LabeledSequence, LocalizedSequence, NarratedSequence]);
 const SceneRecord = Scene.extend({
   planTaskId: Hash,
   planSha256: Hash,
@@ -71,6 +77,7 @@ const SceneRecord = Scene.extend({
   openingCard: z.strictObject({
     title: CardTitle, startFrame: z.number().int().nonnegative(), endFrame: z.number().int().positive(),
   }).optional(),
+  narration: SceneNarration.optional(),
 });
 const Input = z.strictObject({
   spec: Sequence,
@@ -83,21 +90,24 @@ const Input = z.strictObject({
     cardFontLicenseSha256: Hash.optional(),
   }),
 });
+const TotalFrames = z.number().int().min(1).max(PRESENTATION_MAX_FRAMES);
 const Result = z.strictObject({
-  schemaVersion: z.enum(['presentation-sequence-manifest/1.0', 'presentation-sequence-manifest/1.1', 'presentation-sequence-manifest/1.2']),
+  schemaVersion: z.enum(['presentation-sequence-manifest/1.0', 'presentation-sequence-manifest/1.1',
+    'presentation-sequence-manifest/1.2', 'presentation-sequence-manifest/1.3']),
   taskId: Hash,
   input: Input,
-  timeline: z.strictObject({fps: z.literal(PRESENTATION_FPS), totalFrames: z.number().int().min(1).max(PRESENTATION_MAX_FRAMES)}),
+  timeline: z.strictObject({fps: z.literal(PRESENTATION_FPS), totalFrames: TotalFrames}),
   media: z.strictObject({
     sha256: Hash, bytes: z.number().int().min(1).max(MAX_MOVIE_BYTES),
-    fullDecodeExit: z.literal(0), audioStreams: z.literal(0),
+    fullDecodeExit: z.literal(0), audioStreams: z.union([z.literal(0), z.literal(1)]),
+    audio: SequenceAudioMetadata.optional(),
   }),
   review: z.strictObject({semantic: z.literal('pending'), editorial: z.literal('pending'),
     audiovisual: z.literal('pending'), ownerAcceptance: z.literal('pending')}),
   scope: z.enum([Scope, CardScope]),
 });
 type Sequence = z.infer<typeof Sequence>;
-type LocalizedSequence = z.infer<typeof LocalizedSequence>;
+type CurrentSequence = z.infer<typeof LocalizedSequence> | z.infer<typeof NarratedSequence>;
 type Input = z.infer<typeof Input>;
 type Result = z.infer<typeof Result>;
 
@@ -109,9 +119,12 @@ function parse(bytes: Buffer): unknown {
   catch { return fail('JSON', 'Expected UTF-8 sequence JSON.'); }
 }
 
-async function inspectScenes(data: string, spec: Sequence, signal: AbortSignal,
-  collect?: (scene: Sequence['scenes'][number], files: ReadonlyMap<string, Buffer>, index: number) => Promise<void>) {
-  if (spec.mode !== 'silent') fail('MODE', 'Sequences support silent previews only.');
+async function inspectScenes(data: string, spec: Sequence, signal: AbortSignal, options?: {
+  collect?: (scene: Sequence['scenes'][number], files: ReadonlyMap<string, Buffer>, index: number) => Promise<void>;
+  pcm?: Buffer;
+}) {
+  const narrated = spec.schemaVersion === 'presentation-sequence/1.3';
+  if (spec.mode === 'narrated' && !narrated) fail('MODE', 'Narrated sequences require sequence 1.3.');
   if (new Set(spec.scenes.map(scene => scene.sceneId)).size !== spec.scenes.length ||
       new Set(spec.scenes.map(scene => scene.previewTaskId)).size !== spec.scenes.length) {
     fail('DUPLICATE', 'Use distinct scene IDs and distinct preview task IDs.');
@@ -120,11 +133,14 @@ async function inspectScenes(data: string, spec: Sequence, signal: AbortSignal,
   let totalFrames = 0;
   let bytes = 0;
   const scenes: Input['scenes'] = [];
+  const audio = narrated ? sequenceAudio(options?.pcm) : undefined;
   for (const [index, scene] of spec.scenes.entries()) {
     checkAbort(signal);
     const preview = await readPresentation(data, scene.previewTaskId, undefined, signal);
     const status = preview.status;
-    if (status.kind !== 'preview') fail('MODE', 'Every sequence scene must reference a silent preview task.');
+    if (status.kind !== (narrated ? 'narrated' : 'preview')) {
+      fail('MODE', 'Every scene must reference a verified preview matching the sequence mode.');
+    }
     if (status.state !== 'succeeded' || !preview.files || !('integrity' in status) || !('binding' in status) ||
         !('planTaskId' in status) || !('timeline' in status) || !('planSha256' in status) || !('proposalHash' in status)) {
       fail('NOT_READY', 'Every scene needs a successful verified preview.');
@@ -145,13 +161,15 @@ async function inspectScenes(data: string, spec: Sequence, signal: AbortSignal,
     totalFrames += timeline.totalFrames;
     for (const payload of files.values()) bytes += payload.length;
     if (totalFrames > PRESENTATION_MAX_FRAMES || bytes > MAX_CHILD_BYTES) fail('BUDGET', 'Sequence exceeds its frame or child byte budget.');
+    const narration = audio?.append(scene.sceneId, startFrame, totalFrames, files);
     scenes.push(SceneRecord.parse({sceneId: scene.sceneId, previewTaskId: scene.previewTaskId,
       expectedPreviewManifestSha256: scene.expectedPreviewManifestSha256, ...(openingCard && {openingCard}),
+      ...(narration && {narration}),
       planTaskId: status.planTaskId, planSha256: status.planSha256,
       proposalHash: status.proposalHash, movieSha256: sha256(files.get('preview.mp4')!), startFrame, endFrame: totalFrames}));
-    if (collect) await collect(scene, files, index);
+    if (options?.collect) await options.collect(scene, files, index);
   }
-  return {binding: binding!, scenes, totalFrames};
+  return {binding: binding!, scenes, totalFrames, audio: audio?.finish()};
 }
 
 async function requireCurrent(data: string, binding: Input['binding']) {
@@ -171,20 +189,21 @@ async function requireCurrent(data: string, binding: Input['binding']) {
   } finally { store.close(); }
 }
 
-async function toolchain(signal: AbortSignal) {
+async function toolchain(signal: AbortSignal, narrated: boolean) {
   const configured = ffmpegPath();
   const ffmpeg = /[\\/]/.test(configured) ? resolve(configured) : configured;
   const ffprobe = ffprobePath();
   const [encode, probe, source, font, license] = await Promise.all([
     command(ffmpeg, ['-version'], {signal}), command(ffprobe, ['-version'], {signal}),
-    boundedFile(resolve(import.meta.dirname, 'sequence.ts')),
+    Promise.all((narrated ? ['sequence.ts', 'sequence-audio.ts', 'narration.ts', 'runtime.ts', '../story-planner/preview.ts'] : ['sequence.ts'])
+      .map(async path => sha256(await boundedFile(resolve(import.meta.dirname, path))))),
     boundedFile(join(CARD_ASSETS, 'NotoSansSC-Variable.ttf'), 20_000_000),
     boundedFile(join(CARD_ASSETS, 'OFL.txt'), 20_000),
   ]);
   if (sha256(font) !== CARD_FONT_SHA256 || sha256(license) !== CARD_LICENSE_SHA256) {
     fail('FONT', 'Expected the bundled, unmodified Noto Sans SC font and its OFL license.');
   }
-  return {font, identity: {implementationSha256: sha256(source), ffmpeg, ffprobe, ffmpegVersionSha256: sha256(encode),
+  return {font, identity: {implementationSha256: narrated ? sha256(canonical(source)) : source[0]!, ffmpeg, ffprobe, ffmpegVersionSha256: sha256(encode),
     ffprobeVersionSha256: sha256(probe), cardFontSha256: CARD_FONT_SHA256, cardFontLicenseSha256: CARD_LICENSE_SHA256}};
 }
 
@@ -211,9 +230,12 @@ async function checkedResult(data: string, id: string, signal: AbortSignal, incl
   }
   const input = Input.parse(task.input);
   const files = new Map<string, Buffer>();
-  const children = await inspectScenes(data, input.spec, signal, includeChildren ? async (scene, child) => {
+  const pcm = includeChildren && input.spec.schemaVersion === 'presentation-sequence/1.3'
+    ? Buffer.alloc(TotalFrames.parse(input.scenes.at(-1)?.endFrame) * FRAME_SAMPLES * 2) : undefined;
+  const collect = includeChildren ? async (scene: Sequence['scenes'][number], child: ReadonlyMap<string, Buffer>) => {
     for (const [path, bytes] of child) if (!path.startsWith('samples/')) files.set('scenes/scene-' + scene.sceneId + '/' + path, bytes);
-  } : undefined);
+  } : undefined;
+  const children = await inspectScenes(data, input.spec, signal, {collect, pcm});
   if (canonical(children.binding) !== canonical(input.binding) || canonical(children.scenes) !== canonical(input.scenes)) {
     fail('INTEGRITY', 'Sequence parents differ from the committed input.');
   }
@@ -225,32 +247,40 @@ async function checkedResult(data: string, id: string, signal: AbortSignal, incl
   const movie = await readOutput(store, artifact, id, MAX_MOVIE_BYTES);
   const bytes = await readOutput(store, task.result, id, MAX_METADATA);
   const manifest = Result.parse(parse(bytes));
-  const expected = makeResult(input, id, children.totalFrames, movie);
+  const expected = makeResult(input, id, children.totalFrames, movie, children.audio?.metadata);
   if (!json(expected).equals(bytes)) fail('INTEGRITY', 'Sequence manifest differs from its inputs and movie.');
   files.set('sequence.mp4', movie);
   files.set('sequence.json', json(input.spec));
   files.set('sequence-manifest.json', bytes);
-  return {status: {...status, state: task.state, integrity: 'verified', timeline: manifest.timeline, review: REVIEW}, files};
+  if (pcm && children.audio) {
+    files.set('sequence-narration.pcm', pcm);
+    files.set('sequence-captions.vtt', children.audio.vtt);
+    files.set('sequence-caption-ledger.json', children.audio.captionLedger);
+  }
+  return {status: {...status, state: task.state, integrity: 'verified', timeline: manifest.timeline,
+    ...(manifest.media.audio && {audio: manifest.media.audio}), review: REVIEW}, files};
 }
 
-function makeResult(input: Input, id: string, totalFrames: number, movie: Buffer): Result {
+function makeResult(input: Input, id: string, totalFrames: number, movie: Buffer, audio?: z.infer<typeof SequenceAudioMetadata>): Result {
   const version = input.spec.schemaVersion;
   const schemaVersion = version === 'presentation-sequence/1.0' ? 'presentation-sequence-manifest/1.0'
-    : version === 'presentation-sequence/1.1' ? 'presentation-sequence-manifest/1.1' : 'presentation-sequence-manifest/1.2';
+    : version === 'presentation-sequence/1.1' ? 'presentation-sequence-manifest/1.1'
+      : version === 'presentation-sequence/1.2' ? 'presentation-sequence-manifest/1.2' : 'presentation-sequence-manifest/1.3';
   return {schemaVersion,
     taskId: id, input,
     timeline: {fps: PRESENTATION_FPS, totalFrames}, media: {sha256: sha256(movie), bytes: movie.length,
-      fullDecodeExit: 0, audioStreams: 0}, review: REVIEW, scope: version === 'presentation-sequence/1.0' ? Scope : CardScope};
+      fullDecodeExit: 0, audioStreams: audio ? 1 : 0, ...(audio && {audio})},
+    review: REVIEW, scope: version === 'presentation-sequence/1.0' ? Scope : CardScope};
 }
 
-function cardLines(spec: LocalizedSequence, index: number) {
+function cardLines(spec: CurrentSequence, index: number) {
   const title = spec.scenes[index]!.openingCard.title;
   const current = index + 1, total = spec.scenes.length;
   return spec.locale === 'zh-CN' ? ['示例 ' + current + ' / ' + total, '独立示例', title]
     : ['CASE ' + current + ' OF ' + total, 'Separate example', title];
 }
 
-function validateCardGlyphs(font: Buffer, spec: LocalizedSequence) {
+function validateCardGlyphs(font: Buffer, spec: CurrentSequence) {
   // The SHA-256-pinned font is an sfnt with a Windows full-Unicode format-12 cmap.
   let cmap = 0;
   for (let index = 0; index < font.readUInt16BE(4); index++) {
@@ -285,7 +315,7 @@ function validateCardGlyphs(font: Buffer, spec: LocalizedSequence) {
   }
 }
 
-async function sequenceFilter(work: string, scenes: Input['scenes'], spec: LocalizedSequence, font: Buffer) {
+async function sequenceFilter(work: string, scenes: Input['scenes'], spec: CurrentSequence, font: Buffer) {
   await writeFile(join(work, 'card-font.ttf'), font, {flag: 'wx'});
   const filters: string[] = [];
   const inputs: string[] = [];
@@ -317,11 +347,12 @@ async function sequenceFilter(work: string, scenes: Input['scenes'], spec: Local
   return filters.join(';');
 }
 
-async function assemble(data: string, spec: LocalizedSequence, signal: AbortSignal, onTask?: (id: string) => void, resumeId?: string) {
+async function assemble(data: string, spec: CurrentSequence, signal: AbortSignal, onTask?: (id: string) => void, resumeId?: string) {
   data = await preflightPresentationState(data);
   const source = await inspectScenes(data, spec, signal);
   await requireCurrent(data, source.binding);
-  const {font, identity: tools} = await toolchain(signal);
+  const narrated = spec.mode === 'narrated';
+  const {font, identity: tools} = await toolchain(signal, narrated);
   validateCardGlyphs(font, spec);
   const input = Input.parse({spec, binding: source.binding, scenes: source.scenes, toolchain: tools});
   const id = identity(input);
@@ -333,27 +364,39 @@ async function assemble(data: string, spec: LocalizedSequence, signal: AbortSign
     const task = await runner.run(KIND, input, async (directory, active) => {
       const {directory: work} = await createOwnedRuntimeTmp(directory);
       const paths: string[] = [];
-      const checked = await inspectScenes(data, spec, active, async (_scene, child, index) => {
+      const pcm = narrated ? Buffer.alloc(source.totalFrames * FRAME_SAMPLES * 2) : undefined;
+      const checked = await inspectScenes(data, spec, active, {pcm, collect: async (_scene, child, index) => {
         const path = join(work, 'scene-' + index + '.mp4');
         await writeFile(path, child.get('preview.mp4')!, {flag: 'wx'});
         paths.push(path);
-      });
+      }});
       if (canonical(checked.scenes) !== canonical(input.scenes) || canonical(checked.binding) !== canonical(input.binding)) {
         fail('INTEGRITY', 'Sequence parents changed while staging.');
       }
       const movie = join(work, 'sequence.mp4');
       const filter = await sequenceFilter(work, checked.scenes, spec, font);
+      const pcmPath = join(work, 'sequence-narration.pcm');
+      if (pcm) await writeFile(pcmPath, pcm, {flag: 'wx'});
       await command(tools.ffmpeg, ['-v', 'error', '-xerror', '-nostdin', '-n',
         ...paths.flatMap(path => ['-protocol_whitelist', 'file', '-f', 'mov', '-i', path]),
-        '-filter_complex', filter, '-map', '[out]', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast',
+        ...(pcm ? ['-protocol_whitelist', 'file', '-f', 's16le', '-ar', String(RATE), '-ac', '1', '-i', pcmPath] : []),
+        '-filter_complex', filter, '-map', '[out]', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast',
+        ...(pcm ? ['-map', paths.length + ':a:0', '-c:a', 'aac', '-b:a', '128k', '-movie_timescale', String(RATE),
+          '-video_track_timescale', String(RATE), '-use_editlist', '1'] : ['-an']),
         '-maxrate', '1700k', '-bufsize', '3400k', '-fs', String(MAX_MOVIE_BYTES), '-fps_mode', 'passthrough', '-movflags', '+faststart', movie],
       {cwd: work, signal: active, timeout: 300_000});
-      await verifyMovie(movie, {mode: 'silent', timeline: {fps: PRESENTATION_FPS, totalFrames: checked.totalFrames}}, active, 300_000);
-      if (canonical((await toolchain(active)).identity) !== canonical(tools)) fail('RESUME_INPUT', 'Sequence toolchain changed during assembly.');
+      const probe = await verifyMovie(movie, {mode: spec.mode, timeline: {fps: PRESENTATION_FPS, totalFrames: checked.totalFrames}}, active, 300_000);
+      if (checked.audio) {
+        const exactClock = (stream: {time_base?: unknown; start_pts?: unknown; duration_ts?: unknown}) =>
+          stream.time_base === '1/' + RATE && String(stream.start_pts) === '0' &&
+          String(stream.duration_ts) === String(checked.audio!.metadata.samples);
+        if (!probe.streams.every(exactClock)) fail('AUDIO_CLOCK', 'Encoded audio and video must match the exact sequence sample clock.');
+      }
+      if (canonical((await toolchain(active, narrated)).identity) !== canonical(tools)) fail('RESUME_INPUT', 'Sequence toolchain changed during assembly.');
       await requireCurrent(data, source.binding);
       const bytes = await boundedFile(movie, MAX_MOVIE_BYTES);
       const artifact = await runner.artifacts.commit(bytes, 'video/mp4', 'PUBLISH', id);
-      return {value: makeResult(input, id, checked.totalFrames, bytes), outputs: [artifact]};
+      return {value: makeResult(input, id, checked.totalFrames, bytes, checked.audio?.metadata), outputs: [artifact]};
     }, cancellation.signal, {attempts: ATTEMPTS, timeoutMs: DEADLINE, beforeDiscardTemporary: cleanupOwnedRuntimeTmp});
     const {status} = await checkedResult(data, id, signal);
     return {...status, cached: task.cached};
@@ -365,13 +408,16 @@ async function assemble(data: string, spec: LocalizedSequence, signal: AbortSign
 
 export async function assembleSequence(data: string, specPath: string, signal: AbortSignal, onTask?: (id: string) => void) {
   const raw = parse(await boundedFile(resolve(specPath), MAX_METADATA));
-  if (raw && typeof raw === 'object' && 'schemaVersion' in raw && raw.schemaVersion === 'presentation-sequence/1.2' &&
+  if (raw && typeof raw === 'object' && 'schemaVersion' in raw &&
+      (raw.schemaVersion === 'presentation-sequence/1.2' || raw.schemaVersion === 'presentation-sequence/1.3') &&
       !Locale.safeParse('locale' in raw ? raw.locale : undefined).success) {
     return fail('LOCALE', 'Set the sequence locale explicitly to en or zh-CN.');
   }
   const spec = Sequence.safeParse(raw);
-  if (!spec.success) return fail('SCHEMA', 'Expected a strict sequence specification with two to four scenes and valid localized titles for 1.2.');
-  if (spec.data.schemaVersion !== 'presentation-sequence/1.2') return fail('VERSION', 'New assembly requires localized sequence 1.2.');
+  if (!spec.success) return fail('SCHEMA', 'Expected a strict sequence specification with two to four scenes and valid localized titles.');
+  if (spec.data.schemaVersion !== 'presentation-sequence/1.2' && spec.data.schemaVersion !== 'presentation-sequence/1.3') {
+    return fail('VERSION', 'New assembly requires silent sequence 1.2 or narrated sequence 1.3.');
+  }
   return assemble(data, spec.data, signal, onTask);
 }
 
@@ -383,7 +429,9 @@ export async function resumeSequence(data: string, id: string, signal: AbortSign
   const task = await taskRecord(data, id, signal);
   if (task.state === 'succeeded') return {...await statusSequence(data, id, signal), cached: true};
   const {spec} = Input.parse(task.input);
-  if (spec.schemaVersion !== 'presentation-sequence/1.2') return fail('VERSION', 'New assembly requires localized sequence 1.2.');
+  if (spec.schemaVersion !== 'presentation-sequence/1.2' && spec.schemaVersion !== 'presentation-sequence/1.3') {
+    return fail('VERSION', 'New assembly requires silent sequence 1.2 or narrated sequence 1.3.');
+  }
   return assemble(data, spec, signal, onTask, id);
 }
 

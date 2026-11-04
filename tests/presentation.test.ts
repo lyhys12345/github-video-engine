@@ -11,6 +11,7 @@ import {ffmpegPath} from '../src/providers/local.js';
 import {PAPER_BIRD_SHA256} from '../src/presentation/asset.js';
 import {presentationCommand} from '../src/presentation/cli.js';
 import {assembleSequence} from '../src/presentation/sequence.js';
+import {sequenceAudio} from '../src/presentation/sequence-audio.js';
 import {compilePresentation} from '../src/presentation/compile.js';
 import {presentationFrame} from '../src/presentation/frame-state.js';
 import {bindPresentationVoice, checkPresentationPayload, PREVIEW_KIND, readPresentation, renderPresentation} from '../src/presentation/runtime.js';
@@ -425,4 +426,43 @@ it('rejects unbounded or unsupported sequence specs before dispatch', async ({on
     scenes: [preview, {...preview, sceneId: 'second', previewTaskId: '3'.repeat(64)}]}, 'VERSION');
   await reject({...spec, scenes: [scene, scene]}, 'DUPLICATE');
   await reject({...spec, mode: 'narrated'}, 'MODE');
+  await reject({...spec, schemaVersion: 'presentation-sequence/1.3'}, 'SCHEMA');
+  await reject({...spec, schemaVersion: 'presentation-sequence/1.3', mode: 'narrated', scenes: [scene, scene]}, 'DUPLICATE');
+});
+
+it('places exact child PCM and provenance across a narrated sequence card', () => {
+  const pcm1 = Buffer.alloc(2 * FRAME_SAMPLES, 17);
+  const pcm2 = Buffer.alloc(2 * FRAME_SAMPLES, 33);
+  const output = Buffer.alloc(38 * FRAME_SAMPLES * 2);
+  const legacyCue = {beatId: 'same-beat', startSample: 25, endSample: 1990, startFrame: 0, endFrame: 1, transcript: 'A < B'};
+  const newerCue = {...legacyCue, startSample: 50, endSample: 1875, transcript: 'Next & exact'};
+  const makeChild = (pcm: Buffer, ledger: unknown) => {
+    const voice = Buffer.from(JSON.stringify(ledger));
+    const manifest = Buffer.from(JSON.stringify({voiceTaskId: '1'.repeat(64), voiceManifestSha256: sha256(voice)}));
+    return new Map([['preview-manifest.json', manifest], ['voice/voice-manifest.json', voice], ['voice/narration.pcm', pcm]]);
+  };
+  const original = {schemaVersion: 'presentation-voice-ledger/1.0', cues: [legacyCue]};
+  const declared = {schemaVersion: 'presentation-voice-ledger/1.1', captionTiming: 'caller-declared', captionCues: [newerCue]};
+  const audio = sequenceAudio(output);
+  expect(audio.append('first', 0, 1, makeChild(pcm1, original))).toMatchObject({
+    startSample: 0, endSample: 2000, pcmSha256: sha256(pcm1), captionTiming: 'clip-level-measured'});
+  expect(audio.append('next', 37, 38, makeChild(pcm2, declared))).toMatchObject({
+    startSample: 74000, endSample: 76000, pcmSha256: sha256(pcm2), captionTiming: 'caller-declared'});
+  const combined = audio.finish();
+  expect(output.equals(Buffer.concat([pcm1, Buffer.alloc(144_000), pcm2]))).toBe(true);
+  expect(combined.metadata).toMatchObject({samples: 76000, pcmSha256: sha256(output), captionCount: 2, speechAlignment: 'unverified'});
+  expect(combined.vtt.toString()).toContain('first:1\n00:00:00.001 --> 00:00:00.041\nA &lt; B');
+  expect(combined.vtt.toString()).toContain('next:1\n00:00:01.543 --> 00:00:01.581\nNext &amp; exact');
+  expect(JSON.parse(combined.captionLedger.toString()).cues[1]).toMatchObject({
+    id: 'next:1', sceneId: 'next', beatId: 'same-beat', sourceCueIndex: 0,
+    sourceStartSample: 50, sourceEndSample: 1875, startSample: 74050, endSample: 75875,
+    sourceStartFrame: 0, sourceEndFrame: 1, startFrame: 37, endFrame: 38, captionTiming: 'caller-declared'});
+  for (const bad of [pcm1.subarray(2), Buffer.concat([pcm1, Buffer.alloc(2)])]) {
+    expect(() => sequenceAudio().append('first', 0, 1, makeChild(bad, original)))
+      .toThrow(expect.objectContaining({code: 'PRESENTATION_SEQUENCE_AUDIO'}));
+  }
+  expect(() => sequenceAudio().append('first', 0, 1, makeChild(pcm1, {...original, cues: [{...legacyCue, endSample: 2001}]})))
+    .toThrow(expect.objectContaining({code: 'PRESENTATION_SEQUENCE_AUDIO'}));
+  expect(() => sequenceAudio().append('first', 0, 1, makeChild(pcm1, {...original, cues: [{...legacyCue, endSample: 26}]})))
+    .toThrow(expect.objectContaining({code: 'PRESENTATION_SEQUENCE_AUDIO'}));
 });
