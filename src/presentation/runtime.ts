@@ -24,6 +24,8 @@ import {decodeClip, FRAME_SAMPLES, loadClip, matchVoice, MAX_PCM, mixClips, NARR
   voiceCaptions, VOICE_KIND, voiceReview, VoiceSpec} from './narration.js';
 import {EXTENDED_RENDER_PROFILE, EXTENDED_VERIFY_DEADLINE, EXTENDED_WORKER_DEADLINE, extendedRanges,
   MAX_MOVIE_BYTES, MAX_PART_BYTES, MAX_SAMPLE_BYTES, MAX_SAMPLES, requireExtendedDisk} from './duration.js';
+import {checkZhVisualText} from './visual-locale-check.js';
+import {ZH_VISUAL_PROFILE, type VisualLocaleProfile} from './visual-locale.js';
 
 export const PLAN_KIND = 'repository-presentation-plan-v1';
 export const PREVIEW_KIND = 'repository-presentation-preview-v1';
@@ -47,7 +49,8 @@ const PreviewInput = z.strictObject({planTaskId: Hash, planManifestSha256: Hash,
   renderProfile: z.literal(EXTENDED_RENDER_PROFILE).optional(), rendererSha256: Hash.optional()});
 const VoiceInput = z.strictObject({spec: VoiceSpec, decoder: z.record(z.string(), z.string()), implementationSha256: Hash});
 const NarratedInput = PreviewInput.extend({mode: z.literal('narrated'), voiceTaskId: Hash, voiceManifestSha256: Hash,
-  captionLayoutProfile: z.literal(CAPTION_LAYOUT_PROFILE).optional()});
+  captionLayoutProfile: z.literal(CAPTION_LAYOUT_PROFILE).optional(),
+  visualLocaleProfile: z.literal(ZH_VISUAL_PROFILE).optional()});
 const Result = z.strictObject({kind: z.enum([PLAN_KIND, PREVIEW_KIND, VOICE_KIND, NARRATED_KIND]), files: z.array(z.strictObject({
   path: z.string().max(90), artifact: ArtifactSchema,
 })).min(4).max(60)});
@@ -333,15 +336,28 @@ async function checkedVoice(data: string, id: string, signal: AbortSignal, histo
 
 export async function bindPresentationVoice(data: string, path: string, signal: AbortSignal, onTask?: (id: string) => void) {
   const spec = VoiceSpec.parse(decode(await boundedFile(resolve(path), 256_000)));
+  return bindPresentationVoiceFromSpec(data, spec, signal, onTask);
+}
+
+export const voiceDecoderVersions = async (signal: AbortSignal) => Object.fromEntries(await Promise.all(
+  [ ['ffmpeg', ffmpegPath()], ['ffprobe', ffprobePath()] ].map(async ([name, executable]) =>
+    [name, await command(executable!, ['-version'], {signal, timeout: 10_000})])));
+const voiceImplementationSha256 = async () => sha256(canonical(await Promise.all(
+  ['src/presentation/narration.ts', 'src/presentation/runtime.ts', 'src/tts/runtime.ts'].map(async path =>
+    sha256(await boundedFile(join(projectRoot, path)))))));
+
+async function prepareVoiceInput(spec: VoiceSpec, signal: AbortSignal) {
+  return VoiceInput.parse({spec, decoder: await voiceDecoderVersions(signal), implementationSha256: await voiceImplementationSha256()});
+}
+
+export async function presentationVoiceId(spec: VoiceSpec, signal: AbortSignal) {
+  return fingerprint(VOICE_KIND, await prepareVoiceInput(spec, signal));
+}
+
+export async function bindPresentationVoiceFromSpec(data: string, spec: VoiceSpec, signal: AbortSignal, onTask?: (id: string) => void) {
   data = await preflightPresentationState(data);
   const {plan} = await voicePlan(data, spec, signal);
-  const decoderVersions = async (workSignal: AbortSignal) => Object.fromEntries(await Promise.all(
-    [ ['ffmpeg', ffmpegPath()], ['ffprobe', ffprobePath()] ].map(async ([name, executable]) =>
-      [name, await command(executable!, ['-version'], {signal: workSignal, timeout: 10_000})])));
-  const implementationSha256 = async () => sha256(canonical(await Promise.all(
-    ['src/presentation/narration.ts', 'src/presentation/runtime.ts', 'src/tts/runtime.ts'].map(async path =>
-      sha256(await boundedFile(join(projectRoot, path)))))));
-  const input = VoiceInput.parse({spec, decoder: await decoderVersions(signal), implementationSha256: await implementationSha256()});
+  const input = await prepareVoiceInput(spec, signal);
   const taskId = fingerprint(VOICE_KIND, input);
   onTask?.(taskId);
   const runner = new TaskRunner(data);
@@ -351,8 +367,8 @@ export async function bindPresentationVoice(data: string, path: string, signal: 
       const runtime = await createOwnedRuntimeTmp(directory);
       const result = await voiceFiles(data, input, taskId, workSignal,
         (source, index) => decodeClip(source, runtime.directory, index, plan.maxFrames, workSignal));
-      if (canonical(await decoderVersions(workSignal)) !== canonical(input.decoder) ||
-          await implementationSha256() !== input.implementationSha256) fail('Audio toolchain changed during binding.');
+      if (canonical(await voiceDecoderVersions(workSignal)) !== canonical(input.decoder) ||
+          await voiceImplementationSha256() !== input.implementationSha256) fail('Audio toolchain changed during binding.');
       return writeArtifacts(runner, VOICE_KIND, taskId, result.files, workSignal);
     }, cancellation.signal, {attempts: RETRIES, timeoutMs: plan.maxFrames > PRESENTATION_LEGACY_MAX_FRAMES ? 900_000 : 240_000,
       beforeDiscardTemporary: cleanupOwnedRuntimeTmp});
@@ -416,7 +432,7 @@ async function videoInput(work: string, totalFrames: number, extended: boolean, 
 }
 
 export async function renderPresentation(data: string, planTaskId: string, signal: AbortSignal, onTask?: (id: string) => void,
-  voiceTaskId?: string, resumeTaskId?: string) {
+  voiceTaskId?: string, resumeTaskId?: string, visualLocaleProfile?: VisualLocaleProfile) {
   checkAbort(signal);
   data = await preflightPresentationState(data);
   const plan = await checkedPlan(data, planTaskId, signal);
@@ -424,6 +440,12 @@ export async function renderPresentation(data: string, planTaskId: string, signa
   const voice = voiceTaskId === undefined ? undefined : await checkedVoice(data, voiceTaskId, signal);
   if (voice && voice.input.spec.planTaskId !== planTaskId) throw new EngineError('VOICE_PARENT', 'Bind the voice to this exact plan task.');
   const font = await presentationFont();
+  if (visualLocaleProfile !== undefined) {
+    if (!voice || visualLocaleProfile !== ZH_VISUAL_PROFILE) {
+      throw new EngineError('PRESENTATION_VISUAL_LOCALE', 'The Chinese visual profile requires a narrated presentation.');
+    }
+    checkZhVisualText(font, plan.compiled);
+  }
   const captionLines = voice && layoutCaptions(font, voice.captionCues.map(cue => cue.transcript));
   const env = await environment();
   const extended = plan.compiled.timeline.totalFrames > PRESENTATION_LEGACY_MAX_FRAMES;
@@ -438,7 +460,8 @@ export async function renderPresentation(data: string, planTaskId: string, signa
     ...(queueRenderer ? {rendererSha256: queueRenderer} : {})};
   const input = voice ? NarratedInput.parse({...base, mode: 'narrated', voiceTaskId,
     voiceManifestSha256: sha256(voice.files.get('voice-manifest.json')!),
-    captionLayoutProfile: CAPTION_LAYOUT_PROFILE}) : PreviewInput.parse({...base, mode: 'silent'});
+    captionLayoutProfile: CAPTION_LAYOUT_PROFILE, ...(visualLocaleProfile && {visualLocaleProfile})}) :
+    PreviewInput.parse({...base, mode: 'silent'});
   const kind = voice ? NARRATED_KIND : PREVIEW_KIND;
   const taskId = fingerprint(kind, input);
   if (resumeTaskId !== undefined && taskId !== resumeTaskId) {
@@ -458,7 +481,8 @@ export async function renderPresentation(data: string, planTaskId: string, signa
       await writeFile(join(work, 'public', 'font.ttf'), font, {flag: 'wx'});
       const workerInput = join(work, 'input.json');
       await writeFile(workerInput, json({entry: join(projectRoot, 'src/presentation/composition.tsx'), browser: env.browser,
-        props: voice ? {...plan.compiled, cues: voice.captionCues.map(({startFrame, endFrame, transcript}, index) =>
+        props: voice ? {...plan.compiled, ...(visualLocaleProfile && {visualLocaleProfile}),
+          cues: voice.captionCues.map(({startFrame, endFrame, transcript}, index) =>
           ({startFrame, endFrame, transcript, lines: captionLines![index]}))} : plan.compiled,
         sampleFrames: samples, geometry: {...GEOMETRY, fps: plan.compiled.timeline.fps},
         ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {})}), {flag: 'wx'});
@@ -539,6 +563,10 @@ export async function readPresentation(data: string, id: string, requested: Pres
   const voice = input.mode === 'narrated' ? await checkedVoice(data, input.voiceTaskId, signal, true) : undefined;
   if (input.mode === 'narrated' && (voice!.input.spec.planTaskId !== input.planTaskId ||
       sha256(voice!.files.get('voice-manifest.json')!) !== input.voiceManifestSha256)) fail('Preview voice binding differs.');
+  if (input.mode === 'narrated' && input.visualLocaleProfile) {
+    if (!input.captionLayoutProfile) fail('The localized preview requires the pinned caption layout.');
+    checkZhVisualText(await presentationFont(), plan.compiled);
+  }
   const captionLines = input.mode === 'narrated' && input.captionLayoutProfile ?
     layoutCaptions(await presentationFont(), voice!.captionCues.map(cue => cue.transcript)) : undefined;
   const extended = plan.compiled.timeline.totalFrames > PRESENTATION_LEGACY_MAX_FRAMES;
@@ -584,7 +612,8 @@ export async function resumePresentation(data: string, id: string, requested: Pr
   if (input.mode === 'narrated' && !input.captionLayoutProfile) {
     throw new EngineError('PRESENTATION_RESUME_INPUT', 'This unfinished preview uses historical caption layout. Repeat render explicitly to create a new task.');
   }
-  return renderPresentation(data, input.planTaskId, signal, onTask, input.mode === 'narrated' ? input.voiceTaskId : undefined, id);
+  return renderPresentation(data, input.planTaskId, signal, onTask, input.mode === 'narrated' ? input.voiceTaskId : undefined,
+    id, input.mode === 'narrated' ? input.visualLocaleProfile : undefined);
 }
 
 export async function exportPresentation(data: string, id: string, kind: PresentationKind | undefined, output: string, signal: AbortSignal) {

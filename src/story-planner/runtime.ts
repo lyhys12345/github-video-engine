@@ -1,5 +1,5 @@
 import {DatabaseSync} from 'node:sqlite';
-import {lstat,mkdir,mkdtemp,readFile,readdir,realpath,rename,rm,rmdir,writeFile} from 'node:fs/promises';
+import {lstat,mkdir,mkdtemp,open,readFile,readdir,realpath,rename,rm,rmdir,writeFile} from 'node:fs/promises';
 import {basename,dirname,isAbsolute,join,parse,relative,resolve,sep} from 'node:path';
 import {tmpdir} from 'node:os';
 import {randomUUID} from 'node:crypto';
@@ -76,12 +76,43 @@ export async function planCapturedStory(snapshot:StorySnapshot,data:string,out:s
  }finally{runner.close();}
 }
 
-/** Read stable SQLite bytes into an owned snapshot; original state is never opened or migrated. */
+class ActiveSnapshotChanged extends Error {}
+
+async function readActiveSnapshotFile(path:string){
+ await ancestors(dirname(path));
+ const before=await lstat(path);
+ if(!before.isFile()||before.isSymbolicLink()||before.size>DB_LIMIT)fail('EXPLAIN_INPUT','Expected a bounded regular file');
+ const file=await open(path,'r');
+ try{
+  const opened=await file.stat();
+  if(!opened.isFile()||opened.dev!==before.dev||opened.ino!==before.ino)fail('EXPLAIN_INPUT','Snapshot file identity changed during read');
+  if(opened.size!==before.size)throw new ActiveSnapshotChanged();
+  const bytes=Buffer.allocUnsafe(opened.size);
+  for(let offset=0;offset<bytes.length;){
+   const {bytesRead}=await file.read(bytes,offset,bytes.length-offset,offset);
+   if(!bytesRead)throw new ActiveSnapshotChanged();
+   offset+=bytesRead;
+  }
+  if((await file.stat()).size!==opened.size)throw new ActiveSnapshotChanged();
+  return bytes;
+ }finally{await file.close();}
+}
+
+/** Read stable SQLite bytes into an owned snapshot; original state is never opened by SQLite or migrated. */
 export async function readTask(data:string,id:string,kind:string|null='explain-story-plan'){hash.parse(id);data=resolve(data);await ancestors(data);const dbPath=join(data,'tasks.sqlite');if(!await exists(dbPath))fail('EXPLAIN_STATE','Existing planning state was not found');
- const read=async()=>{const db=await boundedFile(dbPath,DB_LIMIT),walPath=dbPath+'-wal',wal=await exists(walPath)?await boundedFile(walPath,DB_LIMIT):null;return{db,wal};};
+ const read=async()=>{
+  const db=await readActiveSnapshotFile(dbPath),walPath=dbPath+'-wal';
+  try{return{db,wal:await exists(walPath)?await readActiveSnapshotFile(walPath):null};}
+  catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')throw new ActiveSnapshotChanged();throw error;}
+ };
  let captured:Awaited<ReturnType<typeof read>>|undefined;
- for(let n=0;n<3;n++){const a=await read(),b=await read();if(sha256(a.db)===sha256(b.db)&&((a.wal===null&&b.wal===null)||(a.wal&&b.wal&&sha256(a.wal)===sha256(b.wal)))){captured=b;break;}}
- if(!captured)fail('EXPLAIN_BUSY','State changed during snapshot; retry status/export');
+ for(let n=0;n<3;n++){
+  try{
+   const a=await read(),b=await read();
+   if(sha256(a.db)===sha256(b.db)&&((a.wal===null&&b.wal===null)||(a.wal&&b.wal&&sha256(a.wal)===sha256(b.wal)))){captured=b;break;}
+  }catch(error){if(!(error instanceof ActiveSnapshotChanged))throw error;}
+ }
+ if(!captured)throw new EngineError('EXPLAIN_BUSY','State changed during snapshot. Retry after current writes finish.','retryable');
  const temp=await mkdtemp(join(tmpdir(),'gve-explain-read-'));try{const p=join(temp,'tasks.sqlite');await writeFile(p,captured!.db);if(captured!.wal)await writeFile(p+'-wal',captured!.wal);
  const db=new DatabaseSync(p,{readOnly:true});try{if(db.prepare('PRAGMA user_version').get()!.user_version!==TASKS_DB_VERSION)fail('EXPLAIN_STATE','Unsupported task state version');const schemas=(d:DatabaseSync)=>d.prepare("SELECT type,name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all().map(r=>({...r,sql:String(r.sql).replace(/\s+/g,'').replace(/ifnotexists/ig,'').toLowerCase()}));const reference=new DatabaseSync(':memory:');try{reference.exec(TASK_SCHEMA_SQL+USAGE_SCHEMA_SQL);if(canonical(schemas(db))!==canonical(schemas(reference)))fail('EXPLAIN_STATE','Unexpected state schema');}finally{reference.close();}const row=db.prepare('SELECT id,data FROM tasks WHERE id=?').get(id);if(!row)fail('EXPLAIN_TASK','Task was not found');if(Buffer.byteLength(String(row!.data))>TOTAL_LIMIT)fail('EXPLAIN_LIMIT','Task record exceeds size limit');const task=JSON.parse(String(row!.data)) as TaskRecord;if(task?.id!==id||typeof task.kind!=='string'||(kind!==null&&task.kind!==kind)||sha256(canonical({version:'production-task-v1',kind:task.kind,input:task.input}))!==id)fail('EXPLAIN_INTEGRITY','Task identity does not bind its planning input');return task;}finally{db.close();}
  }finally{await rm(temp,{recursive:true,force:true});}

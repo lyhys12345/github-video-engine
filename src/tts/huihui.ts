@@ -24,9 +24,9 @@ export const HUIHUI_VOICE_LABEL = 'Microsoft Huihui / Windows WinRT / zh-CN / te
 const Text = z.string().min(1).max(240).refine(text =>
   [...text].length <= 120 && /\p{Script=Han}/u.test(text) && !/[\p{C}\p{Zl}\p{Zp}]/u.test(text),
 'Use one line of Chinese text of at most 120 Unicode code points.');
-const Spec = z.strictObject({schemaVersion: z.literal('tts-huihui/1.0'), text: Text});
+export const HuihuiSpec = z.strictObject({schemaVersion: z.literal('tts-huihui/1.0'), text: Text});
 const Hash = z.string().regex(/^[a-f0-9]{64}$/);
-const Input = Spec.extend({
+const Input = HuihuiSpec.extend({
   provider: z.literal(PROVIDER), voiceId: z.literal(voiceId), language: z.literal('zh-CN'),
   workerSha256: Hash, windowsRelease: z.string().min(1).max(64), arch: z.string().min(1).max(16),
 });
@@ -147,15 +147,24 @@ async function runWorker(work: string, worker: Buffer, text: string, signal: Abo
   return boundedFile(join(work, 'speech.wav'), MAX_WAV);
 }
 
-export async function generateHuihui(raw: unknown, data: string, signal: AbortSignal, onTask?: (id: string) => void) {
-  const spec = Spec.parse(raw);
+async function prepareHuihuiGeneration(raw: unknown) {
+  const spec = HuihuiSpec.parse(raw);
   if (process.platform !== 'win32') return fail('HUIHUI_PLATFORM', 'Huihui generation requires Windows and an installed local WinRT voice.');
-  checkAbort(signal);
-  data = resolve(data);
-  await generationState(data);
   const worker = await boundedFile(join(projectRoot, 'scripts', 'winrt-huihui.ps1'), 32_000);
   const input = Input.parse({...spec, ...voice, provider: PROVIDER, workerSha256: sha256(worker), windowsRelease: release(), arch: process.arch});
   const id = sha256(canonical({version: 'production-task-v1', kind: KIND, input}));
+  return {input, worker, id};
+}
+
+export async function huihuiGenerationId(raw: unknown) {
+  return (await prepareHuihuiGeneration(raw)).id;
+}
+
+export async function generateHuihui(raw: unknown, data: string, signal: AbortSignal, onTask?: (id: string) => void) {
+  checkAbort(signal);
+  const {input, worker, id} = await prepareHuihuiGeneration(raw);
+  data = resolve(data);
+  await generationState(data);
   const cancellation = new AbortController();
   const abort = () => cancellation.abort(signal.reason instanceof DOMException && signal.reason.name === 'AbortError'
     ? new EngineError('CANCELLED', 'Huihui generation cancelled.', 'cancelled') : signal.reason);

@@ -6,11 +6,13 @@ import {DatabaseSync} from 'node:sqlite';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {ElevenLabsProvider,RemoteTtsSchema,ttsFingerprint,ttsInput,type TtsTransport} from '../src/providers/tts.js';
-import {dryRunTts,produceTts,statusTts,exportTts} from '../src/tts/runtime.js';
-import {generateHuihui,measureHuihuiWav} from '../src/tts/huihui.js';
+import {dryRunTts,produceTts,statusTts,exportTts,importHuihuiTts,readLocalTts} from '../src/tts/runtime.js';
+import {generateHuihui,measureHuihuiWav,HUIHUI_VOICE_LABEL} from '../src/tts/huihui.js';
 import {ttsCommand} from '../src/tts/cli.js';
 import {ArtifactStore} from '../src/assets/store.js';
 import {sha256,canonical} from '../src/core/util.js';
+import {TaskRunner} from '../src/orchestrator/tasks.js';
+import {decodeClip} from '../src/presentation/narration.js';
 const dirs:string[]=[];
 afterEach(async()=>{vi.restoreAllMocks();for(const dir of dirs.splice(0))await rm(dir,{recursive:true,force:true,maxRetries:3});});
 async function scratch(){const dir=await mkdtemp(join(tmpdir(),'gve-tts-'));dirs.push(dir);return dir;}
@@ -37,8 +39,7 @@ test('rejects unbounded Huihui requests and alternate provider controls before s
   await expect(readdir(root)).resolves.toEqual([]);
 });
 
-test('checks the fixed Huihui PCM WAV layout, duration and non-silence', () => {
-  const makeWav = (samples: number) => {
+function makeHuihuiWav(samples: number) {
     const wav = Buffer.alloc(46 + samples * 2);
     wav.write('RIFF', 0);
     wav.writeUInt32LE(wav.length - 8, 4);
@@ -54,16 +55,81 @@ test('checks the fixed Huihui PCM WAV layout, duration and non-silence', () => {
     wav.writeUInt32LE(samples * 2, 42);
     wav.writeInt16LE(-1, 46);
     return wav;
-  };
-  const exact = makeWav(480_000);
+}
+
+test('checks the fixed Huihui PCM WAV layout, duration and non-silence', () => {
+  const exact = makeHuihuiWav(480_000);
   expect(measureHuihuiWav(exact)).toEqual({sampleRate: 16000, channels: 1, sampleFormat: 's16le', samples: 480_000, durationSeconds: 30});
-  const silence = makeWav(1);
+  const silence = makeHuihuiWav(1);
   silence.writeInt16LE(0, 46);
-  const stereo = makeWav(1);
+  const stereo = makeHuihuiWav(1);
   stereo.writeUInt16LE(2, 22);
-  for (const invalid of [silence, stereo, exact.subarray(0, -1), makeWav(480_001), Buffer.alloc(2_000_001)]) {
+  for (const invalid of [silence, stereo, exact.subarray(0, -1), makeHuihuiWav(480_001), Buffer.alloc(2_000_001)]) {
     expect(() => measureHuihuiWav(invalid)).toThrow(expect.objectContaining({code: 'HUIHUI_MEDIA'}));
   }
+});
+
+test('Huihui v2 commits one import atomically across retry and contention and decodes odd samples without decimal rounding', async () => {
+  const data = await scratch();
+  const input = {schemaVersion: 'tts-huihui/1.0', text: '奇数采样测试。', provider: 'windows-winrt-huihui',
+    voiceId: 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech_OneCore\\Voices\\Tokens\\MSTTS_V110_zhCN_HuihuiM',
+    language: 'zh-CN', workerSha256: 'a'.repeat(64), windowsRelease: 'test', arch: 'x64'};
+  const kind = 'windows-winrt-huihui-generation-v1';
+  const id = sha256(canonical({version: 'production-task-v1', kind, input}));
+  const wav = makeHuihuiWav(16_001);
+  const runner = new TaskRunner(data);
+  try {
+    await runner.run(kind, input, async () => ({
+      value: {schemaVersion: 'tts-huihui-generation/1.0', taskId: id, input, textSha256: sha256(input.text),
+        voiceLabel: HUIHUI_VOICE_LABEL, audio: {mediaType: 'audio/wav', sha256: sha256(wav), bytes: wav.length, ...measureHuihuiWav(wav)},
+        origin: 'installed Windows WinRT SpeechSynthesizer', engineRemoteDispatch: 'none',
+        review: {speechContent: 'unverified', ownerListening: 'pending'}},
+      outputs: [await runner.artifacts.commit(wav, 'audio/wav', 'RESOLVE_ASSETS', id)],
+    }), signal());
+  } finally {runner.close();}
+
+  const beforeCommit = new AbortController();
+  const commit = ArtifactStore.prototype.commit;
+  const spy = vi.spyOn(ArtifactStore.prototype, 'commit').mockImplementation(async function(this: ArtifactStore, ...args) {
+    const result = await commit.apply(this, args);
+    if (args[2] === 'PUBLISH') beforeCommit.abort();
+    return result;
+  });
+  try {await expect(importHuihuiTts(data, id, beforeCommit.signal)).rejects.toBeDefined();}
+  finally {spy.mockRestore();}
+  const db = new DatabaseSync(join(data, 'tts.sqlite'));
+  try {
+    const tables = () => db.prepare("SELECT name FROM sqlite_schema WHERE type='table'").all();
+    expect(tables()).toEqual([]);
+    await expect(statusTts(data, id)).rejects.toMatchObject({code: 'TTS_STATE'});
+    db.exec('CREATE TABLE unrelated (id TEXT);');
+    await expect(importHuihuiTts(data, id, signal())).rejects.toMatchObject({code: 'TTS_INTEGRITY'});
+    expect(tables()).toEqual([{name: 'unrelated'}]);
+    db.exec('DROP TABLE unrelated;');
+    const prepare = DatabaseSync.prototype.prepare;
+    const inject = vi.spyOn(DatabaseSync.prototype, 'prepare').mockImplementation(function(this: DatabaseSync, sql: string) {
+      if (sql.startsWith('INSERT INTO tts_outcomes')) throw new Error('test rollback');
+      return prepare.call(this, sql);
+    });
+    try {await expect(importHuihuiTts(data, id, signal())).rejects.toThrow('test rollback');}
+    finally {inject.mockRestore();}
+    expect(tables()).toEqual([]);
+    const results = await Promise.all([importHuihuiTts(data, id, signal()), importHuihuiTts(data, id, signal())]);
+    expect(results.map(result => result.cached).sort()).toEqual([false, true]);
+    expect(results[0]!.receiptArtifact).toEqual(results[1]!.receiptArtifact);
+    expect(db.prepare('SELECT estimate FROM tts_requests').all()).toEqual([{estimate: 0}]);
+    const source = await readLocalTts(data, results[0]!.fingerprint, signal());
+    expect(source).toMatchObject({huihuiV2: {samples: 16_001, taskId: id}});
+    const pcm = await decodeClip(source, data, 0, 48, signal());
+    expect(pcm.length / 2).toBe(48_003);
+
+    const legacy = {...results[0]!.receipt.input as object, adapterVersion: 'local-import-huihui-v1'};
+    const legacyId = sha256(canonical(legacy));
+    db.prepare('INSERT INTO tts_requests VALUES(?,?,?,?)').run(legacyId, canonical(legacy), 0, new Date().toISOString());
+    expect(await statusTts(data, legacyId)).toMatchObject({state: 'held', reservationMicros: 0});
+    expect(await importHuihuiTts(data, id, signal())).toMatchObject({cached: true, fingerprint: results[0]!.fingerprint});
+    expect(db.prepare('SELECT * FROM tts_outcomes WHERE id=?').get(legacyId)).toBeUndefined();
+  } finally {db.close();}
 });
 const options=(transport:TtsTransport,budget=100)=>({allowPaid:true,budgetMicros:budget,key:()=> 'sk_explicit_fake_test_secret',provider:new ElevenLabsProvider(transport)});
 const response=async(_url?:string,_init?:RequestInit)=>new Response(await audio(),{status:200,headers:{'Content-Type':'audio/mpeg','request-id':'test-request-123'}});

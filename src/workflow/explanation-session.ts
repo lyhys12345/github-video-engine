@@ -1,28 +1,38 @@
 import {join, resolve} from 'node:path';
 import {z} from 'zod';
 import {ArtifactStore} from '../assets/store.js';
-import {PRESENTATION_FPS, PresentationPlan} from '../contracts/presentation.js';
+import {PRESENTATION_FPS, PRESENTATION_MAX_FRAMES, PresentationPlan} from '../contracts/presentation.js';
 import type {Artifact} from '../contracts/runtime.js';
 import {Hash} from '../contracts/video.js';
 import {checkAbort, EngineError} from '../core/errors.js';
+import {createOwnedRuntimeTmp, cleanupOwnedRuntimeTmp} from '../core/owned-runtime.js';
 import {canonical, sha256} from '../core/util.js';
 import {TaskRunner, type TaskRecord} from '../orchestrator/tasks.js';
 import {compilePresentation} from '../presentation/compile.js';
-import {createPresentationFromPlan, preflightPresentationState, readPresentation, renderPresentation, taskCancellation} from '../presentation/runtime.js';
+import {bindPresentationVoiceFromSpec, createPresentationFromPlan, preflightPresentationState, presentationVoiceId,
+  readPresentation, renderPresentation, taskCancellation, voiceDecoderVersions} from '../presentation/runtime.js';
+import {decodeClip, FRAME_SAMPLES, matchVoice, RATE, VoiceSpec} from '../presentation/narration.js';
 import {researchRepository, type ReadonlyTransport} from '../providers/github-readonly.js';
 import {environment} from '../providers/local.js';
 import {publishAssetFiles, RECEIPT_PUBLICATION} from '../story-planner/asset-pack.js';
 import {ancestors, boundedFile, readTask} from '../story-planner/runtime.js';
+import {generateHuihui, huihuiGenerationId, HuihuiSpec} from '../tts/huihui.js';
+import {importHuihuiTts, readLocalTts} from '../tts/runtime.js';
 import {authoringPacket, loadAuthoringProposal, submitParsedAuthoringProposal, verifyProposal} from './agent-authoring.js';
 import {checkDatabaseFiles} from './cli.js';
-import {AuthorInput, AuthorReceipt, ExplanationAuthorPacketProfile, RenderInput, RenderReceipt, Request, StartInput, StartReceipt, Submission} from './explanation-contract.js';
+import {AuthorInput, AuthorReceipt, ExplanationAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedProfile,
+  NarratedRenderInput, NarratedRenderReceipt, NarratedRenderSpec, RenderInput, RenderReceipt, Request, StartInput,
+  StartReceipt, Submission, VoicePrepareInput, VoicePrepareReceipt} from './explanation-contract.js';
 import {explanationAuthorPacket} from './explanation-author-packet.js';
 import {evidenceWorkspace} from './project-evidence.js';
 import {sourceFingerprint, validateSnapshot, WorkflowStore} from './store.js';
+import {ZH_VISUAL_PROFILE} from '../presentation/visual-locale.js';
 
 const START = 'repository-explanation-start-v1';
 const AUTHOR = 'repository-explanation-author-v1';
 const RENDER = 'repository-explanation-render-v1';
+const PREPARE_VOICE = 'repository-explanation-prepare-huihui-v1';
+const RENDER_NARRATED = 'repository-explanation-render-huihui-v1';
 const PROFILE = 'explanation-session/1.0';
 const RETRIES = 3;
 const SNAPSHOT_LIMIT = 4_000_000;
@@ -34,6 +44,7 @@ const projectFor = (id: string) => 'explain-' + id.slice(0, 48);
 const digestFiles = (files: Map<string, Buffer>) =>
   sha256(canonical([...files].map(([name, bytes]) => [name, sha256(bytes)]).sort((a, b) => a[0]!.localeCompare(b[0]!, 'en'))));
 const review = {semantic: 'pending', editorial: 'pending', audiovisual: 'pending', ownerAcceptance: 'pending'} as const;
+const speechReview = {speechContent: 'unverified', speechAlignment: 'unverified', ownerListening: 'pending'} as const;
 
 function decode(bytes: Buffer): unknown {
   try {return JSON.parse(new TextDecoder('utf-8', {fatal: true}).decode(bytes));}
@@ -62,7 +73,8 @@ async function withWorkflow<T>(data: string, create: boolean, work: (store: Work
 }
 
 async function run<T>(data: string, kind: string, input: unknown, signal: AbortSignal, onTask: Announce | undefined,
-  work: (runner: TaskRunner, id: string, signal: AbortSignal) => Promise<{value: T; outputs: Artifact[]}>, timeoutMs: number) {
+  work: (runner: TaskRunner, id: string, signal: AbortSignal, directory: string) => Promise<{value: T; outputs: Artifact[]}>,
+  timeoutMs: number) {
   data = await preflightPresentationState(data);
   checkAbort(signal);
   const id = fingerprint(kind, input);
@@ -71,7 +83,8 @@ async function run<T>(data: string, kind: string, input: unknown, signal: AbortS
   const cancellation = taskCancellation(signal);
   try {
     if (runner.get(id)?.state === 'succeeded') await checkedStage(data, await readTask(data, id, kind), signal);
-    return await runner.run(kind, input, (_dir, child) => work(runner, id, child), cancellation.signal, {attempts: RETRIES, timeoutMs});
+    return await runner.run(kind, input, (dir, child) => work(runner, id, child, dir), cancellation.signal,
+      {attempts: RETRIES, timeoutMs, ...(kind === PREPARE_VOICE && {beforeDiscardTemporary: cleanupOwnedRuntimeTmp})});
   }
   finally {cancellation.dispose(); runner.close();}
 }
@@ -175,7 +188,9 @@ async function verifiedAuthor(data: string, task: TaskRecord, signal: AbortSigna
     }
   }
   const manifest = {schemaVersion: 'explanation-session-stage/1.0', taskId: task.id, sessionTaskId: parent.manifest.taskId,
-    stage: submission.disposition === 'proposal' ? 'awaiting-plan' : submission.disposition,
+    stage: submission.disposition === 'proposal'
+      ? parent.manifest.request.voiceMode === 'silent' ? 'awaiting-plan' : 'awaiting-voice'
+      : submission.disposition,
     binding: parent.manifest.binding, authoringRequestId: parent.manifest.authoringRequestId,
     request: parent.manifest.request, proposalHash: saved.proposalHash, startManifestSha256: saved.startManifestSha256,
     submissionSha256: sha256(json(submission)), ...('reason' in submission ? {reason: submission.reason} : {}), review} as const;
@@ -186,7 +201,9 @@ async function verifiedAuthor(data: string, task: TaskRecord, signal: AbortSigna
   return {manifest, files, parent, submission};
 }
 
-function checkPlan(author: Awaited<ReturnType<typeof verifiedAuthor>>, plan: RenderInput['plan']) {
+type VerifiedAuthor = Awaited<ReturnType<typeof verifiedAuthor>>;
+
+function checkPlan(author: VerifiedAuthor, plan: RenderInput['plan']) {
   if (author.submission.disposition !== 'proposal' || plan.proposalHash !== author.manifest.proposalHash ||
       plan.authorship.kind !== 'session-agent') return fail('BINDING', 'Rendering requires the accepted exact proposal and session-agent plan.');
   if (plan.schemaVersion === '1.2') return fail('SCHEMA', 'Use queue plan 1.3 for new sessions.');
@@ -194,9 +211,10 @@ function checkPlan(author: Awaited<ReturnType<typeof verifiedAuthor>>, plan: Ren
   if (compiled.timeline.totalFrames > author.manifest.request.maxSeconds * PRESENTATION_FPS) {
     return fail('DURATION', 'Compiled timeline exceeds the requested maximum frame count.');
   }
+  return compiled;
 }
 
-async function verifiedPlan(data: string, author: Awaited<ReturnType<typeof verifiedAuthor>>, input: RenderInput, signal: AbortSignal) {
+async function verifiedPlan(data: string, author: VerifiedAuthor, input: RenderInput | NarratedRenderInput, signal: AbortSignal) {
   checkPlan(author, input.plan);
   const result = await readPresentation(data, input.planTaskId, 'plan', signal);
   if (!result.files || !result.files.get('presentation.json')?.equals(json(input.plan)) ||
@@ -205,25 +223,146 @@ async function verifiedPlan(data: string, author: Awaited<ReturnType<typeof veri
   }
 }
 
-async function verifiedPreview(data: string, input: RenderInput, id: string, signal: AbortSignal) {
-  const result = await readPresentation(data, id, 'preview', signal);
+async function verifiedPreview(data: string, input: RenderInput | NarratedRenderInput, id: string, signal: AbortSignal,
+  voiceManifestSha256?: string) {
+  const mode = input.profile === NarratedProfile ? 'narrated' : 'silent';
+  const result = await readPresentation(data, id, mode === 'silent' ? 'preview' : 'narrated', signal);
   if (!result.files) return fail('NOT_READY', 'Child preview has no verified completed output.');
   const bytes = result.files.get('preview-manifest.json')!;
-  const metadata = parse(z.object({taskId: Hash, mode: z.literal('silent'), planTaskId: Hash, planManifestSha256: Hash,
+  const metadata = parse(z.object({taskId: Hash, mode: z.literal(mode), planTaskId: Hash, planManifestSha256: Hash,
+    voiceTaskId: Hash.optional(), voiceManifestSha256: Hash.optional(),
+    visualLocaleProfile: z.literal(ZH_VISUAL_PROFILE).optional(),
     environment: z.record(z.string(), z.string()), timeline: z.object({fps: z.literal(PRESENTATION_FPS),
       totalFrames: z.number().int().positive().max(7200)})}), decode(bytes));
   if (metadata.taskId !== id || metadata.planTaskId !== input.planTaskId ||
       metadata.planManifestSha256 !== input.planManifestSha256 ||
-      canonical(metadata.environment) !== canonical(input.rendererEnvironment)) {
+      canonical(metadata.environment) !== canonical(input.rendererEnvironment) ||
+      (input.profile === NarratedProfile && (metadata.voiceTaskId !== input.voiceTaskId ||
+        !voiceManifestSha256 || metadata.voiceManifestSha256 !== voiceManifestSha256 ||
+        metadata.visualLocaleProfile !== input.visualLocaleProfile))) {
     return fail('INTEGRITY', 'Child preview differs from the verified plan or recorded renderer environment.');
   }
   return {metadata, bytes, files: result.files};
+}
+
+function voiceBeats(author: VerifiedAuthor) {
+  if (author.manifest.request.voiceMode !== 'windows-winrt-huihui' || author.submission.disposition !== 'proposal') {
+    return fail('VOICE_MODE', 'Voice preparation requires an accepted Huihui session proposal.');
+  }
+  return author.submission.proposal.beats.map(beat => ({
+    beatId: beat.id, spec: parse(HuihuiSpec, {schemaVersion: 'tts-huihui/1.0', text: beat.narration}),
+  }));
+}
+
+async function voiceAuthor(data: string, input: VoicePrepareInput, signal: AbortSignal) {
+  const author = await verifiedAuthor(data, await readTask(data, input.authorTaskId, AUTHOR), signal);
+  const beats = voiceBeats(author);
+  if (input.authorManifestSha256 !== sha256(json(author.manifest)) || input.generationTaskIds.length !== beats.length) {
+    return fail('INTEGRITY', 'Voice preparation differs from its accepted author checkpoint.');
+  }
+  return {author, beats};
+}
+
+async function verifiedVoicePreparation(data: string, task: TaskRecord, signal: AbortSignal) {
+  const input = storedInput(VoicePrepareInput, task);
+  const saved = await receipt(VoicePrepareReceipt, data, task, signal);
+  const {author, beats} = await voiceAuthor(data, input, signal);
+  if (task.outputs.length || saved.clips.length !== beats.length) return fail('INTEGRITY', 'Invalid voice preparation closure.');
+  const files = new Map(author.files);
+  const clips = [];
+  for (const [index, beat] of beats.entries()) {
+    const clip = saved.clips[index]!;
+    const local = await readLocalTts(data, clip.receiptFingerprint, signal);
+    const origin = 'huihuiV2' in local ? local.huihuiV2 : undefined;
+    if (!origin || !('generationManifestBytes' in local) || !local.generationManifestBytes || clip.beatId !== beat.beatId ||
+        clip.generationTaskId !== input.generationTaskIds[index] || origin.taskId !== clip.generationTaskId ||
+        origin.manifestSha256 !== clip.generationManifestSha256 || origin.samples !== clip.sourceSamples ||
+        clip.decodedSamples !== clip.sourceSamples * (RATE / 16_000) ||
+        local.input.text !== beat.spec.text || local.receiptArtifact.sha256 !== clip.receiptSha256 ||
+        local.receipt.artifact.sha256 !== clip.sourceAudioSha256) {
+      return fail('INTEGRITY', 'Huihui source differs from the committed recording for ' + beat.beatId + '.');
+    }
+    clips.push({...clip, transcript: beat.spec.text, transcriptSha256: sha256(beat.spec.text),
+      minFrames: Math.ceil(clip.decodedSamples / FRAME_SAMPLES)});
+    files.set(`huihui/${index}/speech.wav`, local.audio);
+    files.set(`huihui/${index}/generation.json`, local.generationManifestBytes);
+    files.set(`huihui/${index}/import-receipt.json`, local.receiptBytes);
+  }
+  const manifest = {schemaVersion: 'explanation-session-stage/1.1', taskId: task.id, stage: 'awaiting-narrated-plan',
+    sessionTaskId: author.manifest.sessionTaskId, authorTaskId: input.authorTaskId, authorManifestSha256: input.authorManifestSha256,
+    binding: author.manifest.binding, request: author.manifest.request, proposalHash: author.manifest.proposalHash,
+    profile: input.profile, fps: PRESENTATION_FPS, sourceSampleRate: 16_000, placementSampleRate: RATE, decoder: input.decoder,
+    clips, review: {...review, ...speechReview}} as const;
+  files.set('author-manifest.json', json(author.manifest));
+  files.set('voice-preparation.json', json(manifest));
+  files.set('session-manifest.json', json(manifest));
+  return {manifest, files, author};
+}
+
+function narrationBindings(voice: Awaited<ReturnType<typeof verifiedVoicePreparation>>,
+  input: Pick<NarratedRenderInput, 'authorTaskId' | 'voicePreparationManifestSha256' | 'plan' | 'offsets' | 'planTaskId' | 'planManifestSha256'>) {
+  const compiled = checkPlan(voice.author, input.plan);
+  if (input.authorTaskId !== voice.manifest.authorTaskId ||
+      input.voicePreparationManifestSha256 !== sha256(json(voice.manifest)) ||
+      input.offsets.length !== compiled.beats.length) return fail('BINDING', 'Narrated plan differs from its voice checkpoint.');
+  const clips = voice.manifest.clips.map((clip, index) => {
+    const beat = compiled.beats[index]!;
+    const offset = input.offsets[index]!;
+    if (clip.beatId !== beat.id || offset.beatId !== beat.id) return fail('BINDING', 'Offsets must match each beat in order.');
+    const availableFrames = beat.end - beat.start - offset.startOffsetFrames;
+    if (availableFrames < clip.minFrames) {
+      return fail('VOICE_FIT', canonical({beatId: clip.beatId, startOffsetFrames: offset.startOffsetFrames,
+        availableFrames, minClipFrames: clip.minFrames, minAdditionalFrames: clip.minFrames - availableFrames}));
+    }
+    return {beatId: clip.beatId, startOffsetFrames: offset.startOffsetFrames, transcript: clip.transcript,
+      transcriptSha256: clip.transcriptSha256, receiptFingerprint: clip.receiptFingerprint,
+      receiptSha256: clip.receiptSha256, sourceAudioSha256: clip.sourceAudioSha256,
+      ...(offset.captions && {captions: offset.captions})};
+  });
+  const version = input.offsets.some(offset => offset.captions) ? '1.1' : '1.0';
+  const spec = parse(VoiceSpec, {schemaVersion: 'presentation-voice-bindings/' + version, planTaskId: input.planTaskId,
+    planManifestSha256: input.planManifestSha256, proposalHash: input.plan.proposalHash, playbackRate: 1,
+    voicePolicy: 'caller-declared-local-import', clips});
+  matchVoice(compiled, spec);
+  return spec;
+}
+
+async function verifiedNarratedRender(data: string, task: TaskRecord, signal: AbortSignal) {
+  const input = storedInput(NarratedRenderInput, task);
+  const saved = await receipt(NarratedRenderReceipt, data, task, signal);
+  const voice = await verifiedVoicePreparation(data, await readTask(data, input.voicePreparationTaskId, PREPARE_VOICE), signal);
+  const spec = narrationBindings(voice, input);
+  await verifiedPlan(data, voice.author, input, signal);
+  const preview = await verifiedPreview(data, input, saved.previewTaskId, signal, saved.voiceManifestSha256);
+  if (task.outputs.length || saved.authorManifestSha256 !== voice.manifest.authorManifestSha256 ||
+      saved.previewManifestSha256 !== sha256(preview.bytes) || !preview.files.get('voice/bindings.json')?.equals(json(spec)) ||
+      saved.voiceManifestSha256 !== sha256(preview.files.get('voice/voice-manifest.json')!) ||
+      preview.metadata.timeline.totalFrames > voice.manifest.request.maxSeconds * PRESENTATION_FPS) {
+    return fail('INTEGRITY', 'Narrated output differs from its accepted authored plan and Huihui closure.');
+  }
+  const manifest = {schemaVersion: 'explanation-session-stage/1.1', taskId: task.id, stage: 'preview-ready',
+    sessionTaskId: voice.manifest.sessionTaskId, authorTaskId: input.authorTaskId, binding: voice.manifest.binding,
+    request: voice.manifest.request, proposalHash: voice.manifest.proposalHash, planTaskId: input.planTaskId,
+    planManifestSha256: input.planManifestSha256, voicePreparationTaskId: input.voicePreparationTaskId,
+    voicePreparationManifestSha256: input.voicePreparationManifestSha256, voiceTaskId: input.voiceTaskId,
+    voiceManifestSha256: saved.voiceManifestSha256, previewTaskId: saved.previewTaskId,
+    previewManifestSha256: saved.previewManifestSha256, timeline: preview.metadata.timeline,
+    ...(input.visualLocaleProfile && {visualLocaleProfile: input.visualLocaleProfile}),
+    review: {...review, ...speechReview}} as const;
+  const files = new Map(preview.files);
+  files.set('session-manifest.json', json(manifest));
+  files.set('start-manifest.json', json(voice.author.parent.manifest));
+  files.set('author-manifest.json', json(voice.author.manifest));
+  files.set('authoring-submission.json', json(voice.author.submission));
+  files.set('voice-preparation.json', json(voice.manifest));
+  return {manifest, files};
 }
 
 async function verifiedRender(data: string, task: TaskRecord, signal: AbortSignal) {
   const input = storedInput(RenderInput, task);
   const saved = await receipt(RenderReceipt, data, task, signal);
   const author = await verifiedAuthor(data, await readTask(data, input.authorTaskId, AUTHOR), signal);
+  if (author.manifest.request.voiceMode !== 'silent') return fail('VOICE_MODE', 'Expected a silent session for this checkpoint.');
   await verifiedPlan(data, author, input, signal);
   const preview = await verifiedPreview(data, input, saved.previewTaskId, signal);
   if (task.outputs.length || saved.authorManifestSha256 !== sha256(json(author.manifest)) ||
@@ -276,25 +415,87 @@ async function executeAuthor(data: string, input: AuthorInput, signal: AbortSign
   return {...status, cached: result.cached};
 }
 
+function assertCurrentAuthorSource(data: string, author: VerifiedAuthor) {
+  return withWorkflow(data, false, async store => {
+    if (store.project(author.manifest.binding.projectId).snapshotHash !== author.manifest.binding.snapshotHash) {
+      return fail('BINDING', 'Current workflow source changed. Use a new pinned session.');
+    }
+  });
+}
+
+async function executeVoicePreparation(data: string, input: VoicePrepareInput, signal: AbortSignal, onTask?: Announce) {
+  const {author, beats} = await voiceAuthor(data, input, signal);
+  const result = await run(data, PREPARE_VOICE, input, signal, onTask, async (_runner, _id, child, directory) => {
+    await assertCurrentAuthorSource(data, author);
+    if (canonical(await voiceDecoderVersions(child)) !== canonical(input.decoder)) {
+      return fail('ENVIRONMENT', 'Voice decoder identity changed. Prepare voice again for a new checkpoint.');
+    }
+    const runtime = await createOwnedRuntimeTmp(directory);
+    const clips = [];
+    for (const [index, beat] of beats.entries()) {
+      const generation = await generateHuihui(beat.spec, data, child, generationId => {
+        if (generationId !== input.generationTaskIds[index]) {
+          return fail('ENVIRONMENT', 'Huihui generation identity changed. Prepare voice again for a new checkpoint.');
+        }
+      });
+      const imported = await importHuihuiTts(data, generation.taskId, child);
+      const source = await readLocalTts(data, imported.fingerprint, child);
+      const pcm = await decodeClip(source, runtime.directory, index, PRESENTATION_MAX_FRAMES, child);
+      clips.push({beatId: beat.beatId, generationTaskId: generation.taskId, generationManifestSha256: generation.manifestSha256,
+        receiptFingerprint: imported.fingerprint, receiptSha256: imported.receiptArtifact.sha256,
+        sourceAudioSha256: imported.receipt.artifact.sha256, sourceSamples: generation.manifest.audio.samples, decodedSamples: pcm.length / 2});
+    }
+    await assertCurrentAuthorSource(data, author);
+    return {value: VoicePrepareReceipt.parse({clips}), outputs: []};
+  }, 1_020_000);
+  return {...await statusExplanation(data, result.id, signal), cached: result.cached};
+}
+
+async function executeNarratedRender(data: string, input: NarratedRenderInput, signal: AbortSignal, onTask?: Announce) {
+  const voice = await verifiedVoicePreparation(data, await readTask(data, input.voicePreparationTaskId, PREPARE_VOICE), signal);
+  const spec = narrationBindings(voice, input);
+  await verifiedPlan(data, voice.author, input, signal);
+  const result = await run(data, RENDER_NARRATED, input, signal, onTask, async (_runner, _id, child) => {
+    if (canonical(await environment()) !== canonical(input.rendererEnvironment)) {
+      return fail('ENVIRONMENT', 'Renderer identity changed. Submit the authored narrated plan again.');
+    }
+    await assertCurrentAuthorSource(data, voice.author);
+    const bound = await bindPresentationVoiceFromSpec(data, spec, child, voiceId => {
+      if (voiceId !== input.voiceTaskId) return fail('ENVIRONMENT', 'Voice decoder identity changed. Submit the plan again.');
+    });
+    if (bound.taskId !== input.voiceTaskId) return fail('INTEGRITY', 'Narrated binding task differs.');
+    const preview = await renderPresentation(data, input.planTaskId, child, undefined, input.voiceTaskId, undefined,
+      input.visualLocaleProfile);
+    const boundVoice = await readPresentation(data, input.voiceTaskId, 'voice', child);
+    const ledger = boundVoice.files?.get('voice-manifest.json');
+    if (!ledger) return fail('INTEGRITY', 'Narrated binding ledger is unavailable.');
+    const voiceManifestSha256 = sha256(ledger);
+    const checked = await verifiedPreview(data, input, preview.taskId, child, voiceManifestSha256);
+    if (checked.metadata.timeline.totalFrames > voice.manifest.request.maxSeconds * PRESENTATION_FPS) {
+      return fail('DURATION', 'Verified preview exceeds the requested maximum frame count.');
+    }
+    await assertCurrentAuthorSource(data, voice.author);
+    return {value: NarratedRenderReceipt.parse({authorManifestSha256: voice.manifest.authorManifestSha256,
+      voiceManifestSha256, previewTaskId: preview.taskId, previewManifestSha256: sha256(checked.bytes)}), outputs: []};
+  }, 3_120_000);
+  return {...await statusExplanation(data, result.id, signal), cached: result.cached};
+}
+
 async function executeRender(data: string, input: RenderInput, signal: AbortSignal, onTask?: Announce) {
   const author = await verifiedAuthor(data, await readTask(data, input.authorTaskId, AUTHOR), signal);
+  if (author.manifest.request.voiceMode !== 'silent') return fail('VOICE_MODE', 'Use the narrated render checkpoint for Huihui sessions.');
   await verifiedPlan(data, author, input, signal);
   const result = await run(data, RENDER, input, signal, onTask, async (_runner, _id, child) => {
     if (canonical(await environment()) !== canonical(input.rendererEnvironment)) {
       return fail('ENVIRONMENT', 'Renderer identity changed. Submit the authored plan again to create a new render checkpoint.');
     }
-    const assertCurrent = () => withWorkflow(data, false, async store => {
-      if (store.project(author.manifest.binding.projectId).snapshotHash !== author.manifest.binding.snapshotHash) {
-        return fail('BINDING', 'Current workflow source changed. Use a new pinned session.');
-      }
-    });
-    await assertCurrent();
+    await assertCurrentAuthorSource(data, author);
     const preview = await renderPresentation(data, input.planTaskId, child);
     const checked = await verifiedPreview(data, input, preview.taskId, child);
     if (checked.metadata.timeline.totalFrames > author.manifest.request.maxSeconds * PRESENTATION_FPS) {
       return fail('DURATION', 'Verified preview exceeds the requested maximum frame count.');
     }
-    await assertCurrent();
+    await assertCurrentAuthorSource(data, author);
     return {value: RenderReceipt.parse({authorManifestSha256: sha256(json(author.manifest)),
       previewTaskId: preview.taskId, previewManifestSha256: sha256(checked.bytes)}), outputs: []};
   }, 3_120_000);
@@ -306,7 +507,7 @@ async function sessionTask(data: string, id: string, signal: AbortSignal) {
   checkAbort(signal);
   if (!Hash.safeParse(id).success) return fail('TASK', 'Expected a lowercase hexadecimal explanation task ID.');
   const task = await readTask(data, id, null);
-  if (task.kind !== START && task.kind !== AUTHOR && task.kind !== RENDER) {
+  if (![START, AUTHOR, RENDER, PREPARE_VOICE, RENDER_NARRATED].includes(task.kind)) {
     return fail('TASK', 'Task does not belong to an explanation session.');
   }
   return task;
@@ -315,6 +516,8 @@ async function sessionTask(data: string, id: string, signal: AbortSignal) {
 async function checkedStage(data: string, task: TaskRecord, signal: AbortSignal) {
   if (task.kind === START) return verifiedStart(data, task, signal);
   if (task.kind === AUTHOR) return verifiedAuthor(data, task, signal);
+  if (task.kind === PREPARE_VOICE) return verifiedVoicePreparation(data, task, signal);
+  if (task.kind === RENDER_NARRATED) return verifiedNarratedRender(data, task, signal);
   return verifiedRender(data, task, signal);
 }
 
@@ -324,19 +527,26 @@ export async function statusExplanation(data: string, id: string, signal: AbortS
     const expired = task.state === 'running' && task.leaseUntil <= Date.now();
     if (task.kind === START) storedInput(StartInput, task);
     else if (task.kind === AUTHOR) storedInput(AuthorInput, task);
+    else if (task.kind === PREPARE_VOICE) storedInput(VoicePrepareInput, task);
+    else if (task.kind === RENDER_NARRATED) storedInput(NarratedRenderInput, task);
     else storedInput(RenderInput, task);
     return {taskId: id, kind: task.kind, state: expired ? 'interrupted' : task.state, attempt: task.attempt,
       retryable: task.attempt < RETRIES && (expired || (task.state !== 'running' && task.error?.classification !== 'permanent')),
       error: task.error};
   }
   const stage = await checkedStage(data, task, signal);
-  return {...stage.manifest, state: task.state, attempt: task.attempt, integrity: 'verified' as const};
+  const next = task.kind === PREPARE_VOICE ? {
+    voicePreparationManifestSha256: sha256(json(stage.manifest)),
+    submitCommand: 'pnpm gve explanation narrated-render --task ' + id + ' --spec "<NARRATED_RENDER_JSON>" --data "<STATE>"',
+  } : {};
+  return {...stage.manifest, ...next, state: task.state, attempt: task.attempt, integrity: 'verified' as const};
 }
 
 export async function startExplanation(data: string, path: string, out: string, signal: AbortSignal, onTask?: Announce,
   transport?: ReadonlyTransport) {
   const request = await spec(Request, path, 12_000);
-  const input = StartInput.parse({profile: PROFILE, request, packetProfile: ExplanationAuthorPacketProfile});
+  const packetProfile = request.voiceMode === 'silent' ? ExplanationAuthorPacketProfile : LocalizedNarratedAuthorPacketProfile;
+  const input = StartInput.parse({profile: PROFILE, request, packetProfile});
   const status = await executeStart(data, input, signal, onTask, transport);
   return {...status, packet: await exportExplanation(data, status.taskId, out, signal)};
 }
@@ -350,6 +560,7 @@ export async function submitExplanation(data: string, id: string, path: string, 
 export async function renderExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce) {
   const plan = await spec(PresentationPlan, path, 160_000);
   const author = await verifiedAuthor(data, await readTask(data, id, AUTHOR), signal);
+  if (author.manifest.request.voiceMode !== 'silent') return fail('VOICE_MODE', 'Prepare Huihui voice and submit a narrated plan.');
   checkPlan(author, plan);
   data = await preflightPresentationState(data);
   const created = await withWorkflow(data, false, store => createPresentationFromPlan(store, author.manifest.binding.projectId,
@@ -361,11 +572,43 @@ export async function renderExplanation(data: string, id: string, path: string, 
   return executeRender(data, input, signal, onTask);
 }
 
+export async function prepareExplanationVoice(data: string, id: string, signal: AbortSignal, onTask?: Announce) {
+  const author = await verifiedAuthor(data, await readTask(data, id, AUTHOR), signal);
+  const beats = voiceBeats(author);
+  const generationTaskIds = await Promise.all(beats.map(beat => huihuiGenerationId(beat.spec)));
+  const input = VoicePrepareInput.parse({profile: NarratedProfile, authorTaskId: id,
+    authorManifestSha256: sha256(json(author.manifest)), generationTaskIds, decoder: await voiceDecoderVersions(signal)});
+  return executeVoicePreparation(data, input, signal, onTask);
+}
+
+export async function renderNarratedExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce) {
+  const {plan, offsets, voicePreparationManifestSha256} = await spec(NarratedRenderSpec, path, 170_000);
+  const voice = await verifiedVoicePreparation(data, await readTask(data, id, PREPARE_VOICE), signal);
+  if (voicePreparationManifestSha256 !== sha256(json(voice.manifest))) {
+    return fail('BINDING', 'Select the exact voice preparation manifest.');
+  }
+  checkPlan(voice.author, plan);
+  data = await preflightPresentationState(data);
+  const created = await withWorkflow(data, false, store => createPresentationFromPlan(store, voice.manifest.binding.projectId,
+    plan.proposalHash, plan, data, signal));
+  const verified = await readPresentation(data, created.taskId, 'plan', signal);
+  if (!verified.files) return fail('NOT_READY', 'Child plan has no completed output.');
+  const base = {profile: NarratedProfile, authorTaskId: voice.manifest.authorTaskId, voicePreparationTaskId: id,
+    voicePreparationManifestSha256, plan, offsets, planTaskId: created.taskId,
+    planManifestSha256: sha256(verified.files.get('plan-manifest.json')!)};
+  const voiceTaskId = await presentationVoiceId(narrationBindings(voice, base), signal);
+  const input = NarratedRenderInput.parse({...base, voiceTaskId, rendererEnvironment: await environment(),
+    visualLocaleProfile: ZH_VISUAL_PROFILE});
+  return executeNarratedRender(data, input, signal, onTask);
+}
+
 export async function resumeExplanation(data: string, id: string, signal: AbortSignal, onTask?: Announce) {
   const task = await sessionTask(data, id, signal);
   if (task.state === 'succeeded') return {...await statusExplanation(data, id, signal), cached: true};
   if (task.kind === START) return executeStart(data, storedInput(StartInput, task), signal, onTask);
   if (task.kind === AUTHOR) return executeAuthor(data, storedInput(AuthorInput, task), signal, onTask);
+  if (task.kind === PREPARE_VOICE) return executeVoicePreparation(data, storedInput(VoicePrepareInput, task), signal, onTask);
+  if (task.kind === RENDER_NARRATED) return executeNarratedRender(data, storedInput(NarratedRenderInput, task), signal, onTask);
   return executeRender(data, storedInput(RenderInput, task), signal, onTask);
 }
 

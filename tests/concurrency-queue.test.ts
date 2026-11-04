@@ -1,10 +1,13 @@
 import {expect, it} from 'vitest';
+import {readFile} from 'node:fs/promises';
 import {StoryProposal} from '../src/contracts/authoring.js';
 import type {QueueEvent} from '../src/contracts/concurrency-queue.js';
 import {PresentationPlan, type QueuePlan} from '../src/contracts/presentation.js';
 import {canonical, sha256} from '../src/core/util.js';
 import {compilePresentation} from '../src/presentation/compile.js';
-import {queueCardAtRest, queueEventAffectsCard, queueFrame, queueTitle} from '../src/presentation/queue-frame.js';
+import {queueCardAtRest, queueEventAffectsCard, queueFrame, queueSlotY, queueTitle} from '../src/presentation/queue-frame.js';
+import {checkZhVisualText} from '../src/presentation/visual-locale-check.js';
+import {zh, ZH_CARD_HEIGHT} from '../src/presentation/visual-locale.js';
 
 const ids = ['first', 'second', 'third', 'fourth', 'fifth'];
 const start = (taskId: string, slotId: number, atFrame: number): QueueEvent =>
@@ -52,6 +55,29 @@ function fixture(capacity = 2) {
     beats: scheduled.map((events, index) => ({beatId: proposal.beats[index]!.id, frames: index === 1 ? 32 : 160, events}))};
   return {proposal, plan};
 }
+
+it('validates Chinese display labels at mobile sizes with the pinned font and retains the authored queue model', async () => {
+  const {proposal, plan} = fixture(3);
+  const compiled = compilePresentation(proposal, plan);
+  const localized = {...compiled, labels: {waiting: '等待中', slots: '运行中', results: '已结束'},
+    tasks: compiled.tasks.map((task, index) => ({...task, label: '任务 ' + (index + 1)})),
+    beats: compiled.beats.map((beat, index) => ({...beat, title: '示意步骤 ' + (index + 1)}))};
+  const before = canonical(localized);
+  const font = await readFile('assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf');
+  expect(() => checkZhVisualText(font, localized)).not.toThrow();
+  expect(canonical(localized)).toBe(before);
+  expect(queueFrame(localized, 60).state).toEqual(queueFrame(compiled, 60).state);
+  expect(queueSlotY(3) + ZH_CARD_HEIGHT).toBeLessThan(590);
+  expect(122 + 7 * 57 + ZH_CARD_HEIGHT).toBeLessThan(590);
+  expect(queueTitle({...localized, endingTitle: {beatId: localized.beats[0]!.id, visibleFromFrame: 24}},
+    localized.beats[0]!, 0, zh)).toBe(zh.illustrationInProgress);
+  for (const label of ['First request', '任务标签太长', '任务🧪']) {
+    const tasks = localized.tasks.map((task, index) => index ? task : {...task, label});
+    expect(() => checkZhVisualText(font, {...localized, tasks})).toThrow(expect.objectContaining({
+      code: 'PRESENTATION_VISUAL_LOCALE', message: expect.stringContaining('task first label'),
+    }));
+  }
+});
 
 it.each([1, 2, 3])('preserves every submitted task and capacity %i on every frame', capacity => {
   const {proposal, plan} = fixture(capacity);

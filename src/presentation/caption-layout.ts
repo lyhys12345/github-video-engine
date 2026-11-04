@@ -16,13 +16,13 @@ function reject(reason: string): never {
 
 // Read the default advances from the SHA-256-pinned Noto Sans SC sfnt. The
 // styled Chromium run also measures the actual layout at the displayed weight.
-function fontMetrics(font: Buffer) {
+export function fontMetrics(font: Buffer, invalid = reject) {
   const offsets = new Map<string, number>();
   for (let i = 0; i < font.readUInt16BE(4); i++) {
     const record = 12 + 16 * i;
     offsets.set(font.toString('ascii', record, record + 4), font.readUInt32BE(record + 8));
   }
-  const table = (tag: string) => offsets.get(tag) ?? reject('Missing caption font table ' + tag + '.');
+  const table = (tag: string) => offsets.get(tag) ?? invalid('Missing caption font table ' + tag + '.');
   const cmap = table('cmap');
   let unicode = 0;
   for (let i = 0; i < font.readUInt16BE(cmap + 2); i++) {
@@ -31,7 +31,7 @@ function fontMetrics(font: Buffer) {
       unicode = cmap + font.readUInt32BE(record + 4);
     }
   }
-  if (!unicode || font.readUInt16BE(unicode) !== 12) reject('Missing caption font Unicode map.');
+  if (!unicode || font.readUInt16BE(unicode) !== 12) invalid('Missing caption font Unicode map.');
   const groups = font.readUInt32BE(unicode + 12);
   const units = font.readUInt16BE(table('head') + 18);
   const advances = font.readUInt16BE(table('hhea') + 34);
@@ -50,7 +50,7 @@ function fontMetrics(font: Buffer) {
         break;
       }
     }
-    return reject('The pinned font lacks U+' + codePoint.toString(16).toUpperCase() + '.');
+    return invalid('The pinned font lacks U+' + codePoint.toString(16).toUpperCase() + '.');
   };
 }
 

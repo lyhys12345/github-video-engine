@@ -25,7 +25,7 @@ const commonClip = z.strictObject({beatId: Id, receiptFingerprint: Hash, receipt
   transcript: z.string().min(1).max(120), transcriptSha256: Hash,
   startOffsetFrames: z.number().int().min(0).max(PRESENTATION_MAX_FRAMES - 1)});
 const captionSample = z.number().int().min(0).max(MAX_PCM / 2);
-const authoredCaption = z.strictObject({
+export const AuthoredCaption = z.strictObject({
   startChar: z.number().int().min(0).max(2000), endChar: z.number().int().min(1).max(2000),
   startSample: captionSample, endSample: captionSample,
 });
@@ -37,7 +37,7 @@ export const VoiceSpec = z.discriminatedUnion('schemaVersion', [
   commonVoice.extend({schemaVersion: z.literal('presentation-voice-bindings/1.0'), clips: z.array(commonClip).min(1).max(20)}),
   commonVoice.extend({schemaVersion: z.literal('presentation-voice-bindings/1.1'),
     clips: z.array(commonClip.extend({transcript: z.string().min(1).max(2000),
-      captions: z.array(authoredCaption).min(1).max(40)})).min(1).max(20)}),
+      captions: z.array(AuthoredCaption).min(1).max(40)})).min(1).max(20)}),
 ]);
 export type VoiceSpec = z.infer<typeof VoiceSpec>;
 type Clip = VoiceSpec['clips'][number];
@@ -48,6 +48,12 @@ const voiceError = (code: string, message: string): never => {throw new EngineEr
 const captionWeight = (text: string) =>
   [...text].reduce((sum, character) => sum + (character.codePointAt(0)! > 127 ? 2 : 1), 0);
 const fitsCaption = (text: string) => !/[\r\n\p{C}]/u.test(text) && !!text.trim() && captionWeight(text) <= 100;
+
+function checkSingleCaption(transcript: string, beatId: string) {
+  if (transcript.length > 120 || !fitsCaption(transcript)) {
+    voiceError('VOICE_CAPTION_LIMIT', 'Use a shorter single-line transcript and matching recording for ' + beatId);
+  }
+}
 
 function captionText(clip: Extract<Clip, {captions: unknown}>) {
   const characters = [...clip.transcript];
@@ -77,9 +83,7 @@ export function matchVoice(plan: CompiledPresentation, spec: VoiceSpec) {
       voiceError('VOICE_TRANSCRIPT', 'Exact narration and transcript hash differ for ' + beat.id);
     }
     if ('captions' in clip) captionText(clip);
-    else if (!fitsCaption(clip.transcript)) {
-      voiceError('VOICE_CAPTION_LIMIT', 'Use a shorter single-line transcript and matching recording for ' + beat.id);
-    }
+    else checkSingleCaption(clip.transcript, beat.id);
     return {beat, clip};
   });
 }
@@ -96,6 +100,13 @@ export async function loadClip(data: string, clip: Clip, policy: VoiceSpec['voic
   return source;
 }
 
+function exactHuihuiDuration(stream: {duration_ts?: unknown; time_base?: unknown; sample_rate?: unknown}, samples: number) {
+  const base = typeof stream.time_base === 'string' ? /^(\d{1,10})\/([1-9]\d{0,9})$/.exec(stream.time_base) : null;
+  const ticks = stream.duration_ts;
+  return !!base && stream.sample_rate === '16000' && typeof ticks === 'number' && Number.isSafeInteger(ticks) && ticks > 0 &&
+    BigInt(ticks) * BigInt(base[1]!) * 16_000n === BigInt(base[2]!) * BigInt(samples);
+}
+
 export async function decodeClip(source: LocalAudio, dir: string, index: number, maxFrames: number, signal: AbortSignal) {
   const path = join(dir, index + '.audio');
   const output = join(dir, index + '.pcm');
@@ -103,9 +114,12 @@ export async function decodeClip(source: LocalAudio, dir: string, index: number,
   await writeFile(path, source.audio, {flag: 'wx'});
   const probe = JSON.parse(await command(ffprobePath(), ['-v', 'error', '-protocol_whitelist', 'file', '-f', format, '-show_streams', '-show_format',
     '-of', 'json', path], {signal, timeout: 30_000}));
-  const seconds = Number(probe.format?.duration);
+  const huihuiSamples = 'huihuiV2' in source ? source.huihuiV2?.samples : undefined;
+  const seconds = source.receipt.durationSeconds;
   if (probe.streams?.length !== 1 || probe.streams[0]?.codec_type !== 'audio' ||
-      seconds !== source.receipt.durationSeconds) voiceError('VOICE_MEDIA', 'Measured container differs from the import receipt.');
+      (huihuiSamples === undefined ? Number(probe.format?.duration) !== seconds : !exactHuihuiDuration(probe.streams[0], huihuiSamples))) {
+    voiceError('VOICE_MEDIA', 'Measured container differs from the import receipt.');
+  }
   const maxSeconds = maxFrames / PRESENTATION_FPS;
   if (seconds > maxSeconds + 1) voiceError('VOICE_DOES_NOT_FIT', 'The measured container exceeds the entire ' + maxSeconds + '-second preview scope.');
   const maxPcmBytes = maxFrames * FRAME_SAMPLES * 2;
@@ -116,6 +130,9 @@ export async function decodeClip(source: LocalAudio, dir: string, index: number,
     '-ac', '1', '-ar', String(RATE), '-c:a', 'pcm_s16le', '-fs', String(outputCeiling), '-f', 's16le', output], {signal, timeout: 30_000});
   const pcm = await boundedFile(output, outputCeiling + RATE * 2);
   if (pcm.length >= outputCeiling) voiceError('VOICE_DOES_NOT_FIT', 'Decoded clip exceeded the complete preview sample budget.');
+  if (huihuiSamples !== undefined && pcm.length !== huihuiSamples * (RATE / 16_000) * 2) {
+    voiceError('VOICE_MEDIA', 'Decoded Huihui PCM does not have the expected exact sample count.');
+  }
   return pcm;
 }
 

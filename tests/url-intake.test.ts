@@ -9,8 +9,8 @@ import {statusStory, exportStory} from '../src/story-planner/runtime.js';
 import {ArtifactStore} from '../src/assets/store.js';
 import {sha256} from '../src/core/util.js';
 import {readTask} from '../src/story-planner/runtime.js';
-import {exportExplanation, resumeExplanation, startExplanation, statusExplanation, submitExplanation} from '../src/workflow/explanation-session.js';
-import {ExplanationAuthorPacketProfile, StartInput, Submission} from '../src/workflow/explanation-contract.js';
+import {exportExplanation, prepareExplanationVoice, resumeExplanation, startExplanation, statusExplanation, submitExplanation} from '../src/workflow/explanation-session.js';
+import {ExplanationAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedRenderSpec, StartInput, Submission} from '../src/workflow/explanation-contract.js';
 import {workflowRoot} from './workflow-support.js';
 
 const signal = new AbortController().signal;
@@ -59,6 +59,7 @@ it('pins a resumable explanation request, preserves an evidence disposition and 
   await writeFile(submission, JSON.stringify(author));
   const submitted = await submitExplanation(data, started.taskId, submission, signal);
   expect(submitted).toMatchObject({stage: 'needs-evidence', proposalHash: null, integrity: 'verified'});
+  await expect(prepareExplanationVoice(data, submitted.taskId, signal)).rejects.toMatchObject({code: 'EXPLANATION_VOICE_MODE'});
   expect(await resumeExplanation(data, submitted.taskId, signal)).toMatchObject({taskId: submitted.taskId, cached: true});
   const exported = await exportExplanation(data, submitted.taskId, join(root, 'result'), signal);
   expect(JSON.parse(await readFile(join(exported.bundle, 'authoring-submission.json'), 'utf8'))).toEqual(author);
@@ -70,6 +71,33 @@ it('pins a resumable explanation request, preserves an evidence disposition and 
     await expect(statusExplanation(data, submitted.taskId, signal)).rejects.toMatchObject({code: 'INTEGRITY'});
   } finally {await writeFile(source, original);}
   expect(await statusExplanation(data, submitted.taskId, signal)).toMatchObject({stage: 'needs-evidence', integrity: 'verified'});
+});
+
+it('uses a separate authored Huihui packet for the explicitly requested Chinese session', async () => {
+  const root = await workflowRoot('explanation-zh'), data = join(root, 'db');
+  const requestPath = join(root, 'request.json');
+  const transport = vi.fn(async (url: string) => url.includes('/commits/') ? {sha: commit} :
+    url.includes('/readme?') ? {type: 'file', path: 'README.md', encoding: 'base64', size: Buffer.byteLength(readme),
+      content: Buffer.from(readme).toString('base64')} : {full_name: 'example/demo', name: 'demo', default_branch: 'main', license: null});
+  const request = {schemaVersion: 'explanation-session-request/1.1', repository,
+    audience: '中文读者', language: 'zh-CN', maxSeconds: 300, voiceMode: 'windows-winrt-huihui'};
+  const start = async (value: unknown, packet: string) => {
+    await writeFile(requestPath, JSON.stringify(value));
+    return startExplanation(data, requestPath, join(root, packet), signal, undefined, transport);
+  };
+  await expect(start({...request, language: 'en-US'}, 'wrong-language')).rejects.toMatchObject({code: 'EXPLANATION_SCHEMA'});
+  await expect(start({...request, maxSeconds: 301}, 'too-long')).rejects.toMatchObject({code: 'EXPLANATION_SCHEMA'});
+  await expect(start({...request, voiceMode: 'silent'}, 'wrong-mode')).rejects.toMatchObject({code: 'EXPLANATION_SCHEMA'});
+  expect(transport).not.toHaveBeenCalled();
+  const started = await start(request, 'voice');
+  const packet = JSON.parse(await readFile(join(started.packet.bundle, 'work-package.json'), 'utf8'));
+  expect(packet).toMatchObject({schemaVersion: LocalizedNarratedAuthorPacketProfile, language: 'zh-CN', voiceMode: request.voiceMode});
+  expect(packet.instructions.join(' ')).toContain('explanation voice-prepare');
+  expect(JSON.parse(await readFile(join(started.packet.bundle, packet.narratedRenderSchema), 'utf8')))
+    .toEqual(z.toJSONSchema(NarratedRenderSpec));
+  const silent = await start({...request, schemaVersion: 'explanation-session-request/1.0', voiceMode: 'silent'}, 'silent');
+  expect(silent.taskId).not.toBe(started.taskId);
+  expect(silent).toMatchObject({packetProfile: ExplanationAuthorPacketProfile});
 });
 
 it('links URL intake to a reusable workspace and a durable authored story without network after intake', async () => {

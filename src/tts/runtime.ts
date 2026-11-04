@@ -18,9 +18,10 @@ import {HUIHUI_VOICE_LABEL,readHuihuiGeneration} from './huihui.js';
 const hash=z.string().regex(/^[a-f0-9]{64}$/);
 const ReceiptSchema=z.object({schemaVersion:z.literal('tts-receipt/1.0'),fingerprint:hash,input:z.unknown(),voiceLabel:z.string().min(1).max(100),createdAt:z.iso.datetime(),artifact:ArtifactSchema,durationSeconds:z.number().finite().positive().max(600),requestId:z.string().nullable(),estimatedMaxChargeMicros:z.number().int().nonnegative(),actualChargeMicros:z.null(),chargeBasis:z.enum(['local-import-no-provider-call','provider-invoice-unverified']),transcriptVerification:z.literal('caller-declared; recorded speech not verified'),review:z.literal('pending-owner-listening')}).strict();
 export type TtsReceipt=z.infer<typeof ReceiptSchema>;
-const HUIHUI_IMPORT = 'local-import-huihui-v1';
+const HUIHUI_IMPORT_V1 = 'local-import-huihui-v1';
+const HUIHUI_IMPORT = 'local-import-huihui-v2';
 const HuihuiImport = ImportTtsSchema.omit({schemaVersion:true}).extend({
- adapterVersion:z.literal(HUIHUI_IMPORT), voiceLabel:z.literal(HUIHUI_VOICE_LABEL), mediaType:z.literal('audio/wav'),
+ adapterVersion:z.enum([HUIHUI_IMPORT_V1,HUIHUI_IMPORT]), voiceLabel:z.literal(HUIHUI_VOICE_LABEL), mediaType:z.literal('audio/wav'),
  generation:z.strictObject({taskId:hash,manifestSha256:hash}),
 });
 const json=(x:unknown)=>JSON.stringify(x,null,2)+'\n';
@@ -51,9 +52,27 @@ export async function measureTtsAudio(bytes:Buffer,signal:AbortSignal,mediaType:
 }
 export function dryRunTts(raw:unknown){const spec=TtsSpecSchema.parse(raw);return{schemaVersion:'tts-preflight/1.0',fingerprint:ttsFingerprint(spec),input:ttsInput(spec),voiceLabel:spec.voiceLabel,characters:[...spec.text].length,estimatedMaxChargeMicros:spec.provider==='elevenlabs'?spec.estimatedMaxChargeMicros:0,estimateBasis:'caller-supplied upper bound; not provider price or invoice',entitlement:spec.provider==='elevenlabs'?spec.entitlement:'local-import',remoteDispatch:false,requirements:spec.provider==='elevenlabs'?['explicit --allow-paid','positive immutable state budget','ELEVENLABS_API_KEY environment variable','confirmed exact voice/model API entitlement']:[],review:'pending-owner-listening'};}
 
-async function openState(data:string,create:boolean){data=resolve(data);preflightStatePath(data);await ancestors(data,create);const path=join(data,'tts.sqlite');
+function ttsSchemaReady(db:DatabaseSync){
+ const row=db.prepare(`SELECT COUNT(*) AS total,
+  COUNT(CASE WHEN type='table' AND name IN ('tts_requests','tts_outcomes','tts_policy') THEN 1 END) AS known
+  FROM sqlite_schema WHERE substr(name,1,7) <> 'sqlite_'`).get()!;
+ if(row.total===0)return false;
+ if(row.known!==3)fail('TTS_INTEGRITY','TTS database has an unrelated or partial schema.');
+ return true;
+}
+async function openState(data:string,create:boolean,deferSchema=false){data=resolve(data);preflightStatePath(data);await ancestors(data,create);const path=join(data,'tts.sqlite');
  try{const s=await lstat(path);if(!s.isFile()||s.isSymbolicLink()||s.size>64_000_000)fail('TTS_STATE','Expected bounded regular TTS database');}catch(e){if((e as NodeJS.ErrnoException).code!=='ENOENT')throw e;if(!create)fail('TTS_STATE','Existing TTS state not found');}
- const db=new DatabaseSync(path,{readOnly:!create});if(create){db.exec('PRAGMA journal_mode=DELETE; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;');db.exec(schema);}return db;
+ const db=new DatabaseSync(path,{readOnly:!create});
+ try{
+  db.exec('PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;');
+  if(create&&!deferSchema){
+   db.exec('PRAGMA journal_mode=DELETE; BEGIN IMMEDIATE;');
+   try{db.exec(schema);db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
+  }else if(!create&&!ttsSchemaReady(db)){
+   fail('TTS_STATE','Existing TTS state is not initialized.');
+  }
+  return db;
+ }catch(error){db.close();throw error;}
 }
 function outcome(db:DatabaseSync,id:string){const row=db.prepare('SELECT data FROM tts_outcomes WHERE id=?').get(id);return row?JSON.parse(String(row.data)) as {state:string;receipt?:Artifact;code?:string}:null;}
 async function verifiedBytes(store:ArtifactStore,artifact:Artifact){const bytes=await boundedFile(store.path(artifact),25_000_000);if(artifact.id!==artifact.sha256||bytes.length!==artifact.bytes||sha256(bytes)!==artifact.sha256)fail('INTEGRITY','TTS artifact bytes do not match their immutable reference');return bytes;}
@@ -90,17 +109,19 @@ export async function produceTts(raw:unknown,data:string,signal:AbortSignal,opti
   }catch(e){const code=e instanceof EngineError?e.code:'TTS_FAILED';db.prepare('INSERT INTO tts_outcomes VALUES(?,?)').run(id,json({state:'held',code,actualChargeMicros:null}));if(e instanceof EngineError)throw e;throw new EngineError('TTS_FAILED','TTS attempt failed; reservation held. No automatic replay.');}
  }finally{db.close();}
 }
-function huihuiImportInput(generation:Awaited<ReturnType<typeof readHuihuiGeneration>>){
- return HuihuiImport.parse({provider:'local-import',adapterVersion:HUIHUI_IMPORT,
+function huihuiImportInput(generation:Awaited<ReturnType<typeof readHuihuiGeneration>>,
+ adapterVersion:typeof HUIHUI_IMPORT | typeof HUIHUI_IMPORT_V1 = HUIHUI_IMPORT){
+ return HuihuiImport.parse({provider:'local-import',adapterVersion,
   text:generation.manifest.input.text,voiceLabel:HUIHUI_VOICE_LABEL,sourceSha256:generation.manifest.audio.sha256,mediaType:'audio/wav',
   generation:{taskId:generation.manifest.taskId,manifestSha256:generation.manifestSha256}});
 }
 
 async function checkedHuihuiParent(data:string,receipt:TtsReceipt,signal:AbortSignal){
- if((receipt.input as {adapterVersion?:string}|null)?.adapterVersion!==HUIHUI_IMPORT)return undefined;
+ const adapter=(receipt.input as {adapterVersion?:string}|null)?.adapterVersion;
+ if(adapter!==HUIHUI_IMPORT_V1&&adapter!==HUIHUI_IMPORT)return undefined;
  const input=HuihuiImport.parse(receipt.input);
  const generation=await readHuihuiGeneration(data,input.generation.taskId,signal);
- if(canonical(input)!==canonical(huihuiImportInput(generation))||receipt.voiceLabel!==input.voiceLabel||
+ if(canonical(input)!==canonical(huihuiImportInput(generation,adapter))||receipt.voiceLabel!==input.voiceLabel||
     receipt.artifact.mediaType!==input.mediaType||receipt.artifact.sha256!==input.sourceSha256||
     receipt.durationSeconds!==generation.manifest.audio.durationSeconds||receipt.requestId!==null||
     receipt.estimatedMaxChargeMicros!==0||receipt.chargeBasis!=='local-import-no-provider-call'){
@@ -132,37 +153,39 @@ export async function statusTts(data:string,id:string,signal=new AbortController
 export async function importHuihuiTts(data:string,taskId:string,signal:AbortSignal){
  const generation=await readHuihuiGeneration(data,taskId,signal);
  const input=huihuiImportInput(generation),id=sha256(canonical(input));
- let existing:DatabaseSync|undefined;
- try{existing=await openState(data,false);}catch(error){if(!(error instanceof EngineError&&error.code==='TTS_STATE'))throw error;}
- if(existing){
-  try{
-   if(existing.prepare('SELECT id FROM tts_requests WHERE id=?').get(id)){
-    const result=await verifiedReceipt(new ArtifactStore(data),existing,id);
-    await checkedHuihuiParent(data,result.receipt,signal);
-    return {fingerprint:id,cached:true,...result};
-   }
-  }finally{existing.close();}
- }
  await ancestors(join(resolve(data),'artifacts'),true);
- const db=await openState(data,true),store=new ArtifactStore(data);
+ // A writer can recover a rollback journal left by a killed first importer.
+ const db=await openState(data,true,true),store=new ArtifactStore(data);
  try{
+  if(ttsSchemaReady(db)&&db.prepare('SELECT id FROM tts_requests WHERE id=?').get(id)){
+   const result=await verifiedReceipt(store,db,id);
+   await checkedHuihuiParent(data,result.receipt,signal);
+   return {fingerprint:id,cached:true,...result};
+  }
+  const artifact=await store.commit(generation.wav,'audio/wav','RESOLVE_ASSETS',id);
+  const receipt=ReceiptSchema.parse({schemaVersion:'tts-receipt/1.0',fingerprint:id,input,voiceLabel:input.voiceLabel,
+   createdAt:new Date().toISOString(),artifact,durationSeconds:generation.manifest.audio.durationSeconds,requestId:null,
+   estimatedMaxChargeMicros:0,actualChargeMicros:null,chargeBasis:'local-import-no-provider-call',
+   transcriptVerification:'caller-declared; recorded speech not verified',review:'pending-owner-listening'});
+  const receiptArtifact=await store.commit(json(receipt),'application/json','PUBLISH',id);
   checkAbort(signal);
-  reserve(db,id,input,0,0);
+  db.exec('BEGIN IMMEDIATE');
+  let cached:boolean;
   try{
-   const artifact=await store.commit(generation.wav,'audio/wav','RESOLVE_ASSETS',id);
-   const receipt=ReceiptSchema.parse({schemaVersion:'tts-receipt/1.0',fingerprint:id,input,voiceLabel:input.voiceLabel,
-    createdAt:new Date().toISOString(),artifact,durationSeconds:generation.manifest.audio.durationSeconds,requestId:null,
-    estimatedMaxChargeMicros:0,actualChargeMicros:null,chargeBasis:'local-import-no-provider-call',
-    transcriptVerification:'caller-declared; recorded speech not verified',review:'pending-owner-listening'});
-   const receiptArtifact=await store.commit(json(receipt),'application/json','PUBLISH',id);
-   checkAbort(signal);
-   db.prepare('INSERT INTO tts_outcomes VALUES(?,?)').run(id,json({state:'succeeded',receipt:receiptArtifact}));
-   return {fingerprint:id,cached:false,receipt,receiptArtifact};
+   if(!ttsSchemaReady(db))db.exec(schema);
+   cached=!!db.prepare('SELECT id FROM tts_requests WHERE id=?').get(id);
+   if(!cached){
+    db.prepare('INSERT INTO tts_requests VALUES(?,?,?,?)').run(id,canonical(input),0,receipt.createdAt);
+    db.prepare('INSERT INTO tts_outcomes VALUES(?,?)').run(id,json({state:'succeeded',receipt:receiptArtifact}));
+   }
+   db.exec('COMMIT');
   }catch(error){
-   const code=error instanceof EngineError?error.code:'TTS_FAILED';
-   db.prepare('INSERT INTO tts_outcomes VALUES(?,?)').run(id,json({state:'held',code,actualChargeMicros:null}));
+   db.exec('ROLLBACK');
    throw error;
   }
+  const result=await verifiedReceipt(store,db,id);
+  await checkedHuihuiParent(data,result.receipt,signal);
+  return {fingerprint:id,cached,...result};
  }finally{db.close();}
 }
 
@@ -177,7 +200,10 @@ export async function readLocalTts(data: string, id: string, signal=new AbortCon
     const {adapterVersion:_adapterVersion,generation:_generation,...raw}=HuihuiImport.parse(receipt.input);
     const input=ImportTtsSchema.parse({...raw,schemaVersion:'1.0'});
     return {input,receipt,receiptArtifact,receiptBytes:await verifiedBytes(store,receiptArtifact),
-      audio:status.generation.wav,generationManifestBytes:status.generation.manifestBytes};
+      audio:status.generation.wav,generationManifestBytes:status.generation.manifestBytes,
+      ...(HuihuiImport.parse(receipt.input).adapterVersion===HUIHUI_IMPORT
+        ? {huihuiV2:{samples:status.generation.manifest.audio.samples,taskId:status.generation.manifest.taskId,
+          manifestSha256:status.generation.manifestSha256}} : {})};
   }
   // The fingerprint is over the canonical input with adapterVersion, while the
   // public import schema accepts only request fields.

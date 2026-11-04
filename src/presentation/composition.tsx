@@ -5,6 +5,7 @@ import type {CompiledLegacy, CompiledPresentation} from './compile.js';
 import {ConcurrencyQueue} from './queue-composition.js';
 import {queueTitle} from './queue-frame.js';
 import {httpResponseArrived, imageResultPanels, presentationFrame} from './frame-state.js';
+import {type VisualLocaleProfile, ZH_TITLE_SIZE, zh, zhTextSlots} from './visual-locale.js';
 
 const ink = '#122d38';
 const muted = '#607079';
@@ -82,7 +83,7 @@ function ImageChoice({plan, frame}: {plan: CompiledLegacy; frame: ReturnType<typ
 }
 
 type Cue = {startFrame: number; endFrame: number; transcript: string; lines: CaptionLine[]};
-type Props = CompiledPresentation & {cues?: Cue[]};
+type Props = CompiledPresentation & {cues?: Cue[]; visualLocaleProfile?: VisualLocaleProfile};
 const lineStyle: React.CSSProperties = {fontFamily: 'GVE Presentation', fontSize: CAPTION_FONT_SIZE,
   fontWeight: CAPTION_FONT_WEIGHT, fontKerning: 'none', fontVariantLigatures: 'none', lineHeight: '34px',
   whiteSpace: 'pre', direction: 'ltr'};
@@ -114,6 +115,22 @@ function validateCaptionWidths(cues: Cue[]) {
   }
 }
 
+function validateZhWidths(plan: CompiledPresentation) {
+  const line = document.createElement('span');
+  Object.assign(line.style, {fontFamily: 'GVE Presentation', whiteSpace: 'pre', position: 'absolute', visibility: 'hidden'});
+  document.body.append(line);
+  try {
+    for (const slot of zhTextSlots(plan)) {
+      line.style.fontSize = slot.size + 'px';
+      line.style.fontWeight = String(slot.weight);
+      line.textContent = slot.text;
+      if (line.getBoundingClientRect().width > slot.width - 4) {
+        throw new Error('Chinese visual label exceeds pinned browser width: ' + slot.field);
+      }
+    }
+  } finally {line.remove();}
+}
+
 const Presentation: React.FC<Props> = (plan) => {
   const frame = useCurrentFrame();
   const [handle] = useState(() => delayRender('Load pinned presentation font'));
@@ -123,21 +140,24 @@ const Presentation: React.FC<Props> = (plan) => {
     void font.load().then(loaded => {
       document.fonts.add(loaded);
       if (plan.cues) validateCaptionWidths(plan.cues);
+      if (plan.visualLocaleProfile) validateZhWidths(plan);
       setReady(true);
       continueRender(handle);
     }).catch(cancelRender);
-  }, [handle, plan.cues]);
+  }, [handle, plan.cues, plan.visualLocaleProfile]);
   if (!ready) return null;
   const beat = plan.beats.find(row => frame >= row.start && frame < row.end);
   if (!beat) throw new Error('Frame outside presentation timeline');
-  const title = plan.moduleId === 'concurrency-queue/1' ? queueTitle(plan, beat, frame) : beat.title;
+  const localized = !!plan.visualLocaleProfile;
+  const title = plan.moduleId === 'concurrency-queue/1' ? queueTitle(plan, beat, frame, localized ? zh : undefined) : beat.title;
   const titleLength = characters(title);
   const cue = plan.cues?.find(item => frame >= item.startFrame && frame < item.endFrame);
   return <AbsoluteFill style={{fontFamily: 'GVE Presentation, sans-serif', background: '#f3f1e7', color: ink, padding: '54px 54px 45px'}}>
-    <div style={{color: '#8c4736', fontSize: 22, fontWeight: 700}}>{plan.cues ? 'Local voice · Illustration · No observed execution' : 'Silent · Illustration · No observed execution'}</div>
-    <div style={{fontSize: titleLength > 45 ? 30 : titleLength > 25 ? 38 : 48, fontWeight: 800, lineHeight: 1.12,
+    <div style={{color: '#8c4736', fontSize: localized ? 25 : 22, fontWeight: 700}}>{localized ? zh.illustratedNarration :
+      plan.cues ? 'Local voice · Illustration · No observed execution' : 'Silent · Illustration · No observed execution'}</div>
+    <div style={{fontSize: localized ? ZH_TITLE_SIZE : titleLength > 45 ? 30 : titleLength > 25 ? 38 : 48, fontWeight: 800, lineHeight: 1.12,
       height: 175, marginTop: 22, overflowWrap: 'anywhere'}}>{title}</div>
-    {plan.moduleId === 'concurrency-queue/1' ? <ConcurrencyQueue plan={plan} frame={frame}/> :
+    {plan.moduleId === 'concurrency-queue/1' ? <ConcurrencyQueue plan={plan} frame={frame} localized={localized}/> :
       plan.moduleId === 'http-exchange/1' ? <Http plan={plan} frame={presentationFrame(plan, frame)}/> :
       <ImageChoice plan={plan} frame={presentationFrame(plan, frame)}/>}
     <div style={{position: 'absolute', bottom: plan.cues ? 170 : 130, left: 54, right: 54, height: 6, borderRadius: 6, background: border}}>

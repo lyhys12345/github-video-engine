@@ -1,10 +1,11 @@
 import type {CompiledQueue, QueueState} from './concurrency-queue.js';
 import type {QueueEvent} from '../contracts/concurrency-queue.js';
 
-export function queueTitle(plan: CompiledQueue, beat: CompiledQueue['beats'][number], frame: number) {
+export function queueTitle(plan: CompiledQueue, beat: CompiledQueue['beats'][number], frame: number,
+  headings = {finalStage: 'Final stage in progress', illustrationInProgress: 'Illustration in progress'}) {
   const ending = plan.endingTitle;
   if (ending?.beatId === beat.id && frame < ending.visibleFromFrame) {
-    return plan.scenario.ending === 'all-completed' ? 'Final stage in progress' : 'Illustration in progress';
+    return plan.scenario.ending === 'all-completed' ? headings.finalStage : headings.illustrationInProgress;
   }
   return beat.title;
 }
