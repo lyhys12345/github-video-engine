@@ -1,4 +1,5 @@
 import {expect, it, vi} from 'vitest';
+import {createHash} from 'node:crypto';
 import {mkdir, readFile, readdir, rename, symlink, writeFile} from 'node:fs/promises';
 import {DatabaseSync} from 'node:sqlite';
 import {join} from 'node:path';
@@ -10,13 +11,126 @@ import {ArtifactStore} from '../src/assets/store.js';
 import {sha256} from '../src/core/util.js';
 import {readTask} from '../src/story-planner/runtime.js';
 import {exportExplanation, prepareExplanationVoice, resumeExplanation, startExplanation, statusExplanation, submitExplanation} from '../src/workflow/explanation-session.js';
-import {ExplanationAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedRenderSpec, StartInput, Submission} from '../src/workflow/explanation-contract.js';
+import {ExplanationAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedRenderSpec, SourceCaptureProfile,
+  SourcePathsAuthorPacketProfile, StartInput, Submission} from '../src/workflow/explanation-contract.js';
 import {workflowRoot} from './workflow-support.js';
 
 const signal = new AbortController().signal;
 const commit = 'a'.repeat(40);
 const repository = 'https://github.com/example/demo';
 const readme = '# Demo\r\n\r\nUse the flag to return a mask.\r\n';
+
+function sourcePathsTransport(mode = '100644') {
+  const base = 'https://api.github.com/repos/example/demo';
+  const rootTree = 'b'.repeat(40), srcTree = 'c'.repeat(40);
+  const sources = [Buffer.from('\uFEFF// Demo\r\nconst mask = true;\r\n'), Buffer.from('// Other documented behavior.\n')];
+  const names = ['main.ts', 'other.ts'];
+  const blobs = sources.map(bytes => {
+    const sha = createHash('sha1').update('blob ' + bytes.length + '\0').update(bytes).digest('hex');
+    return {sha, encoding: 'base64', size: bytes.length, content: bytes.toString('base64')};
+  });
+  const routes = new Map<string, unknown>([
+    [base, {full_name: 'example/demo', name: 'demo', default_branch: 'main', license: null}],
+    [base + '/commits/' + commit, {sha: commit}],
+    [base + '/readme?ref=' + commit, {type: 'file', path: 'README.md', encoding: 'base64',
+      size: Buffer.byteLength(readme), content: Buffer.from(readme).toString('base64')}],
+    [base + '/git/commits/' + commit, {sha: commit, tree: {sha: rootTree}}],
+    [base + '/git/trees/' + rootTree, {sha: rootTree, truncated: false, tree: [{path: 'src', mode: '040000', type: 'tree', sha: srcTree}]}],
+    [base + '/git/trees/' + srcTree, {sha: srcTree, truncated: false,
+      tree: blobs.map(({sha}, index) => ({path: names[index], mode, type: 'blob', sha}))}],
+    ...blobs.map(blob => [base + '/git/blobs/' + blob.sha, blob] as const),
+  ]);
+  const transport = vi.fn(async (url: string) => {
+    if (!routes.has(url)) throw new Error('Unexpected source request: ' + url);
+    return routes.get(url);
+  });
+  return {transport, sources, routes};
+}
+
+const sourcePathsRequest = {
+  schemaVersion: 'explanation-session-request/1.2', repository, ref: commit, sourcePaths: ['src/main.ts', 'src/other.ts'],
+  audience: 'Readers of the fixture', language: 'en-US', maxSeconds: 12, voiceMode: 'silent',
+};
+
+it('captures ordered Git blobs in a new session and reverifies exact text and dispositions offline', async () => {
+  const root = await workflowRoot('sp'), data = join(root, 'db'), request = join(root, 'request.json');
+  const {transport, sources, routes} = sourcePathsTransport();
+  const start = async (value: unknown, out: string) => {
+    await writeFile(request, JSON.stringify(value));
+    return startExplanation(data, request, join(root, out), signal, undefined, transport);
+  };
+  const {sourcePaths, ...baseRequest} = sourcePathsRequest;
+  const old = await start({...baseRequest, schemaVersion: 'explanation-session-request/1.0'}, 'old');
+  if (!('stage' in old) || old.stage !== 'awaiting-author') throw new Error('Expected completed legacy start.');
+  const oldPacket = await readFile(join(old.packet.bundle, 'work-package.json'));
+  const legacy = JSON.parse(oldPacket.toString('utf8'));
+  const oldGap = JSON.parse(await readFile(join(old.packet.bundle, legacy.needsEvidenceDraft), 'utf8'));
+  oldGap.reason.detail = 'Need the file that implements the behavior.';
+  oldGap.reason.citations = [{sourceId: 'source-1', sourceSha256: sha256(readme), startLine: 3, endLine: 3,
+    quote: 'Use the flag to return a mask.'}];
+  const submission = join(root, 'submission.json');
+  await writeFile(submission, JSON.stringify(oldGap));
+  const gap = await submitExplanation(data, old.taskId, submission, signal);
+  expect(gap).toMatchObject({stage: 'needs-evidence', proposalHash: null});
+  transport.mockClear();
+  const fresh = await start({...baseRequest, ref: old.binding.commit, sourcePaths}, 'fresh');
+  if (!('stage' in fresh) || fresh.stage !== 'awaiting-author') throw new Error('Expected completed sourcePaths start.');
+  expect(fresh).toMatchObject({stage: 'awaiting-author', binding: {commit},
+    packetProfile: SourcePathsAuthorPacketProfile, sourceCaptureProfile: SourceCaptureProfile, request: {sourcePaths}});
+  expect(fresh.taskId).not.toBe(old.taskId);
+  expect(fresh.binding.snapshotHash).not.toBe(old.binding.snapshotHash);
+  expect(transport.mock.calls.map(([url]) => url)).toEqual([...routes.keys()]);
+  const packet = JSON.parse(await readFile(join(fresh.packet.bundle, 'work-package.json'), 'utf8'));
+  const evidence = JSON.parse(await readFile(join(fresh.packet.bundle, packet.sourceManifest), 'utf8'));
+  expect(packet).toMatchObject({schemaVersion: SourcePathsAuthorPacketProfile, sourceCaptureProfile: SourceCaptureProfile, sourcePaths});
+  expect(evidence.documents.map((doc: {repositoryPath: string}) => doc.repositoryPath)).toEqual(['README.md', ...sourcePaths]);
+  for (const [index, bytes] of sources.entries()) {
+    expect(evidence.sources[index + 1]).toMatchObject({sha256: sha256(bytes), url: repository + '/blob/' + commit + '/' + sourcePaths[index]});
+    expect(await readFile(join(fresh.packet.bundle, evidence.sources[index + 1].path))).toEqual(bytes);
+  }
+  const cited = JSON.parse(await readFile(join(fresh.packet.bundle, packet.needsEvidenceDraft), 'utf8'));
+  cited.reason.detail = 'Need an explanation of how the option is selected.';
+  cited.reason.citations = [{sourceId: 'source-2', sourceSha256: sha256(sources[0]!), startLine: 2, endLine: 2, quote: 'const mask = true;'}];
+  await writeFile(submission, JSON.stringify(cited));
+  await expect(submitExplanation(data, fresh.taskId, submission, signal)).resolves.toMatchObject({stage: 'needs-evidence'});
+  transport.mockClear();
+  expect(await start(sourcePathsRequest, 'fresh')).toMatchObject({taskId: fresh.taskId, cached: true});
+  expect(await resumeExplanation(data, fresh.taskId, signal)).toMatchObject({taskId: fresh.taskId, cached: true});
+  const replay = await exportExplanation(data, old.taskId, join(root, 'old-replay'), signal);
+  expect(await readFile(join(replay.bundle, 'work-package.json'))).toEqual(oldPacket);
+  expect(await statusExplanation(data, gap.taskId, signal)).toMatchObject({stage: 'needs-evidence', integrity: 'verified'});
+  expect(transport).not.toHaveBeenCalled();
+  const reversed = await start({...sourcePathsRequest, sourcePaths: [...sourcePaths].reverse()}, 'reversed');
+  expect(reversed.taskId).not.toBe(fresh.taskId);
+  expect(await readFile(join(reversed.packet.bundle, 'source-2.txt'))).toEqual(sources[1]);
+  const task = await readTask(data, fresh.taskId, null);
+  const snapshot = new ArtifactStore(data).path(task.outputs[0]!);
+  await writeFile(snapshot, 'damaged test snapshot');
+  await expect(statusExplanation(data, fresh.taskId, signal)).rejects.toMatchObject({code: 'INTEGRITY'});
+});
+
+it('refuses invalid source selections before network or task creation and non-ordinary Git entries before blob reads', async () => {
+  const root = await workflowRoot('spf'), data = join(root, 'db'), request = join(root, 'request.json'), out = join(root, 'packet');
+  const {transport} = sourcePathsTransport('120000');
+  const start = async (value: unknown) => {
+    await writeFile(request, JSON.stringify(value));
+    return startExplanation(data, request, out, signal, undefined, transport);
+  };
+  for (const invalid of [
+    {ref: 'HEAD'}, {ref: undefined}, {sourcePaths: undefined}, {sourcePaths: []},
+    {sourcePaths: ['src/main.ts', 'src/main.ts']}, {sourcePaths: ['a.ts', 'b.ts', 'c.ts', 'd.ts']},
+    {sourcePaths: ['../main.ts']}, {sourcePaths: ['a/b/c/d/e.ts']}, {sourcePaths: ['https://host/main.ts']},
+    {sourcePaths: ['docs/help.md'], documents: ['docs/help.md']},
+    {voiceMode: 'windows-winrt-huihui'}, {schemaVersion: 'explanation-session-request/1.0'},
+  ]) {
+    await expect(start({...sourcePathsRequest, ...invalid})).rejects.toMatchObject({code: 'EXPLANATION_SCHEMA'});
+  }
+  expect(transport).not.toHaveBeenCalled();
+  expect(await readdir(root)).toEqual(['request.json']);
+  await expect(start(sourcePathsRequest)).rejects.toMatchObject({code: 'SOURCE_ENTRY'});
+  expect(transport.mock.calls.some(([url]) => url.includes('/git/blobs/'))).toBe(false);
+  expect(await readdir(root)).not.toContain('packet');
+});
 
 it('pins a resumable explanation request, preserves an evidence disposition and rejects damaged parent artifacts', async () => {
   const root = await workflowRoot('explanation-session'), data = join(root, 'db');

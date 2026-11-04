@@ -25,6 +25,29 @@ The render checkpoint binds the accepted proposal, exact authored plan, child pl
 
 The CLI uses public GitHub read-only intake and existing local rendering. Repository text is untrusted evidence. Automatic use-case selection, arbitrary renderer generation, paid services and final production are outside this interface.
 
+## Explicit source files at a fixed commit
+
+Use `explanation-session-request/1.2` to include one to three explicit `sourcePaths` in the authoring packet. For example:
+
+```json
+{
+  "schemaVersion": "explanation-session-request/1.2",
+  "repository": "https://github.com/OWNER/REPO",
+  "ref": "0123456789abcdef0123456789abcdef01234567",
+  "sourcePaths": ["src/main.rs"],
+  "audience": "Readers learning how the command works",
+  "language": "en-US",
+  "maxSeconds": 30,
+  "voiceMode": "silent"
+}
+```
+
+Replace the repository, full 40-character commit and paths with the requested source. The engine reads ordinary Git blobs at that exact commit, alongside the normal README, optional license and any explicit `documents`. Paths are unique, safe repository-relative text paths and cannot duplicate a document already selected. The existing source capture bounds apply, including four path components, 200,000 bytes per file, eight evidence files and 1,200,000 combined bytes. Git symlinks, submodules and invalid UTF-8 are refused. Code remains inert text. There is no dependency traversal.
+
+The new work package records `explanation-author-packet/1.3` and `github-pinned-git-blob/1.0`. Use `evidence.json` to match each path to its numbered file and content SHA-256. Source selection adds evidence for authoring. The available presentation modules are still HTTP, image-mask and concurrency-queue.
+
+After `needs-evidence`, take `binding.commit` from status and start a fresh request and output directory using that exact `ref`. List the source paths needed by the new request within the three-file limit. The original packet and disposition remain available. Completed status, resume and receipt export reverify the local evidence. Request versions 1.0 and 1.1 retain their original packet formats. Version 1.2 also accepts the existing Huihui mode when `language` is `zh-CN`.
+
 ## Huihui technical preview
 
 Use `explanation-session-request/1.1` with `language: "zh-CN"` and `voiceMode: "windows-winrt-huihui"`. An accepted proposal enters `awaiting-voice`. Write one Chinese narration line of at most 120 Unicode code points per beat, across up to 20 beats. The installed Windows WinRT Huihui voice synthesizes the exact text from the accepted proposal. If the voice is unavailable, the command reports the error. The engine sends no explicit provider request for this mode. Windows speech subsystem network behavior has not been audited.

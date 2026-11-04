@@ -12,7 +12,7 @@ import {compilePresentation} from '../presentation/compile.js';
 import {bindPresentationVoiceFromSpec, createPresentationFromPlan, preflightPresentationState, presentationVoiceId,
   readPresentation, renderPresentation, taskCancellation, voiceDecoderVersions} from '../presentation/runtime.js';
 import {decodeClip, FRAME_SAMPLES, matchVoice, RATE, VoiceSpec} from '../presentation/narration.js';
-import {researchRepository, type ReadonlyTransport} from '../providers/github-readonly.js';
+import {captureRepositoryText, researchRepository, TextCaptureLimits, type ReadonlyTransport} from '../providers/github-readonly.js';
 import {environment} from '../providers/local.js';
 import {publishAssetFiles, RECEIPT_PUBLICATION} from '../story-planner/asset-pack.js';
 import {ancestors, boundedFile, readTask} from '../story-planner/runtime.js';
@@ -22,7 +22,7 @@ import {authoringPacket, loadAuthoringProposal, submitParsedAuthoringProposal, v
 import {checkDatabaseFiles} from './cli.js';
 import {AuthorInput, AuthorReceipt, ExplanationAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedProfile,
   NarratedRenderInput, NarratedRenderReceipt, NarratedRenderSpec, RenderInput, RenderReceipt, Request, StartInput,
-  StartReceipt, Submission, VoicePrepareInput, VoicePrepareReceipt} from './explanation-contract.js';
+  SourceCaptureProfile, SourcePathsAuthorPacketProfile, StartReceipt, Submission, VoicePrepareInput, VoicePrepareReceipt} from './explanation-contract.js';
 import {explanationAuthorPacket} from './explanation-author-packet.js';
 import {evidenceWorkspace} from './project-evidence.js';
 import {sourceFingerprint, validateSnapshot, WorkflowStore} from './store.js';
@@ -114,6 +114,18 @@ function packet(id: string, input: StartInput, snapshot: ReturnType<typeof valid
       input.request.documents.some(path => !snapshot.documents.some(file => file.path === path))) {
     return fail('INTEGRITY', 'Pinned snapshot differs from the requested repository, commit or documents.');
   }
+  if ('sourceCaptureProfile' in input) {
+    const {sourcePaths, documents} = input.request;
+    const split = snapshot.documents.length - sourcePaths.length;
+    const base = snapshot.documents.slice(0, split);
+    const captured = snapshot.documents.slice(split);
+    if (split < 1 || documents.some(path => !base.some(file => file.path === path)) ||
+        captured.some((file, index) => file.path !== sourcePaths[index] || !file.content ||
+          file.content.includes('\0') || Buffer.from(file.content).toString('utf8') !== file.content) ||
+        snapshot.documents.reduce((size, file) => size + Buffer.byteLength(file.content), 0) > TextCaptureLimits.totalBytes) {
+      return fail('INTEGRITY', 'Pinned snapshot differs from the ordered sourcePaths or capture budget.');
+    }
+  }
   const workspace = evidenceWorkspace(projectFor(id), sourceFingerprint(snapshot), snapshot);
   const author = authoringPacket(workspace);
   author.files.set('session-request.json', json({sessionTaskId: id, request: input.request, ...author.request}));
@@ -135,6 +147,7 @@ async function verifiedStart(data: string, task: TaskRecord, signal: AbortSignal
   const manifest = {schemaVersion: 'explanation-session-stage/1.0', taskId: task.id, stage: 'awaiting-author',
     profile: input.profile, request: input.request, binding: saved.binding, authoringRequestId: saved.authoringRequestId,
     ...(input.packetProfile ? {packetProfile: input.packetProfile} : {}),
+    ...('sourceCaptureProfile' in input ? {sourceCaptureProfile: input.sourceCaptureProfile} : {}),
     packetSha256: saved.packetSha256, review} as const;
   const files = new Map(material.author.files);
   files.set('session-manifest.json', json(manifest));
@@ -387,7 +400,10 @@ async function verifiedRender(data: string, task: TaskRecord, signal: AbortSigna
 async function executeStart(data: string, input: StartInput, signal: AbortSignal, onTask?: Announce, transport?: ReadonlyTransport) {
   const result = await run(data, START, input, signal, onTask, async (runner, id, child) => {
     const {request} = input;
-    const snapshot = await researchRepository(request.repository, request.ref, request.documents, transport, child);
+    const base = await researchRepository(request.repository, request.ref, request.documents, transport, child);
+    const snapshot = 'sourcePaths' in request
+      ? validateSnapshot(await captureRepositoryText(base, request.sourcePaths, child, transport))
+      : base;
     const material = packet(id, input, snapshot);
     const artifact = await runner.artifacts.commit(json(snapshot), 'application/json', 'PUBLISH', id);
     return {value: StartReceipt.parse({...material.author.request, packetSha256: material.packetSha256, snapshot: artifact}),
@@ -545,8 +561,10 @@ export async function statusExplanation(data: string, id: string, signal: AbortS
 export async function startExplanation(data: string, path: string, out: string, signal: AbortSignal, onTask?: Announce,
   transport?: ReadonlyTransport) {
   const request = await spec(Request, path, 12_000);
-  const packetProfile = request.voiceMode === 'silent' ? ExplanationAuthorPacketProfile : LocalizedNarratedAuthorPacketProfile;
-  const input = StartInput.parse({profile: PROFILE, request, packetProfile});
+  const input = StartInput.parse(request.schemaVersion === 'explanation-session-request/1.2'
+    ? {profile: PROFILE, request, packetProfile: SourcePathsAuthorPacketProfile, sourceCaptureProfile: SourceCaptureProfile}
+    : {profile: PROFILE, request,
+      packetProfile: request.voiceMode === 'silent' ? ExplanationAuthorPacketProfile : LocalizedNarratedAuthorPacketProfile});
   const status = await executeStart(data, input, signal, onTask, transport);
   return {...status, packet: await exportExplanation(data, status.taskId, out, signal)};
 }

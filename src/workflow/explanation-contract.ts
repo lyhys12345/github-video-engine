@@ -7,6 +7,7 @@ import {ArtifactSchema} from '../contracts/runtime.js';
 import {PRESENTATION_MAX_FRAMES} from '../contracts/presentation.js';
 import {AuthoredCaption} from '../presentation/narration.js';
 import {ZH_VISUAL_PROFILE} from '../presentation/visual-locale.js';
+import {TextCaptureLimits, TextCapturePath} from '../providers/github-readonly.js';
 
 const boundedText = (max: number) => z.string().min(1).max(max).regex(/\S/u);
 const Language = z.enum(['en-US', 'zh-CN']);
@@ -25,7 +26,21 @@ const NarratedRequest = SilentRequest.extend({
   schemaVersion: z.literal('explanation-session-request/1.1'), language: z.literal('zh-CN'),
   voiceMode: z.literal('windows-winrt-huihui'),
 });
-export const Request = z.discriminatedUnion('schemaVersion', [SilentRequest, NarratedRequest]);
+const SourcePathsRequest = SilentRequest.extend({
+  schemaVersion: z.literal('explanation-session-request/1.2'),
+  ref: z.string().regex(/^[a-f0-9]{40}$/i).transform(ref => ref.toLowerCase()),
+  sourcePaths: z.array(TextCapturePath).min(1).max(TextCaptureLimits.filesPerRequest),
+  voiceMode: z.enum(['silent', 'windows-winrt-huihui']),
+}).superRefine((request, context) => {
+  const paths = new Set(request.sourcePaths);
+  if (paths.size !== request.sourcePaths.length || request.documents.some(path => paths.has(path))) {
+    context.addIssue({code: 'custom', path: ['sourcePaths'], message: 'Use distinct source paths outside documents.'});
+  }
+  if (request.voiceMode === 'windows-winrt-huihui' && request.language !== 'zh-CN') {
+    context.addIssue({code: 'custom', path: ['language'], message: 'Huihui requires zh-CN.'});
+  }
+});
+export const Request = z.discriminatedUnion('schemaVersion', [SilentRequest, NarratedRequest, SourcePathsRequest]);
 const Citation = z.strictObject({sourceId: z.string().regex(/^source-[1-8]$/), sourceSha256: Hash,
   startLine: z.number().int().min(1).max(200_001), endLine: z.number().int().min(1).max(200_001), quote: boundedText(8_000)});
 const Reason = z.strictObject({detail: boundedText(1_000), citations: z.array(Citation).min(1).max(4)});
@@ -42,10 +57,14 @@ const Protocol = z.strictObject({profile: z.literal('explanation-session/1.0')})
 export const ExplanationAuthorPacketProfile = 'explanation-author-packet/1.0';
 export const NarratedAuthorPacketProfile = 'explanation-author-packet/1.1';
 export const LocalizedNarratedAuthorPacketProfile = 'explanation-author-packet/1.2';
+export const SourcePathsAuthorPacketProfile = 'explanation-author-packet/1.3';
+export const SourceCaptureProfile = 'github-pinned-git-blob/1.0';
 export const NarratedProfile = 'explanation-session-huihui/1.0';
 export const StartInput = z.union([
   Protocol.extend({request: SilentRequest, packetProfile: z.literal(ExplanationAuthorPacketProfile).optional()}),
   Protocol.extend({request: NarratedRequest, packetProfile: z.enum([NarratedAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile])}),
+  Protocol.extend({request: SourcePathsRequest, packetProfile: z.literal(SourcePathsAuthorPacketProfile),
+    sourceCaptureProfile: z.literal(SourceCaptureProfile)}),
 ]);
 export const AuthorInput = Protocol.extend({submission: Submission});
 const renderFields = {authorTaskId: Hash, plan: PresentationPlan, planTaskId: Hash,
