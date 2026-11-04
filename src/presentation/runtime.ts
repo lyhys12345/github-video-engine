@@ -68,7 +68,7 @@ export function checkPresentationPayload(kind: z.infer<typeof Result>['kind'], f
   }
 }
 
-function taskCancellation(signal: AbortSignal) {
+export function taskCancellation(signal: AbortSignal) {
   const control = new AbortController();
   const forward = () => {
     const reason = signal.reason;
@@ -82,7 +82,7 @@ function taskCancellation(signal: AbortSignal) {
   return {signal: control.signal, dispose: () => signal.removeEventListener('abort', forward)};
 }
 
-async function preflight(data: string) {
+export async function preflightPresentationState(data: string) {
   data = resolve(data);
   preflightStatePath(data);
   await ancestors(join(data, 'tmp'));
@@ -205,7 +205,7 @@ export async function createPresentation(store: WorkflowStore, id: string, propo
     evidenceSha256: sha256(workspace.files.get('evidence.json')!), compiler});
   const taskId = fingerprint(PLAN_KIND, input);
   const files = planFiles(input, compiled, taskId, workspace.files);
-  data = await preflight(data);
+  data = await preflightPresentationState(data);
   checkAbort(signal);
   assertCurrent();
   const runner = new TaskRunner(data);
@@ -305,7 +305,7 @@ async function checkedVoice(data: string, id: string, signal: AbortSignal) {
 
 export async function bindPresentationVoice(data: string, path: string, signal: AbortSignal, onTask?: (id: string) => void) {
   const spec = VoiceSpec.parse(decode(await boundedFile(resolve(path), 256_000)));
-  data = await preflight(data);
+  data = await preflightPresentationState(data);
   const {plan} = await voicePlan(data, spec, signal);
   const decoderVersions = async (workSignal: AbortSignal) => Object.fromEntries(await Promise.all(
     [ ['ffmpeg', ffmpegPath()], ['ffprobe', ffprobePath()] ].map(async ([name, executable]) =>
@@ -373,7 +373,7 @@ async function videoInput(work: string, totalFrames: number, extended: boolean, 
 export async function renderPresentation(data: string, planTaskId: string, signal: AbortSignal, onTask?: (id: string) => void,
   voiceTaskId?: string, resumeTaskId?: string) {
   checkAbort(signal);
-  data = await preflight(data);
+  data = await preflightPresentationState(data);
   const plan = await checkedPlan(data, planTaskId, signal);
   if (plan.compiled.moduleId === 'concurrency-queue/1' && !plan.compiled.endingTitle) requireQueueMigration();
   const voice = voiceTaskId === undefined ? undefined : await checkedVoice(data, voiceTaskId, signal);

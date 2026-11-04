@@ -1,4 +1,5 @@
-import {readFile, writeFile} from 'node:fs/promises';
+import {mkdtemp, readFile, rm, rmdir, writeFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {expect, it} from 'vitest';
@@ -9,6 +10,7 @@ import {command} from '../src/core/process.js';
 import {ffmpegPath} from '../src/providers/local.js';
 import {PAPER_BIRD_SHA256} from '../src/presentation/asset.js';
 import {presentationCommand} from '../src/presentation/cli.js';
+import {assembleSequence} from '../src/presentation/sequence.js';
 import {compilePresentation} from '../src/presentation/compile.js';
 import {presentationFrame} from '../src/presentation/frame-state.js';
 import {bindPresentationVoice, checkPresentationPayload, PREVIEW_KIND, readPresentation, renderPresentation} from '../src/presentation/runtime.js';
@@ -382,4 +384,45 @@ it('projects Unicode transcript ranges and rejects caption text and timing that 
   expect(() => projectCaptions({...clip, captions: [
     {...clip.captions[0]!, startSample: 0, endSample: 192100}, {...clip.captions[1]!, startSample: 192150},
   ]}, recording)).toThrow(expect.objectContaining({code: 'VOICE_CAPTION_TIMING'}));
+});
+
+it('rejects unbounded or unsupported sequence specs before dispatch', async ({onTestFinished}) => {
+  const root = await mkdtemp(join(tmpdir(), 'gve-seq-'));
+  const data = join(root, 'unused-state');
+  const path = join(root, 'sequence.json');
+  onTestFinished(async () => {
+    await rm(path, {force: true});
+    await rmdir(root);
+  });
+  const preview = {sceneId: 'first', previewTaskId: '1'.repeat(64), expectedPreviewManifestSha256: '2'.repeat(64)};
+  const scene = {...preview, openingCard: {title: 'One slot'}};
+  const spec = {schemaVersion: 'presentation-sequence/1.2', locale: 'en', authorship: {kind: 'caller-authored'}, mode: 'silent',
+    scenes: [scene, {...scene, sceneId: 'second', previewTaskId: '3'.repeat(64)}]};
+  const reject = async (value: unknown, code: string) => {
+    await writeFile(path, JSON.stringify(value));
+    await expect(assembleSequence(data, path, signal, () => {throw new Error('Unexpected dispatch');}))
+      .rejects.toMatchObject({code: 'PRESENTATION_SEQUENCE_' + code});
+  };
+  await reject({...spec, scenes: [scene]}, 'SCHEMA');
+  await reject({...spec, scenes: [scene, {...scene, path: 'outside.mp4'}]}, 'SCHEMA');
+  await reject({...spec, scenes: [scene, {...preview, sceneId: 'second'}]}, 'SCHEMA');
+  for (const title of ['A'.repeat(22), ' ', 'Example\n', 'A%{pts}', 'A:../../other', 'A\u202e']) {
+    await reject({...spec, scenes: [scene, {...spec.scenes[1], openingCard: {title}}]}, 'SCHEMA');
+  }
+  await reject({...spec, scenes: [scene, {...spec.scenes[1], openingCard: {title: 'Example', frames: 1}}]}, 'SCHEMA');
+  await reject({...spec, locale: undefined}, 'LOCALE');
+  await reject({...spec, locale: 'fr-FR'}, 'LOCALE');
+  await reject({...spec, locale: 'zh-CN'}, 'SCHEMA');
+  await reject({...spec, scenes: [scene, {...spec.scenes[1], openingCard: {title: '修订版'}}]}, 'SCHEMA');
+  const chinese = {sceneId: 'second', previewTaskId: '3'.repeat(64), expectedPreviewManifestSha256: '2'.repeat(64),
+    openingCard: {title: '修订版示意'}};
+  await reject({...spec, locale: 'zh-CN', scenes: [chinese, chinese]}, 'DUPLICATE');
+  for (const title of ['中文'.repeat(7), '中文\u200b', '中文\n示例']) {
+    await reject({...spec, locale: 'zh-CN', scenes: [chinese, {...chinese, openingCard: {title}}]}, 'SCHEMA');
+  }
+  await reject({...spec, locale: undefined, schemaVersion: 'presentation-sequence/1.1'}, 'VERSION');
+  await reject({...spec, locale: undefined, schemaVersion: 'presentation-sequence/1.0',
+    scenes: [preview, {...preview, sceneId: 'second', previewTaskId: '3'.repeat(64)}]}, 'VERSION');
+  await reject({...spec, scenes: [scene, scene]}, 'DUPLICATE');
+  await reject({...spec, mode: 'narrated'}, 'MODE');
 });

@@ -1,8 +1,22 @@
 import {EngineError} from '../core/errors.js';
+import {assembleSequence, exportSequence, resumeSequence, statusSequence} from './sequence.js';
 import {bindPresentationVoice, exportPresentation, readPresentation, renderPresentation, resumePresentation} from './runtime.js';
 
 export async function presentationCommand(positionals: string[], options: Record<string, unknown>, signal: AbortSignal) {
   const action = positionals[1];
+  if (action === 'assemble' || action === 'sequence-status' || action === 'sequence-resume' || action === 'sequence-export') {
+    const required = ['data', action === 'assemble' ? 'spec' : 'task', ...(action === 'sequence-export' ? ['out'] : [])];
+    if (positionals.length !== 2 || required.some(key => typeof options[key] !== 'string' || !String(options[key]).trim()) ||
+        Object.entries(options).some(([key, value]) => value !== undefined && !required.includes(key))) {
+      throw new EngineError('USAGE', 'presentation assemble --spec <sequence> --data <state> | presentation sequence-status/sequence-resume/sequence-export --task <sequence-task> --data <state> [--out <directory>]');
+    }
+    const data = String(options.data), id = String(options.task);
+    const announce = (taskId: string) => console.error(JSON.stringify({taskId, stage: 'presentation-sequence'}));
+    if (action === 'assemble') return assembleSequence(data, String(options.spec), signal, announce);
+    if (action === 'sequence-resume') return resumeSequence(data, id, signal, announce);
+    if (action === 'sequence-export') return exportSequence(data, id, String(options.out), signal);
+    return statusSequence(data, id, signal);
+  }
   const narrated = action === 'render' && options.mode === 'narrated';
   const required = action === 'voice-bind' ? ['data', 'spec'] :
     action === 'render' ? ['data', 'task', 'mode', ...(narrated ? ['voice'] : [])] :
