@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {AbsoluteFill, Composition, cancelRender, continueRender, delayRender, registerRoot, staticFile, useCurrentFrame} from 'remotion';
+import {CAPTION_FONT_SIZE, CAPTION_FONT_WEIGHT, CAPTION_TEXT_WIDTH, type CaptionLine} from './caption-layout-style.js';
 import type {CompiledLegacy, CompiledPresentation} from './compile.js';
 import {ConcurrencyQueue} from './queue-composition.js';
 import {queueTitle} from './queue-frame.js';
@@ -79,15 +80,52 @@ function ImageChoice({plan, frame}: {plan: CompiledLegacy; frame: ReturnType<typ
   </div>;
 }
 
-type Props = CompiledPresentation & {cues?: {startFrame: number; endFrame: number; transcript: string}[]};
+type Cue = {startFrame: number; endFrame: number; transcript: string; lines: CaptionLine[]};
+type Props = CompiledPresentation & {cues?: Cue[]};
+const lineStyle: React.CSSProperties = {fontFamily: 'GVE Presentation', fontSize: CAPTION_FONT_SIZE,
+  fontWeight: CAPTION_FONT_WEIGHT, fontKerning: 'none', fontVariantLigatures: 'none', lineHeight: '34px',
+  whiteSpace: 'pre', direction: 'ltr'};
+const lineText = (cue: Cue, line: CaptionLine) => cue.transcript.slice(line.startChar, line.endChar);
+
+function validateCaptionWidths(cues: Cue[]) {
+  const line = document.createElement('span');
+  line.style.fontFamily = 'GVE Presentation';
+  line.style.fontSize = CAPTION_FONT_SIZE + 'px';
+  line.style.fontWeight = String(CAPTION_FONT_WEIGHT);
+  line.style.fontKerning = 'none';
+  line.style.fontVariantLigatures = 'none';
+  line.style.whiteSpace = 'pre';
+  line.style.direction = 'ltr';
+  line.style.position = 'absolute';
+  line.style.visibility = 'hidden';
+  document.body.append(line);
+  try {
+    for (const [index, cue] of cues.entries()) {
+      for (const range of cue.lines) {
+        line.textContent = lineText(cue, range);
+        if (line.getBoundingClientRect().width > CAPTION_TEXT_WIDTH - 4) {
+          throw new Error('Caption cue ' + (index + 1) + ' exceeds the pinned browser width. Use shorter cues in presentation-voice-bindings/1.1.');
+        }
+      }
+    }
+  } finally {
+    line.remove();
+  }
+}
+
 const Presentation: React.FC<Props> = (plan) => {
   const frame = useCurrentFrame();
   const [handle] = useState(() => delayRender('Load pinned presentation font'));
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const font = new FontFace('GVE Presentation', `url(${JSON.stringify(staticFile('font.ttf'))})`);
-    void font.load().then(loaded => {document.fonts.add(loaded);setReady(true);continueRender(handle);}).catch(cancelRender);
-  }, [handle]);
+    void font.load().then(loaded => {
+      document.fonts.add(loaded);
+      if (plan.cues) validateCaptionWidths(plan.cues);
+      setReady(true);
+      continueRender(handle);
+    }).catch(cancelRender);
+  }, [handle, plan.cues]);
   if (!ready) return null;
   const beat = plan.beats.find(row => frame >= row.start && frame < row.end);
   if (!beat) throw new Error('Frame outside presentation timeline');
@@ -101,13 +139,12 @@ const Presentation: React.FC<Props> = (plan) => {
     {plan.moduleId === 'concurrency-queue/1' ? <ConcurrencyQueue plan={plan} frame={frame}/> :
       plan.moduleId === 'http-exchange/1' ? <Http plan={plan} frame={presentationFrame(plan, frame)}/> :
       <ImageChoice plan={plan} frame={presentationFrame(plan, frame)}/>}
-    <div style={{position: 'absolute', bottom: 130, left: 54, right: 54, height: 6, borderRadius: 6, background: border}}>
+    <div style={{position: 'absolute', bottom: plan.cues ? 170 : 130, left: 54, right: 54, height: 6, borderRadius: 6, background: border}}>
       <div style={{width: `${100 * (frame + 1) / plan.timeline.totalFrames}%`, height: '100%', borderRadius: 6, background: accent}}/>
     </div>
-    {cue && <div style={{position: 'absolute', bottom: 23, left: 54, right: 54, color: '#fff', background: ink, padding: '10px 16px',
-      borderRadius: 12, textAlign: 'center', fontSize: cue.transcript.length > 60 ? 18 : 25, lineHeight: 1.15,
-      overflowWrap: 'anywhere', whiteSpace: 'pre-wrap'}}>
-      {cue.transcript}
+    {cue && <div style={{position: 'absolute', bottom: 40, left: 54, right: 54, color: '#fff', background: ink, padding: '10px 16px',
+      borderRadius: 12, textAlign: 'center', ...lineStyle}}>
+      {cue.lines.map(line => <div key={line.startChar}>{lineText(cue, line)}</div>)}
     </div>}
   </AbsoluteFill>;
 };

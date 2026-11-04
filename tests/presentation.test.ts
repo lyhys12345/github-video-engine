@@ -10,6 +10,7 @@ import {command} from '../src/core/process.js';
 import {ffmpegPath} from '../src/providers/local.js';
 import {PAPER_BIRD_SHA256} from '../src/presentation/asset.js';
 import {presentationCommand} from '../src/presentation/cli.js';
+import {layoutCaptions} from '../src/presentation/caption-layout.js';
 import {assembleSequence} from '../src/presentation/sequence.js';
 import {sequenceAudio} from '../src/presentation/sequence-audio.js';
 import {compilePresentation} from '../src/presentation/compile.js';
@@ -30,6 +31,37 @@ const citation = {sourceId: 'source-1', sourceSha256: fixture.documents[0]!.sha2
   quote: fixture.documents[0]!.content.split(/\r?\n/)[0]!};
 const binding = {projectId: 'demo', repository: fixture.repository, commit: fixture.commit,
   snapshotHash: '1'.repeat(64), evidenceFingerprint: '2'.repeat(64)};
+
+it('lays out exact Chinese and mixed-script cue ranges at natural breaks with bounded, balanced lines', async () => {
+  const font = await readFile(new URL('../assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf', import.meta.url));
+  const inputs = [
+    '示例监听三千端口。请求根路径时，处理器返回问候。',
+    '示例使用 Express。发送 GET /hello 时，状态为 HTTP 200，正文为 Cafe\u0301。',
+    '这是一段适合分行的示例文字，'.repeat(3) + '用来检查最后一行是否过短。',
+    '短句。',
+  ];
+  const ranges = layoutCaptions(font, inputs);
+  const lines = ranges.map((cue, i) => cue.map(({startChar, endChar}) => inputs[i]!.slice(startChar, endChar)));
+  expect(lines[0]).toEqual(['示例监听三千端口。', '请求根路径时，处理器返回问候。']);
+  expect(lines[1]!.find(line => line.includes('Cafe\u0301'))).toBeDefined();
+  for (const token of ['Express', 'GET', '/hello', 'HTTP', '200']) expect(lines[1]!.filter(line => line.includes(token))).toHaveLength(1);
+  expect(lines[2]).toHaveLength(3);
+  expect(lines[2]!.every(line => line.length >= 10)).toBe(true);
+  expect(lines[3]).toEqual(['短句。']);
+  const request = '示例使用 Express。发送 GET / 时，处理器返回 Hello World!';
+  expect(layoutCaptions(font, [request])[0]!.map(({startChar, endChar}) => request.slice(startChar, endChar)))
+    .toEqual(['示例使用 Express。发送 GET / ', '时，处理器返回 Hello World!']);
+  for (const [i, cue] of ranges.entries()) {
+    expect(lines[i]!.join('')).toBe(inputs[i]);
+    expect(cue.map(line => line.startChar)).toEqual([0, ...cue.slice(0, -1).map(line => line.endChar)]);
+    expect(lines[i]!.every(line => !/^[，。！？、；：]/u.test(line))).toBe(true);
+  }
+  expect(layoutCaptions(font, ['中'.repeat(57)])[0]).toHaveLength(3);
+  expect(layoutCaptions(font, ['文本𰻞'])[0]).toEqual([{startChar: 0, endChar: 4}]);
+  for (const text of ['中'.repeat(58), 'W'.repeat(35), '中文🙂', '文本' + String.fromCodePoint(0x31350), 'مرحبا', '中\uFE0F', '中文\u2028换行']) {
+    expect(() => layoutCaptions(font, [text])).toThrow(/Use shorter cues in presentation-voice-bindings\/1\.1/);
+  }
+});
 
 function example(count: number, mode: 'http' | 'image-mask' = 'http', sourceBinding = binding, requestId = '3'.repeat(64)) {
   const isHttp = mode === 'http';

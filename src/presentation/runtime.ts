@@ -17,6 +17,8 @@ import {verifyMovie} from '../story-planner/preview.js';
 import {ancestors, boundedFile, preflightStatePath, readTask} from '../story-planner/runtime.js';
 import {loadAuthoringProposal} from '../workflow/agent-authoring.js';
 import type {WorkflowStore} from '../workflow/store.js';
+import {layoutCaptions} from './caption-layout.js';
+import {CAPTION_LAYOUT_PROFILE, type CaptionLine} from './caption-layout-style.js';
 import {compilePresentation, type CompiledPresentation} from './compile.js';
 import {decodeClip, FRAME_SAMPLES, loadClip, matchVoice, MAX_PCM, mixClips, NARRATED_KIND, placement, projectCaptions, RATE,
   voiceCaptions, VOICE_KIND, voiceReview, VoiceSpec} from './narration.js';
@@ -44,7 +46,8 @@ const PreviewInput = z.strictObject({planTaskId: Hash, planManifestSha256: Hash,
   mediaMetadataProfile: z.literal(MEDIA_METADATA_PROFILE).optional(),
   renderProfile: z.literal(EXTENDED_RENDER_PROFILE).optional(), rendererSha256: Hash.optional()});
 const VoiceInput = z.strictObject({spec: VoiceSpec, decoder: z.record(z.string(), z.string()), implementationSha256: Hash});
-const NarratedInput = PreviewInput.extend({mode: z.literal('narrated'), voiceTaskId: Hash, voiceManifestSha256: Hash});
+const NarratedInput = PreviewInput.extend({mode: z.literal('narrated'), voiceTaskId: Hash, voiceManifestSha256: Hash,
+  captionLayoutProfile: z.literal(CAPTION_LAYOUT_PROFILE).optional()});
 const Result = z.strictObject({kind: z.enum([PLAN_KIND, PREVIEW_KIND, VOICE_KIND, NARRATED_KIND]), files: z.array(z.strictObject({
   path: z.string().max(90), artifact: ArtifactSchema,
 })).min(4).max(60)});
@@ -353,11 +356,18 @@ export async function bindPresentationVoice(data: string, path: string, signal: 
 }
 
 function previewManifest(input: z.infer<typeof PreviewInput> | z.infer<typeof NarratedInput>, id: string, plan: CompiledPresentation,
-  samples: number[], movie: Buffer, probe: unknown) {
+  samples: number[], movie: Buffer, probe: unknown, captionLines?: CaptionLine[][]) {
   return {kind: input.mode === 'silent' ? PREVIEW_KIND : NARRATED_KIND, taskId: id, ...input, binding: plan.binding,
     proposalHash: plan.proposalHash, planSha256: plan.planSha256, moduleId: plan.moduleId, timeline: plan.timeline, samples,
+    ...(captionLines ? {captionLines} : {}),
     ...(input.renderProfile ? {frameRanges: extendedRanges(plan.timeline.totalFrames)} : {}),
     media: {sha256: sha256(movie), probe, fullDecodeExit: 0}, review: input.mode === 'silent' ? review : voiceReview};
+}
+
+async function presentationFont() {
+  const font = await boundedFile(join(projectRoot, 'assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf'), 30_000_000);
+  if (sha256(font) !== FONT_SHA) fail('Pinned presentation font differs.');
+  return font;
 }
 
 function probeWithoutLocation(probe: unknown) {
@@ -407,8 +417,8 @@ export async function renderPresentation(data: string, planTaskId: string, signa
   if (plan.compiled.moduleId === 'concurrency-queue/1' && !plan.compiled.endingTitle) requireQueueMigration();
   const voice = voiceTaskId === undefined ? undefined : await checkedVoice(data, voiceTaskId, signal);
   if (voice && voice.input.spec.planTaskId !== planTaskId) throw new EngineError('VOICE_PARENT', 'Bind the voice to this exact plan task.');
-  const font = await boundedFile(join(projectRoot, 'assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf'), 30_000_000);
-  if (sha256(font) !== FONT_SHA) fail('Pinned presentation font differs.');
+  const font = await presentationFont();
+  const captionLines = voice && layoutCaptions(font, voice.captionCues.map(cue => cue.transcript));
   const env = await environment();
   const extended = plan.compiled.timeline.totalFrames > PRESENTATION_LEGACY_MAX_FRAMES;
   const rendererSha256 = async () => sha256(canonical(await Promise.all([
@@ -421,7 +431,8 @@ export async function renderPresentation(data: string, planTaskId: string, signa
     ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {}),
     ...(queueRenderer ? {rendererSha256: queueRenderer} : {})};
   const input = voice ? NarratedInput.parse({...base, mode: 'narrated', voiceTaskId,
-    voiceManifestSha256: sha256(voice.files.get('voice-manifest.json')!)}) : PreviewInput.parse({...base, mode: 'silent'});
+    voiceManifestSha256: sha256(voice.files.get('voice-manifest.json')!),
+    captionLayoutProfile: CAPTION_LAYOUT_PROFILE}) : PreviewInput.parse({...base, mode: 'silent'});
   const kind = voice ? NARRATED_KIND : PREVIEW_KIND;
   const taskId = fingerprint(kind, input);
   if (resumeTaskId !== undefined && taskId !== resumeTaskId) {
@@ -441,8 +452,8 @@ export async function renderPresentation(data: string, planTaskId: string, signa
       await writeFile(join(work, 'public', 'font.ttf'), font, {flag: 'wx'});
       const workerInput = join(work, 'input.json');
       await writeFile(workerInput, json({entry: join(projectRoot, 'src/presentation/composition.tsx'), browser: env.browser,
-        props: voice ? {...plan.compiled, cues: voice.captionCues.map(({startFrame, endFrame, transcript}) =>
-          ({startFrame, endFrame, transcript}))} : plan.compiled,
+        props: voice ? {...plan.compiled, cues: voice.captionCues.map(({startFrame, endFrame, transcript}, index) =>
+          ({startFrame, endFrame, transcript, lines: captionLines![index]}))} : plan.compiled,
         sampleFrames: samples, geometry: {...GEOMETRY, fps: plan.compiled.timeline.fps},
         ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {})}), {flag: 'wx'});
       await command(process.execPath, ['--import', 'tsx', join(projectRoot, 'src/short-segment/worker.ts'), workerInput], {
@@ -469,7 +480,7 @@ export async function renderPresentation(data: string, planTaskId: string, signa
       const files = new Map<string, Buffer>([['preview.mp4', video],
         ['captions.vtt', voice ? voice.files.get('captions.vtt')! : captions(plan.compiled)]]);
       for (const frame of samples) files.set('samples/' + frame + '.png', await boundedFile(join(work, 'samples', frame + '.png'), MAX_SAMPLE_BYTES));
-      files.set('preview-manifest.json', json(previewManifest(input, taskId, plan.compiled, samples, video, probeWithoutLocation(probe))));
+      files.set('preview-manifest.json', json(previewManifest(input, taskId, plan.compiled, samples, video, probeWithoutLocation(probe), captionLines)));
       return writeArtifacts(runner, kind, taskId, files, workSignal);
     }, cancellation.signal, {attempts: RETRIES, timeoutMs: extended ? 3_000_000 : 900_000, beforeDiscardTemporary: cleanupOwnedRuntimeTmp,
       accounting: {provider: 'remotion-local', ratePolicy: 'local-zero-v1'}});
@@ -522,6 +533,8 @@ export async function readPresentation(data: string, id: string, requested: Pres
   const voice = input.mode === 'narrated' ? await checkedVoice(data, input.voiceTaskId, signal, true) : undefined;
   if (input.mode === 'narrated' && (voice!.input.spec.planTaskId !== input.planTaskId ||
       sha256(voice!.files.get('voice-manifest.json')!) !== input.voiceManifestSha256)) fail('Preview voice binding differs.');
+  const captionLines = input.mode === 'narrated' && input.captionLayoutProfile ?
+    layoutCaptions(await presentationFont(), voice!.captionCues.map(cue => cue.transcript)) : undefined;
   const extended = plan.compiled.timeline.totalFrames > PRESENTATION_LEGACY_MAX_FRAMES;
   if (extended !== (input.renderProfile === EXTENDED_RENDER_PROFILE)) fail('Preview duration profile differs from its parent.');
   const samples = sampleFrames(plan.compiled, voice?.captionCues, extended);
@@ -538,7 +551,7 @@ export async function readPresentation(data: string, id: string, requested: Pres
       (voice && (audio?.codec_type !== 'audio' || audio?.codec_name !== 'aac' || audio?.sample_rate !== String(RATE) ||
         audio?.channels !== 1 || !Number.isFinite(Number(audio.duration)) ||
         Math.abs(Number(audio.duration) - plan.compiled.timeline.totalFrames / plan.compiled.timeline.fps) > .01)) ||
-      !json(previewManifest(input, id, plan.compiled, samples, files.get('preview.mp4')!, probe)).equals(files.get('preview-manifest.json')!) ||
+      !json(previewManifest(input, id, plan.compiled, samples, files.get('preview.mp4')!, probe, captionLines)).equals(files.get('preview-manifest.json')!) ||
       !(voice ? voice.files.get('captions.vtt')! : captions(plan.compiled)).equals(files.get('captions.vtt')!)) fail('Preview media, captions or parent binding differs.');
   for (const [path, bytes] of plan.files) files.set('editable/' + path, bytes);
   if (voice) for (const [path, bytes] of [...voice.files, ...voice.sourceFiles]) files.set('voice/' + path, bytes);
@@ -561,6 +574,9 @@ export async function resumePresentation(data: string, id: string, requested: Pr
   const input = kind === 'narrated' ? NarratedInput.parse(task.input) : PreviewInput.parse(task.input);
   if (!input.mediaMetadataProfile) {
     throw new EngineError('PRESENTATION_RESUME_INPUT', 'This unfinished preview uses historical media metadata. Repeat render explicitly to create a new task.');
+  }
+  if (input.mode === 'narrated' && !input.captionLayoutProfile) {
+    throw new EngineError('PRESENTATION_RESUME_INPUT', 'This unfinished preview uses historical caption layout. Repeat render explicitly to create a new task.');
   }
   return renderPresentation(data, input.planTaskId, signal, onTask, input.mode === 'narrated' ? input.voiceTaskId : undefined, id);
 }
