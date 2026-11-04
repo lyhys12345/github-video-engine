@@ -126,10 +126,13 @@ export function verifyProposal(proposal: StoryProposal, workspace: Workspace) {
   }
 }
 
-export async function openAuthoring(store: WorkflowStore, id: string, directory: string, signal: AbortSignal) {
-  checkAbort(signal);
-  const output = safeOutput(store, directory);
-  const {manifest, files} = await buildWorkspace(store, id);
+export function authoringDraft(request: ReturnType<typeof identity>, audience = '') {
+  return {schemaVersion: '1.0', kind: 'session-story-proposal', ...request, authorship: {kind: 'session-agent'},
+    useCase: {title: '', audience, question: '', scope: '', exclusions: [], goalClaimIds: [], inputClaimIds: [],
+      processClaimIds: [], outputClaimIds: [], limitationClaimIds: []}, claims: [], entities: [], mechanisms: [], beats: [], openQuestions: []};
+}
+
+export function authoringPacket({manifest, files}: Workspace) {
   const request = identity(manifest);
   const packet = {
     schemaVersion: '1.0', kind: 'session-agent-authoring-work-package', state: 'awaiting-author', ...request,
@@ -147,18 +150,22 @@ export async function openAuthoring(store: WorkflowStore, id: string, directory:
       'Source and reference checks do not prove entailment or coverage. Factual, editorial and audiovisual review remain pending.',
     ],
   };
-  const draft = {schemaVersion: '1.0', kind: 'session-story-proposal', ...request, authorship: {kind: 'session-agent'},
-    useCase: {title: '', audience: '', question: '', scope: '', exclusions: [], goalClaimIds: [], inputClaimIds: [],
-      processClaimIds: [], outputClaimIds: [], limitationClaimIds: []}, claims: [], entities: [], mechanisms: [], beats: [], openQuestions: []};
   files.set('proposal.schema.json', json(z.toJSONSchema(LegacyStoryProposal)));
   files.set('proposal-queue.schema.json', json(z.toJSONSchema(QueueStoryProposal)));
   files.set('capture.schema.json', json(z.toJSONSchema(captureSpec)));
-  files.set('proposal-draft.json', json(draft));
+  files.set('proposal-draft.json', json(authoringDraft(request)));
   for (const source of manifest.sources) {
     const lines = files.get(source.path)!.toString('utf8').split(/\r?\n/);
     files.set(source.id + '.lines.txt', Buffer.from(lines.map((line, i) => `${i + 1}\t${display(line)}`).join('\n') + '\n'));
   }
   files.set('work-package.json', json(packet));
+  return {request, packet, files};
+}
+
+export async function openAuthoring(store: WorkflowStore, id: string, directory: string, signal: AbortSignal) {
+  checkAbort(signal);
+  const output = safeOutput(store, directory);
+  const {request, packet, files} = authoringPacket(await buildWorkspace(store, id));
   await publishReviewExport(output, [...files], signal, {exactFiles: true});
   return {...request, state: packet.state, output, next: 'Session author reads evidence and submits a proposal'};
 }
@@ -191,6 +198,11 @@ function reviewState(proposal: StoryProposal, hash: string) {
 export async function submitAuthoringProposal(store: WorkflowStore, id: string, spec: string, signal: AbortSignal) {
   checkAbort(signal);
   const proposal = parse(StoryProposal, decode(await boundedFile(resolve(spec), proposalLimit)));
+  return submitParsedAuthoringProposal(store, id, proposal, signal);
+}
+
+export async function submitParsedAuthoringProposal(store: WorkflowStore, id: string, proposal: StoryProposal, signal: AbortSignal) {
+  checkAbort(signal);
   verifyProposal(proposal, await buildWorkspace(store, id));
   const {hash, reused} = await store.saveValidatedProposal(proposal, signal);
   return {...reviewState(proposal, hash), reused};

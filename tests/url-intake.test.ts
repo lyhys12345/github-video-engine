@@ -2,17 +2,75 @@ import {expect, it, vi} from 'vitest';
 import {mkdir, readFile, readdir, rename, symlink, writeFile} from 'node:fs/promises';
 import {DatabaseSync} from 'node:sqlite';
 import {join} from 'node:path';
+import {z} from 'zod';
 import {workflowCommand} from '../src/workflow/cli.js';
 import {StorySchema} from '../src/contracts/story.js';
 import {statusStory, exportStory} from '../src/story-planner/runtime.js';
 import {ArtifactStore} from '../src/assets/store.js';
 import {sha256} from '../src/core/util.js';
+import {readTask} from '../src/story-planner/runtime.js';
+import {exportExplanation, resumeExplanation, startExplanation, statusExplanation, submitExplanation} from '../src/workflow/explanation-session.js';
+import {ExplanationAuthorPacketProfile, StartInput, Submission} from '../src/workflow/explanation-contract.js';
 import {workflowRoot} from './workflow-support.js';
 
 const signal = new AbortController().signal;
 const commit = 'a'.repeat(40);
 const repository = 'https://github.com/example/demo';
 const readme = '# Demo\r\n\r\nUse the flag to return a mask.\r\n';
+
+it('pins a resumable explanation request, preserves an evidence disposition and rejects damaged parent artifacts', async () => {
+  const root = await workflowRoot('explanation-session'), data = join(root, 'db');
+  const request = join(root, 'request.json'), submission = join(root, 'submission.json');
+  await writeFile(request, JSON.stringify({schemaVersion: 'explanation-session-request/1.0', repository,
+    audience: 'Readers of the fixture', language: 'en-US', maxSeconds: 12, voiceMode: 'silent'}));
+  const transport = vi.fn(async (url: string) => url.includes('/commits/') ? {sha: commit} :
+    url.includes('/readme?') ? {type: 'file', path: 'README.md', encoding: 'base64', size: Buffer.byteLength(readme),
+      content: Buffer.from(readme).toString('base64')} : {full_name: 'example/demo', name: 'demo', default_branch: 'main', license: null});
+  const packet = join(root, 'packet');
+  const started = await startExplanation(data, request, packet, signal, undefined, transport);
+  expect(started).toMatchObject({stage: 'awaiting-author', binding: {commit}, cached: false, packetProfile: ExplanationAuthorPacketProfile});
+  expect(await startExplanation(data, request, packet, signal, undefined, transport)).toMatchObject({taskId: started.taskId, cached: true});
+  expect(transport).toHaveBeenCalledTimes(3);
+  const packetJson = async (name: string) => JSON.parse(await readFile(join(started.packet.bundle, name), 'utf8'));
+  const handoff = await packetJson('work-package.json');
+  expect(handoff).toMatchObject({kind: 'explanation-session-authoring-work-package', sessionTaskId: started.taskId,
+    language: 'en-US', audience: 'Readers of the fixture', submitCommand:
+      'pnpm gve explanation proposal --task ' + started.taskId + ' --spec "<SUBMISSION_JSON>" --data "<STATE>"'});
+  expect(JSON.stringify(handoff)).not.toMatch(/submit-proposal|capture-text/);
+  expect(await readdir(started.packet.bundle)).not.toContain('capture.schema.json');
+  expect(await packetJson(handoff.submissionSchema)).toEqual(z.toJSONSchema(Submission));
+  expect(await packetJson(handoff.proposalDraft)).toMatchObject({sessionTaskId: started.taskId, language: handoff.language,
+    disposition: 'proposal', snapshotHash: handoff.binding.snapshotHash, authoringRequestId: handoff.authoringRequestId,
+    proposal: {binding: handoff.binding, useCase: {audience: handoff.audience}}});
+  const draft = await packetJson(handoff.needsEvidenceDraft);
+  const author = {...draft, reason: {...draft.reason, detail: 'This source omits the output format.',
+      citations: [{sourceId: 'source-1', sourceSha256: sha256(readme), startLine: 3, endLine: 3,
+        quote: 'Use the flag to return a mask.'}]}};
+  const startedTask = await readTask(data, started.taskId, null);
+  const {packetProfile, ...historicalInput} = StartInput.parse(startedTask.input);
+  expect(packetProfile).toBe(ExplanationAuthorPacketProfile);
+  expect(StartInput.parse(historicalInput)).toStrictEqual(historicalInput);
+  await writeFile(submission, JSON.stringify({...author, unknown: true}));
+  await expect(submitExplanation(data, started.taskId, submission, signal)).rejects.toMatchObject({code: 'EXPLANATION_SCHEMA'});
+  await writeFile(submission, JSON.stringify({...author, language: 'zh-CN'}));
+  await expect(submitExplanation(data, started.taskId, submission, signal)).rejects.toMatchObject({code: 'EXPLANATION_BINDING'});
+  await writeFile(submission, JSON.stringify({...author, snapshotHash: '0'.repeat(64)}));
+  await expect(submitExplanation(data, started.taskId, submission, signal)).rejects.toMatchObject({code: 'EXPLANATION_BINDING'});
+  await writeFile(submission, JSON.stringify(author));
+  const submitted = await submitExplanation(data, started.taskId, submission, signal);
+  expect(submitted).toMatchObject({stage: 'needs-evidence', proposalHash: null, integrity: 'verified'});
+  expect(await resumeExplanation(data, submitted.taskId, signal)).toMatchObject({taskId: submitted.taskId, cached: true});
+  const exported = await exportExplanation(data, submitted.taskId, join(root, 'result'), signal);
+  expect(JSON.parse(await readFile(join(exported.bundle, 'authoring-submission.json'), 'utf8'))).toEqual(author);
+  const task = await readTask(data, started.taskId, null);
+  const source = new ArtifactStore(data).path(task.outputs[0]!);
+  const original = await readFile(source);
+  try {
+    await writeFile(source, 'damage only this test copy');
+    await expect(statusExplanation(data, submitted.taskId, signal)).rejects.toMatchObject({code: 'INTEGRITY'});
+  } finally {await writeFile(source, original);}
+  expect(await statusExplanation(data, submitted.taskId, signal)).toMatchObject({stage: 'needs-evidence', integrity: 'verified'});
+});
 
 it('links URL intake to a reusable workspace and a durable authored story without network after intake', async () => {
   const root = await workflowRoot('url');

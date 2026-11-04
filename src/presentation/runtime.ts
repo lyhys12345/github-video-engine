@@ -194,13 +194,19 @@ export async function createPresentation(store: WorkflowStore, id: string, propo
   const plan = PresentationPlan.safeParse(value);
   if (!plan.success) throw new EngineError('PRESENTATION_SCHEMA', 'Expected a bounded presentation plan. ' +
     plan.error.issues.slice(0, 6).map(issue => issue.path.join('.') + ' ' + issue.message).join(', '));
-  if (plan.data.schemaVersion === '1.2') requireQueueMigration();
+  return createPresentationFromPlan(store, id, proposalHash, plan.data, data, signal);
+}
+
+export async function createPresentationFromPlan(store: WorkflowStore, id: string, proposalHash: string,
+  plan: PresentationPlan, data: string, signal: AbortSignal) {
+  checkAbort(signal);
+  if (plan.schemaVersion === '1.2') requireQueueMigration();
   const {proposal, bytes, workspace} = await loadAuthoringProposal(store, id, proposalHash, signal);
   if (bytes.length > 300_000) throw new EngineError('PRESENTATION_SIZE', 'Presentation proposal exceeds 300 kB.');
   const assertCurrent = () => {
     if (store.project(id).snapshotHash !== proposal.binding.snapshotHash) throw new EngineError('AUTHORING_STALE', 'Select a proposal for the current source revision.');
   };
-  const compiled = compilePresentation(proposal, plan.data);
+  const compiled = compilePresentation(proposal, plan);
   const queueImplementation = compiled.moduleId === 'concurrency-queue/1' ? [
     'src/contracts/authoring.ts', 'src/contracts/concurrency-queue.ts', 'src/presentation/concurrency-queue.ts',
     'src/presentation/queue-frame.ts', 'src/presentation/queue-composition.tsx', 'src/presentation/composition.tsx',
@@ -208,7 +214,7 @@ export async function createPresentation(store: WorkflowStore, id: string, propo
   const compiler = await Promise.all(['src/contracts/presentation.ts', 'src/presentation/compile.ts', 'src/presentation/asset.ts',
     'src/presentation/runtime.ts', ...queueImplementation]
     .map(async path => ({path, sha256: sha256(await boundedFile(join(projectRoot, path)))})));
-  const input = PlanInput.parse({projectId: id, proposal, plan: plan.data, sources: workspace.manifest.sources,
+  const input = PlanInput.parse({projectId: id, proposal, plan, sources: workspace.manifest.sources,
     evidenceSha256: sha256(workspace.files.get('evidence.json')!), compiler});
   const taskId = fingerprint(PLAN_KIND, input);
   const files = planFiles(input, compiled, taskId, workspace.files);

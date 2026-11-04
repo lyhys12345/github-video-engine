@@ -11,7 +11,7 @@ import {adaptAuthoringProposal} from './adapt-proposal.js';
 import {createPresentation} from '../presentation/runtime.js';
 type Options={root?:string;spec?:string;data?:string;repo?:string;ref?:string;doc?:string[];out?:string;id?:string;snapshot?:string;plan?:string;gate?:string;candidate?:string;rules?:string;delegation?:string;proposal?:string};
 export async function readJson(path:string){try{const info=await stat(path);if(!info.isFile()||info.size>4_000_000)throw new EngineError('WORKFLOW_SIZE','Workflow inputs must be regular JSON files up to 4 MB');return JSON.parse((await readFile(path,'utf8')).replace(/^\uFEFF/,'')) as unknown;}catch(error){if(error instanceof EngineError)throw error;throw new EngineError('INVALID_JSON',`Cannot read JSON ${path}: ${String(error)}`);}}
-async function checkDatabaseFiles(database:string) {
+export async function checkDatabaseFiles(database:string) {
   const entries = await Promise.all(['','-wal','-shm','-journal'].map(async suffix => {
     const info=await lstat(database+suffix).catch(error=>{
       if((error as NodeJS.ErrnoException).code==='ENOENT')return null;
