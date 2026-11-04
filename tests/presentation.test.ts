@@ -19,6 +19,7 @@ import {FRAME_SAMPLES, MAX_PCM, matchVoice, mixClips, placement, projectCaptions
 import {extendedRanges, FRAME_CHUNK, MAX_MOVIE_BYTES, requireExtendedDisk} from '../src/presentation/duration.js';
 import {produceTts} from '../src/tts/runtime.js';
 import {ArtifactStore} from '../src/assets/store.js';
+import {TaskRunner} from '../src/orchestrator/tasks.js';
 import {workflowCommand} from '../src/workflow/cli.js';
 import {WorkflowStore} from '../src/workflow/store.js';
 import {sourceFixture, workflowRoot} from './workflow-support.js';
@@ -165,6 +166,71 @@ it.runIf(process.platform === 'win32' && !!process.env.SystemRoot)('commits, ver
       .rejects.toMatchObject({code: 'EXPLAIN_INTEGRITY'});
   } finally {database.close();}
 }, 60_000);
+
+it('validates location-free preview metadata while retaining the original historical fingerprint and bytes', async () => {
+  const root = await workflowRoot('probe'), data = join(root, 'state');
+  const store = new WorkflowStore(join(data, 'workflow'));
+  try {await store.create('demo', fixture);} finally {store.close();}
+  const run = (action: string, args: Parameters<typeof workflowCommand>[1]) =>
+    workflowCommand(['project', action], {id: 'demo', data, ...args}, signal);
+  const packet = await run('author', {out: join(root, 'packet')}) as {binding: typeof binding; authoringRequestId: string};
+  const authored = example(1, 'http', packet.binding, packet.authoringRequestId);
+  const proposalPath = join(root, 'proposal.json'), planPath = join(root, 'plan.json');
+  await writeFile(proposalPath, canonical(authored.proposal));
+  const submitted = await run('submit-proposal', {spec: proposalPath}) as {hash: string};
+  await writeFile(planPath, canonical(authored.plan));
+  const {taskId: planTaskId} = await run('presentation-plan', {spec: planPath, proposal: submitted.hash}) as {taskId: string};
+  const parent = await readPresentation(data, planTaskId, 'plan', signal);
+  const plan = compilePresentation(authored.proposal, authored.plan);
+  const fontSha256 = sha256(await readFile('assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf'));
+  const base = {planTaskId, planManifestSha256: sha256(parent.files!.get('plan-manifest.json')!),
+    mode: 'silent', fontSha256, environment: {fixture: 'metadata-profile'}};
+  // Persist a complete synthetic closure. Historical status verifies bytes and metadata offline.
+  const movie = Buffer.from('synthetic preview bytes');
+  const captions = Buffer.from('WEBVTT\n\n00:00:00.000 --> 00:00:03.000\nText 0\n');
+  const samples = [0, 1, 2, 3, 4, 5, 29, 71];
+  const runner = new TaskRunner(data);
+  const persist = async (input: typeof base & {mediaMetadataProfile?: string}, format: {duration: string; filename?: string | null}) => {
+    const taskId = sha256(canonical({version: 'production-task-v1', kind: PREVIEW_KIND, input}));
+    const probe = {format, streams: [{codec_type: 'video', codec_name: 'h264', pix_fmt: 'yuv420p',
+      width: 720, height: 1280, avg_frame_rate: '24/1', nb_read_frames: '72'}]};
+    const manifest = Buffer.from(canonical({kind: PREVIEW_KIND, taskId, ...input, binding: plan.binding,
+      proposalHash: plan.proposalHash, planSha256: plan.planSha256, moduleId: plan.moduleId, timeline: plan.timeline,
+      samples, media: {sha256: sha256(movie), probe, fullDecodeExit: 0}, review: parent.status.review}));
+    const payloads = [
+      {path: 'preview.mp4', bytes: movie, mediaType: 'video/mp4'},
+      {path: 'captions.vtt', bytes: captions, mediaType: 'text/plain'},
+      {path: 'preview-manifest.json', bytes: manifest, mediaType: 'application/json'},
+      ...samples.map(frame => ({path: `samples/${frame}.png`, bytes: Buffer.from('synthetic sample'), mediaType: 'image/png'})),
+    ];
+    await runner.run(PREVIEW_KIND, input, async () => {
+      const files = await Promise.all(payloads.map(async ({path, bytes, mediaType}) =>
+        ({path, artifact: await runner.artifacts.commit(bytes, mediaType, 'PUBLISH', taskId)})));
+      return {value: {kind: PREVIEW_KIND, files}, outputs: files.map(file => file.artifact)};
+    }, signal);
+    return {taskId, manifest};
+  };
+  try {
+    const historical = await persist(base, {duration: '3.000000', filename: 'historical-tmp/preview.mp4'});
+    const previous = await readPresentation(data, historical.taskId, 'preview', signal);
+    expect(previous.status).toMatchObject({taskId: historical.taskId, integrity: 'verified'});
+    expect(previous.files!.get('preview-manifest.json')).toEqual(historical.manifest);
+    expect(runner.get(historical.taskId)?.input).toEqual(base);
+
+    const currentInput = {...base, mediaMetadataProfile: 'ffprobe-no-location/1'};
+    const current = await persist(currentInput, {duration: '3.000000'});
+    expect(current.taskId).not.toBe(historical.taskId);
+    expect((await readPresentation(data, current.taskId, 'preview', signal)).files!.get('preview-manifest.json')).toEqual(current.manifest);
+    for (const filename of ['current-tmp/preview.mp4', null]) {
+      const located = await persist({...currentInput, environment: {fixture: String(filename)}}, {duration: '3.000000', filename});
+      await expect(readPresentation(data, located.taskId, 'preview', signal)).rejects.toMatchObject({code: 'PRESENTATION_INTEGRITY',
+        message: 'Location-free preview metadata cannot contain a file name and requires a format record.'});
+    }
+    const unknown = await persist({...base, mediaMetadataProfile: 'unknown/9'}, {duration: '3.000000'});
+    await expect(readPresentation(data, unknown.taskId, 'preview', signal)).rejects.toMatchObject({code: 'PRESENTATION_INTEGRITY',
+      message: 'Persisted presentation input does not match its task kind.'});
+  } finally {runner.close();}
+});
 
 it('uses the last decoded sample, rounds cues outward, and rejects overflow and digital silence', () => {
   const authored = example(4);

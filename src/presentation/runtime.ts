@@ -28,6 +28,7 @@ export const PREVIEW_KIND = 'repository-presentation-preview-v1';
 const FONT_SHA = 'a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da';
 const GEOMETRY = {width: 720, height: 1280};
 const RETRIES = 3;
+const MEDIA_METADATA_PROFILE = 'ffprobe-no-location/1';
 const EARLY_VOICE_IMPLEMENTATION = '5fcc6b1dde72b2ce7dd45894b11d547503e20988fbf219d9f6c7b4117c41ff2c';
 const EARLY_VOICE_LEDGER = 'voice-ledger-1.0-early-event-trace';
 const requireQueueMigration = (): never => {
@@ -40,6 +41,7 @@ const PlanInput = z.strictObject({projectId: Id, proposal: StoryProposal, plan: 
 type PlanInput = z.infer<typeof PlanInput>;
 const PreviewInput = z.strictObject({planTaskId: Hash, planManifestSha256: Hash, mode: z.literal('silent'),
   fontSha256: z.literal(FONT_SHA), environment: z.record(z.string(), z.string()),
+  mediaMetadataProfile: z.literal(MEDIA_METADATA_PROFILE).optional(),
   renderProfile: z.literal(EXTENDED_RENDER_PROFILE).optional(), rendererSha256: Hash.optional()});
 const VoiceInput = z.strictObject({spec: VoiceSpec, decoder: z.record(z.string(), z.string()), implementationSha256: Hash});
 const NarratedInput = PreviewInput.extend({mode: z.literal('narrated'), voiceTaskId: Hash, voiceManifestSha256: Hash});
@@ -355,6 +357,16 @@ function previewManifest(input: z.infer<typeof PreviewInput> | z.infer<typeof Na
     media: {sha256: sha256(movie), probe, fullDecodeExit: 0}, review: input.mode === 'silent' ? review : voiceReview};
 }
 
+function probeWithoutLocation(probe: unknown) {
+  if (!probe || typeof probe !== 'object' || !('format' in probe) || !probe.format ||
+      typeof probe.format !== 'object' || Array.isArray(probe.format)) {
+    return fail('Expected FFprobe format metadata.');
+  }
+  const format = {...probe.format} as Record<string, unknown>;
+  delete format.filename;
+  return {...probe, format};
+}
+
 async function videoInput(work: string, totalFrames: number, extended: boolean, signal: AbortSignal) {
   const ranges = extended ? extendedRanges(totalFrames) : [[0, totalFrames - 1]];
   let fullRange: boolean | undefined;
@@ -402,6 +414,7 @@ export async function renderPresentation(data: string, planTaskId: string, signa
   ].map(async path => sha256(await boundedFile(join(projectRoot, path)))))));
   const queueRenderer = plan.compiled.moduleId === 'concurrency-queue/1' ? await rendererSha256() : undefined;
   const base = {planTaskId, planManifestSha256: sha256(plan.files.get('plan-manifest.json')!), fontSha256: FONT_SHA, environment: env,
+    mediaMetadataProfile: MEDIA_METADATA_PROFILE,
     ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {}),
     ...(queueRenderer ? {rendererSha256: queueRenderer} : {})};
   const input = voice ? NarratedInput.parse({...base, mode: 'narrated', voiceTaskId,
@@ -453,7 +466,7 @@ export async function renderPresentation(data: string, planTaskId: string, signa
       const files = new Map<string, Buffer>([['preview.mp4', video],
         ['captions.vtt', voice ? voice.files.get('captions.vtt')! : captions(plan.compiled)]]);
       for (const frame of samples) files.set('samples/' + frame + '.png', await boundedFile(join(work, 'samples', frame + '.png'), MAX_SAMPLE_BYTES));
-      files.set('preview-manifest.json', json(previewManifest(input, taskId, plan.compiled, samples, video, probe)));
+      files.set('preview-manifest.json', json(previewManifest(input, taskId, plan.compiled, samples, video, probeWithoutLocation(probe))));
       return writeArtifacts(runner, kind, taskId, files, workSignal);
     }, cancellation.signal, {attempts: RETRIES, timeoutMs: extended ? 3_000_000 : 900_000, beforeDiscardTemporary: cleanupOwnedRuntimeTmp,
       accounting: {provider: 'remotion-local', ratePolicy: 'local-zero-v1'}});
@@ -512,6 +525,10 @@ export async function readPresentation(data: string, id: string, requested: Pres
   const files = await readArtifacts(data, task, ['preview.mp4', 'captions.vtt', 'preview-manifest.json', ...samples.map(frame => `samples/${frame}.png`)], signal);
   const manifest = decode(files.get('preview-manifest.json')!);
   const probe = manifest.media?.probe, stream = probe?.streams?.[0], audio = probe?.streams?.[1];
+  if (input.mediaMetadataProfile && (!probe?.format || typeof probe.format !== 'object' ||
+      Array.isArray(probe.format) || Object.hasOwn(probe.format, 'filename'))) {
+    fail('Location-free preview metadata cannot contain a file name and requires a format record.');
+  }
   if (probe?.streams?.length !== (voice ? 2 : 1) || stream?.codec_type !== 'video' || stream?.codec_name !== 'h264' || stream?.pix_fmt !== 'yuv420p' ||
       stream?.width !== GEOMETRY.width || stream?.height !== GEOMETRY.height || stream?.avg_frame_rate !== plan.compiled.timeline.fps + '/1' ||
       Number(stream?.nb_read_frames) !== plan.compiled.timeline.totalFrames ||
@@ -539,6 +556,9 @@ export async function resumePresentation(data: string, id: string, requested: Pr
     return {...result.status, cached: true, ...('voiceLedgerProfile' in result && {voiceLedgerProfile: result.voiceLedgerProfile})};
   }
   const input = kind === 'narrated' ? NarratedInput.parse(task.input) : PreviewInput.parse(task.input);
+  if (!input.mediaMetadataProfile) {
+    throw new EngineError('PRESENTATION_RESUME_INPUT', 'This unfinished preview uses historical media metadata. Repeat render explicitly to create a new task.');
+  }
   return renderPresentation(data, input.planTaskId, signal, onTask, input.mode === 'narrated' ? input.voiceTaskId : undefined, id);
 }
 
