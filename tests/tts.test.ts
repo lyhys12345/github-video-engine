@@ -7,6 +7,8 @@ import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {ElevenLabsProvider,RemoteTtsSchema,ttsFingerprint,ttsInput,type TtsTransport} from '../src/providers/tts.js';
 import {dryRunTts,produceTts,statusTts,exportTts} from '../src/tts/runtime.js';
+import {generateHuihui,measureHuihuiWav} from '../src/tts/huihui.js';
+import {ttsCommand} from '../src/tts/cli.js';
 import {ArtifactStore} from '../src/assets/store.js';
 import {sha256,canonical} from '../src/core/util.js';
 const dirs:string[]=[];
@@ -15,6 +17,54 @@ async function scratch(){const dir=await mkdtemp(join(tmpdir(),'gve-tts-'));dirs
 const signal=()=>new AbortController().signal;
 const spec=()=>RemoteTtsSchema.parse({schemaVersion:'1.0',provider:'elevenlabs',text:'Explicit mocked provider narration.',voiceId:'test_exact_voice',voiceLabel:'Test voice; no Chen inference',modelId:'eleven_multilingual_v2',voiceSettings:{stability:.5,similarity_boost:.75,style:0,use_speaker_boost:true,speed:1},outputFormat:'mp3_44100_128',entitlement:'confirmed-api-access',estimatedMaxChargeMicros:40});
 const audio=()=>readFile('fixtures/tts-synthetic.mp3');
+
+test('rejects unbounded Huihui requests and alternate provider controls before state is created', async () => {
+  const root = await scratch();
+  const request = {schemaVersion: 'tts-huihui/1.0', text: '中文技术测试。'};
+  for (const invalid of [
+    {...request, text: '中'.repeat(121)},
+    {...request, text: '中\n文'},
+    {...request, text: '中\ud800文'},
+    {...request, voiceId: 'another-voice'},
+    {...request, ssml: '<speak>test</speak>'},
+    {...request, apiKey: 'synthetic-test-key'},
+    {...request, referenceAudio: 'audio.wav'},
+  ]) {
+    await expect(generateHuihui(invalid, join(root, 'state'), signal())).rejects.toHaveProperty('name', 'ZodError');
+  }
+  await expect(ttsCommand(['tts', 'huihui-generate'], {spec: 'unused.json', data: root, 'allow-paid': true}, signal()))
+    .rejects.toMatchObject({code: 'USAGE'});
+  await expect(readdir(root)).resolves.toEqual([]);
+});
+
+test('checks the fixed Huihui PCM WAV layout, duration and non-silence', () => {
+  const makeWav = (samples: number) => {
+    const wav = Buffer.alloc(46 + samples * 2);
+    wav.write('RIFF', 0);
+    wav.writeUInt32LE(wav.length - 8, 4);
+    wav.write('WAVEfmt ', 8);
+    wav.writeUInt32LE(18, 16);
+    wav.writeUInt16LE(1, 20);
+    wav.writeUInt16LE(1, 22);
+    wav.writeUInt32LE(16000, 24);
+    wav.writeUInt32LE(32000, 28);
+    wav.writeUInt16LE(2, 32);
+    wav.writeUInt16LE(16, 34);
+    wav.write('data', 38);
+    wav.writeUInt32LE(samples * 2, 42);
+    wav.writeInt16LE(-1, 46);
+    return wav;
+  };
+  const exact = makeWav(480_000);
+  expect(measureHuihuiWav(exact)).toEqual({sampleRate: 16000, channels: 1, sampleFormat: 's16le', samples: 480_000, durationSeconds: 30});
+  const silence = makeWav(1);
+  silence.writeInt16LE(0, 46);
+  const stereo = makeWav(1);
+  stereo.writeUInt16LE(2, 22);
+  for (const invalid of [silence, stereo, exact.subarray(0, -1), makeWav(480_001), Buffer.alloc(2_000_001)]) {
+    expect(() => measureHuihuiWav(invalid)).toThrow(expect.objectContaining({code: 'HUIHUI_MEDIA'}));
+  }
+});
 const options=(transport:TtsTransport,budget=100)=>({allowPaid:true,budgetMicros:budget,key:()=> 'sk_explicit_fake_test_secret',provider:new ElevenLabsProvider(transport)});
 const response=async(_url?:string,_init?:RequestInit)=>new Response(await audio(),{status:200,headers:{'Content-Type':'audio/mpeg','request-id':'test-request-123'}});
 

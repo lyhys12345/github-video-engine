@@ -10,10 +10,11 @@ export async function killTree(pid: number): Promise<void> {
     });
   } else { try { process.kill(-pid, 'SIGKILL'); } catch { /* Already exited. */ } }
 }
-export function command(exe: string, args: string[], options: {timeout?: number; signal?: AbortSignal; cwd?: string; capture?: 'stdout'|'stderr'; env?: NodeJS.ProcessEnv} = {}): Promise<string> {
+export function command(exe: string, args: string[], options: {timeout?: number; signal?: AbortSignal; cwd?: string; capture?: 'stdout'|'stderr'; env?: NodeJS.ProcessEnv; inheritEnv?: false} = {}): Promise<string> {
   if (options.signal) checkAbort(options.signal);
   return new Promise((resolve, reject) => {
-    const child = spawn(exe, args, {shell: false, windowsHide: true, detached: process.platform !== 'win32', cwd: options.cwd, env: options.env ? {...process.env,...options.env} : undefined, stdio: ['ignore', 'pipe', 'pipe']});
+    const env = options.inheritEnv === false ? options.env ?? {} : options.env ? {...process.env, ...options.env} : undefined;
+    const child = spawn(exe, args, {shell: false, windowsHide: true, detached: process.platform !== 'win32', cwd: options.cwd, env, stdio: ['ignore', 'pipe', 'pipe']});
     let stdout = '', stderr = '', failure: unknown;
     let killing: Promise<void> | undefined;
     const stop = (reason: unknown) => { failure ??= reason; if (child.pid && !killing) killing = killTree(child.pid); };

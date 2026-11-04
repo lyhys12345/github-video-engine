@@ -66,7 +66,7 @@ export class TaskRunner{
   private set(value:TaskRecord){this.db.prepare('INSERT INTO tasks(id,data) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(value.id,canonical(value));}
   async run<T>(kind:string,input:unknown,work:(directory:string,signal:AbortSignal)=>Promise<{value:T;outputs:Artifact[]}>,signal:AbortSignal,limits:{attempts?:number;timeoutMs?:number;leaseMs?:number;scopeKey?:string;maxScopeAttempts?:number;accounting?:AccountingPolicy;beforeDiscardTemporary?:(directory:string)=>Promise<void>}={}){
     checkAbort(signal);const parsedPolicy=limits.accounting===undefined?null:AccountingPolicySchema.safeParse(limits.accounting);
-    if(parsedPolicy!==null&&!parsedPolicy.success)throw new EngineError('USAGE_POLICY','Usage accounting: only explicit windows-sapi-offline/remotion-local local-zero-v1 policies are supported');
+    if(parsedPolicy!==null&&!parsedPolicy.success)throw new EngineError('USAGE_POLICY','Usage accounting: only explicit Windows SAPI, Windows WinRT Huihui, or local Remotion local-zero-v1 policies are supported');
     const policy=parsedPolicy?.data??null,id=sha256(canonical({version:'production-task-v1',kind,input}));
     const ttl=limits.leaseMs??15000,maxAttempts=limits.attempts??2;
     const owner=randomUUID();let cached:TaskRecord|null=null,start!:UsageEvent;let observedStart=0;

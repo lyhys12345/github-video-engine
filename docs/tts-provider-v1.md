@@ -40,3 +40,21 @@ The fixed origin is `https://api.elevenlabs.io`, redirect mode is `error`, timeo
 - [Voice Library: API access and subscription restriction](https://elevenlabs.io/docs/eleven-creative/voices/voice-library)
 
 Verification: `pnpm typecheck`; `pnpm exec vitest run tests/tts.test.ts tests/voice-handoff.test.ts tests/core.test.ts`. No real provider request/entitlement verification or owner listening is claimed.
+## Local Chinese technical narration on Windows
+
+Use the installed Windows WinRT Huihui `zh-CN` token to synthesize one short plain-text line. The request accepts only its schema version and exact text, up to 120 Unicode code points. The provider uses the installed voice's default speaking settings and admits non-silent 16 kHz mono PCM WAV, at most 30 seconds and 2 MB. The engine makes no explicit remote request for this provider. The Windows speech subsystem's network behavior has not been audited.
+
+```json
+{"schemaVersion":"tts-huihui/1.0","text":"这是一条本机中文技术测试。"}
+```
+
+```text
+pnpm gve tts huihui-generate --spec line.json --data state
+pnpm gve tts huihui-status --task GENERATION --data state
+pnpm gve tts huihui-export --task GENERATION --data state --out speech-export
+pnpm gve tts huihui-import --task GENERATION --data state
+```
+
+Repeating the same generation request reuses a verified success. After a retryable failure or cancellation, repeat the request to resume its bounded task. Status and export verify retained artifacts without starting synthesis. Synthesis can produce different bytes when independently run in another state.
+
+The import command takes a generation task in the same state. It derives the exact text, fixed voice label and WAV digest from the verified generation. Its versioned import receipt binds the generation task and manifest hashes. Use the returned import fingerprint, receipt artifact SHA-256 and audio artifact SHA-256 with the existing presentation voice binding. The original generation manifest accompanies the recording in the editable presentation export. This is a technical Huihui sample. Speech content and owner listening remain unverified.

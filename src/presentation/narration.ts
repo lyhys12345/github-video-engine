@@ -86,7 +86,7 @@ export function matchVoice(plan: CompiledPresentation, spec: VoiceSpec) {
 
 export async function loadClip(data: string, clip: Clip, policy: VoiceSpec['voicePolicy'], signal: AbortSignal) {
   checkAbort(signal);
-  const source = await readLocalTts(data, clip.receiptFingerprint);
+  const source = await readLocalTts(data, clip.receiptFingerprint, signal);
   if (source.receiptArtifact.sha256 !== clip.receiptSha256 ||
       source.receipt.artifact.sha256 !== clip.sourceAudioSha256 ||
       source.input.text !== clip.transcript || (policy === 'windows-sapi-zira-technical-fixture' &&

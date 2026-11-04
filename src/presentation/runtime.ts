@@ -277,6 +277,9 @@ async function voiceFiles(data: string, input: z.infer<typeof VoiceInput>, id: s
     files.set(`clips/${index}.pcm`, pcm);
     sourceFiles.set(`original/${index}.audio`, source.audio);
     sourceFiles.set(`original/${index}.receipt.json`, source.receiptBytes);
+    if ('generationManifestBytes' in source && source.generationManifestBytes) {
+      sourceFiles.set(`original/${index}.generation.json`, source.generationManifestBytes);
+    }
     placed.push({pcm, cue, captions: projectCaptions(clip, cue)});
   }
   const cues = placed.map(item => item.cue);
