@@ -37,3 +37,18 @@ For automation, `timing-check` exits 0 when all declared checks pass and 2 when 
 Exact UTF-8 specification bytes are part of the task identity. Repeat the same specification to reuse a verified result or recover an interrupted attempt. A revised declaration creates a new task and preserves earlier reports. Status and export reverify the report against its retained parent artifacts. The export contains the original specification, timing report, compiled trace and both exact parent manifests. A specification admits up to 32 distinct checks and at most 32,000 bytes. Unsupported states, bad references and parent digest changes are rejected.
 
 The timing checker analyzes modeled visual states and measured or authored cue positions. It runs independently of rendering, so an unmet declaration does not change preview eligibility, voice bindings, audio, subtitles or review status. The check does not assess the decoded movie, what was spoken, or whether the declared relationship was editorially appropriate.
+
+## Queue card timing
+
+Use `presentation-visual-cues/1.1` for queue plans 1.3. Each check includes a `subject` object with the compiled task's `id` and the canonical SHA-256 of its exact `{"id": "...", "label": "..."}` row from `trace.json`. The cue and event references use the same beat-local indexing and digests as 1.0. Choose a state that matches the selected event and subject.
+
+| State | Required event |
+| --- | --- |
+| `queue-waiting-rest` | `enqueue` listing the subject |
+| `queue-running-rest` | `start` naming the subject and its slot |
+| `queue-fulfilled-rest` | `settle` with the subject and a fulfilled outcome |
+| `queue-rejected-rest` | `settle` with the subject and a rejected outcome |
+
+The checker uses the renderer's card coordinates, opacity and movement phase. A card at rest must be fully opaque and stationary at its assigned modeled position. The selected event owns the window up to the first later event that changes this card's state or target position. Another task's event can interrupt this window by shifting the selected waiting card. Events that leave this card unchanged can overlap its animation without ending the window. Later motion cannot supply frames to an earlier event's check.
+
+The report gives the subject, event window, any interrupting event and the at-rest intervals used to measure overlap. New queue reports use profile `presentation-rendered-state/3` and report format 1.2. They include top-level `occlusion: "unchecked"` so a detached report preserves the scope of the model check. Speech alignment and listening remain outside the result. Existing queue profile 2 and HTTP or image profile 1 reports remain readable and export with their original bytes. Submitting the same queue specification under profile 3 creates a new task.

@@ -1,4 +1,5 @@
 import type {CompiledQueue, QueueState} from './concurrency-queue.js';
+import type {QueueEvent} from '../contracts/concurrency-queue.js';
 
 export function queueTitle(plan: CompiledQueue, beat: CompiledQueue['beats'][number], frame: number) {
   const ending = plan.endingTitle;
@@ -25,6 +26,17 @@ function position(state: QueueState, id: string): Position {
   return hidden;
 }
 
+const samePosition = (left: Position, right: Position) =>
+  left.x === right.x && left.y === right.y && left.opacity === right.opacity;
+const outcomeFor = (state: QueueState, id: string) => state.settled.find(row => row.taskId === id)?.outcome;
+
+export const queueEventSubjects = (event: QueueEvent) => event.kind === 'enqueue' ? event.taskIds : [event.taskId];
+
+export function queueEventAffectsCard(event: CompiledQueue['trace'][number], id: string) {
+  return !samePosition(position(event.before, id), position(event.after, id)) ||
+    outcomeFor(event.before, id) !== outcomeFor(event.after, id);
+}
+
 function interpolate(movement: Movement, frame: number) {
   const p = Math.min(1, (frame - movement.start) / movement.duration);
   const ease = (part: number) => part * part * (3 - 2 * part);
@@ -44,11 +56,11 @@ export function queueFrame(plan: CompiledQueue, frame: number) {
     if (row.frame > frame) break;
     const phase = row.kind === 'enqueue' ? 'submitting' : row.kind === 'start' ? 'entering' : 'leaving';
     const event = row.event;
-    const primary = event.kind === 'enqueue' ? event.taskIds : [event.taskId];
+    const primary = queueEventSubjects(event);
     for (const task of plan.tasks) {
       const before = position(row.before, task.id);
       const to = position(row.after, task.id);
-      if (before.x === to.x && before.y === to.y && before.opacity === to.opacity) continue;
+      if (samePosition(before, to)) continue;
       const previous = movements.get(task.id);
       const separatedLanes = !!plan.endingTitle;
       const from = previous ? interpolate(previous, row.frame) :
@@ -61,7 +73,7 @@ export function queueFrame(plan: CompiledQueue, frame: number) {
   const cards = plan.tasks.map(task => {
     const movement = movements.get(task.id);
     const moving = movement && frame < movement.start + movement.duration;
-    const outcome = state.settled.find(row => row.taskId === task.id)?.outcome;
+    const outcome = outcomeFor(state, task.id);
     return {...task, ...(movement ? interpolate(movement, frame) : hidden), phase: moving ? movement.phase : undefined,
       active: state.activeSlots.includes(task.id), outcome};
   });
@@ -69,4 +81,14 @@ export function queueFrame(plan: CompiledQueue, frame: number) {
   const ended = plan.endingTitle ? frame >= plan.endingTitle.visibleFromFrame :
     plan.trace.every(row => frame >= row.frame + row.motionFrames);
   return {state, active, cards, ended};
+}
+
+export function queueCardAtRest(frame: ReturnType<typeof queueFrame>, id: string, event: QueueEvent) {
+  const card = frame.cards.find(item => item.id === id);
+  if (!card || card.phase !== undefined || card.opacity !== 1 || !samePosition(card, position(frame.state, id))) {
+    return false;
+  }
+  if (event.kind === 'enqueue') return frame.state.pending.includes(id);
+  if (event.kind === 'start') return frame.state.activeSlots[event.slotId] === id;
+  return card.outcome === event.outcome;
 }

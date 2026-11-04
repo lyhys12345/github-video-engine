@@ -1,0 +1,9 @@
+# Queue visual timing checks: verification
+
+Frozen candidate `66226c461f7e9390ca5c38e450648abef2d168494090d91733036e0e6fe3bd7a` extends caller-declared timing checks to named queue tasks and exact events. It checks waiting, running, fulfilled or rejected card positions after their animation finishes using the renderer's shared frame model. The selected event's window ends when a later event changes the task's position or state; unrelated events do not terminate it. The report binds the compiled task and event identities and does not claim to infer narrative meaning or speech timing.
+
+Actual retained p-limit and explicitly synthetic queue previews were inspected. In one real case a waiting card had only 11 continuous frames before another task caused it to shift: a threshold of 11 passed and 12 failed. Independent judges checked state boundaries against actual video frames, forged events and reports, cache, recovery and old report bytes. Actual frames include card overlaps. The initial product review noted that a standalone result did not explicitly indicate occlusion was unchecked; the revised queue report now carries `occlusion: unchecked`, preserving historical profile 1 and 2 report bytes. Both rounds' raw reports are retained alongside this summary.
+
+This establishes the checked model position and timing, not an unobstructed view, semantic accuracy, speech alignment, continuous viewing or owner approval. Frozen material remains at `C:/Users/luyuh/Documents/Codex/gve-queue-timing-freeze-v1/` and `C:/Users/luyuh/Documents/Codex/gve-queue-timing-freeze-v2/` outside Git.
+
+Main-workspace `pnpm typecheck` and `pnpm test` exited successfully; the final mechanism phase passed 2 tests and skipped 1 real-media test. Some tests use mocks as labelled by the tests. The independently retained exact-source full run recorded 415 Vitest tests across 47 files.

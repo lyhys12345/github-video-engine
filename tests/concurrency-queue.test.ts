@@ -4,7 +4,7 @@ import type {QueueEvent} from '../src/contracts/concurrency-queue.js';
 import {PresentationPlan, type QueuePlan} from '../src/contracts/presentation.js';
 import {canonical, sha256} from '../src/core/util.js';
 import {compilePresentation} from '../src/presentation/compile.js';
-import {queueFrame, queueTitle} from '../src/presentation/queue-frame.js';
+import {queueCardAtRest, queueEventAffectsCard, queueFrame, queueTitle} from '../src/presentation/queue-frame.js';
 
 const ids = ['first', 'second', 'third', 'fourth', 'fifth'];
 const start = (taskId: string, slotId: number, atFrame: number): QueueEvent =>
@@ -86,6 +86,23 @@ it('keeps independent motions across a beat boundary and preserves the stationar
   expect(card('second', boundary + 18).phase).toBe('leaving');
   expect(card('third', boundary + 18).phase).toBe('entering');
   expect(compiled.trace[4]).toMatchObject({slotId: 1, after: {activeSlots: ['first', 'third']}});
+});
+
+it('shares exact at-rest boundaries and distinguishes queue shifts from unrelated events', () => {
+  const {proposal, plan} = fixture();
+  const compiled = compilePresentation(proposal, {...plan, schemaVersion: '1.3'});
+  const [queued, firstStarted, secondStarted, secondSettled, thirdStarted] = compiled.trace;
+  const rest = (event: NonNullable<typeof queued>, id: string, frame: number) =>
+    queueCardAtRest(queueFrame(compiled, frame), id, event.event);
+  expect(rest(queued!, 'third', queued!.frame + queued!.motionFrames - 1)).toBe(false);
+  expect(rest(queued!, 'third', queued!.frame + queued!.motionFrames)).toBe(true);
+  expect(queueEventAffectsCard(firstStarted!, 'third')).toBe(true);
+  expect(rest(queued!, 'third', firstStarted!.frame)).toBe(false);
+  expect(queueEventAffectsCard(secondStarted!, 'first')).toBe(false);
+  expect(rest(firstStarted!, 'first', firstStarted!.frame + firstStarted!.motionFrames)).toBe(true);
+  expect(queueEventAffectsCard(thirdStarted!, 'second')).toBe(false);
+  expect(rest(secondSettled!, 'second', secondSettled!.frame + secondSettled!.motionFrames - 1)).toBe(false);
+  expect(rest(secondSettled!, 'second', secondSettled!.frame + secondSettled!.motionFrames)).toBe(true);
 });
 
 it.each([

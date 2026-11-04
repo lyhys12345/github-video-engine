@@ -443,6 +443,7 @@ it.runIf(process.platform === 'win32' && !!process.env.SystemRoot)('verifies loc
       checks: [{cueInterval: {startFrame: 13, endFrame: 25}, visualIntervals: [{startFrame: 22, endFrame: 72}],
         longestOverlap: {frames: 3, interval: {startFrame: 22, endFrame: 25}}, verdict: 'passed'}]}});
   expect(await verifyTiming(timing)).toMatchObject({taskId: passed.taskId, cached: true});
+  expect(passed.report).not.toHaveProperty('occlusion');
   const passingCli = timingCli('timing-check', '--spec', timingPath);
   expect(passingCli.status).toBe(0);
   expect(JSON.parse(passingCli.stdout)).toMatchObject({taskId: passed.taskId, cached: true, declaredTemporalChecks: 'passed'});

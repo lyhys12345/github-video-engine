@@ -9,11 +9,15 @@ import {TaskRunner} from '../orchestrator/tasks.js';
 import {publishAssetFiles, RECEIPT_PUBLICATION} from '../story-planner/asset-pack.js';
 import {boundedFile, readTask} from '../story-planner/runtime.js';
 import type {CompiledLegacy, CompiledPresentation} from './compile.js';
+import type {CompiledQueue} from './concurrency-queue.js';
 import {httpResponseArrived, imageResultPanels, presentationFrame} from './frame-state.js';
+import {queueCardAtRest, queueEventAffectsCard, queueEventSubjects, queueFrame} from './queue-frame.js';
 import {preflightPresentationState, readPresentation, taskCancellation} from './runtime.js';
 
 export const TIMING_CHECK_KIND = 'repository-presentation-timing-check-v1';
-const PROFILE = 'presentation-rendered-state/1';
+const LEGACY_PROFILE = 'presentation-rendered-state/1';
+const HISTORICAL_QUEUE_PROFILE = 'presentation-rendered-state/2';
+const QUEUE_PROFILE = 'presentation-rendered-state/3';
 const MAX_SPEC_BYTES = 32_000;
 const MAX_REPORT_BYTES = 128_000;
 const RETRIES = 3;
@@ -22,13 +26,20 @@ const parse = (bytes: Buffer) => JSON.parse(new TextDecoder('utf-8', {fatal: tru
 const fail = (code: string, message: string): never => {throw new EngineError('PRESENTATION_TIMING_' + code, message);};
 const Ref = z.strictObject({beatId: Id, indexInBeat: z.number().int().min(0).max(39), sha256: Hash});
 const State = z.enum(['image-cutout-full', 'image-mask-full', 'image-comparison-full', 'http-response-arrived']);
-const Spec = z.strictObject({
-  schemaVersion: z.literal('presentation-visual-cues/1.0'),
+const QueueState = z.enum(['queue-waiting-rest', 'queue-running-rest', 'queue-fulfilled-rest', 'queue-rejected-rest']);
+const Check = z.strictObject({id: Id, cue: Ref, event: Ref,
+  minContinuousFrames: z.number().int().min(1).max(PRESENTATION_MAX_FRAMES)});
+const QueueCheck = Check.extend({state: QueueState, subject: z.strictObject({id: Id, sha256: Hash})});
+const Parents = z.strictObject({
   planTaskId: Hash, planManifestSha256: Hash, traceSha256: Hash, voiceTaskId: Hash, voiceManifestSha256: Hash,
-  checks: z.array(z.strictObject({id: Id, cue: Ref, event: Ref, state: State,
-    minContinuousFrames: z.number().int().min(1).max(PRESENTATION_MAX_FRAMES)})).min(1).max(32),
 });
-const Input = z.strictObject({profile: z.literal(PROFILE), specText: z.string().min(1).max(MAX_SPEC_BYTES)});
+const Spec = z.discriminatedUnion('schemaVersion', [
+  Parents.extend({schemaVersion: z.literal('presentation-visual-cues/1.0'),
+    checks: z.array(Check.extend({state: State})).min(1).max(32)}),
+  Parents.extend({schemaVersion: z.literal('presentation-visual-cues/1.1'), checks: z.array(QueueCheck).min(1).max(32)}),
+]);
+const Input = z.strictObject({profile: z.enum([LEGACY_PROFILE, HISTORICAL_QUEUE_PROFILE, QUEUE_PROFILE]),
+  specText: z.string().min(1).max(MAX_SPEC_BYTES)});
 type Input = z.infer<typeof Input>;
 type Spec = z.infer<typeof Spec>;
 type State = z.infer<typeof State>;
@@ -47,40 +58,73 @@ const target = {
   'http-response-arrived': {module: 'http-exchange/1', event: 'respond', forms: []},
 } as const;
 
-function specFrom(input: Input) {
-  const bytes = Buffer.from(input.specText);
+const profileFor = (spec: Spec) => spec.schemaVersion === 'presentation-visual-cues/1.1' ? QUEUE_PROFILE : LEGACY_PROFILE;
+
+function parseSpec(specText: string) {
+  const bytes = Buffer.from(specText);
   if (bytes.length > MAX_SPEC_BYTES) return fail('SPEC', 'Timing specification exceeds its byte limit.');
   let value: unknown;
   try {value = parse(bytes);} catch {return fail('SPEC', 'Expected valid UTF-8 JSON timing specification.');}
   const result = Spec.safeParse(value);
-  if (!result.success) return fail('SPEC', 'Expected a strict presentation-visual-cues/1.0 specification with supported states and bounded checks.');
+  if (!result.success) return fail('SPEC', 'Expected a strict presentation-visual-cues/1.0 or 1.1 specification with supported states and bounded checks.');
   return result.data;
 }
 
-function visibleIntervals(plan: CompiledLegacy, state: State, eventIndex: number, signal: AbortSignal) {
-  const expected = target[state];
-  const event = plan.trace[eventIndex]!;
-  if (plan.moduleId !== expected.module || event.kind !== expected.event) {
-    return fail('STATE', 'Selected visual state does not apply to the exact module and event.');
-  }
-  const end = plan.trace[eventIndex + 1]?.frame ?? plan.timeline.totalFrames;
+function visibleIntervals(window: Interval, visibleAt: (frame: number) => boolean, signal: AbortSignal) {
   const intervals: Interval[] = [];
   let start: number | undefined;
-  for (let index = event.frame; index < end; index++) {
+  for (let index = window.startFrame; index < window.endFrame; index++) {
     checkAbort(signal);
-    const frame = presentationFrame(plan, index);
-    const panels = imageResultPanels(frame);
-    const visible = state === 'http-response-arrived' ? httpResponseArrived(frame) :
-      panels.opacity === 1 && panels.forms.length === expected.forms.length &&
-        expected.forms.every((form, formIndex) => form === panels.forms[formIndex]);
-    if (visible) start ??= index;
+    if (visibleAt(index)) start ??= index;
     else if (start !== undefined) {
       intervals.push({startFrame: start, endFrame: index});
       start = undefined;
     }
   }
-  if (start !== undefined) intervals.push({startFrame: start, endFrame: end});
+  if (start !== undefined) intervals.push({startFrame: start, endFrame: window.endFrame});
   return intervals;
+}
+
+function legacyIntervals(plan: CompiledLegacy, state: State, eventIndex: number, signal: AbortSignal) {
+  const expected = target[state];
+  const event = plan.trace[eventIndex]!;
+  if (plan.moduleId !== expected.module || event.kind !== expected.event) {
+    return fail('STATE', 'Selected visual state does not apply to the exact module and event.');
+  }
+  return visibleIntervals({startFrame: event.frame, endFrame: plan.trace[eventIndex + 1]?.frame ?? plan.timeline.totalFrames}, index => {
+    const frame = presentationFrame(plan, index);
+    if (state === 'http-response-arrived') return httpResponseArrived(frame);
+    const panels = imageResultPanels(frame);
+    return panels.opacity === 1 && panels.forms.length === expected.forms.length &&
+      expected.forms.every((form, formIndex) => form === panels.forms[formIndex]);
+  }, signal);
+}
+
+function queueIntervals(plan: CompiledQueue, check: z.infer<typeof QueueCheck>, eventIndex: number,
+  frames: Map<number, ReturnType<typeof queueFrame>>, signal: AbortSignal) {
+  const {subject, state} = check;
+  const anchor = plan.trace[eventIndex]!;
+  const event = anchor.event;
+  const task = plan.tasks.find(row => row.id === subject.id);
+  if (!task || sha256(canonical(task)) !== subject.sha256 || !queueEventSubjects(event).includes(subject.id)) {
+    return fail('REFERENCE', 'Queue subject digest or exact event ownership differs: ' + check.id);
+  }
+  const expected = event.kind === 'enqueue' ? 'queue-waiting-rest' : event.kind === 'start' ? 'queue-running-rest' :
+    event.outcome === 'fulfilled' ? 'queue-fulfilled-rest' : 'queue-rejected-rest';
+  if (state !== expected) return fail('STATE', 'Queue state does not match the selected event and outcome: ' + check.id);
+  const interruption = plan.trace.slice(eventIndex + 1).find(row => queueEventAffectsCard(row, subject.id));
+  const window = {startFrame: anchor.frame, endFrame: interruption?.frame ?? plan.timeline.totalFrames};
+  const intervals = visibleIntervals(window, index => {
+    let frame = frames.get(index);
+    if (!frame) {
+      frame = queueFrame(plan, index);
+      frames.set(index, frame);
+    }
+    return queueCardAtRest(frame, subject.id, event);
+  }, signal);
+  return {intervals, queue: {subject, window,
+    interruption: interruption ? {beatId: interruption.beatId, frame: interruption.frame, kind: interruption.kind,
+      sha256: sha256(canonical(interruption))} : null}};
 }
 
 function longestOverlap(cue: Interval, visual: Interval[]) {
@@ -111,16 +155,22 @@ async function derive(data: string, input: Input, spec: Spec, taskId: string, si
     return fail('PARENT', 'Voice binds a different plan.');
   }
   const compiled = parse(trace) as CompiledPresentation;
-  if (compiled.moduleId === 'concurrency-queue/1') return fail('STATE', 'This profile supports HTTP exchange and image output choice only.');
+  const queue = spec.schemaVersion === 'presentation-visual-cues/1.1';
+  if (queue ? compiled.moduleId !== 'concurrency-queue/1' || parse(plan.files.get('presentation.json')!).schemaVersion !== '1.3' :
+      compiled.moduleId === 'concurrency-queue/1') {
+    return fail('STATE', 'Queue checks require a queue plan 1.3. HTTP and image checks use specification 1.0.');
+  }
   const cues = ledger.schemaVersion === 'presentation-voice-ledger/1.0' ? ledger.cues : ledger.captionCues;
   const ids = new Set<string>();
   const relationships = new Set<string>();
   const checkedCues = new Set<string>();
-  const visualCache = new Map<string, Interval[]>();
-  const checks = spec.checks.map(({id, cue, event, state, minContinuousFrames}) => {
+  const visualCache = new Map<string, {intervals: Interval[]; queue?: ReturnType<typeof queueIntervals>['queue']}>();
+  const frames = new Map<number, ReturnType<typeof queueFrame>>();
+  const checks = spec.checks.map(check => {
+    const {id, cue, event, state, minContinuousFrames} = check;
     const cueKey = cue.beatId + '/' + cue.indexInBeat;
     const eventKey = event.beatId + '/' + event.indexInBeat;
-    const visualKey = eventKey + '/' + state;
+    const visualKey = eventKey + '/' + state + ('subject' in check ? '/' + check.subject.id + '/' + check.subject.sha256 : '');
     const relation = cueKey + '/' + visualKey;
     if (ids.has(id) || relationships.has(relation)) return fail('SPEC', 'Duplicate check ID or cue/event/state relationship.');
     ids.add(id);
@@ -132,23 +182,35 @@ async function derive(data: string, input: Input, spec: Spec, taskId: string, si
       return fail('REFERENCE', 'Cue or event reference is absent or differs from its exact digest: ' + id);
     }
     checkedCues.add(cueKey);
-    let visual = visualCache.get(visualKey);
-    if (!visual) {
-      visual = visibleIntervals(compiled, state, compiled.trace.indexOf(sourceEvent), signal);
-      visualCache.set(visualKey, visual);
+    let measured = visualCache.get(visualKey);
+    if (!measured) {
+      const eventIndex = compiled.trace.findIndex(row => row.frame === sourceEvent.frame);
+      if ('subject' in check) {
+        if (compiled.moduleId !== 'concurrency-queue/1') return fail('STATE', 'Queue check requires a queue trace.');
+        measured = queueIntervals(compiled, check, eventIndex, frames, signal);
+      } else {
+        if (compiled.moduleId === 'concurrency-queue/1') return fail('STATE', 'Legacy check requires an HTTP or image trace.');
+        measured = {intervals: legacyIntervals(compiled, check.state, eventIndex, signal)};
+      }
+      visualCache.set(visualKey, measured);
     }
     const cueInterval = {startFrame: sourceCue.startFrame, endFrame: sourceCue.endFrame};
-    const overlap = longestOverlap(cueInterval, visual);
+    const overlap = longestOverlap(cueInterval, measured.intervals);
     return {id, cue, event: {...event, kind: sourceEvent.kind, frame: sourceEvent.frame}, state,
-      minContinuousFrames, cueInterval, visualIntervals: visual, longestOverlap: overlap,
+      minContinuousFrames, cueInterval, visualIntervals: measured.intervals, longestOverlap: overlap,
+      ...(measured.queue ? {queue: measured.queue} : {}),
       verdict: overlap.frames >= minContinuousFrames ? 'passed' as const : 'failed' as const};
   });
+  const recordsOcclusionScope = input.profile === QUEUE_PROFILE;
   const report = {
-    schemaVersion: 'presentation-timing-report/1.0', taskId, profile: input.profile, specSha256: sha256(input.specText),
+    schemaVersion: recordsOcclusionScope ? 'presentation-timing-report/1.2' :
+      queue ? 'presentation-timing-report/1.1' : 'presentation-timing-report/1.0',
+    taskId, profile: input.profile, specSha256: sha256(input.specText),
     planTaskId: spec.planTaskId, planManifestSha256: spec.planManifestSha256, traceSha256: spec.traceSha256,
     voiceTaskId: spec.voiceTaskId, voiceManifestSha256: spec.voiceManifestSha256, moduleId: compiled.moduleId,
     timeline: compiled.timeline, intervalConvention: 'half-open-frames', relationshipSource: 'caller-declared',
     declaredTemporalChecks: checks.every(check => check.verdict === 'passed') ? 'passed' as const : 'failed' as const,
+    ...(recordsOcclusionScope ? {occlusion: 'unchecked' as const} : {}),
     uncheckedCueCount: cues.length - checkedCues.size, undeclaredRelationships: 'unchecked', speechAlignment: 'unverified', checks,
   } as const;
   return {report, parents: new Map([['trace.json', trace], ['plan-manifest.json', planManifest], ['voice-manifest.json', voiceManifest]])};
@@ -159,7 +221,12 @@ async function checked(data: string, id: string, signal: AbortSignal) {
   if (!Hash.safeParse(id).success) return fail('TASK', 'Expected a lowercase hexadecimal timing-check task ID.');
   const task = await readTask(data, id, TIMING_CHECK_KIND);
   const input = Input.parse(task.input);
-  const spec = specFrom(input);
+  const spec = parseSpec(input.specText);
+  const currentProfile = profileFor(spec);
+  const historicalQueue = input.profile === HISTORICAL_QUEUE_PROFILE && currentProfile === QUEUE_PROFILE;
+  if (input.profile !== currentProfile && !historicalQueue) {
+    return fail('INTEGRITY', 'Timing profile does not match the stored specification version.');
+  }
   if (task.state !== 'succeeded') return {status: {taskId: id, state: task.state, attempt: task.attempt,
     declaredTemporalChecks: 'unchecked' as const, error: task.error}};
   if (!task.result || task.result.inputFingerprint !== id || task.result.mediaType !== 'application/json' ||
@@ -183,8 +250,8 @@ export async function checkPresentationTiming(data: string, path: string, signal
   try {specText = new TextDecoder('utf-8', {fatal: true, ignoreBOM: true}).decode(bytes);} catch {
     return fail('SPEC', 'Expected valid UTF-8 timing specification.');
   }
-  const input = Input.parse({profile: PROFILE, specText});
-  const spec = specFrom(input);
+  const spec = parseSpec(specText);
+  const input = Input.parse({profile: profileFor(spec), specText});
   data = await preflightPresentationState(data);
   const id = sha256(canonical({version: 'production-task-v1', kind: TIMING_CHECK_KIND, input}));
   const {report} = await derive(data, input, spec, id, signal);
