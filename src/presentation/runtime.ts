@@ -28,6 +28,8 @@ export const PREVIEW_KIND = 'repository-presentation-preview-v1';
 const FONT_SHA = 'a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da';
 const GEOMETRY = {width: 720, height: 1280};
 const RETRIES = 3;
+const EARLY_VOICE_IMPLEMENTATION = '5fcc6b1dde72b2ce7dd45894b11d547503e20988fbf219d9f6c7b4117c41ff2c';
+const EARLY_VOICE_LEDGER = 'voice-ledger-1.0-early-event-trace';
 const requireQueueMigration = (): never => {
   throw new EngineError('PRESENTATION_MIGRATION', 'Queue plan 1.2 is historical. Use schemaVersion 1.3 for new plans and previews. Existing tasks remain available through status, export and successful render-task resume.');
 };
@@ -293,14 +295,26 @@ async function voiceFiles(data: string, input: z.infer<typeof VoiceInput>, id: s
   return {files, sourceFiles, plan, captionCues, ledger};
 }
 
-async function checkedVoice(data: string, id: string, signal: AbortSignal) {
+async function checkedVoice(data: string, id: string, signal: AbortSignal, historicalRead = false) {
   const task = await readTask(data, id, VOICE_KIND);
   const input = VoiceInput.parse(task.input);
   const paths = [...input.spec.clips.map((_, index) => `clips/${index}.pcm`), 'narration.pcm', 'captions.vtt', 'bindings.json', 'voice-manifest.json'];
   const files = await readArtifacts(data, task, paths, signal);
   const derived = await voiceFiles(data, input, id, signal, async (_source, index) => files.get(`clips/${index}.pcm`)!);
-  for (const [path, bytes] of derived.files) if (!bytes.equals(files.get(path)!)) fail('Voice derivation differs: ' + path);
-  return {task, input, ...derived};
+  // The pinned early implementation used the same ledger version with a smaller event record.
+  // Compare the complete historical projection, including the current verifier's plan-derived trace.
+  const legacy = historicalRead && input.implementationSha256 === EARLY_VOICE_IMPLEMENTATION &&
+      input.spec.schemaVersion === 'presentation-voice-bindings/1.0'
+    ? {...derived.ledger, events: derived.ledger.events.map(({beatId, frame, sample}) => ({beatId, frame, sample}))}
+    : undefined;
+  const legacyMatches = legacy !== undefined && json(legacy).equals(files.get('voice-manifest.json')!);
+  for (const [path, bytes] of derived.files) {
+    if (!bytes.equals(files.get(path)!) && !(path === 'voice-manifest.json' && legacyMatches)) {
+      fail('Voice derivation differs: ' + path);
+    }
+  }
+  return {task, input, ...derived, files, ledger: legacyMatches ? legacy : derived.ledger,
+    ...(legacyMatches && {voiceLedgerProfile: EARLY_VOICE_LEDGER})};
 }
 
 export async function bindPresentationVoice(data: string, path: string, signal: AbortSignal, onTask?: (id: string) => void) {
@@ -480,15 +494,16 @@ export async function readPresentation(data: string, id: string, requested: Pres
       moduleId: plan.compiled.moduleId, timeline: plan.compiled.timeline, review}};
   }
   if (kind === 'voice') {
-    const voice = await checkedVoice(data, id, signal);
+    const voice = await checkedVoice(data, id, signal, true);
     return {files: new Map([...voice.files, ...voice.sourceFiles]), status: {taskId: id, kind, state: task.state,
-      attempt: task.attempt, integrity: 'verified', ledger: voice.ledger, review: statusReview}};
+      attempt: task.attempt, integrity: 'verified', ledger: voice.ledger, review: statusReview},
+      ...(voice.voiceLedgerProfile && {voiceLedgerProfile: voice.voiceLedgerProfile})};
   }
   const input = kind === 'narrated' ? NarratedInput.parse(task.input) : PreviewInput.parse(task.input);
   const plan = await checkedPlan(data, input.planTaskId, signal);
   if (sha256(plan.files.get('plan-manifest.json')!) !== input.planManifestSha256) fail('Preview parent plan manifest differs.');
   if ((plan.compiled.moduleId === 'concurrency-queue/1') !== !!input.rendererSha256) fail('Preview renderer fingerprint differs from its module.');
-  const voice = input.mode === 'narrated' ? await checkedVoice(data, input.voiceTaskId, signal) : undefined;
+  const voice = input.mode === 'narrated' ? await checkedVoice(data, input.voiceTaskId, signal, true) : undefined;
   if (input.mode === 'narrated' && (voice!.input.spec.planTaskId !== input.planTaskId ||
       sha256(voice!.files.get('voice-manifest.json')!) !== input.voiceManifestSha256)) fail('Preview voice binding differs.');
   const extended = plan.compiled.timeline.totalFrames > PRESENTATION_LEGACY_MAX_FRAMES;
@@ -509,7 +524,8 @@ export async function readPresentation(data: string, id: string, requested: Pres
   if (voice) for (const [path, bytes] of [...voice.files, ...voice.sourceFiles]) files.set('voice/' + path, bytes);
   return {files, status: {taskId: id, kind, planTaskId: input.planTaskId, state: task.state, attempt: task.attempt, integrity: 'verified',
     binding: plan.compiled.binding, proposalHash: plan.compiled.proposalHash, planSha256: plan.compiled.planSha256,
-    moduleId: plan.compiled.moduleId, timeline: plan.compiled.timeline, review: statusReview}};
+    moduleId: plan.compiled.moduleId, timeline: plan.compiled.timeline, review: statusReview},
+    ...(voice?.voiceLedgerProfile && {voiceLedgerProfile: voice.voiceLedgerProfile})};
 }
 
 export async function resumePresentation(data: string, id: string, requested: PresentationKind | undefined, signal: AbortSignal,
@@ -518,7 +534,10 @@ export async function resumePresentation(data: string, id: string, requested: Pr
   if (kind !== 'preview' && kind !== 'narrated') {
     throw new EngineError('PRESENTATION_RESUME_KIND', 'Resume accepts a preview or narrated render task. For plan or voice tasks, repeat the original command.');
   }
-  if (task.state === 'succeeded') return {...(await readPresentation(data, id, kind, signal)).status, cached: true};
+  if (task.state === 'succeeded') {
+    const result = await readPresentation(data, id, kind, signal);
+    return {...result.status, cached: true, ...('voiceLedgerProfile' in result && {voiceLedgerProfile: result.voiceLedgerProfile})};
+  }
   const input = kind === 'narrated' ? NarratedInput.parse(task.input) : PreviewInput.parse(task.input);
   return renderPresentation(data, input.planTaskId, signal, onTask, input.mode === 'narrated' ? input.voiceTaskId : undefined, id);
 }

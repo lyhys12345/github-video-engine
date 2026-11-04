@@ -37,5 +37,6 @@ export async function presentationCommand(positionals: string[], options: Record
     narrated ? String(options.voice) : undefined);
   if (action === 'resume') return resumePresentation(data, task, kind, signal, announce('presentation-resume'));
   if (action === 'export') return exportPresentation(data, task, kind, String(options.out), signal);
-  return (await readPresentation(data, task, kind, signal)).status;
+  const result = await readPresentation(data, task, kind, signal);
+  return {...result.status, ...('voiceLedgerProfile' in result && {voiceLedgerProfile: result.voiceLedgerProfile})};
 }
