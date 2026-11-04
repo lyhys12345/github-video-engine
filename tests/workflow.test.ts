@@ -1,13 +1,13 @@
 import {it,expect} from 'vitest';
-import {mkdir,readFile,readdir,symlink,writeFile,rm} from 'node:fs/promises';
+import {mkdir,readFile,readdir,writeFile,rm} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {WorkflowStore,validateSnapshot,validatePlan,sourceFingerprint} from '../src/workflow/store.js';
 import {canonical,sha256} from '../src/core/util.js';
 import {PlanningPackageSchema} from '../src/contracts/planning.js';
 import {command} from '../src/core/process.js';
 import {sourceFixture,planFixture,workflowRoot,reviewFixture} from './workflow-support.js';
-import {readJson,workflowCommand} from '../src/workflow/cli.js';
-import {EngineError} from '../src/core/errors.js';
+import {readJson} from '../src/workflow/cli.js';
+import {publishReviewExport} from '../src/workflow/review-export.js';
 
 it('validates source URL/hash/version and exact evidence quote locations',()=>{
   const snapshot=sourceFixture(),hash=sourceFingerprint(snapshot),plan=planFixture(snapshot);expect(validateSnapshot(snapshot)).toEqual(snapshot);expect(validatePlan(plan,snapshot,hash)).toEqual(plan);
@@ -31,79 +31,37 @@ it('persists source and immutable plan revisions, deduplicates imports and same-
   expect(()=>store.db.prepare('UPDATE revisions SET data=data').run()).toThrow('immutable');expect(()=>store.db.prepare('DELETE FROM sources').run()).toThrow('immutable');store.close();
   store=new WorkflowStore(root);expect((await store.status('demo')).project.currentRevision).toBe(second.hash);expect((await store.status('demo')).revisions).toHaveLength(2);store.close();
 });
-it('exports an immutable review input whose byte hash equals revision identity',async()=>{
-  const root=await workflowRoot('export');const store=new WorkflowStore(join(root,'data'));await store.create('demo',sourceFixture());const revision=await store.importPlan('demo',planFixture());
-  const exported=await store.export('demo',join(root,'out'));expect(sha256(await readFile(exported.reviewInput))).toBe(revision.hash);expect(await store.export('demo',join(root,'out'))).toEqual(exported);
-  await writeFile(exported.reviewMarkdown,'tampered');await expect(store.export('demo',join(root,'out'))).rejects.toMatchObject({code:'EXPORT_EXISTS'});store.close();
-});
-it('keeps a conflicting generic review directory untouched and publishes identical concurrent exports together',async()=>{
-  const root=await workflowRoot('export-atomic'),store=new WorkflowStore(join(root,'data'));
-  try {
-    await store.create('demo',sourceFixture());await store.importPlan('demo',planFixture());
-    const conflict=join(root,'conflict');
-    await mkdir(conflict);
-    await writeFile(join(conflict,'review.md'),'owner note');
-    await expect(store.export('demo',conflict)).rejects.toMatchObject({code:'EXPORT_EXISTS'});
-    expect(await readdir(conflict)).toEqual(['review.md']);
-    expect(await readFile(join(conflict,'review.md'),'utf8')).toBe('owner note');
-    const output=join(root,'published');
-    const [first,second]=await Promise.all([store.export('demo',output),store.export('demo',output)]);
-    expect(first).toEqual(second);
-    expect((await readdir(output)).sort()).toEqual(['review-input.json','review.md']);
-    expect(sha256(await readFile(first.reviewInput))).toBe(first.revisionHash);
-    expect((await readdir(root)).filter(name=>name.startsWith('.gve-review-'))).toEqual([]);
-  } finally {store.close();}
-});
-it('refuses generic review export through a real leaf or ancestor junction',async()=>{
-  const root=await workflowRoot('export-link'),store=new WorkflowStore(join(root,'data'));
-  try {
-    await store.create('demo',sourceFixture());await store.importPlan('demo',planFixture());
-    const outside=join(root,'outside'),alias=join(root,'alias');
-    await mkdir(outside);
-    await writeFile(join(outside,'KEEP'),'retain');
-    await symlink(outside,alias,process.platform==='win32'?'junction':'dir');
-    await expect(store.export('demo',alias)).rejects.toMatchObject({code:'EXPORT_EXISTS'});
-    await expect(store.export('demo',join(alias,'nested','export'))).rejects.toMatchObject({code:'EXPORT_PATH'});
-    expect(await readdir(outside)).toEqual(['KEEP']);
-    expect(await readFile(join(outside,'KEEP'),'utf8')).toBe('retain');
-  } finally {store.close();}
-});
-it('refuses a pre-cancelled generic export before creating workflow state or output',async()=>{
-  const root=await workflowRoot('export-abort'),data=join(root,'data'),out=join(root,'out');
-  const signal=AbortSignal.abort(new EngineError('CANCELLED','pre-cancelled review','cancelled'));
-  await expect(workflowCommand(['project','export'],{data,id:'demo',out},signal)).rejects.toMatchObject({code:'CANCELLED'});
+it('refuses default review publication without creating a destination parent',async()=>{
+  const root=await workflowRoot('export-helper'),output=join(root,'missing','export');
+  const signal=new AbortController().signal;
+  const files: [string, Buffer][]=[['review.md',Buffer.from('fixture')]];
+  await expect(publishReviewExport(output,files,signal)).rejects.toMatchObject({code:'LEGACY_EXPORT_DISABLED'});
+  await expect(publishReviewExport(output,files,signal,{exactFiles:false})).rejects.toMatchObject({code:'LEGACY_EXPORT_DISABLED'});
   expect(await readdir(root)).toEqual([]);
 });
-
-it('removes generic export staging when a real staged write triggers cancellation',async()=>{
-  const root=await workflowRoot('export-inflight'),data=join(root,'data'),out=join(root,'out');
-  const store=new WorkflowStore(join(data,'workflow'));
-  try{await store.create('demo',sourceFixture());await store.importPlan('demo',planFixture());}finally{store.close();}
-  // Inject the abort in an isolated process after the first real staging write finishes.
-  const script=`
-    import assert from 'node:assert/strict';
-    import {createRequire,syncBuiltinESMExports} from 'node:module';
-    import {basename,dirname} from 'node:path';
-    const fs=createRequire(import.meta.url)('node:fs/promises');
-    const {EngineError}=await import('./src/core/errors.ts');
-    const control=new AbortController();
-    const writeFile=fs.writeFile;
-    let injected=false;
-    fs.writeFile=async (target,...args)=>{
-      await writeFile(target,...args);
-      if(basename(dirname(target)).startsWith('.gve-review-')){
-        injected=true;
-        control.abort(new EngineError('CANCELLED','cancel after staging','cancelled'));
-      }
-    };
-    syncBuiltinESMExports();
-    const {workflowCommand}=await import('./src/workflow/cli.ts');
-    const [data,out]=process.argv.slice(1);
-    await assert.rejects(workflowCommand(['project','export'],{data,id:'demo',out},control.signal),{code:'CANCELLED'});
-    assert.equal(injected,true);
-  `;
-  await command(process.execPath,['--import','tsx','--input-type=module','-e',script,data,out]);
-  expect(await readdir(root)).toEqual(['data']);
+it('refuses Store export before revision access and preserves an existing review directory',async()=>{
+  const root=await workflowRoot('export-store'),store=new WorkflowStore(join(root,'state'));
+  try {
+    await store.create('demo',sourceFixture());
+    const revision=await store.importPlan('demo',planFixture());
+    const output=join(root,'existing'),reviewInput=join(output,'review-input.json');
+    const {payload}=await store.revision('demo');
+    await mkdir(output);
+    await writeFile(reviewInput,canonical(payload));
+    await writeFile(join(output,'review.md'),'existing owner review');
+    await expect(store.export('missing',output)).rejects.toMatchObject({code:'LEGACY_EXPORT_DISABLED'});
+    await expect(store.export('demo',output)).rejects.toMatchObject({code:'LEGACY_EXPORT_DISABLED'});
+    expect((await readdir(output)).sort()).toEqual(['review-input.json','review.md']);
+    expect(sha256(await readFile(reviewInput))).toBe(revision.hash);
+    expect(await readFile(join(output,'review.md'),'utf8')).toBe('existing owner review');
+    expect((await store.status('demo')).project.currentRevision).toBe(revision.hash);
+  } finally {store.close();}
+});
+it('refuses CLI export before opening fresh state or creating an output parent',async()=>{
+  const root=await workflowRoot('export-cli-empty'),data=join(root,'data'),out=join(root,'missing','out');
+  const args=['--import','tsx',resolve('src/cli.ts'),'project','export','--data',data,'--id','demo','--out',out];
+  await expect(command(process.execPath,args)).rejects.toThrow('LEGACY_EXPORT_DISABLED');
+  expect(await readdir(root)).toEqual([]);
 });
 it('binds delegated G1/G2 approvals, rejects skipped stages and never creates direct-human final approval',async()=>{
   const root=await workflowRoot('approve');const store=new WorkflowStore(join(root,'data'),{reviewRoot:root});await store.create('demo',sourceFixture());await store.importPlan('demo',planFixture());const r=await reviewFixture(root,store);
@@ -135,11 +93,22 @@ it('detects changed review inputs, weakened policy, unauthorized delegation and 
   const delegation=JSON.parse(await readFile(r.delegationPath,'utf8'));await writeFile(r.delegationPath,JSON.stringify({...delegation,allowedGates:['G2']}));await expect(store.approve('demo','G1',r.candidatePath,r.rulesPath,r.delegationPath)).rejects.toMatchObject({code:'APPROVAL_AUTHORITY'});await writeFile(r.delegationPath,JSON.stringify(delegation));
   const record=await store.approve('demo','G1',r.candidatePath,r.rulesPath,r.delegationPath);await writeFile(store.artifacts.path(record.artifact),'damaged');await expect(store.status('demo')).rejects.toMatchObject({code:'INTEGRITY'});store.close();
 });
-it('public project CLI creates/imports/status/exports and refuses invalid planning input',async()=>{
+it('public project CLI reads existing history after refusing legacy export',async()=>{
   const root=await workflowRoot('cli'),data=join(root,'data'),snapshot=join(root,'snapshot.json'),plan=join(root,'plan.json');await writeFile(snapshot,JSON.stringify(sourceFixture()));await writeFile(plan,JSON.stringify(planFixture()));
   const run=(args:string[])=>command(process.execPath,['--import','tsx',resolve('src/cli.ts'),...args,'--data',data]);
   const created=JSON.parse(await run(['project','create','--id','demo','--snapshot',snapshot]));expect(created.id).toBe('demo');await run(['project','import','--id','demo','--plan',plan]);
-  expect(JSON.parse(await run(['project','status','--id','demo'])).state).toBe('BRIEF_REVIEW');expect(JSON.parse(await run(['project','export','--id','demo','--out',join(root,'export')])).revisionHash).toMatch(/^[a-f0-9]{64}$/);
+  const before=JSON.parse(await run(['project','status','--id','demo']));
+  expect(before.state).toBe('BRIEF_REVIEW');
+  const dataFiles=async()=>{
+    const entries=await readdir(data,{recursive:true,withFileTypes:true});
+    const files=entries.filter(entry=>entry.isFile()).map(entry=>join(entry.parentPath,entry.name)).sort();
+    return Promise.all(files.map(async path=>[path,sha256(await readFile(path))]));
+  };
+  const stateBytes=await dataFiles();
+  await expect(run(['project','export','--id','demo','--out',join(root,'new','export')])).rejects.toThrow('LEGACY_EXPORT_DISABLED');
+  expect(await dataFiles()).toEqual(stateBytes);
+  expect((await readdir(root)).sort()).toEqual(['data','plan.json','snapshot.json']);
+  expect(JSON.parse(await run(['project','status','--id','demo']))).toEqual(before);
   const store=new WorkflowStore(join(data,'workflow'));const reviews=await reviewFixture(root,store,resolve('.'));store.close();
   const approve=(gate:string)=>run(['project','approve','--id','demo','--gate',gate,'--candidate',reviews.candidatePath,'--rules',reviews.rulesPath,'--delegation',reviews.delegationPath]);
   await expect(approve('G2')).rejects.toThrow('GATE_ORDER');await approve('G1');await approve('G2');expect(JSON.parse(await run(['project','status','--id','demo'])).state).toBe('SCRIPT_APPROVED');await expect(approve('G6')).rejects.toThrow('HUMAN_FINAL_REQUIRED');

@@ -9,6 +9,7 @@ import {ancestors} from '../story-planner/runtime.js';
 import {captureAuthoringText, exportAuthoringProposal, openAuthoring, statusAuthoringProposal, submitAuthoringProposal} from './agent-authoring.js';
 import {adaptAuthoringProposal} from './adapt-proposal.js';
 import {createPresentation} from '../presentation/runtime.js';
+import {rejectLegacyReviewExport} from './review-export.js';
 type Options={root?:string;spec?:string;data?:string;repo?:string;ref?:string;doc?:string[];out?:string;id?:string;snapshot?:string;plan?:string;gate?:string;candidate?:string;rules?:string;delegation?:string;proposal?:string};
 export async function readJson(path:string){try{const info=await stat(path);if(!info.isFile()||info.size>4_000_000)throw new EngineError('WORKFLOW_SIZE','Workflow inputs must be regular JSON files up to 4 MB');return JSON.parse((await readFile(path,'utf8')).replace(/^\uFEFF/,'')) as unknown;}catch(error){if(error instanceof EngineError)throw error;throw new EngineError('INVALID_JSON',`Cannot read JSON ${path}: ${String(error)}`);}}
 export async function checkDatabaseFiles(database:string) {
@@ -27,6 +28,7 @@ export async function checkDatabaseFiles(database:string) {
 export async function workflowCommand(positionals:string[],options:Options,signal:AbortSignal){
   const[command,action]=positionals;
   if((command==='research'&&positionals.length!==1)||(command==='project'&&positionals.length!==2))throw new EngineError('USAGE','Unexpected positional arguments for workflow command');
+  if(command==='project'&&action==='export')rejectLegacyReviewExport();
   if(command==='research'){
     if(!options.repo||!options.out)throw new EngineError('USAGE','research --repo <https://github.com/owner/repo> --out <new-snapshot.json> [--ref <ref>] [--doc <path>]');
     const snapshot=await researchRepository(options.repo,options.ref??'HEAD',options.doc??[],undefined,signal);
@@ -94,18 +96,16 @@ export async function workflowCommand(positionals:string[],options:Options,signa
       return await planProjectStory(store,options.id!,options.spec!,options.root!,data,options.out!,signal);
     }finally{store.close();}
   }
-  if(action==='export')checkAbort(signal);
   await ancestors(workflow);
   await checkDatabaseFiles(join(workflow,'workflow.sqlite'));
   const store=new WorkflowStore(workflow);
   try{
     if(action==='list')return store.list();
-    if(!options.id)throw new EngineError('USAGE','project <create|import|status|export|approve> --id <project-id>');
+    if(!options.id)throw new EngineError('USAGE','project <create|import|status|approve> --id <project-id>');
     if(action==='create'&&options.snapshot)return await store.create(options.id,await readJson(resolve(options.snapshot)));
     if(action==='import'&&options.plan)return await store.importPlan(options.id,await readJson(resolve(options.plan)));
     if(action==='status')return await store.status(options.id);
-    if(action==='export'&&options.out)return await store.export(options.id,options.out,signal);
     if(action==='approve'&&options.gate&&options.candidate&&options.rules&&options.delegation)return await store.approve(options.id,options.gate,resolve(options.candidate),resolve(options.rules),resolve(options.delegation));
-    throw new EngineError('USAGE','create needs --snapshot; import needs --plan; export needs --out; approve needs --gate --candidate --rules --delegation');
+    throw new EngineError('USAGE','create needs --snapshot; import needs --plan; approve needs --gate --candidate --rules --delegation');
   }finally{store.close();}
 }

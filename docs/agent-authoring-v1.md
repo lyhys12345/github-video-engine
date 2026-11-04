@@ -41,4 +41,4 @@ The first authoring command adds the immutable proposal table and upgrades the w
 
 Work package and proposal publication currently require a local Windows drive. The native publisher holds ordinary directory and file handles, creates files exclusively in the final directory and verifies an existing export through read handles. It keeps incomplete or conflicting output for inspection. Use a fresh directory if an interruption leaves incomplete files. Cancellation requested after the publisher starts may arrive after a complete export. The publisher protects the operation while its handles are open. Exported files remain editable afterward.
 
-Use a trusted, exclusively controlled output parent for the separate legacy `project export` command. Independent testing confirmed that a concurrent local writer can replace its staging directory before rename or cleanup. The authoring commands use the native publisher described above.
+The separate legacy `project export` command for `PlanningPackage` files is disabled and returns `LEGACY_EXPORT_DISABLED`. Its staging race prompted the shutdown. Authoring commands continue to use the native publisher described above.

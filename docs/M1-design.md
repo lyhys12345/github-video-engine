@@ -1,10 +1,14 @@
 # M1：只读研究、策划与委托审批
 
+> **当前状态**　旧 `project export` 已停用。尝试把 `PlanningPackage` 导出为文件时，命令会返回 `LEGACY_EXPORT_DISABLED`。旧审阅包保留为历史文件，已存修订和审批历史仍可通过 `project status` 查看。下面记录 M1 当时的流程，当前操作见[操作手册](operator-runbook.md)。
+
 M1 依据 v7 路线和用户 2026-10-26 的连续执行授权。研究只使用公共 GitHub GET 接口，固定到实际 commit；未执行 REA、Notion 或其他目标仓库的代码。策划由本聊天 agent 编写并导入，不把模板或规则处理伪装成一次模型 API 调用。
 
-## 可运行入口
+## M1 当时的命令
 
-```powershell
+这段命令记录包含当时使用的旧导出命令，仅供查阅。
+
+```text
 pnpm gve research --repo https://github.com/morluto/rea --ref main --doc docs/javascript-application-workflows.md --out <new-source-snapshot.json>
 pnpm gve project create --id rea --snapshot examples/rea/source-snapshot.json --data <state-directory>
 pnpm gve project import --id rea --plan examples/rea/planning-package.json --data <state-directory>
@@ -13,7 +17,7 @@ pnpm gve project export --id rea --out <new-export-directory> --data <state-dire
 pnpm gve project approve --id rea --gate G1 --candidate <frozen-candidate.json> --rules reviews/M1/gate.json --delegation examples/rea/delegation.json --data <state-directory>
 ```
 
-`research` 不覆盖已有输出；`create` 的重复内容、`import` 的相同修订和相同导出可复用。`project list` 可查看项目。所有失败返回非零；fixture 与真实来源的运行记录分开。
+M1 当时的重复请求可复用同一来源、同一修订和已完成的旧导出。`research` 不覆盖已有输出，`project list` 可查看项目。M1 记录将测试 fixture 与真实来源的运行分开。
 
 ## 合同与模块
 
@@ -26,7 +30,7 @@ GitHub 资料始终是不可信数据。快照校验固定 commit URL、内容 h
 
 ## 不可变内容与修订
 
-源记录的 `snapshotHash` 是除 `fetchedAt` 外的快照规范化内容哈希；获取时间保存在原始 source artifact 中，避免同 commit/内容的再次读取仅因时间变化而使已批输入失效。source artifact 自身另有精确字节 SHA-256。修订哈希是规范化 `{snapshotHash,plan}` 的精确字节哈希；`review-input.json` 以同样字节导出，因此可直接绑定候选。
+源记录的 `snapshotHash` 是除 `fetchedAt` 外的快照规范化内容哈希；获取时间保存在原始 source artifact 中，避免同 commit/内容的再次读取仅因时间变化而使已批输入失效。source artifact 自身另有精确字节 SHA-256。修订哈希是规范化 `{snapshotHash,plan}` 的精确字节哈希。M1 历史导出的 `review-input.json` 使用相同字节，因而能绑定当时的候选。
 
 新 source/plan 会切换当前指针，旧修订和审批仍在历史中；有效审批只从当前精确修订计算。切回完全相同输入可以复用那份输入的有效历史批准。修改事实、脚本、分镜或预算即产生新修订，不把旧审批套到新输入。存储先提交完整 blob，再提交 SQLite 引用；崩溃可能留下无引用完整 blob，不把它当成成功。
 
@@ -50,4 +54,4 @@ G1/G2 需要：当前项目/修订/Gate 绑定；候选包含同哈希 review in
 
 ## 验证边界
 
-新测试覆盖安全 URL/路径/大小/身份、quote/版本/ID/时长、持久化和不可变导出、去重、G1/G2 顺序、专项缺失/FAIL/错版本、规则弱化/委托越权、输入变更和 receipt 损坏，以及公开 CLI。M1 不声称完成 M2–M4、生产安全认证或最终用户审美验收。
+M1 当时的测试覆盖安全 URL/路径/大小/身份、quote/版本/ID/时长、持久化和历史导出、去重、G1/G2 顺序、专项缺失/FAIL/错版本、规则弱化/委托越权、输入变更和 receipt 损坏，以及公开 CLI。该阶段的验收范围限于 M1。

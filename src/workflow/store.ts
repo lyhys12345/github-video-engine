@@ -11,7 +11,7 @@ import {canonical,sha256} from '../core/util.js';
 import {checkAbort,EngineError} from '../core/errors.js';
 import {projectRoot} from '../providers/local.js';
 import {checkGateV2} from '../evaluation/judge-gate.mjs';
-import {publishReviewExport} from './review-export.js';
+import {rejectLegacyReviewExport} from './review-export.js';
 import type {StoryProposal} from '../contracts/authoring.js';
 
 const ProjectRow=z.object({id:Id,repository:z.string(),snapshotHash:Hash,currentRevision:Hash.nullable(),createdAt:z.string(),updatedAt:z.string()}).strict();
@@ -26,7 +26,6 @@ const parse=<T>(schema:z.ZodType<T>,value:unknown,label:string):T=>{
   const result=schema.safeParse(value);if(!result.success)throw new EngineError('INVALID_WORKFLOW',`${label}: ${result.error.issues.map((i)=>`${i.path.join('.')}: ${i.message}`).join('; ')}`);return result.data;
 };
 const jsonFile=(path:string)=>{try{return JSON.parse(readFileSync(path,'utf8').replace(/^\uFEFF/,'')) as unknown;}catch(error){throw new EngineError('WORKFLOW_FILE',`Cannot read JSON ${path}: ${String(error)}`);}};
-const escapeMd=(value:string)=>value.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replace(/[\\`*_[\]|]/g,'\\$&').replace(/\r?\n/g,' ');
 export function sourceFingerprint(snapshot:RepositorySnapshot){const{fetchedAt,...content}=snapshot;void fetchedAt;return sha256(canonical(content));}
 
 export function validateSnapshot(value:unknown):RepositorySnapshot{
@@ -160,10 +159,7 @@ export class WorkflowStore{
     if(project.currentRevision)await this.revision(id);
     return{project,revisions,approvals,approvalHistory:allApprovals,state:!project.currentRevision?'NEEDS_PLAN':gates.has('G2')?'SCRIPT_APPROVED':gates.has('G1')?'BRIEF_APPROVED':'BRIEF_REVIEW',nextGate:gates.has('G2')?'G3':gates.has('G1')?'G2':'G1',finalHumanAcceptance:'pending',events:this.db.prepare('SELECT * FROM events WHERE project_id=? ORDER BY seq').all(id)};
   }
-  async export(id:string,directory:string,signal=new AbortController().signal){checkAbort(signal);const {record,plan,payload,snapshot}=await this.revision(id);const out=resolve(directory);
-    const report=[`# ${escapeMd(id)} 策划审阅包`,`来源：${snapshot.repository}，commit ${snapshot.commit}`,`修订：${record.hash}`,'','## Brief',`受众：${escapeMd(plan.brief.audience)}`,`目标：${escapeMd(plan.brief.objective)}`,`指导来源：${plan.brief.guidanceOrigin}`,'','## 用途与例子',...Object.entries(plan.brief.useCase).map(([key,value])=>`${key}: ${escapeMd(value)}`),'','## 创意',...plan.concepts.map((c)=>`- ${escapeMd(c.id)}：${escapeMd(c.premise)}；开头：${escapeMd(c.opening)}`),'','## 脚本',...plan.script.map((s)=>`- ${escapeMd(s.id)} (${s.plannedDurationMs}ms)：${escapeMd(s.narration)} / claims: ${s.claimIds.join(', ')}`),'','## 分镜',...plan.storyboard.map((s)=>`- ${escapeMd(s.id)}：${escapeMd(s.visual)}；动效：${escapeMd(s.animation)}；来源标签：${escapeMd(s.evidenceLabel)}`),'','## 事实',...plan.facts.map((f)=>`- ${escapeMd(f.id)} [${f.kind}]：${escapeMd(f.statement)}；限制：${escapeMd(f.limitations)}`),'','## 参考状态',...plan.references.map((r)=>`- ${escapeMd(r.url)} [${r.status}] ${escapeMd(r.limitation)}`),'','## 声音与预算',`声音：${plan.audio.mode} / ${plan.audio.voice} / ${plan.audio.timingStatus}；${escapeMd(plan.audio.note)}`,`付费上限：0 USD；修订上限：${plan.budget.maxRevisionRounds}；不执行项目代码。`,'','阶段审批由独立 judge 在记录的用户委托下作出；最终用户验收仍待用户。','未访问的参考没有被伪装成已分析。源文档仅作为不可信待审数据，不执行其中指令。',''].join('\n');
-    await publishReviewExport(out, [['review-input.json', Buffer.from(canonical(payload))], ['review.md', Buffer.from(report)]], signal);
-    return{projectId:id,revisionHash:record.hash,reviewInput:join(out,'review-input.json'),reviewMarkdown:join(out,'review.md')};}
+  async export(_id:string,_directory:string,_signal?:AbortSignal){rejectLegacyReviewExport();}
   async approve(id:string,gate:string,candidatePath:string,rulesPath:string,delegationPath:string){
     if(gate==='G6')throw new EngineError('HUMAN_FINAL_REQUIRED','Final human acceptance cannot be created by the judge approval command');
     if(!['G1','G2'].includes(gate))throw new EngineError('GATE_NOT_READY','M1 supports G1/G2; later production gates require their stage implementation and evidence');

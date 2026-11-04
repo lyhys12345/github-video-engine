@@ -33,12 +33,13 @@ pnpm gve project status --id PROJECT --data STATE
 
 ```sh
 pnpm gve project import --id PROJECT --plan INPUT/planning-package.json --data STATE
-pnpm gve project export --id PROJECT --out REVIEW/plan-v1 --data STATE
 pnpm gve project approve --id PROJECT --gate G1 --candidate REVIEW/g1/candidate.json --rules reviews/M1/gate.json --delegation INPUT/delegation.json --data STATE
 pnpm gve project approve --id PROJECT --gate G2 --candidate REVIEW/g2/candidate.json --rules reviews/M1/gate.json --delegation INPUT/delegation.json --data STATE
 ```
 
 Each approval command requires a genuinely completed frozen candidate and every required independent report for that exact gate/revision. Do not create placeholder PASS reports. G2 requires current G1. Delegation is a trusted local record of the owner's actual authorization, not authenticated human identity. A new plan revision invalidates current downstream assumptions; old versions remain retained. `project list --data STATE` and `project status` inspect selection/history.
+
+The legacy `project export` command for `PlanningPackage` files returns `LEGACY_EXPORT_DISABLED`. This stops the publisher with the known staging race. Existing export directories, stored revisions and approval history are retained. The project authoring and explanation session commands have separate export paths.
 
 ## 2. Measure speech, design and authorize previews
 

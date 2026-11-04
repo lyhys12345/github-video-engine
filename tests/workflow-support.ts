@@ -17,15 +17,18 @@ export function planFixture(snapshot=sourceFixture()){
 }
 export async function workflowRoot(name:string){await mkdir('test-output',{recursive:true});return mkdtemp(resolve('test-output','workflow-'+name+'-'));}
 export async function reviewFixture(root:string,store:WorkflowStore,reviewRoot=root){
-  const exported=await store.export('demo',join(root,'export'));
+  const {record,payload}=await store.revision('demo');
+  // Materialize a synthetic review input inside the test's own directory.
+  const reviewInput=join(root,'review-input.json');
+  await writeFile(reviewInput,canonical(payload),{flag:'wx'});
   const rules=JSON.parse(await readFile('reviews/M1/gate.json','utf8'));
   const rulesPath=join(root,'gate.json');await writeFile(rulesPath,JSON.stringify(rules));
   await writeFile(join(root,'proof.log'),'FIXTURE records only; not an actual independent judge run.\n');
   const rel=(path:string)=>relative(reviewRoot,path).replaceAll('\\','/');
   const proofPath=rel(join(root,'proof.log'));
-  const candidate={id:'fixture-candidate',milestone:'M1',workflow:{projectId:'demo',revisionHash:exported.revisionHash,gates:['G1','G2']},files:[{path:rel(exported.reviewInput),sha256:sha256(await readFile(exported.reviewInput))},{path:rel(rulesPath),sha256:sha256(await readFile(rulesPath))},{path:proofPath,sha256:sha256(await readFile(join(root,'proof.log')))}]};
+  const candidate={id:'fixture-candidate',milestone:'M1',workflow:{projectId:'demo',revisionHash:record.hash,gates:['G1','G2']},files:[{path:rel(reviewInput),sha256:sha256(await readFile(reviewInput))},{path:rel(rulesPath),sha256:sha256(await readFile(rulesPath))},{path:proofPath,sha256:sha256(await readFile(join(root,'proof.log')))}]};
   const candidatePath=join(root,'candidate.json');await writeFile(candidatePath,canonical(candidate));const hash=sha256(await readFile(candidatePath));
   for(const role of rules.activeRoles){const report={role,candidateId:candidate.id,candidateSha256:hash,verdict:'PASS',criteria:rules.requiredCriteria[role].map((id:string)=>({id,status:'PASS',evidence:[proofPath]})),findings:[],executed:[{command:'FIXTURE: synthetic judge receipt, not actual review',exitCode:0,evidencePath:proofPath}],limitations:['This is a schema/authorization fixture, not a real judge report']};await writeFile(join(root,role+'.json'),JSON.stringify(report));}
   const delegationPath=join(root,'delegation.json');await writeFile(delegationPath,JSON.stringify({schemaVersion:'1.0',id:'fixture-delegation',authorityText:'Test fixture representing a trusted local operator recording an explicit user instruction.',authoritySource:'current-chat-user-instruction',recordedBy:'trusted-local-operator',humanIdentityAuthenticated:false,allowedGates:['G1','G2','G3','G4','G5'],finalHumanRequired:true,limits:{maxPaidUsd:0,deployment:false,untrustedRepositoryExecution:false}}));
-  return{candidatePath,rulesPath,delegationPath,exported};
+  return{candidatePath,rulesPath,delegationPath};
 }
