@@ -21,7 +21,7 @@ import {importHuihuiTts, readLocalTts} from '../tts/runtime.js';
 import {authoringPacket, loadAuthoringProposal, submitParsedAuthoringProposal, verifyProposal} from './agent-authoring.js';
 import {checkDatabaseFiles} from './cli.js';
 import {AuthorInput, AuthorReceipt, ExplanationAuthorPacketProfile, HiddenFileAuthorPacketProfile, NarratedHiddenFileAuthorPacketProfile, HiddenNarratedRenderSpec, LocalizedNarratedAuthorPacketProfile, NarratedProfile,
-  NarratedRenderInput, NarratedRenderReceipt, NarratedRenderSpec, RenderInput, RenderReceipt, Request, StartInput,
+  NarratedRenderInput, NarratedRenderReceipt, NarratedRenderSpec, PreparedRevisionInput, RenderInput, RenderReceipt, Request, RevisionInput, RevisionReceipt, RevisionSpec, StartInput,
   SourceCaptureProfile, SourcePathsAuthorPacketProfile, StartReceipt, SessionSubmission, VoicePrepareInput, VoicePrepareReceipt} from './explanation-contract.js';
 import {explanationAuthorPacket} from './explanation-author-packet.js';
 import {evidenceWorkspace} from './project-evidence.js';
@@ -33,6 +33,10 @@ const AUTHOR = 'repository-explanation-author-v1';
 const RENDER = 'repository-explanation-render-v1';
 const PREPARE_VOICE = 'repository-explanation-prepare-huihui-v1';
 const RENDER_NARRATED = 'repository-explanation-render-huihui-v1';
+const REVISE = 'repository-explanation-revise-v1';
+const MAX_REVISION_DEPTH = 8;
+const RENDER_TIMEOUT_MS = 3_120_000;
+const REVISION_TIMEOUT_MS = RENDER_TIMEOUT_MS + 60_000;
 const PROFILE = 'explanation-session/1.0';
 const RETRIES = 3;
 const SNAPSHOT_LIMIT = 4_000_000;
@@ -522,7 +526,7 @@ async function executeNarratedRender(data: string, input: NarratedRenderInput, s
     await assertCurrentAuthorSource(data, voice.author);
     return {value: NarratedRenderReceipt.parse({authorManifestSha256: voice.manifest.authorManifestSha256,
       voiceManifestSha256, previewTaskId: preview.taskId, previewManifestSha256: sha256(checked.bytes)}), outputs: []};
-  }, 3_120_000);
+  }, RENDER_TIMEOUT_MS);
   return {...await statusExplanation(data, result.id, signal), cached: result.cached};
 }
 
@@ -543,7 +547,7 @@ async function executeRender(data: string, input: RenderInput, signal: AbortSign
     await assertCurrentAuthorSource(data, author);
     return {value: RenderReceipt.parse({authorManifestSha256: sha256(json(author.manifest)),
       previewTaskId: preview.taskId, previewManifestSha256: sha256(checked.bytes)}), outputs: []};
-  }, 3_120_000);
+  }, RENDER_TIMEOUT_MS);
   const status = await statusExplanation(data, result.id, signal);
   return {...status, cached: result.cached};
 }
@@ -552,13 +556,14 @@ async function sessionTask(data: string, id: string, signal: AbortSignal) {
   checkAbort(signal);
   if (!Hash.safeParse(id).success) return fail('TASK', 'Expected a lowercase hexadecimal explanation task ID.');
   const task = await readTask(data, id, null);
-  if (![START, AUTHOR, RENDER, PREPARE_VOICE, RENDER_NARRATED].includes(task.kind)) {
+  if (![START, AUTHOR, RENDER, PREPARE_VOICE, RENDER_NARRATED, REVISE].includes(task.kind)) {
     return fail('TASK', 'Task does not belong to an explanation session.');
   }
   return task;
 }
 
 async function checkedStage(data: string, task: TaskRecord, signal: AbortSignal) {
+  if (task.kind === REVISE) return verifiedRevision(data, task, signal);
   if (task.kind === START) return verifiedStart(data, task, signal);
   if (task.kind === AUTHOR) return verifiedAuthor(data, task, signal);
   if (task.kind === PREPARE_VOICE) return verifiedVoicePreparation(data, task, signal);
@@ -570,7 +575,8 @@ export async function statusExplanation(data: string, id: string, signal: AbortS
   const task = await sessionTask(data, id, signal);
   if (task.state !== 'succeeded') {
     const expired = task.state === 'running' && task.leaseUntil <= Date.now();
-    if (task.kind === START) storedInput(StartInput, task);
+    if (task.kind === REVISE) storedInput(RevisionInput, task);
+    else if (task.kind === START) storedInput(StartInput, task);
     else if (task.kind === AUTHOR) storedInput(AuthorInput, task);
     else if (task.kind === PREPARE_VOICE) storedInput(VoicePrepareInput, task);
     else if (task.kind === RENDER_NARRATED) storedInput(NarratedRenderInput, task);
@@ -608,6 +614,10 @@ export async function submitExplanation(data: string, id: string, path: string, 
 
 export async function renderExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce) {
   const plan = await spec(PresentationPlan, path, 160_000);
+  return executeRender(data, await prepareExplanationRender(data, id, plan, signal), signal, onTask);
+}
+
+async function prepareExplanationRender(data: string, id: string, plan: PresentationPlan, signal: AbortSignal) {
   const author = await verifiedAuthor(data, await readTask(data, id, AUTHOR), signal);
   if (author.manifest.request.voiceMode !== 'silent') return fail('VOICE_MODE', 'Prepare Huihui voice and submit a narrated plan.');
   checkPlan(author, plan);
@@ -616,10 +626,9 @@ export async function renderExplanation(data: string, id: string, path: string, 
     plan.proposalHash, plan, data, signal));
   const verified = await readPresentation(data, created.taskId, 'plan', signal);
   if (!verified.files) return fail('NOT_READY', 'Child plan has no completed output.');
-  const input = RenderInput.parse({profile: PROFILE, authorTaskId: id, plan, planTaskId: created.taskId,
+  return RenderInput.parse({profile: PROFILE, authorTaskId: id, plan, planTaskId: created.taskId,
     ...(plan.schemaVersion === '1.4' ? {capabilityProfile: plan.capabilityProfile} : {}),
     planManifestSha256: sha256(verified.files.get('plan-manifest.json')!), rendererEnvironment: await environment()});
-  return executeRender(data, input, signal, onTask);
 }
 
 export async function prepareExplanationVoice(data: string, id: string, signal: AbortSignal, onTask?: Announce) {
@@ -632,7 +641,13 @@ export async function prepareExplanationVoice(data: string, id: string, signal: 
 }
 
 export async function renderNarratedExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce) {
-  const {schemaVersion, plan, offsets, voicePreparationManifestSha256} = await spec(z.union([NarratedRenderSpec, HiddenNarratedRenderSpec]), path, 170_000);
+  const authored = await spec(z.union([NarratedRenderSpec, HiddenNarratedRenderSpec]), path, 170_000);
+  return executeNarratedRender(data, await prepareNarratedExplanationRender(data, id, authored, signal), signal, onTask);
+}
+
+async function prepareNarratedExplanationRender(data: string, id: string, authored: z.infer<typeof NarratedRenderSpec | typeof HiddenNarratedRenderSpec>,
+  signal: AbortSignal) {
+  const {schemaVersion, plan, offsets, voicePreparationManifestSha256} = authored;
   const voice = await verifiedVoicePreparation(data, await readTask(data, id, PREPARE_VOICE), signal);
   if (voicePreparationManifestSha256 !== sha256(json(voice.manifest))) {
     return fail('BINDING', 'Select the exact voice preparation manifest.');
@@ -650,14 +665,182 @@ export async function renderNarratedExplanation(data: string, id: string, path: 
     voicePreparationManifestSha256, plan, offsets, planTaskId: created.taskId,
     planManifestSha256: sha256(verified.files.get('plan-manifest.json')!)};
   const voiceTaskId = await presentationVoiceId(narrationBindings(voice, base), signal);
-  const input = NarratedRenderInput.parse({...base, voiceTaskId, rendererEnvironment: await environment(),
+  return NarratedRenderInput.parse({...base, voiceTaskId, rendererEnvironment: await environment(),
     visualLocaleProfile: ZH_VISUAL_PROFILE});
-  return executeNarratedRender(data, input, signal, onTask);
+}
+
+function renderPresentationSpec(input: RenderInput | NarratedRenderInput): RevisionInput['edit']['presentation'] {
+  if (input.profile !== NarratedProfile) return {mode: 'silent', plan: input.plan};
+  const spec = input.plan.schemaVersion === '1.4' ? HiddenNarratedRenderSpec : NarratedRenderSpec;
+  return {mode: 'narrated', spec: spec.parse({schemaVersion: input.plan.schemaVersion === '1.4'
+    ? 'explanation-narrated-render/1.1' : 'explanation-narrated-render/1.0',
+  plan: input.plan, offsets: input.offsets, voicePreparationManifestSha256: input.voicePreparationManifestSha256})};
+}
+
+async function revisionPreview(data: string, task: TaskRecord, signal: AbortSignal) {
+  if (task.kind === RENDER) {
+    const input = storedInput(RenderInput, task);
+    const stage = await verifiedRender(data, task, signal);
+    return {...stage, authorTaskId: input.authorTaskId, voicePreparationTaskId: undefined,
+      presentation: renderPresentationSpec(input)};
+  }
+  if (task.kind === RENDER_NARRATED) {
+    const input = storedInput(NarratedRenderInput, task);
+    const stage = await verifiedNarratedRender(data, task, signal);
+    return {...stage, authorTaskId: input.authorTaskId, voicePreparationTaskId: input.voicePreparationTaskId,
+      presentation: renderPresentationSpec(input)};
+  }
+  return fail('REVISION_PARENT', 'Select a completed explanation preview or revision.');
+}
+
+type RevisionPreview = Awaited<ReturnType<typeof revisionPreview>>;
+type RevisionLineage = {
+  preview: RevisionPreview;
+  manifest: {taskId: string; stage: "preview-ready"};
+  depth: number;
+  files: Map<string, Buffer>;
+};
+
+async function revisionBase(data: string, input: RevisionInput, signal: AbortSignal, remaining: number): Promise<RevisionLineage> {
+  if (remaining <= 0) return fail('REVISION_DEPTH', 'Explanation revisions are limited to eight from the original preview.');
+  const task = await readTask(data, input.baseTaskId, null);
+  const base = task.kind === REVISE ? await verifiedRevision(data, task, signal, remaining - 1) : undefined;
+  const preview = base?.preview ?? await revisionPreview(data, task, signal);
+  const manifest = base?.manifest ?? preview.manifest;
+  if (sha256(json(manifest)) !== input.edit.expectedBaseManifestSha256) {
+    return fail('REVISION_HASH', 'The verified base manifest differs from the expected hash.');
+  }
+  return {preview, manifest, files: base?.files ?? preview.files, depth: base?.depth ?? 0};
+}
+
+async function revisionParents(data: string, base: RevisionPreview, edit: RevisionInput['edit'], signal: AbortSignal) {
+  if (edit.presentation.mode !== base.presentation.mode) {
+    return fail('REVISION_MODE', 'A revision must keep the original voice mode.');
+  }
+  if (canonical(edit.presentation) === canonical(base.presentation)) {
+    return fail('REVISION_UNCHANGED', 'Supply a changed presentation or manuscript.');
+  }
+  if (edit.kind === 'presentation') {
+    return {authorTaskId: base.authorTaskId, voicePreparationTaskId: base.voicePreparationTaskId};
+  }
+  const author = await verifiedAuthor(data, await readTask(data, edit.authorTaskId, AUTHOR), signal);
+  if (author.manifest.sessionTaskId !== base.manifest.sessionTaskId ||
+      canonical(author.manifest.binding) !== canonical(base.manifest.binding) ||
+      canonical(author.manifest.request) !== canonical(base.manifest.request) ||
+      author.submission.disposition !== 'proposal') {
+    return fail('REVISION_SOURCE', 'The revised manuscript must be accepted by the same pinned session.');
+  }
+  if (author.manifest.proposalHash === base.manifest.proposalHash) {
+    return fail('REVISION_UNCHANGED', 'A manuscript revision requires a changed accepted proposal.');
+  }
+  if (edit.presentation.mode === 'narrated') {
+    if (!edit.voicePreparationTaskId) return fail('REVISION_VOICE', 'Provide the revised manuscript’s voice preparation checkpoint.');
+    const voice = await verifiedVoicePreparation(data, await readTask(data, edit.voicePreparationTaskId, PREPARE_VOICE), signal);
+    if (voice.manifest.authorTaskId !== edit.authorTaskId) {
+      return fail('REVISION_VOICE', 'The voice preparation must belong to the revised manuscript.');
+    }
+  } else if (edit.voicePreparationTaskId) {
+    return fail('REVISION_VOICE', 'A silent manuscript cannot select voice preparation.');
+  }
+  return {authorTaskId: edit.authorTaskId, voicePreparationTaskId: edit.voicePreparationTaskId};
+}
+
+async function verifiedRevision(data: string, task: TaskRecord, signal: AbortSignal, remaining = MAX_REVISION_DEPTH): Promise<RevisionLineage> {
+  const input = storedInput(RevisionInput, task);
+  const saved = await receipt(RevisionReceipt, data, task, signal);
+  const base = await revisionBase(data, input, signal, remaining);
+  const parents = await revisionParents(data, base.preview, input.edit, signal);
+  if ('childRender' in input && saved.childTaskId !== revisionChildId(input.childRender)) {
+    return fail('INTEGRITY', 'Revision receipt does not reference the prepared render checkpoint.');
+  }
+  const child = await revisionPreview(data, await readTask(data, saved.childTaskId, null), signal);
+  if (task.outputs.length || saved.baseManifestSha256 !== input.edit.expectedBaseManifestSha256 ||
+      saved.childManifestSha256 !== sha256(json(child.manifest)) ||
+      child.authorTaskId !== parents.authorTaskId || child.voicePreparationTaskId !== parents.voicePreparationTaskId ||
+      canonical(child.presentation) !== canonical(input.edit.presentation)) {
+    return fail('INTEGRITY', 'Revision receipt differs from the verified base, edits or child preview.');
+  }
+  const depth = base.depth + 1;
+  const manifest = {
+    schemaVersion: 'explanation-revision-stage/1.0', taskId: task.id, stage: 'preview-ready' as const, depth,
+    baseTaskId: input.baseTaskId, baseManifestSha256: saved.baseManifestSha256,
+    childTaskId: saved.childTaskId, childManifestSha256: saved.childManifestSha256,
+    sessionTaskId: child.manifest.sessionTaskId, binding: child.manifest.binding, request: child.manifest.request,
+    proposalHash: child.manifest.proposalHash, authorTaskId: child.authorTaskId,
+    ...(child.voicePreparationTaskId && {voicePreparationTaskId: child.voicePreparationTaskId}),
+    kind: input.edit.kind, reason: input.edit.reason, review: child.manifest.review,
+  };
+  const files = new Map(child.files);
+  files.set('base-manifest.json', json(base.manifest));
+  files.set('revision-edit.json', json(input.edit));
+  files.set('revision-manifest.json', json(manifest));
+  return {manifest, files, preview: child, depth};
+}
+
+const revisionChildId = (child: RenderInput | NarratedRenderInput) =>
+  fingerprint(child.profile === NarratedProfile ? RENDER_NARRATED : RENDER, child);
+
+async function checkRevisionEnvironment(data: string, child: RenderInput | NarratedRenderInput, signal: AbortSignal) {
+  const task = await readTask(data, revisionChildId(child), null).catch(error => {
+    if (error instanceof EngineError && error.code === 'EXPLAIN_TASK') return null;
+    throw error;
+  });
+  if (task?.state === 'succeeded') return;
+  const changed = () => new EngineError('EXPLANATION_ENVIRONMENT',
+    'Restore the prepared renderer and decoder environment to resume this revision, or submit the edit again to create a new checkpoint.',
+    'retryable');
+  if (canonical(await environment()) !== canonical(child.rendererEnvironment)) throw changed();
+  if (child.profile === NarratedProfile) {
+    const voice = await verifiedVoicePreparation(data, await readTask(data, child.voicePreparationTaskId, PREPARE_VOICE), signal);
+    if (await presentationVoiceId(narrationBindings(voice, child), signal) !== child.voiceTaskId) throw changed();
+  }
+}
+
+async function executeRevision(data: string, input: PreparedRevisionInput, signal: AbortSignal, onTask?: Announce) {
+  const base = await revisionBase(data, input, signal, MAX_REVISION_DEPTH);
+  const parents = await revisionParents(data, base.preview, input.edit, signal);
+  const childRender = input.childRender;
+  const voicePreparationTaskId = childRender.profile === NarratedProfile ? childRender.voicePreparationTaskId : undefined;
+  if (childRender.authorTaskId !== parents.authorTaskId || voicePreparationTaskId !== parents.voicePreparationTaskId ||
+      canonical(renderPresentationSpec(childRender)) !== canonical(input.edit.presentation)) {
+    return fail('INTEGRITY', 'Prepared render differs from the revision edit or its parents.');
+  }
+  const childTaskId = revisionChildId(childRender);
+  await checkRevisionEnvironment(data, childRender, signal);
+  const result = await run(data, REVISE, input, signal, onTask, async (_runner, _id, childSignal) => {
+    const status = childRender.profile === NarratedProfile
+      ? await executeNarratedRender(data, childRender, childSignal)
+      : await executeRender(data, childRender, childSignal);
+    if (status.taskId !== childTaskId) return fail('INTEGRITY', 'Render did not use the prepared checkpoint.');
+    const child = await revisionPreview(data, await readTask(data, childTaskId, null), childSignal);
+    return {value: RevisionReceipt.parse({baseManifestSha256: input.edit.expectedBaseManifestSha256,
+      childTaskId, childManifestSha256: sha256(json(child.manifest))}), outputs: []};
+  }, REVISION_TIMEOUT_MS);
+  return {...await statusExplanation(data, result.id, signal), cached: result.cached};
+}
+
+export async function reviseExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce) {
+  const edit = await spec(RevisionSpec, path, 175_000);
+  const baseInput = {baseTaskId: parse(Hash, id), edit};
+  const base = await revisionBase(data, baseInput, signal, MAX_REVISION_DEPTH);
+  const parents = await revisionParents(data, base.preview, edit, signal);
+  const presentation = edit.presentation;
+  const childRender = presentation.mode === 'silent'
+    ? await prepareExplanationRender(data, parents.authorTaskId, presentation.plan, signal)
+    : await prepareNarratedExplanationRender(data, parents.voicePreparationTaskId!, presentation.spec, signal);
+  return executeRevision(data, PreparedRevisionInput.parse({...baseInput, profile: 'explanation-revision-task/1.1', childRender}),
+    signal, onTask);
 }
 
 export async function resumeExplanation(data: string, id: string, signal: AbortSignal, onTask?: Announce) {
   const task = await sessionTask(data, id, signal);
   if (task.state === 'succeeded') return {...await statusExplanation(data, id, signal), cached: true};
+  if (task.kind === REVISE) {
+    const input = storedInput(RevisionInput, task);
+    if (!('childRender' in input)) return fail('REVISION_LEGACY_RESUME',
+      'This unfinished revision did not record a prepared render checkpoint. Submit the edit again.');
+    return executeRevision(data, input, signal, onTask);
+  }
   if (task.kind === START) return executeStart(data, storedInput(StartInput, task), signal, onTask);
   if (task.kind === AUTHOR) return executeAuthor(data, storedInput(AuthorInput, task), signal, onTask);
   if (task.kind === PREPARE_VOICE) return executeVoicePreparation(data, storedInput(VoicePrepareInput, task), signal, onTask);

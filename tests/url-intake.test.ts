@@ -15,7 +15,7 @@ import {checkPresentationTiming} from '../src/presentation/timing-check.js';
 import {HiddenFileCapability} from '../src/contracts/hidden-file-policy.js';
 import {FILE_PATH_SIZE, hiddenFileLayout} from '../src/presentation/hidden-file-layout.js';
 import type {CompiledHiddenFiles} from '../src/presentation/hidden-file-policy.js';
-import {exportExplanation, prepareExplanationVoice, renderExplanation, resumeExplanation, startExplanation, statusExplanation, submitExplanation} from '../src/workflow/explanation-session.js';
+import {exportExplanation, prepareExplanationVoice, renderExplanation, resumeExplanation, reviseExplanation, startExplanation, statusExplanation, submitExplanation} from '../src/workflow/explanation-session.js';
 import {ExplanationAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedRenderSpec, SourceCaptureProfile,
   SourcePathsAuthorPacketProfile, StartInput, Submission} from '../src/workflow/explanation-contract.js';
 import {workflowRoot} from './workflow-support.js';
@@ -142,6 +142,20 @@ it('separates hidden-file authoring, derives pruned descendants, and refuses amb
   await writeSpec(plan);
   await expect(renderExplanation(data, acceptedNarration.taskId, spec, signal))
     .rejects.toMatchObject({code: 'EXPLANATION_VOICE_MODE'});
+  const revision = {schemaVersion: 'explanation-revision/1.0', kind: 'presentation',
+    reason: 'Clarify the synthetic comparison', expectedBaseManifestSha256: '0'.repeat(64),
+    presentation: {mode: 'silent', plan}};
+  await writeSpec(revision);
+  await expect(reviseExplanation(data, accepted.taskId, spec, signal))
+    .rejects.toMatchObject({code: 'EXPLANATION_REVISION_PARENT'});
+  for (const malformed of [
+    {...revision, reason: ' '}, {...revision, expectedBaseManifestSha256: 'not-a-hash'},
+    {...revision, voicePreparationTaskId: acceptedNarration.taskId}, {...revision, kind: 'manuscript'},
+  ]) {
+    await writeSpec(malformed);
+    await expect(reviseExplanation(data, accepted.taskId, spec, signal))
+      .rejects.toMatchObject({code: 'EXPLANATION_SCHEMA'});
+  }
   const submitPlan = async (value: unknown) => {
     await writeSpec(value);
     return workflowCommand(['project', 'presentation-plan'], {data, id: started.binding.projectId, proposal: accepted.proposalHash!, spec}, signal);

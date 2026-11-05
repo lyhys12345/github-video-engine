@@ -82,3 +82,25 @@ By default each clip uses one caption and the existing weighted-length limit. To
 New Huihui renders use the `presentation-ui-zh-cn/1` visual profile. Author short Chinese headings in proposal beat `purpose` fields and Chinese labels for the entities used by the plan, including queue lanes and tasks. Keep source-backed identifiers, code, command arguments and payloads in the existing plan parameters. The fixed renderer supplies Chinese notice and state labels. It validates editable text against the pinned Noto Sans SC font and available display width. A missing glyph, overly wide label or missing Chinese prose yields a field-specific error. Queue task cards use separate 26 px and 22 px lines for the task label and state on the 720 px canvas. This profile preserves the event trace, narration and caption timing.
 
 Status, resume and receipt export use the same explanation commands. Resume by the checkpoint ID printed on stderr after cancellation or interruption. Completed exports verify the pinned authoring, generation, imports, voice ledger and media offline. The narrated export retains editable plan/proposal, exact source recordings, VTT and reference PCM alongside the H.264/AAC technical preview.
+
+## Revise a completed preview
+
+```text
+pnpm gve explanation revise --task BASE --spec edit.json --data STATE
+pnpm gve explanation status --task REVISION --data STATE
+pnpm gve explanation resume --task REVISION --data STATE
+pnpm gve explanation export --task REVISION --data STATE --out NEW_OUTPUT
+```
+
+`BASE` is a completed render or revision in the same state directory. Export it first and calculate the SHA-256 of the exact `session-manifest.json` for an original render or `revision-manifest.json` for a revision. Pass that hash as `expectedBaseManifestSha256` in the edit. An edit has schema version `explanation-revision/1.0` and a nonblank `reason` of at most 500 characters. The caller supplies the complete revised presentation.
+
+| Edit field | Accepted value |
+| --- | --- |
+| `kind` | `presentation` to reuse the base proposal and prepared voice, or `manuscript` to use a changed proposal accepted by the same pinned start |
+| `presentation` | `{"mode":"silent","plan": ...}` or `{"mode":"narrated","spec": ...}`, using the existing render schema for the chosen mode |
+| `authorTaskId` | Required for a manuscript edit. Submit the revised proposal through the existing proposal command first |
+| `voicePreparationTaskId` | Required for a narrated manuscript edit. Prepare voice for the revised author checkpoint first |
+
+For a silent presentation edit, begin with the base export's `editable/presentation.json`. For a narrated presentation edit, use the original narrated-render spec, or reconstruct it from `editable/presentation.json`, the voice preparation manifest hash in `session-manifest.json`, and the beat IDs, offsets and caption cues in `voice/bindings.json`. A prior revision's `revision-edit.json` includes its complete spec.
+
+A revision keeps the same source, session, language and voice mode. The engine rejects an unchanged edit or a different base manifest hash. The revision export contains the new preview, its original render-stage manifest, the exact edit, and the base and revision manifests. The revision manifest binds the completed base and new preview by task ID and manifest SHA-256. A lineage can have at most eight revisions. The revision checkpoint records the prepared render, compiled plan, and renderer identity, including the decoder binding for narration. Resume uses that exact render. If its environment changed, restore it or explicitly submit the edit to create a new checkpoint. Identical submissions prepared in the same environment use the same revision checkpoint. Completed earlier revisions can still be verified and exported. An unfinished revision created before this binding must be submitted again. Earlier exports are still available through their own IDs and receipt directories. Semantic, editorial and owner review remain pending.

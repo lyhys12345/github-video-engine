@@ -1,7 +1,7 @@
 import {z} from 'zod';
 import {AuthoringBinding, HiddenFileStoryProposal, StoryProposal} from '../contracts/authoring.js';
 import {HiddenFileCapability} from '../contracts/hidden-file-policy.js';
-import {HiddenFilePlan, HistoricalPresentationPlan} from '../contracts/presentation.js';
+import {HiddenFilePlan, HistoricalPresentationPlan, PresentationPlan} from '../contracts/presentation.js';
 import {RepositoryUrl} from '../contracts/planning.js';
 import {Hash, Id} from '../contracts/video.js';
 import {ArtifactSchema} from '../contracts/runtime.js';
@@ -132,3 +132,28 @@ export type NarratedRenderInput = z.infer<typeof NarratedRenderInput>;
 export type NarratedRenderSpec = z.infer<typeof NarratedRenderSpec>;
 export type Submission = z.infer<typeof Submission>;
 export type SessionSubmission = z.infer<typeof SessionSubmission>;
+const RevisionPresentation = z.union([
+  z.strictObject({mode: z.literal('silent'), plan: PresentationPlan}),
+  z.strictObject({mode: z.literal('narrated'), spec: z.union([NarratedRenderSpec, HiddenNarratedRenderSpec])}),
+]);
+const revisionFields = {
+  schemaVersion: z.literal('explanation-revision/1.0'),
+  expectedBaseManifestSha256: Hash,
+  reason: boundedText(500),
+  presentation: RevisionPresentation,
+};
+export const RevisionSpec = z.discriminatedUnion('kind', [
+  z.strictObject({...revisionFields, kind: z.literal('presentation')}),
+  z.strictObject({...revisionFields, kind: z.literal('manuscript'), authorTaskId: Hash, voicePreparationTaskId: Hash.optional()}),
+]);
+const LegacyRevisionInput = z.strictObject({baseTaskId: Hash, edit: RevisionSpec});
+export const PreparedRevisionInput = LegacyRevisionInput.extend({
+  profile: z.literal('explanation-revision-task/1.1'),
+  childRender: z.union([RenderInput, NarratedRenderInput]),
+});
+export const RevisionInput = z.union([LegacyRevisionInput, PreparedRevisionInput]);
+export const RevisionReceipt = z.strictObject({
+  baseManifestSha256: Hash, childTaskId: Hash, childManifestSha256: Hash,
+});
+export type RevisionInput = z.infer<typeof RevisionInput>;
+export type PreparedRevisionInput = z.infer<typeof PreparedRevisionInput>;
