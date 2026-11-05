@@ -916,3 +916,9 @@ export async function capturePortableExplanation(data:string,id:string,signal:Ab
    return {beatId:b.id,audio,sourceReceipt,mediaType:receipt.artifact.mediaType};
   })};
 }
+
+/** Reuse the verified URL capture; this is data, not automatic repository reasoning. */
+export async function captureNarrativeStart(data:string,id:string,signal:AbortSignal){
+ const stage=await verifiedStart(data,await readTask(data,id,START),signal);
+ return {manifest:stage.manifest,snapshot:stage.snapshot,workspace:stage.workspace};
+}

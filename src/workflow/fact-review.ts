@@ -1,3 +1,4 @@
+import type {NarrativePlan} from '../contracts/narrative.js';
 import {z} from 'zod';
 import {canonical, sha256} from '../core/util.js';
 import {EngineError} from '../core/errors.js';
@@ -41,4 +42,18 @@ export function presentationFactReview(proposal:StoredStoryProposal,sources:Sour
  const {packetHash,...content}=base;
  const next={...content,candidateHash:sha256(canonical({proposal,presentation})),units:[...base.units,{id:'authored-presentation',kind:'presentation',text:canonical(presentation),claimIds:[]}],requiredItems:[...base.requiredItems,'authored-presentation']};
  return {...next,packetHash:sha256(canonical(next))};
+}
+
+/** Full narrative review includes thesis, all transitions, ending and unresolved scene dispositions. */
+export function narrativeFactReview(plan:NarrativePlan,sources:Source[]){
+ return packet(plan,sources,plan.claims.map(c=>({id:c.id,statement:c.statement,kind:c.basis.kind,...(c.basis.kind==='inference'?{reasoning:c.basis.reasoning}:{}),citations:c.citations.map(q=>{if(sources.find(s=>s.id===q.sourceId)?.sha256!==q.sourceSha256)fail('Citation source hash mismatch');return {document:q.sourceId,startLine:q.startLine,endLine:q.endLine,quote:q.quote};})})),[
+ {id:'narrative-brief',kind:'scope-and-thesis',text:canonical({brief:plan.brief,authorship:plan.authorship,interpretation:plan.interpretation,openQuestions:plan.openQuestions}),claimIds:plan.brief.claimIds},
+ ...plan.scenes.flatMap(s=>[
+  {id:'scene-context:'+s.id,kind:'scene-context',text:canonical({title:s.title,role:s.role,estimatedSeconds:s.estimatedSeconds}),claimIds:s.claimIds},
+  {id:'scene-narration:'+s.id,kind:'narration',text:s.narration,claimIds:s.claimIds},
+  {id:'scene-visual:'+s.id,kind:'visual',text:s.visual,claimIds:s.claimIds},
+  {id:'scene-screen:'+s.id,kind:'on-screen-text',text:canonical(s.onScreenText),claimIds:s.claimIds},
+  {id:'scene-transition:'+s.id,kind:'transition',text:s.transitionToNext,claimIds:s.claimIds},
+  {id:'scene-execution:'+s.id,kind:'execution-disposition',text:canonical(s.execution),claimIds:s.claimIds}
+ ])]);
 }

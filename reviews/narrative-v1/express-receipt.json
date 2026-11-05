@@ -1,0 +1,215 @@
+{
+  "schemaVersion": "fact-review-receipt/1.0",
+  "candidateHash": "e105516469088894691f446d755445ae407583c44a5e6add118cbfe0801b6058",
+  "packetHash": "54815d42260b90b9556ca92fba174984316ddb5a1093e8313191bbbcfb34a10c",
+  "reviewer": {
+    "kind": "session-agent",
+    "identity": "/root/narrative_facts independent J5 written-plan review"
+  },
+  "items": [
+    {
+      "id": "claim:example-listens",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The exact quoted lines directly support this narrowly documented claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "claim:root-match",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The exact quoted lines directly support this narrowly documented claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "claim:send-greeting",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The exact quoted lines directly support this narrowly documented claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "narrative-brief",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). Thesis correctly attributes the example to documentation and excludes empirical claims; five scene roles and open questions are present.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-context:send-request",
+      "verdict": "supported",
+      "reason": "Editorial title and role match this scene. estimatedSeconds is authored intent, not an empirical duration claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-narration:send-request",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The wording/caption remains within that documented example; imagined request or unchanged sample path is an illustrative comparison, not an observed run.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-visual:send-request",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The proposed image is a schematic diagram/output intention in the full narrative context, not an observed execution or measured output.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-screen:send-request",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The wording/caption remains within that documented example; imagined request or unchanged sample path is an illustrative comparison, not an observed run.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-transition:send-request",
+      "verdict": "supported",
+      "reason": "Editorial transition connects the documented steps or introduces limitations; it adds no unreferenced technical or measured assertion.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-execution:send-request",
+      "verdict": "supported",
+      "reason": "Independent hash check confirms the bundled linked Story equals expectedGraphHash, its listed shots exist, and the story-links entry agrees. This supports a planning linkage only.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-context:match-route",
+      "verdict": "supported",
+      "reason": "Editorial title and role match this scene. estimatedSeconds is authored intent, not an empirical duration claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-narration:match-route",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The wording/caption remains within that documented example; imagined request or unchanged sample path is an illustrative comparison, not an observed run.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-visual:match-route",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The proposed image is a schematic diagram/output intention in the full narrative context, not an observed execution or measured output.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-screen:match-route",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The wording/caption remains within that documented example; imagined request or unchanged sample path is an illustrative comparison, not an observed run.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-transition:match-route",
+      "verdict": "supported",
+      "reason": "Editorial transition connects the documented steps or introduces limitations; it adds no unreferenced technical or measured assertion.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-execution:match-route",
+      "verdict": "supported",
+      "reason": "Independent hash check confirms the bundled linked Story equals expectedGraphHash, its listed shots exist, and the story-links entry agrees. This supports a planning linkage only.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-context:return-body",
+      "verdict": "supported",
+      "reason": "Editorial title and role match this scene. estimatedSeconds is authored intent, not an empirical duration claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-narration:return-body",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The wording/caption remains within that documented example; imagined request or unchanged sample path is an illustrative comparison, not an observed run.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-visual:return-body",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The proposed image is a schematic diagram/output intention in the full narrative context, not an observed execution or measured output.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-screen:return-body",
+      "verdict": "supported",
+      "reason": "Pinned README lines 41–47: GET /, handler res.send(Hello World), listen(3000). The wording/caption remains within that documented example; imagined request or unchanged sample path is an illustrative comparison, not an observed run.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-transition:return-body",
+      "verdict": "supported",
+      "reason": "Editorial transition connects the documented steps or introduces limitations; it adds no unreferenced technical or measured assertion.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-execution:return-body",
+      "verdict": "supported",
+      "reason": "Independent hash check confirms the bundled linked Story equals expectedGraphHash, its listed shots exist, and the story-links entry agrees. This supports a planning linkage only.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-context:evidence-limit",
+      "verdict": "supported",
+      "reason": "Editorial title and role match this scene. estimatedSeconds is authored intent, not an empirical duration claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-narration:evidence-limit",
+      "verdict": "supported",
+      "reason": "This unit explicitly presents an unanswered empirical question and discloses that the plan has not measured it. It makes no affirmative performance or image-quality claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-visual:evidence-limit",
+      "verdict": "supported",
+      "reason": "This unit explicitly presents an unanswered empirical question and discloses that the plan has not measured it. It makes no affirmative performance or image-quality claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-screen:evidence-limit",
+      "verdict": "supported",
+      "reason": "This unit explicitly presents an unanswered empirical question and discloses that the plan has not measured it. It makes no affirmative performance or image-quality claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-transition:evidence-limit",
+      "verdict": "supported",
+      "reason": "This unit explicitly presents an unanswered empirical question and discloses that the plan has not measured it. It makes no affirmative performance or image-quality claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-execution:evidence-limit",
+      "verdict": "supported",
+      "reason": "The provided package supplies documented examples, not workload/model-result measurements. Preserving needs-evidence accurately records the unresolved empirical question.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-context:close-with-scope",
+      "verdict": "supported",
+      "reason": "Editorial title and role match this scene. estimatedSeconds is authored intent, not an empirical duration claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-narration:close-with-scope",
+      "verdict": "supported",
+      "reason": "This ending stays within documented example/output intent and explicitly defers observed-result evidence and adapter work. The empty final transition adds no claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-visual:close-with-scope",
+      "verdict": "supported",
+      "reason": "This ending stays within documented example/output intent and explicitly defers observed-result evidence and adapter work. The empty final transition adds no claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-screen:close-with-scope",
+      "verdict": "supported",
+      "reason": "This ending stays within documented example/output intent and explicitly defers observed-result evidence and adapter work. The empty final transition adds no claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-transition:close-with-scope",
+      "verdict": "supported",
+      "reason": "This ending stays within documented example/output intent and explicitly defers observed-result evidence and adapter work. The empty final transition adds no claim.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    },
+    {
+      "id": "scene-execution:close-with-scope",
+      "verdict": "supported",
+      "reason": "No closing Story link appears in the package; needs-adapter accurately retains the unsupported execution disposition rather than deleting the scene.",
+      "limitations": "Written-plan semantics only; no target execution, rendered media, listening, timing measurement, or owner acceptance."
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "narrative-freeze/1.0",
+  "candidate": "narrative-planning-c1",
+  "commit": "6b60d8321c8a6479af36a1943275331850069a32",
+  "base": "c411d3c",
+  "frozenAt": "2026-11-05T06:29:07.769Z",
+  "activeRoles": [
+    "product",
+    "reliability",
+    "evidence",
+    "content_facts",
+    "security",
+    "video_quality"
+  ],
+  "sourceFiles": 715,
+  "sourceManifestSha256": "7651f8e2397cdb9008a7693e3d3620e1c3d8545adf9bf3170cd0bbff7af4d3a0",
+  "sourceArchiveSha256": "85b5ae2224558d8c95d21e059638ba015ac05ecb90a1fe9a7e8418e7c75b8486",
+  "materialsFiles": 264,
+  "materialsManifestSha256": "fcf892fabb96f8c6fee80858e9e6d997b67de21bf79dce2cdbdc5deeb3678890",
+  "tests": {
+    "typecheck": "PASS",
+    "affected": "51 PASS across4 files;16 narrative tests",
+    "fullRegression": "running at initial freeze; additive result only"
+  },
+  "actual": {
+    "sourceCapture": "real pinned public GitHub API; no target execution",
+    "projects": [
+      "expressjs/express@43fca52d28a422c8be48fd489cbd4f2d6152bab6",
+      "danielgatis/rembg@e2c2e3f72701357b9bb3f2be32a4330d74ce8f47"
+    ],
+    "plans": [
+      "c692b3666a1b7cfd95659b4d8345c399c9e2131b4d235ab985ce5a50bbf10ee3",
+      "e226e6711c6fbb61d80cf11016a54c708f721946b4ce902e1f72b300c5cd6e1d"
+    ],
+    "sceneStatesPerPlan": {
+      "supportedStory": 3,
+      "needsEvidence": 1,
+      "needsAdapter": 1
+    },
+    "independentWrittenReviewItems": 67,
+    "offlineReplayAndExactExport": "PASS after input/receipt/state movement and fetch disabled"
+  },
+  "limits": [
+    "Human/session-agent authored; not automatic repository understanding",
+    "Planning JSON only; no new whole-video/media/frame generation",
+    "Narrative attribution does not approve nested Story/media or resolve scene gaps",
+    "Actual audiovisual and final owner/G6 acceptance pending"
+  ]
+}
