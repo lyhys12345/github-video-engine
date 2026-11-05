@@ -23,3 +23,5 @@ This proves a general source-bound authoring entry and a new project through the
 Optional Chinese explanation and gap text: see [scene context v1](narrative-scene-context-v1.md). The session Agent authors the data; claim references are pending provenance, not semantic approval. Use only if a smaller complete source frame is acceptable and author timing for the actual audience. No field is inferred automatically.
 
 For a source-backed single-input/tool/output continuous operation view, see [causal operation animation v1](causal-operation-animation-v1.md). It retains input/output identities, uses separate illustrative signals and rejects compound operations; facts and hearing remain pending.
+
+For explicit legacy/independent/causal animation choices within one complete unified run, see [per-scene profiles](mixed-scene-animation-run-v1.md). All scenes, whole recordings and source checks remain required; profile selection is Agent-authored data and cannot invent support.
