@@ -32,6 +32,7 @@ function wrapPreviewText(value:string):string[]{
 /** Diagnostic SVG frame, not an approved visual design or video renderer. */
 export function renderFramePreview(plan: ReturnType<typeof compileAnimation>, frame: number, context?:PreviewEvidenceContext, format:PreviewFormat='3'): string {
  const state=sampleAnimation(plan,frame);
+ if(state.independentFlows)return renderIndependentFrame(state,frame,context);
  const destinations=new Map<string,number>();
  if(format==='3'){
   // The token travels along the path; destination captions stay anchored and never cross the source.
@@ -66,4 +67,20 @@ export function renderFramePreview(plan: ReturnType<typeof compileAnimation>, fr
  }
  const footer=context?'provenance.json · 完整陈述 / 推断理由 / 引文 / 来源哈希':evidence.slice(0,100);
  return `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280"><metadata>${esc(evidence)}</metadata><rect width="720" height="1280" fill="#101827"/><text x="24" y="44" fill="white" font-size="20">${esc(state.shotId)} · frame ${frame}</text><text x="24" y="82" fill="#ffe180" font-size="20">实验示意 / 人工编排；非实际执行记录</text><text x="24" y="116" fill="#ffe180" font-size="16">含推断 / 假设重建；不表示已观察到实际结果</text>${contextLabel}${operation?diagram:arrow+traces+objects}<text x="24" y="1210" fill="#b8c7e2" font-size="12">${esc(footer)}</text></svg>`;
+}
+
+function renderIndependentFrame(state:ReturnType<typeof sampleAnimation>,frame:number,context?:PreviewEvidenceContext){
+ const esc=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]!));
+ const lanes=state.independentFlows!,height=800/lanes.length,small=lanes.length>2;
+ const wrap=(s:string,n:number)=>{const chars=Array.from(s),lines:string[]=[];while(chars.length)lines.push(chars.splice(0,n).join(''));return lines;};
+ const diagrams=lanes.map((lane,index)=>{
+  const top=300+index*height,cy=top+(lanes.length===1?380:small?80:150),scale=lanes.length===1?.8:small?.38:.65,font=small?14:18;
+  const x=(id:string)=>80+lane.objectIds.indexOf(id)*560/Math.max(1,lane.objectIds.length-1);
+  const actions=state.actions.filter(a=>'flowId'in a&&a.flowId===lane.id);
+  const traces=actions.map(a=>{const from=x(a.source!),to=x(a.target),cyToken=cy;return `<g data-flow="${lane.id}" data-operation="${'operationId'in a?a.operationId:''}" data-from="${a.source}" data-to="${a.target}"><path d="M${from+40} ${cyToken}H${to-40}" fill="none" stroke="#ffe180" stroke-width="3" marker-end="url(#independent-arrow)"/><circle cx="${from+40+(to-from-80)*a.progress}" cy="${cyToken}" r="6" fill="#8cdeaa"/></g>`;}).join('');
+  const objects=lane.objectIds.map(id=>{const object=state.objects.find(o=>o.id===id)!,action=actions.find(a=>a.target===id),progress=action?.progress??1;return `<g data-semantic-object="${id}" transform="translate(${x(id)} ${cy})"><g transform="scale(${scale})" opacity="${.25+.75*progress}">${glyph('code',progress,frame)}</g><text text-anchor="middle" fill="white" font-size="${font}">${wrap(object.label,6).map((line,i)=>`<tspan x="0" y="${(small?44:75)+i*(font+2)}">${esc(line)}</tspan>`).join('')}</text></g>`;}).join('');
+  return `<g data-independent-flow="${lane.id}"><rect x="18" y="${top+3}" width="684" height="${height-10}" rx="12" fill="${index%2?'#1b2538':'#172237'}" stroke="#526683"/><text fill="#b9d8ff" font-size="16">${wrap(lane.label+' · 独立示例',28).map((line,i)=>`<tspan x="34" y="${top+30+i*18}">${esc(line)}</tspan>`).join('')}</text>${traces}${objects}</g>`;
+ }).join('');
+ const metadata={schemaVersion:'independent-document-frame/1.0',scope:'independent-source-examples-not-executed-or-roundtrip-verified',frame,shotId:state.shotId,flows:lanes,actions:state.actions,...(context?{storyId:context.story.id,evidence:context.story.evidence,provenanceSha256:context.provenanceSha256}:{})};
+ return `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280"><metadata>${esc(JSON.stringify(metadata))}</metadata><defs><marker id="independent-arrow" viewBox="0 0 10 10" markerWidth="4" markerHeight="4" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#ffe180"/></marker></defs><rect width="720" height="1280" fill="#101827"/><text x="24" y="44" fill="white" font-size="22">独立文档流程 · 源证据约束的人工动画</text><text x="24" y="82" fill="#ffe180" font-size="18">未执行目标；不表示并发、连续执行或往返保真</text><text x="24" y="118" fill="#b8c7e2" font-size="16">${esc(state.shotId)} · frame ${frame} · 语义事实与听感待审</text>${context?wrapPreviewText(context.story.name).slice(0,3).map((line,i)=>`<text x="24" y="${160+i*23}" fill="white" font-size="18">${esc(line)}</text>`).join(''):''}${diagrams}<text x="24" y="1180" fill="#b8c7e2" font-size="14">各泳道独立；箭头只连接同一来源流程中的对象</text><text x="24" y="1210" fill="#b8c7e2" font-size="12">provenance.json · 全部来源 / 引文 / 操作 / 人工编排</text></svg>`;
 }

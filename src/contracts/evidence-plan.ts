@@ -24,7 +24,12 @@ const documentStoryGraph=storyGraph.extend({
  schemaVersion:z.literal('1.1'),
  operations:z.array(graphOperation.extend({kind:z.enum([...operationKind.options,'match-route','send-response','document-transform'])})).min(1).max(5),
 });
-function validateGraph(g:z.infer<typeof storyGraph>|z.infer<typeof documentStoryGraph>,c:z.RefinementCtx){
+const independentDocumentGraph=documentStoryGraph.extend({
+ schemaVersion:z.literal('1.2'),flowRelation:z.literal('independent-source-examples'),
+ operations:z.array(graphOperation.extend({kind:z.literal('document-transform')})).min(2).max(12),
+ flows:z.array(z.strictObject({id:Id,label:text.max(40),operationIds:z.array(Id).min(1).max(4),claimIds:z.array(Id).min(1)})).min(2).max(4),
+});
+function validateGraph(g:z.infer<typeof storyGraph>|z.infer<typeof documentStoryGraph>|z.infer<typeof independentDocumentGraph>,c:z.RefinementCtx){
  const fail=(message:string)=>c.addIssue({code:'custom',message});
  for(const list of [g.sources,g.claims,g.objects,g.actors,g.operations])if(new Set(list.map(x=>x.id)).size!==list.length)fail('Duplicate identity');
  const sources=new Set(g.sources.map(x=>x.id)),claims=new Set(g.claims.map(x=>x.id)),objects=new Map(g.objects.map(x=>[x.id,x])),actors=new Set(g.actors.map(x=>x.id)),ops=new Map(g.operations.map(x=>[x.id,x]));
@@ -44,12 +49,25 @@ function validateGraph(g:z.infer<typeof storyGraph>|z.infer<typeof documentStory
  if(op.kind!=='rate-change'&&Object.keys(op.parameters).length)fail('Unsupported parameters for operation');
  if(op.dependsOn.length>1||op.dependsOn.some(id=>ops.get(id)?.output!==op.input))fail('Dependency does not supply unique semantic input');
  }
- if(g.operations.filter(x=>!x.dependsOn.length).length!==1||g.operations.filter(x=>!g.operations.some(y=>y.dependsOn.includes(x.id))).length!==1||g.operations.some(x=>g.operations.filter(y=>y.dependsOn.includes(x.id)).length>1))fail('Only connected single-input single-output chains supported');
+ const chain=(operations:typeof g.operations)=>operations.filter(x=>!x.dependsOn.length).length===1&&operations.filter(x=>!operations.some(y=>y.dependsOn.includes(x.id))).length===1&&!operations.some(x=>operations.filter(y=>y.dependsOn.includes(x.id)).length>1);
+ if(g.schemaVersion==='1.2'){
+  if(new Set(g.flows.map(f=>f.id)).size!==g.flows.length)fail('Duplicate independent flow identity');
+  const covered=new Set<string>(),ownedObjects=new Set<string>();
+  for(const flow of g.flows){const selected=flow.operationIds.map(id=>ops.get(id)),ids=new Set(flow.operationIds);if(ids.size!==flow.operationIds.length||selected.some(op=>!op)||flow.operationIds.some(id=>covered.has(id))){fail('Each operation must belong to exactly one known independent flow');continue;}
+   const operations=selected as typeof g.operations,localObjects=new Set(operations.flatMap(op=>[op.input,op.output])),usedClaims=new Set(operations.flatMap(op=>op.claimIds));
+   if(!chain(operations)||operations.some((op,i)=>op.dependsOn.some(id=>!ids.has(id)||!flow.operationIds.slice(0,i).includes(id))))fail('Each independent flow is an ordered connected chain; cross-flow dependencies are forbidden');
+   if([...localObjects].some(id=>ownedObjects.has(id)))fail('Independent flows cannot share semantic objects or imply a round trip');
+   if(new Set(flow.claimIds).size!==flow.claimIds.length||flow.claimIds.length!==usedClaims.size||flow.claimIds.some(id=>!usedClaims.has(id)))fail('Flow claims must exactly cover its source-bound operations');
+   for(const id of ids)covered.add(id);for(const id of localObjects)ownedObjects.add(id);
+  }
+  if(covered.size!==g.operations.length)fail('Independent flows must cover every operation');
+  if(g.objects.some(o=>o.label.length>24))fail('Independent-flow node labels must be at most24 characters for bounded readable lanes');
+ }else if(!chain(g.operations))fail('Only connected single-input single-output chains supported');
  const done=new Set<string>();let pending=[...g.operations];while(pending.length){const ready=pending.filter(x=>x.dependsOn.every(id=>done.has(id)));if(!ready.length){fail('Cyclic semantic graph');break;}for(const x of ready)done.add(x.id);pending=pending.filter(x=>!done.has(x.id));}
 }
 export const EvidenceGraphSchema=legacyGraph.superRefine(validateGraph);
 export const LegacyStoryEvidenceGraphSchema=storyGraph.superRefine(validateGraph);
-export const StoryEvidenceGraphSchema=z.discriminatedUnion('schemaVersion',[LegacyStoryEvidenceGraphSchema,documentStoryGraph.superRefine(validateGraph)]);
+export const StoryEvidenceGraphSchema=z.discriminatedUnion('schemaVersion',[LegacyStoryEvidenceGraphSchema,documentStoryGraph.superRefine(validateGraph),independentDocumentGraph.superRefine(validateGraph)]);
 export type EvidenceGraph=z.infer<typeof EvidenceGraphSchema>;
 export const CompiledPlanSchema=z.object({schemaVersion:z.literal('1.0'),compilerVersion:z.literal('evidence-planner-1'),graphHash:z.string().length(64),graph:EvidenceGraphSchema,
  goals:z.array(z.object({question:text,answer:text,claimIds:z.array(Id).min(1)}).strict()).length(3),

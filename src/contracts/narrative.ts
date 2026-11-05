@@ -3,7 +3,7 @@ import {AuthoringBinding,LegacyStoryProposal} from './authoring.js';
 import {Hash,Id} from './video.js';
 const text=(max:number)=>z.string().min(1).max(max).regex(/\S/);
 const execution=z.discriminatedUnion('kind',[
- z.strictObject({kind:z.literal('supported-story'),adapter:z.enum(['http','image-mask','scalar-rule','document-flow/1.0']),storyTaskId:Hash,expectedGraphHash:Hash,shotIds:z.array(Id).min(1).max(12)}),
+ z.strictObject({kind:z.literal('supported-story'),adapter:z.enum(['http','image-mask','scalar-rule','document-flow/1.0','document-independent/1.0']),storyTaskId:Hash,expectedGraphHash:Hash,shotIds:z.array(Id).min(1).max(12)}),
  z.strictObject({kind:z.literal('needs-evidence'),reason:text(1000),missingEvidence:text(1000)}),
  z.strictObject({kind:z.literal('needs-adapter'),reason:text(1000),requiredCapability:text(1000)})
 ]);

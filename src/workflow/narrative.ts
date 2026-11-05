@@ -25,7 +25,7 @@ async function spec<T>(schema:z.ZodType<T>,path:string,max=1_000_000){return par
 // Their stored closure is immutable; new authoring packets expose the extended schema.
 function boundNarrativeSchema(plan:z.infer<typeof NarrativePlan>){
  const schema:any=z.toJSONSchema(NarrativePlan);
- if(!plan.scenes.some(scene=>scene.execution.kind==='supported-story'&&scene.execution.adapter==='document-flow/1.0'))schema.properties.scenes.items.properties.execution.oneOf[0].properties.adapter.enum=['http','image-mask','scalar-rule'];
+ if(!plan.scenes.some(scene=>scene.execution.kind==='supported-story'&&scene.execution.adapter==='document-independent/1.0'))schema.properties.scenes.items.properties.execution.oneOf[0].properties.adapter.enum=plan.scenes.some(scene=>scene.execution.kind==='supported-story'&&scene.execution.adapter==='document-flow/1.0')?['http','image-mask','scalar-rule','document-flow/1.0']:['http','image-mask','scalar-rule'];
  return schema;
 }
 function fileDigest(files:Map<string,Buffer>){return sha256(canonical([...files].map(([name,b])=>[name,sha256(b)]).sort(([a],[b])=>a!.localeCompare(b!,'en'))));}
@@ -44,7 +44,7 @@ async function material(data:string,input:z.infer<typeof Input>,signal:AbortSign
   if(scene.narration!==shots.map(s=>s!.narration).join('\n')||scene.visual!==shots.map(s=>s!.visual).join('\n'))fail('Supported scene must retain complete linked Story narration and visual text.');
   const used=[...new Set(shots.flatMap(s=>s!.claimIds))];if(used.some(id=>!scene.claimIds.includes(id)))fail('Supported scene omits linked Story claims.');
   for(const id of used){const original=story.evidence.claims.find(c=>c.id===id)!,claimed=plan.claims.find(c=>c.id===id);const citations=original.citations.map(q=>({sourceId:q.document,sourceSha256:story.evidence.sources.find(s=>s.id===q.document)!.sha256,startLine:q.startLine,endLine:q.endLine,quote:q.quote}));if(!claimed||original.statement!==claimed.statement||original.kind!==claimed.basis.kind||canonical(citations)!==canonical(claimed.citations)||(original.kind==='inference'&&original.rationale!==(claimed.basis as {reasoning?:string}).reasoning))fail('Supported scene claim differs from its exact Story source assertion.');}
-  const families=story.evidence.operations.map(o=>o.kind==='document-transform'?'document-flow/1.0':['match-route','send-response'].includes(o.kind)?'http':['segment','extract','composite'].includes(o.kind)?'image-mask':'scalar-rule');if(!families.length||families.some(f=>f!==e.adapter))fail('Declared Story adapter differs from the established operation vocabulary.');
+  const families=story.evidence.operations.map(o=>story.evidence.schemaVersion==='1.2'?'document-independent/1.0':o.kind==='document-transform'?'document-flow/1.0':['match-route','send-response'].includes(o.kind)?'http':['segment','extract','composite'].includes(o.kind)?'image-mask':'scalar-rule');if(!families.length||families.some(f=>f!==e.adapter))fail('Declared Story adapter differs from the established operation vocabulary.');
   linked.push({sceneId:scene.id,storyTaskId:e.storyTaskId,graphHash:e.expectedGraphHash,shotIds:e.shotIds,adapter:e.adapter,scope:'verified-source-bound-story-planning-link; no new rendered-scene validation'});
  }
  const review=input.reviewReceipt?verifyFactReview(packet,input.reviewReceipt):{status:'pending-independent-review',semanticTruth:'not-machine-verified',approval:'none'};

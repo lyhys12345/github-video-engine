@@ -1,5 +1,7 @@
 # General author packet and document flow
 
+The original single-chain contract below remains unchanged. For bounded independent read/write examples, see [evidence1.2 / animation1.1 independent document flows](independent-document-flows-v1.md).
+
 `explanation narrative-packet` now exports `authoring-guide.json` and source-bound draft files for Story, complete five-role narrative, animation, silent child voice, optional documented closing, local Chinese speech and narrated excerpt/captions. Every draft is marked UNAUTHORED and deliberately fails the existing stage schemas until its content is actually authored. The sources, commit, binding and authoring request identity are real; the engine does not fill factual claims, choose scene meaning, invoke a model or create a review receipt. Seven ordered stage entries identify dependencies, files to fill and the existing validator/CLI that checks them. `explanation next` supplies exact task identities and executable argument arrays at committed checkpoints.
 
 Story evidence version1.1 adds one finite `document-transform` operation: code input→code output, exactly one actor with role tool, no parameters, and the existing source/claim/citation/single-chain constraints. This is an authored documentary diagram primitive, not an executor or a verified semantic interpretation. A narrative binds it with `document-flow/1.0`; it is refused under a scalar-rule/image/HTTP adapter. Generic animation already renders its code labels and transfers, so no target parser/runtime is loaded.
