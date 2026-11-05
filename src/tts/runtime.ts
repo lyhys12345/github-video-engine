@@ -26,7 +26,7 @@ const HuihuiImport = ImportTtsSchema.omit({schemaVersion:true}).extend({
 });
 const json=(x:unknown)=>JSON.stringify(x,null,2)+'\n';
 const fail=(code:string,message:string):never=>{throw new EngineError(code,message);};
-const schema=`CREATE TABLE IF NOT EXISTS tts_requests(id TEXT PRIMARY KEY,input TEXT NOT NULL,estimate INTEGER NOT NULL,at TEXT NOT NULL);
+export const TTS_STATE_SCHEMA_SQL=`CREATE TABLE IF NOT EXISTS tts_requests(id TEXT PRIMARY KEY,input TEXT NOT NULL,estimate INTEGER NOT NULL,at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS tts_outcomes(id TEXT PRIMARY KEY REFERENCES tts_requests(id),data TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS tts_policy(singleton INTEGER PRIMARY KEY CHECK(singleton=1),budget INTEGER NOT NULL);
 CREATE TRIGGER IF NOT EXISTS tts_request_immutable BEFORE UPDATE ON tts_requests BEGIN SELECT RAISE(ABORT,'Immutable reservation');END;
@@ -67,7 +67,7 @@ async function openState(data:string,create:boolean,deferSchema=false){data=reso
   db.exec('PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;');
   if(create&&!deferSchema){
    db.exec('PRAGMA journal_mode=DELETE; BEGIN IMMEDIATE;');
-   try{db.exec(schema);db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
+   try{db.exec(TTS_STATE_SCHEMA_SQL);db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
   }else if(!create&&!ttsSchemaReady(db)){
    fail('TTS_STATE','Existing TTS state is not initialized.');
   }
@@ -172,7 +172,7 @@ export async function importHuihuiTts(data:string,taskId:string,signal:AbortSign
   db.exec('BEGIN IMMEDIATE');
   let cached:boolean;
   try{
-   if(!ttsSchemaReady(db))db.exec(schema);
+   if(!ttsSchemaReady(db))db.exec(TTS_STATE_SCHEMA_SQL);
    cached=!!db.prepare('SELECT id FROM tts_requests WHERE id=?').get(id);
    if(!cached){
     db.prepare('INSERT INTO tts_requests VALUES(?,?,?,?)').run(id,canonical(input),0,receipt.createdAt);

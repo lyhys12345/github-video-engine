@@ -1,5 +1,7 @@
 # Relocating a complete experimental preview
 
+For a supported data-package command instead of manual directory copying, use [portable complete project export/import](portable-long-project-v1.md). The manual experiment below is preserved as historical evidence.
+
 A complete-profile project is portable data for a compatible trusted engine checkout. It is not a standalone editor. Start with a new empty destination; use a short absolute Windows path because SQLite and publication paths remain bounded. Close all writers first; a nonempty SQLite WAL requires a consistent database backup/checkpoint rather than copying only the main database. Preserve the original project until verification completes.
 
 Copy these regular files/directories, refusing symlinks and special files:

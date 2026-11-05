@@ -1,0 +1,34 @@
+# Portable complete project data
+
+Use a compatible trusted engine checkout. Export only a project you control; this is not an arbitrary third-party database migration or authenticated package format. The supplied SHA256 protects exact transferred bytes, not publisher identity. No archive extraction, package entrypoint, target execution, dependency installation, model API or review approval occurs.
+
+```text
+node --import tsx src/cli.ts explanation project-export --workspace OWNED_PROJECT --out NEW_PACKAGE
+node --import tsx src/cli.ts explanation project-import --package PACKAGE --digest EXPORTED_DIGEST --workspace NEW_PROJECT
+```
+
+Export selects the task/author recorded in project.json or portable-project.json. To select a different completed candidate, the session Agent supplies `--task PREVIEW_TASK --author AUTHOR_DIRECTORY` to project-export; the user never writes JSON. Only complete-technical-preview/1.0 is supported. Task/author mismatches are refused. Existing destinations are never overwritten. Use short Windows paths and keep the package, workspace and output separate.
+
+The directory package contains a strict manifest and only owner/request/source JSON, declared author JSON/text, task/TTS row JSON and the selected preview's reachable content-addressed blobs. It retains every current scene, editable Story/animation/narrative/run input, complete original local recordings/receipts, captions, source evidence, movies, and history/accounting for selected dependencies. Unrelated tasks, author candidates, CAS blobs, .codex/auth/config files, .env files, dependencies, logs and old absolute-path publications are excluded. This is a selected-candidate closure, not an archive of all unrelated project history. Selected immutable inputs can still contain old machine paths or user-authored text; these cannot be redacted without changing fingerprints. Review the selected content before sharing it outside your trust boundary.
+
+## SQLite and package boundary
+
+**No SQLite database, WAL, SQL schema, extension, trigger or view is accepted from the package.** Export takes stable read transactions from controlled local stores, first comparing their actual schema to the installed engine's fixed trusted definitions. Active task state, unknown schema and concurrent database/WAL content changes are refused. Committed WAL data is read by SQLite's transaction machinery, not copied as a loose database file. Reader-created empty WAL files do not falsely count as content changes.
+
+Rows have strict bounded schemas. Task fingerprints, terminal states, accounting/history references, zero-estimate local TTS identities, receipts, source bindings, complete author/Story/animation/caption mappings and the chosen preview are checked. Import creates fresh databases using only installed trusted DDL and parameterized values; the engine's own immutable-history triggers are generated locally, never loaded from the package. Extension loading is disabled. Existing recovery databases must match that trusted schema. Unknown package files and foreign staged files are rejected. Each CAS filename must match its content hash; all paths, sizes, file counts, case collisions, regular-file types and SHA256 values are bounded/checked. Symlinks/junctions and special files are refused.
+
+Copying uses owned staging, partial files outside the publishable payload, verified bytes and exclusive publication. A same-digest retry can reuse exact completed staged files and transactionally reconstruct missing trusted rows. Failed work remains available for inspection; no partial destination is published and no historical destination is replaced. Incomplete/foreign staging is not silently repaired. A changed package requires a new digest/output. This does not claim protection against an attacker controlling the trusted engine or local account.
+
+After import, the Agent can run the existing executor with the same URL, new workspace and `--author NEW_PROJECT/author`. Publications are regenerated from verified CAS at the new absolute path. Engine upgrades can legitimately invalidate video caches; unchanged recordings remain reusable. The project does not depend on chat history or the original workspace, but still needs compatible engine/runtime dependencies. A second computer was not available and cross-machine execution is not claimed.
+
+## Actual REA/rembg results
+
+REA's package is18,827,518bytes/249files,35reachable tasks and8local speech imports; rembg's is19,150,882bytes/247files,35tasks and8imports. Neither contains raw SQLite or executable package files. Digests and paths are in `work/portable-project-checks/{rea,rembg}-export.json`. Both were imported into entirely new directories while their original v3 workspace was temporarily unavailable, with restoration in finally and source fetch disabled during execution.
+
+Both complete previews and edited versions fully decode: REA95seconds/2850frames, rembg98seconds/2940frames, each9scenes/8complete original-speed recordings and full captions. Speech totals87.01/89.22seconds. Pinned source hashes, silent evidence gaps and the packaged original preview/PCM closure still verify. All eight speech generation/import caches were reused from the package. A same-input repeat reused every stage. Changing only threshold/compose animation timing rerendered one source scene and assembly; seven scene movies, all voices and the parent narrative stayed cached. The packaged old version remained intact.
+
+Restored REA task `192b2fd102d0af9fde8b4c3c677687357d5c3a415b5cf90447bfe1e467399a0a`, edited `afb836b3918655d070bc451071595f7b1898ce653c6c4078206e3c681f24b304`. Restored rembg `588f6997500e356983f86f678f1ddf36e13289edf15a7f05756967ccaac361d3`, edited `81d49df75ba76623f6f1b80e64b98cf7a59c468188a2ae0230c9d7e32361b733`.
+
+Evidence under `work/portable-project-checks` includes source export/import receipts, original/edited complete-media verification, cached results and recovery.json. A real cancellation published no partial destination, then the same-digest retry succeeded; existing-target import was refused. `wal-and-scope.json` records a74,192byte committed live WAL: its selected cache receipt was preserved while an unrelated test task/sentinel and blob were omitted. `cli-import.json` confirms the final command-line import of that snapshot. The initial empty-WAL false-positive was retained as a reported failed attempt before correction; no original data was removed.
+
+Nine targeted misuse tests and TypeScript pass. Facts, speech content/alignment, natural listening, continuous AV and final owner acceptance remain pending. No Judge, full regression, paid API, target code execution or formal full film was used.
