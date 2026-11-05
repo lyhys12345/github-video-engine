@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "narrative-author-revision/1.0",
+  "expectedAuthorSha256": "9dbabb4b4e105a1f4a92d6b0f136c999b208adf48d25d5489ec5a141bf76232d",
+  "selectionPolicy": "recompute-existing-whole-shot-estimates",
+  "captionPolicy": "rebuild-single-whole-recording-cue",
+  "edits": [
+    {
+      "shotId": "scene-example",
+      "expectedNarrationSha256": "e8414f08e34ff3d984c6cdb071b96364759b83bea9d4bd4046b1546db5d019db",
+      "text": "文档例子里，双横线foo后面跟bar，结果对象的foo值为bar。这不是本次执行。"
+    }
+  ]
+}

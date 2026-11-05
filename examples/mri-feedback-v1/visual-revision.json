@@ -1,0 +1,137 @@
+{
+  "feedback": "feedback.json",
+  "sourceAuthorSha256": "ac89c34c294ae44feb12efb6e29366e13a43659e228d5ceab9254faf0a6076c3",
+  "finalAuthorSha256": "cadbbd7a7417c216f73884484972edb15d351f340c649b0774c6947069c958f9",
+  "changedScene": "scene-example",
+  "before": {
+    "shotId": "scene-example",
+    "objects": [
+      {
+        "id": "left",
+        "label": "参数数组",
+        "kind": "document",
+        "visual": "code"
+      },
+      {
+        "id": "right",
+        "label": "解析对象",
+        "kind": "document",
+        "visual": "code"
+      }
+    ],
+    "actions": [
+      {
+        "kind": "reveal",
+        "target": "left",
+        "start": 0,
+        "end": 0.2,
+        "claimIds": [
+          "example"
+        ]
+      },
+      {
+        "kind": "compare",
+        "source": "left",
+        "target": "right",
+        "start": 0.25,
+        "end": 0.65,
+        "claimIds": [
+          "example"
+        ]
+      },
+      {
+        "kind": "emphasize",
+        "target": "right",
+        "start": 0.7,
+        "end": 0.9,
+        "claimIds": [
+          "example"
+        ]
+      }
+    ]
+  },
+  "after": {
+    "shotId": "scene-example",
+    "objects": [
+      {
+        "id": "left",
+        "label": "--foo bar",
+        "kind": "document",
+        "visual": "code"
+      },
+      {
+        "id": "right",
+        "label": "foo:bar",
+        "kind": "document",
+        "visual": "code"
+      }
+    ],
+    "actions": [
+      {
+        "kind": "reveal",
+        "target": "left",
+        "start": 0,
+        "end": 0.12,
+        "claimIds": [
+          "example"
+        ]
+      },
+      {
+        "kind": "emphasize",
+        "target": "left",
+        "start": 0.1,
+        "end": 0.45,
+        "claimIds": [
+          "example"
+        ]
+      },
+      {
+        "kind": "compare",
+        "source": "left",
+        "target": "right",
+        "start": 0.55,
+        "end": 0.85,
+        "claimIds": [
+          "example"
+        ]
+      },
+      {
+        "kind": "emphasize",
+        "target": "right",
+        "start": 0.87,
+        "end": 0.98,
+        "claimIds": [
+          "example"
+        ]
+      }
+    ]
+  },
+  "sourceClaimsAndBindingsUnchanged": true,
+  "semanticAndListeningReview": "pending",
+  "semanticVisualBefore": {
+    "shotVisual": "文档例子：参数数组与解析对象的来源示意，未执行目标。",
+    "visualContext": {
+      "boundary": "来源示意，未执行，待审",
+      "claimIds": [
+        "example"
+      ],
+      "explanation": "参数数组到解析对象",
+      "question": "这一章解释什么",
+      "schemaVersion": "narrative-scene-context/1.0",
+      "title": "文档例子"
+    }
+  },
+  "semanticVisualAfter": {
+    "shotVisual": "输入参数先显示并强调，输出对象稍后出现；标签采用文档中的foo和bar，未运行目标。",
+    "visualContext": {
+      "boundary": "来源示意，未执行，待审",
+      "claimIds": [
+        "example"
+      ],
+      "explanation": "输入先显示，输出随后出现",
+      "question": "这一章解释什么",
+      "schemaVersion": "narrative-scene-context/1.0",
+      "title": "具体的参数例子"
+    }
+  }
+}

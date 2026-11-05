@@ -1,0 +1,9 @@
+{
+  "origin": "current-session-agent validation feedback; not an owner review or approval",
+  "text": "把 --foo bar 的例子说具体，并让左侧输入先亮起来，输出稍后出现。",
+  "requestedChanges": [
+    "scene-example narration",
+    "scene-example input/output labels and choreography"
+  ],
+  "scope": "one produced scene; source claims unchanged"
+}

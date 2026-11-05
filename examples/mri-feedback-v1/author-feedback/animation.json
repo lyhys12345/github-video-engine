@@ -1,0 +1,261 @@
+{
+  "schemaVersion": "narrative-scene-animations/1.0",
+  "storyId": "mri-story",
+  "scenes": [
+    {
+      "sceneId": "scene-hook",
+      "profile": "legacy-animation/1.0",
+      "animation": {
+        "schemaVersion": "1.0",
+        "storyId": "mri-story",
+        "shots": [
+          {
+            "shotId": "scene-hook",
+            "objects": [
+              {
+                "id": "left",
+                "label": "命令行参数",
+                "kind": "document",
+                "visual": "code"
+              },
+              {
+                "id": "right",
+                "label": "解析结果对象",
+                "kind": "document",
+                "visual": "code"
+              }
+            ],
+            "actions": [
+              {
+                "kind": "reveal",
+                "target": "left",
+                "start": 0,
+                "end": 0.2,
+                "claimIds": [
+                  "purpose"
+                ]
+              },
+              {
+                "kind": "compare",
+                "source": "left",
+                "target": "right",
+                "start": 0.25,
+                "end": 0.65,
+                "claimIds": [
+                  "purpose"
+                ]
+              },
+              {
+                "kind": "emphasize",
+                "target": "right",
+                "start": 0.7,
+                "end": 0.9,
+                "claimIds": [
+                  "purpose"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "sceneId": "scene-mechanism",
+      "profile": "causal-operation/1.0",
+      "animation": {
+        "schemaVersion": "1.2",
+        "storyId": "mri-story",
+        "shots": [
+          {
+            "shotId": "scene-mechanism",
+            "operationId": "parse",
+            "start": 0.08,
+            "arrive": 0.3,
+            "processed": 0.65,
+            "end": 0.9
+          }
+        ]
+      }
+    },
+    {
+      "sceneId": "scene-example",
+      "profile": "legacy-animation/1.0",
+      "animation": {
+        "schemaVersion": "1.0",
+        "storyId": "mri-story",
+        "shots": [
+          {
+            "shotId": "scene-example",
+            "objects": [
+              {
+                "id": "left",
+                "label": "--foo bar",
+                "kind": "document",
+                "visual": "code"
+              },
+              {
+                "id": "right",
+                "label": "foo:bar",
+                "kind": "document",
+                "visual": "code"
+              }
+            ],
+            "actions": [
+              {
+                "kind": "reveal",
+                "target": "left",
+                "start": 0,
+                "end": 0.12,
+                "claimIds": [
+                  "example"
+                ]
+              },
+              {
+                "kind": "emphasize",
+                "target": "left",
+                "start": 0.1,
+                "end": 0.45,
+                "claimIds": [
+                  "example"
+                ]
+              },
+              {
+                "kind": "compare",
+                "source": "left",
+                "target": "right",
+                "start": 0.55,
+                "end": 0.85,
+                "claimIds": [
+                  "example"
+                ]
+              },
+              {
+                "kind": "emphasize",
+                "target": "right",
+                "start": 0.87,
+                "end": 0.98,
+                "claimIds": [
+                  "example"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "sceneId": "scene-limitation",
+      "profile": "legacy-animation/1.0",
+      "animation": {
+        "schemaVersion": "1.0",
+        "storyId": "mri-story",
+        "shots": [
+          {
+            "shotId": "scene-limitation",
+            "objects": [
+              {
+                "id": "left",
+                "label": "文档中的条件",
+                "kind": "document",
+                "visual": "code"
+              },
+              {
+                "id": "right",
+                "label": "源码中的开关",
+                "kind": "document",
+                "visual": "code"
+              }
+            ],
+            "actions": [
+              {
+                "kind": "reveal",
+                "target": "left",
+                "start": 0,
+                "end": 0.2,
+                "claimIds": [
+                  "boundary"
+                ]
+              },
+              {
+                "kind": "compare",
+                "source": "left",
+                "target": "right",
+                "start": 0.25,
+                "end": 0.65,
+                "claimIds": [
+                  "boundary"
+                ]
+              },
+              {
+                "kind": "emphasize",
+                "target": "right",
+                "start": 0.7,
+                "end": 0.9,
+                "claimIds": [
+                  "boundary"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "sceneId": "scene-closing",
+      "profile": "legacy-animation/1.0",
+      "animation": {
+        "schemaVersion": "1.0",
+        "storyId": "mri-story",
+        "shots": [
+          {
+            "shotId": "scene-closing",
+            "objects": [
+              {
+                "id": "left",
+                "label": "输入与输出关系",
+                "kind": "document",
+                "visual": "code"
+              },
+              {
+                "id": "right",
+                "label": "证据与待验证项",
+                "kind": "document",
+                "visual": "code"
+              }
+            ],
+            "actions": [
+              {
+                "kind": "reveal",
+                "target": "left",
+                "start": 0,
+                "end": 0.2,
+                "claimIds": [
+                  "mechanism"
+                ]
+              },
+              {
+                "kind": "compare",
+                "source": "left",
+                "target": "right",
+                "start": 0.25,
+                "end": 0.65,
+                "claimIds": [
+                  "mechanism"
+                ]
+              },
+              {
+                "kind": "emphasize",
+                "target": "right",
+                "start": 0.7,
+                "end": 0.9,
+                "claimIds": [
+                  "mechanism"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

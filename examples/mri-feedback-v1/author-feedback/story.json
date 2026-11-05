@@ -1,0 +1,205 @@
+{
+  "evidence": {
+    "actors": [
+      {
+        "id": "tool",
+        "label": "命令行解析函数",
+        "role": "tool"
+      }
+    ],
+    "audience": "了解基础JavaScript字符串操作的开发者",
+    "claims": [
+      {
+        "citations": [
+          {
+            "document": "source-1",
+            "endLine": 7,
+            "quote": "# mri [![CI](https://github.com/lukeed/mri/workflows/CI/badge.svg?branch=master&event=push)](https://github.com/lukeed/mri/actions) [![licenses](https://licenses.dev/b/npm/mri)](https://licenses.dev/npm/mri)\n\n> Quickly scan for CLI flags and arguments\n\nThis is a [fast](#benchmarks) and lightweight alternative to [`minimist`](https://github.com/substack/minimist) and [`yargs-parser`](https://github.com/yargs/yargs-parser).\n\nIt only exists because I find that I usually don't need most of what `minimist` and `yargs-parser` have to offer. However, `mri` is similar _enough_ that it might function as a \"drop-in replacement\" for you, too!",
+            "startLine": 1
+          }
+        ],
+        "id": "purpose",
+        "kind": "documented",
+        "rationale": "固定提交的文档或源码直接支持；语义解释仍待独立审阅。",
+        "statement": "mri扫描命令行标志和参数。"
+      },
+      {
+        "citations": [
+          {
+            "document": "source-1",
+            "endLine": 52,
+            "quote": "### mri(args, options)\nReturn: `Object`\n\n#### args\nType: `Array`<br>\nDefault: `[]`\n\nAn array of arguments to parse. For CLI usage, send `process.argv.slice(2)`. See [`process.argv`](https://nodejs.org/docs/latest/api/process.html#process_process_argv) for info.",
+            "startLine": 45
+          },
+          {
+            "document": "source-2",
+            "endLine": 78,
+            "quote": "\tfor (i=0; i < len; i++) {\n\t\targ = args[i];\n\n\t\tif (arg === '--') {\n\t\t\tout._ = out._.concat(args.slice(++i));\n\t\t\tbreak;\n\t\t}\n\n\t\tfor (j=0; j < arg.length; j++) {\n\t\t\tif (arg.charCodeAt(j) !== 45) break; // \"-\"\n\t\t}\n\n\t\tif (j === 0) {\n\t\t\tout._.push(arg);\n\t\t} else if (arg.substring(j, j + 3) === 'no-') {",
+            "startLine": 64
+          }
+        ],
+        "id": "mechanism",
+        "kind": "documented",
+        "rationale": "固定提交的文档或源码直接支持；语义解释仍待独立审阅。",
+        "statement": "mri接受参数数组并返回对象，源码维护普通参数列表并依次读取参数。"
+      },
+      {
+        "citations": [
+          {
+            "document": "source-1",
+            "endLine": 79,
+            "quote": "```js\nmri(['--foo', 'bar']);\n//=> { _:[], foo:'bar' }\n\nmri(['--foo', 'bar'], {\n  default: { foo:true, baz:'hello', bat:42 }\n});\n//=> { _:['bar'], foo:true, baz:'hello', bat:42 }",
+            "startLine": 72
+          }
+        ],
+        "id": "example",
+        "kind": "documented",
+        "rationale": "固定提交的文档或源码直接支持；语义解释仍待独立审阅。",
+        "statement": "文档给出参数--foo和bar产生foo值为bar的对象示例。"
+      },
+      {
+        "citations": [
+          {
+            "document": "source-1",
+            "endLine": 98,
+            "quote": "#### options.unknown\nType: `Function`<br>\nDefault: `undefined`\n\nCallback that is run when a parsed flag has not been defined as a known key or alias. Its only parameter is the unknown flag itself; eg `--foobar` or `-f`.\n\nOnce an unknown flag is encountered, parsing will terminate, regardless of your return value.\n\n> **Note:** `mri` _only_ checks for unknown flags if `options.unknown` **and** `options.alias` are populated. Otherwise, everything will be accepted.",
+            "startLine": 90
+          },
+          {
+            "document": "source-2",
+            "endLine": 26,
+            "quote": "\tconst alibi = opts.alias !== void 0;\n\tconst strict = opts.unknown !== void 0;\n\tconst defaults = opts.default !== void 0;\n\n\topts.alias = opts.alias || {};",
+            "startLine": 22
+          },
+          {
+            "document": "source-2",
+            "endLine": 62,
+            "quote": "\tconst keys = strict ? Object.keys(opts.alias) : [];",
+            "startLine": 62
+          }
+        ],
+        "id": "boundary",
+        "kind": "inference",
+        "rationale": "静态对照文档条件和源码strict设置；未运行目标，未裁定所有配置的行为。",
+        "statement": "文档强调unknown与alias同时配置，而源码strict开关按unknown是否定义设置；差异未实测。"
+      }
+    ],
+    "disclosure": "会话Agent依据固定README与源码创作；示意动画而非目标执行；事实、听感、连续视听与最终验收待审。",
+    "id": "mri-evidence",
+    "interpretation": "agent-curated-semantic-graph-not-automatic-source-understanding",
+    "name": "mri参数解析固定来源预览",
+    "objects": [
+      {
+        "id": "input",
+        "kind": "code",
+        "label": "参数数组"
+      },
+      {
+        "id": "output",
+        "kind": "code",
+        "label": "解析结果对象"
+      }
+    ],
+    "operations": [
+      {
+        "actorIds": [
+          "tool"
+        ],
+        "claimIds": [
+          "mechanism"
+        ],
+        "dependsOn": [],
+        "id": "parse",
+        "input": "input",
+        "kind": "document-transform",
+        "output": "output",
+        "parameters": {}
+      }
+    ],
+    "schemaVersion": "1.1",
+    "sources": [
+      {
+        "id": "source-1",
+        "path": "source-1.txt",
+        "sha256": "59e83c18bed246d7ad42feb57cc45989434ff51635c7a8524787843704287fc4",
+        "url": "https://github.com/lukeed/mri/blob/62b9ce4f25e1f7b476c99858c20882d86c010085/readme.md"
+      },
+      {
+        "id": "source-2",
+        "path": "source-2.txt",
+        "sha256": "dadfba4b762fae76a84250da2c772da6dd5a520afe65b97fcb6b19a6d9eea5c6",
+        "url": "https://github.com/lukeed/mri/blob/62b9ce4f25e1f7b476c99858c20882d86c010085/src/index.js"
+      }
+    ]
+  },
+  "id": "mri-story",
+  "name": "mri参数解析固定来源预览",
+  "schemaVersion": "1.0",
+  "shots": [
+    {
+      "beat": "hook",
+      "claimIds": [
+        "purpose"
+      ],
+      "holdSeconds": 0,
+      "id": "scene-hook",
+      "narration": "命令行给出一串参数。这个库把标志和参数整理成对象。",
+      "transitionSeconds": 0,
+      "visual": "参数怎样变成对象：命令行参数与解析结果对象的来源示意，未执行目标。",
+      "visualSeconds": 9
+    },
+    {
+      "beat": "mechanism",
+      "claimIds": [
+        "mechanism"
+      ],
+      "holdSeconds": 0,
+      "id": "scene-mechanism",
+      "narration": "接口接受参数数组，源码依次扫描，并保留普通参数列表。动画不是执行。",
+      "transitionSeconds": 0,
+      "visual": "数组与结果：参数数组与解析结果对象的来源示意，未执行目标。",
+      "visualSeconds": 10
+    },
+    {
+      "beat": "example",
+      "claimIds": [
+        "example"
+      ],
+      "holdSeconds": 0,
+      "id": "scene-example",
+      "narration": "文档例子里，双横线foo后面跟bar，结果对象的foo值为bar。这不是本次执行。",
+      "transitionSeconds": 0,
+      "visual": "输入参数先显示并强调，输出对象稍后出现；标签采用文档中的foo和bar，未运行目标。",
+      "visualSeconds": 10
+    },
+    {
+      "beat": "limitation",
+      "claimIds": [
+        "boundary"
+      ],
+      "holdSeconds": 0,
+      "id": "scene-limitation",
+      "narration": "未知参数的文档条件与源码开关有差异。本片保留这个疑点，未运行验证。",
+      "transitionSeconds": 0,
+      "visual": "需要保留的疑点：文档中的条件与源码中的开关的来源示意，未执行目标。",
+      "visualSeconds": 10
+    },
+    {
+      "beat": "closing",
+      "claimIds": [
+        "mechanism"
+      ],
+      "holdSeconds": 0,
+      "id": "scene-closing",
+      "narration": "看懂输入和对象，也要留意文档与源码的边界。事实和听感仍待最终审阅。",
+      "transitionSeconds": 0,
+      "visual": "来源与验证的边界：输入与输出关系与证据与待验证项的来源示意，未执行目标。",
+      "visualSeconds": 10
+    }
+  ],
+  "timing": {
+    "chineseCharsPerSecond": 8,
+    "fps": 30,
+    "wordsPerSecond": 5
+  }
+}
