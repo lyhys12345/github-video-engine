@@ -121,14 +121,15 @@ function reviewPage(mode: z.infer<typeof Mode>) {
 </body></html>\n`;
 }
 
-export async function verifyMovie(path: string, props: Pick<PreviewProps, 'mode' | 'timeline'>, signal: AbortSignal, timeout = 120_000) {
+export async function verifyMovie(path: string, props: Pick<PreviewProps, 'mode' | 'timeline'>, signal: AbortSignal, timeout = 120_000, subtitle?: 'mov_text') {
   const probe = JSON.parse(await command(ffprobePath(), [
     '-v', 'error', '-count_frames', '-show_streams', '-show_format', '-of', 'json', path,
   ], {signal, timeout}));
   const video = probe.streams.find((stream: {codec_type: string}) => stream.codec_type === 'video');
   const audio = probe.streams.find((stream: {codec_type: string}) => stream.codec_type === 'audio');
   const {fps, totalFrames} = props.timeline;
-  if (probe.streams.length !== (props.mode === 'silent' ? 1 : 2) ||
+  if ((subtitle!==undefined&&(props.mode!=='narrated'||probe.streams.filter((s:{codec_type:string;codec_name:string})=>s.codec_type==='subtitle'&&s.codec_name===subtitle).length!==1)) ||
+      probe.streams.length !== (props.mode === 'silent' ? 1 : 2)+(subtitle?1:0) ||
       video?.codec_name !== 'h264' || video.pix_fmt !== 'yuv420p' ||
       video.width !== GEOMETRY.width || video.height !== GEOMETRY.height ||
       video.avg_frame_rate !== fps + '/1' || Number(video.nb_read_frames) !== totalFrames ||

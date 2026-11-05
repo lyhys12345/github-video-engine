@@ -1,0 +1,9 @@
+# Burned captions in a reserved source-preserving area
+
+C1's selectable subtitle placement could cover source footer text in a simulated libass display. C1 and its failure evidence remain unchanged. Use the new1.1 profile and `explanation narrative-caption-preview/status/export` for the corrected technical excerpt; old `narrative-audio-*`1.0 remains historical/legacy.
+
+The complete720x1280 source frame is scaled uniformly to576x1024 and placed at(72,96), ending exactly at1120. The bottom160pixels are reserved for actual burned caption pixels, separate from all source content. The font bytes are pinned; text is supplied through owned UTF-8 textfiles with expansion disabled. At most3lines of22Chinese/Latin/number/punctuation characters each are supported at28px,36px line spacing. Overflow/unsupported glyph classes are refused; no text is truncated. Longer transcripts need shorter caller-authored cue partitions.
+
+Each cue, exact wrapped line, font hash, viewport and half-open frame interval are bound into the new pending execution packet and burned-caption-layout.json. The renderer burns captions using startFrame<=n<endFrame. Movie contains exactly one H264 video and one AAC audio stream, with no selectable subtitle stream or HTML track that could render a duplicate. VTT remains editable timing/text data, not a default playback layer. This produces visible caption pixels without depending on a third-party player's subtitle layout; it does not claim such a player was tested.
+
+Source and current narrative/voice/PCM/caption integrity, silent unproduced gaps and edit invalidation remain unchanged. All current facts, transcript accuracy, natural listening, speech alignment and continuous perceptual AV remain pending. Actual decoded frame checks and source-region correspondence are engineering evidence, not listening or final human acceptance.

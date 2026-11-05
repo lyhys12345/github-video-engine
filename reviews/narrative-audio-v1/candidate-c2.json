@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "narrative-audio-freeze/1.1",
+  "candidate": "narrative-audio-c2-caption-safe",
+  "commit": "c8a0c814535eaa33e24c3546719cb4709b6ad2ae",
+  "base": "9ec1c6b83b6c7ebbbd41c39764a1db62df41cf7f",
+  "frozenAt": "2026-11-05T08:59:32.319588+00:00",
+  "activeRoles": [
+    "product",
+    "reliability",
+    "evidence",
+    "content_facts",
+    "security",
+    "video_quality"
+  ],
+  "sourceFiles": 741,
+  "sourceManifestSha256": "e0c6e9393d10cc1b04081ac171d3d48586b0c82144eabb9861c1379fafe7ffcd",
+  "sourceArchiveSha256": "6205296133f7436f23a2f4410e1a65778623d02c5d8320cab087b3fa08e89d60",
+  "materialsFiles": 1434,
+  "materialsManifestSha256": "484d7fe09343f0fd35b579a49b7874a6ac8f27c0c726c03b927ea44de416c2e9",
+  "rendererCodeHash": "199deca36162642ee9a70d46ab83174be792903b883036a105efd8fda4bbb359",
+  "tests": {
+    "typecheck": "PASS",
+    "affected": "72 PASS",
+    "full": "50files/483 PASS",
+    "mechanism": "2 PASS/1existing opt-in SKIP",
+    "actualCaptionFramesChecked": 1680,
+    "minimumSourcePsnr": 38.673908
+  },
+  "scope": "14second engine-burned caption-safe narrated technical excerpts, full source visible, gaps silent/unproduced",
+  "thirdPartyPlayerVerification": "not performed; engine visible pixels only",
+  "naturalListening": "not performed; pending owner",
+  "currentFactsReview": "pending",
+  "ownerAcceptance": "pending",
+  "approval": "none"
+}

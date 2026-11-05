@@ -1,3 +1,5 @@
+import {narrativeCaptionSafeCommand} from './narrative-audio-safe.js';
+import {narrativeAudioCommand} from './narrative-audio.js';
 import {narrativeContinuityCommand} from './narrative-continuity.js';
 import {narrativeExcerptCommand} from './narrative-preview.js';
 import {narrativeCommand} from './narrative.js';
@@ -10,6 +12,8 @@ const usage = 'explanation start --spec <request> --data <state> --out <packet> 
 
 export async function explanationCommand(positionals: string[], values: Record<string, unknown>, signal: AbortSignal) {
   const action = positionals[1];
+  if(action?.startsWith('narrative-caption-'))return narrativeCaptionSafeCommand(positionals,values,signal);
+  if(action?.startsWith('narrative-audio-'))return narrativeAudioCommand(positionals,values,signal);
   if(action?.startsWith('narrative-continuity-preview'))return narrativeContinuityCommand(positionals,values,signal);
   if(action?.startsWith('narrative-preview'))return narrativeExcerptCommand(positionals,values,signal);
   if(action?.startsWith('narrative-'))return narrativeCommand(positionals,values,signal);

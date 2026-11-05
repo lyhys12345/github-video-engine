@@ -108,6 +108,12 @@ function exactHuihuiDuration(stream: {duration_ts?: unknown; time_base?: unknown
 }
 
 export async function decodeClip(source: LocalAudio, dir: string, index: number, maxFrames: number, signal: AbortSignal) {
+  return decodeClipSamples(source,dir,index,maxFrames*FRAME_SAMPLES,signal);
+}
+
+/** Explicit 48kHz sample budget; independent of any presentation frame clock. */
+export async function decodeClipSamples(source: LocalAudio, dir: string, index: number, maxSamples: number, signal: AbortSignal) {
+  if(!Number.isSafeInteger(maxSamples)||maxSamples<1||maxSamples>MAX_PCM/2)voiceError('VOICE_BUDGET','Expected bounded integral48kHz sample budget.');
   const path = join(dir, index + '.audio');
   const output = join(dir, index + '.pcm');
   const format = { 'audio/wav': 'wav', 'audio/flac': 'flac', 'audio/mpeg': 'mp3' }[source.input.mediaType];
@@ -120,9 +126,9 @@ export async function decodeClip(source: LocalAudio, dir: string, index: number,
       (huihuiSamples === undefined ? Number(probe.format?.duration) !== seconds : !exactHuihuiDuration(probe.streams[0], huihuiSamples))) {
     voiceError('VOICE_MEDIA', 'Measured container differs from the import receipt.');
   }
-  const maxSeconds = maxFrames / PRESENTATION_FPS;
+  const maxSeconds = maxSamples / RATE;
   if (seconds > maxSeconds + 1) voiceError('VOICE_DOES_NOT_FIT', 'The measured container exceeds the entire ' + maxSeconds + '-second preview scope.');
-  const maxPcmBytes = maxFrames * FRAME_SAMPLES * 2;
+  const maxPcmBytes = maxSamples * 2;
   // The extra second distinguishes a bounded output stop from a valid clip.
   // Any result over the exact budget fails regardless of the decoder exit code.
   const outputCeiling = maxPcmBytes + RATE * 2;
