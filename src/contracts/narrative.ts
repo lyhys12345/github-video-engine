@@ -6,7 +6,7 @@ const text=(max:number)=>z.string().min(1).max(max).regex(/\S/);
 const screenText=z.string().min(1).max(24).regex(/^[\p{Script=Han}\p{Script=Latin}\p{N}\p{P}\p{Zs}]+$/u).regex(/\S/);
 export const NarrativeSceneContext=z.strictObject({schemaVersion:z.literal('narrative-scene-context/1.0'),title:screenText,question:screenText,explanation:screenText,boundary:screenText,claimIds:z.array(Id).max(12),nextStep:screenText.optional()});
 const execution=z.discriminatedUnion('kind',[
- z.strictObject({kind:z.literal('supported-story'),adapter:z.enum(['http','image-mask','scalar-rule','document-flow/1.0','document-independent/1.0']),storyTaskId:Hash,expectedGraphHash:Hash,shotIds:z.array(Id).min(1).max(12)}),
+ z.strictObject({kind:z.literal('supported-story'),adapter:z.enum(['http','image-mask','scalar-rule','document-flow/1.0','document-independent/1.0','multi-input/1.0']),storyTaskId:Hash,expectedGraphHash:Hash,shotIds:z.array(Id).min(1).max(12)}),
  z.strictObject({kind:z.literal('needs-evidence'),reason:text(1000),missingEvidence:text(1000)}),
  z.strictObject({kind:z.literal('needs-adapter'),reason:text(1000),requiredCapability:text(1000)})
 ]);

@@ -17,7 +17,7 @@ export async function planAnimationTask(spec:string,sourceRoot:string,animationP
  if(raw.length>2_000_000)throw new Error('Animation input exceeds size limit');
  const animation=AnimationSchema.parse(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(raw).replace(/^\uFEFF/,'')));
  const compiled=compileAnimation(snapshot.graph,animation);
- const files=['story-planner/causal-operation.ts','story-planner/animation.ts','story-planner/compile.ts','story-planner/animation-task.ts','story-planner/runtime.ts','contracts/story.ts','contracts/evidence-plan.ts','contracts/runtime.ts','core/util.ts','core/errors.ts','orchestrator/tasks.ts','assets/store.ts','operations/usage.ts'];
+ const files=['story-planner/multi-input-operation.ts','story-planner/causal-operation.ts','story-planner/animation.ts','story-planner/compile.ts','story-planner/animation-task.ts','story-planner/runtime.ts','contracts/story.ts','contracts/evidence-plan.ts','contracts/runtime.ts','core/util.ts','core/errors.ts','orchestrator/tasks.ts','assets/store.ts','operations/usage.ts'];
  const compiler=await Promise.all(files.map(async file=>({file,sha256:sha256(await readFile(resolve(import.meta.dirname,'..',file)))})));
  const kind='experimental-story-animation-v1';
  const input={story:snapshot.graph,animation,sources:snapshot.sources.map(s=>({id:s.id,sha256:sha256(s.bytes),bytes:s.bytes.length})),compiler};

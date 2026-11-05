@@ -29,6 +29,23 @@ const independentDocumentGraph=documentStoryGraph.extend({
  operations:z.array(graphOperation.extend({kind:z.literal('document-transform')})).min(2).max(12),
  flows:z.array(z.strictObject({id:Id,label:text.max(40),operationIds:z.array(Id).min(1).max(4),claimIds:z.array(Id).min(1)})).min(2).max(4),
 });
+const inputLink=z.strictObject({objectId:Id,claimIds:z.array(Id).min(1).max(20)});
+const joinBase={id:Id,kind:z.literal('combine-inputs'),level:z.literal('source-process-summary'),dependsOn:z.tuple([]),inputs:z.tuple([inputLink,inputLink]),output:Id,actorIds:z.tuple([Id]),claimIds:z.array(Id).min(1).max(20),outputClaimIds:z.array(Id).min(1).max(20)};
+const joinOperation=z.discriminatedUnion('mode',[
+ z.strictObject({...joinBase,mode:z.literal('masked-image'),fixedContext:z.literal('transparent-rgba-base'),contextClaimIds:z.array(Id).min(1).max(20)}),
+ z.strictObject({...joinBase,mode:z.literal('ordered-pages'),fixedContext:z.literal('new-document'),outputOrder:z.tuple([Id,Id]),orderClaimIds:z.array(Id).min(1).max(20)})
+]);
+export const MultiInputStoryEvidenceSchema=legacyGraph.extend({schemaVersion:z.literal('1.3'),objects:z.array(graphObject.extend({kind:z.enum(['image','mask','cutout','pdf-page','pdf-document'])})).length(3),actors:legacyGraph.shape.actors.length(1),operations:z.array(joinOperation).length(1)}).superRefine((g,c)=>{
+ const fail=(message:string)=>c.addIssue({code:'custom',message}),op=g.operations[0]!,objects=new Map(g.objects.map(o=>[o.id,o])),claims=new Set(g.claims.map(c=>c.id)),sources=new Set(g.sources.map(s=>s.id)),inputs=op.inputs.map(i=>i.objectId),links=[...op.inputs.flatMap(i=>i.claimIds),...op.outputClaimIds,...(op.mode==='masked-image'?op.contextClaimIds:op.orderClaimIds)];
+ for(const list of [g.sources,g.claims,g.objects,g.actors])if(new Set(list.map(x=>x.id)).size!==list.length)fail('Duplicate multi-input identity');
+ for(const claim of g.claims)for(const q of claim.citations)if(!sources.has(q.document)||q.endLine<q.startLine)fail('Invalid multi-input citation');
+ if(new Set(inputs).size!==2||inputs.includes(op.output)||!objects.has(op.output)||inputs.some(id=>!objects.has(id)))fail('Exactly two distinct known inputs and a separate output are required');
+ if(g.actors[0]?.id!==op.actorIds[0]||g.actors[0]?.role!=='tool')fail('Multi-input operation requires its one known tool');
+ if(new Set(op.claimIds).size!==op.claimIds.length||op.claimIds.some(id=>!claims.has(id))||links.some(id=>!op.claimIds.includes(id))||op.claimIds.some(id=>!links.includes(id)))fail('Every input/output/context/order connection must be source-claim bound; union must equal operation claims');
+ for(const ids of [...op.inputs.map(i=>i.claimIds),op.outputClaimIds,op.mode==='masked-image'?op.contextClaimIds:op.orderClaimIds])if(new Set(ids).size!==ids.length)fail('Duplicate connection claim');
+ if(op.mode==='masked-image'&&(objects.get(inputs[0]!)?.kind!=='image'||objects.get(inputs[1]!)?.kind!=='mask'||objects.get(op.output)?.kind!=='cutout'))fail('Masked-image mode requires ordered image and mask inputs with separate cutout');
+ if(op.mode==='ordered-pages'&&(inputs.some(id=>objects.get(id)?.kind!=='pdf-page')||objects.get(op.output)?.kind!=='pdf-document'||new Set(op.outputOrder).size!==2||op.outputOrder.some(id=>!inputs.includes(id))))fail('Ordered-pages mode requires two source pages and exact distinct input-page order in a new document');
+});
 function validateGraph(g:z.infer<typeof storyGraph>|z.infer<typeof documentStoryGraph>|z.infer<typeof independentDocumentGraph>,c:z.RefinementCtx){
  const fail=(message:string)=>c.addIssue({code:'custom',message});
  for(const list of [g.sources,g.claims,g.objects,g.actors,g.operations])if(new Set(list.map(x=>x.id)).size!==list.length)fail('Duplicate identity');
@@ -67,7 +84,7 @@ function validateGraph(g:z.infer<typeof storyGraph>|z.infer<typeof documentStory
 }
 export const EvidenceGraphSchema=legacyGraph.superRefine(validateGraph);
 export const LegacyStoryEvidenceGraphSchema=storyGraph.superRefine(validateGraph);
-export const StoryEvidenceGraphSchema=z.discriminatedUnion('schemaVersion',[LegacyStoryEvidenceGraphSchema,documentStoryGraph.superRefine(validateGraph),independentDocumentGraph.superRefine(validateGraph)]);
+export const StoryEvidenceGraphSchema=z.discriminatedUnion('schemaVersion',[LegacyStoryEvidenceGraphSchema,documentStoryGraph.superRefine(validateGraph),independentDocumentGraph.superRefine(validateGraph),MultiInputStoryEvidenceSchema]);
 export type EvidenceGraph=z.infer<typeof EvidenceGraphSchema>;
 export const CompiledPlanSchema=z.object({schemaVersion:z.literal('1.0'),compilerVersion:z.literal('evidence-planner-1'),graphHash:z.string().length(64),graph:EvidenceGraphSchema,
  goals:z.array(z.object({question:text,answer:text,claimIds:z.array(Id).min(1)}).strict()).length(3),
