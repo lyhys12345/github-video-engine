@@ -43,7 +43,7 @@ const requireQueueMigration = (): never => {
 const review = {semanticReview: 'pending', editorialReview: 'pending', audiovisualReview: 'pending', voice: 'omitted-explicitly', ownerAcceptance: 'pending'} as const;
 const Source = z.strictObject({id: Id, path: z.string().regex(/^source-[1-8]\.txt$/), url: z.string().max(600), sha256: Hash});
 const PlanInput = z.strictObject({projectId: Id, proposal: StoredStoryProposal, plan: PresentationPlan, evidenceSha256: Hash,
-  hiddenVoicePreparationTaskId: Hash.optional(), sources: z.array(Source).min(1).max(8), compiler: z.array(z.strictObject({path: z.string(), sha256: Hash})).min(1).max(20)});
+  portableVoiceImportHash: Hash.optional(), hiddenVoicePreparationTaskId: Hash.optional(), sources: z.array(Source).min(1).max(8), compiler: z.array(z.strictObject({path: z.string(), sha256: Hash})).min(1).max(20)});
 type PlanInput = z.infer<typeof PlanInput>;
 const PreviewInput = z.strictObject({planTaskId: Hash, planManifestSha256: Hash, mode: z.literal('silent'),
   fontSha256: z.literal(FONT_SHA), environment: z.record(z.string(), z.string()),
@@ -178,6 +178,7 @@ function planFiles(input: PlanInput, compiled: CompiledPresentation, id: string,
     planSha256: compiled.planSha256, moduleId: compiled.moduleId, timeline: compiled.timeline, review,
     ...(compiled.moduleId === 'hidden-file-policy/1' ? {capabilityProfile: compiled.capabilityProfile, scope: compiled.scope} : {}),
     ...(input.hiddenVoicePreparationTaskId && {hiddenVoicePreparationTaskId: input.hiddenVoicePreparationTaskId}),
+    ...(input.portableVoiceImportHash && {portableVoiceImportHash: input.portableVoiceImportHash}),
     files: [...files].map(([path, bytes]) => ({path, bytes: bytes.length, sha256: sha256(bytes)}))}));
   return files;
 }
@@ -191,7 +192,7 @@ async function checkedPlan(data: string, id: string, signal: AbortSignal) {
   const files = await readArtifacts(data, task, names, signal);
   const derived = planFiles(input, compiled, id, files);
   for (const [path, bytes] of derived) if (!bytes.equals(files.get(path)!)) fail('Presentation plan derivation differs: ' + path);
-  return {files, compiled, task, hiddenVoicePreparationTaskId: input.hiddenVoicePreparationTaskId, maxFrames: presentationMaxFrames(input.plan.schemaVersion)};
+  return {files, compiled, task, hiddenVoicePreparationTaskId: input.hiddenVoicePreparationTaskId, portableVoiceImportHash:input.portableVoiceImportHash, maxFrames: presentationMaxFrames(input.plan.schemaVersion)};
 }
 
 export async function createPresentation(store: WorkflowStore, id: string, proposalHash: string, spec: string, data: string, signal: AbortSignal) {
@@ -207,7 +208,7 @@ export async function createPresentation(store: WorkflowStore, id: string, propo
 }
 
 export async function createPresentationFromPlan(store: WorkflowStore, id: string, proposalHash: string,
-  plan: PresentationPlan, data: string, signal: AbortSignal, hiddenVoicePreparationTaskId?: string) {
+  plan: PresentationPlan, data: string, signal: AbortSignal, hiddenVoicePreparationTaskId?: string, portableVoiceImportHash?:string) {
   checkAbort(signal);
   if (plan.schemaVersion === '1.2') requireQueueMigration();
   const {proposal, bytes, workspace} = await loadAuthoringProposal(store, id, proposalHash, signal);
@@ -216,6 +217,7 @@ export async function createPresentationFromPlan(store: WorkflowStore, id: strin
     if (store.project(id).snapshotHash !== proposal.binding.snapshotHash) throw new EngineError('AUTHORING_STALE', 'Select a proposal for the current source revision.');
   };
   const compiled = compilePresentation(proposal, plan);
+  if (portableVoiceImportHash && (hiddenVoicePreparationTaskId || compiled.moduleId !== 'hidden-file-policy/1' || compiled.language !== 'zh-CN')) throw new EngineError('VOICE_PARENT','Portable local voice requires a separate Chinese hidden-file import profile.');
   if (hiddenVoicePreparationTaskId && (compiled.moduleId !== 'hidden-file-policy/1' || compiled.language !== 'zh-CN')) {
     throw new EngineError('VOICE_PARENT', 'Hidden-file voice requires a Chinese hidden-file plan.');
   }
@@ -231,7 +233,7 @@ export async function createPresentationFromPlan(store: WorkflowStore, id: strin
     .map(async path => ({path, sha256: sha256(await boundedFile(join(projectRoot, path)))})));
   const input = PlanInput.parse({projectId: id, proposal, plan, sources: workspace.manifest.sources,
     evidenceSha256: sha256(workspace.files.get('evidence.json')!), compiler,
-    ...(hiddenVoicePreparationTaskId && {hiddenVoicePreparationTaskId})});
+    ...(hiddenVoicePreparationTaskId && {hiddenVoicePreparationTaskId}), ...(portableVoiceImportHash && {portableVoiceImportHash})});
   const taskId = fingerprint(PLAN_KIND, input);
   const files = planFiles(input, compiled, taskId, workspace.files);
   data = await preflightPresentationState(data);
@@ -282,7 +284,7 @@ function captions(plan: CompiledPresentation) {
 
 async function voicePlan(data: string, spec: VoiceSpec, signal: AbortSignal) {
   const plan = await checkedPlan(data, spec.planTaskId, signal);
-  if (plan.compiled.moduleId === 'hidden-file-policy/1' && !plan.hiddenVoicePreparationTaskId) throw new EngineError('VOICE_PARENT', 'Hidden-file policy previews are silent in this profile.');
+  if (plan.compiled.moduleId === 'hidden-file-policy/1' && !plan.hiddenVoicePreparationTaskId && !plan.portableVoiceImportHash) throw new EngineError('VOICE_PARENT', 'Hidden-file policy previews are silent in this profile.');
   if (sha256(plan.files.get('plan-manifest.json')!) !== spec.planManifestSha256) fail('Voice parent manifest differs.');
   return {plan, matches: matchVoice(plan.compiled, spec)};
 }
@@ -299,6 +301,7 @@ async function voiceFiles(data: string, input: z.infer<typeof VoiceInput>, id: s
     if (plan.hiddenVoicePreparationTaskId && !('generationManifestBytes' in source && source.generationManifestBytes)) {
       throw new EngineError('VOICE_RECEIPT', 'The hidden-file narrated plan requires verified Huihui source recordings.');
     }
+    if (plan.portableVoiceImportHash && (source.receipt.input as {adapterVersion?:string}).adapterVersion!=='local-import-v1') throw new EngineError('VOICE_RECEIPT','Portable local voice requires a newly verified local audio import.');
     originalBytes += source.audio.length;
     if (originalBytes > 32_000_000) throw new EngineError('VOICE_SIZE', 'Combined original recordings exceed 32 MB.');
     const pcm = await getPcm(source, index);
@@ -456,7 +459,7 @@ export async function renderPresentation(data: string, planTaskId: string, signa
   const plan = await checkedPlan(data, planTaskId, signal);
   if (plan.compiled.moduleId === 'concurrency-queue/1' && !plan.compiled.endingTitle) requireQueueMigration();
   const hidden = plan.compiled.moduleId === 'hidden-file-policy/1' ? plan.compiled : null;
-  if (hidden && (!!voiceTaskId !== !!plan.hiddenVoicePreparationTaskId || (voiceTaskId && visualLocaleProfile !== ZH_VISUAL_PROFILE))) {
+  if (hidden && (!!voiceTaskId !== !!(plan.hiddenVoicePreparationTaskId || plan.portableVoiceImportHash) || (voiceTaskId && visualLocaleProfile !== ZH_VISUAL_PROFILE))) {
     throw new EngineError('VOICE_PARENT', 'Select the mode and Chinese visual profile bound to this hidden-file plan.');
   }
   const voice = voiceTaskId === undefined ? undefined : await checkedVoice(data, voiceTaskId, signal);
@@ -592,7 +595,7 @@ export async function readPresentation(data: string, id: string, requested: Pres
   if (sha256(plan.files.get('plan-manifest.json')!) !== input.planManifestSha256) fail('Preview parent plan manifest differs.');
   const hidden = plan.compiled.moduleId === 'hidden-file-policy/1' ? plan.compiled : null;
   if ((!!hidden || plan.compiled.moduleId === 'concurrency-queue/1') !== !!input.rendererSha256 ||
-      input.capabilityProfile !== hidden?.capabilityProfile || (hidden && (input.mode === 'narrated') !== !!plan.hiddenVoicePreparationTaskId)) {
+      input.capabilityProfile !== hidden?.capabilityProfile || (hidden && (input.mode === 'narrated') !== !!(plan.hiddenVoicePreparationTaskId || plan.portableVoiceImportHash))) {
     fail('Preview renderer fingerprint or capability differs from its module.');
   }
   if (hidden?.language === 'zh-CN' && input.mode === 'silent') checkZhVisualText(await presentationFont(), hidden);

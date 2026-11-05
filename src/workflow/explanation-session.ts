@@ -893,3 +893,26 @@ const ReviewPresentation=z.union([
  z.strictObject({mode:z.literal('narrated'),spec:z.union([NarratedRenderSpec,HiddenNarratedRenderSpec])})
 ]);
 async function reviewInput(path?:string){return path?{factReviewReceipt:await spec(FactReviewReceipt,path,4_000_000)}:{};}
+
+/** Data-only portable capture. Historical review never grants trust to an import. */
+export async function capturePortableExplanation(data:string,id:string,signal:AbortSignal){
+ let task=await sessionTask(data,id,signal);
+ await checkedStage(data,task,signal);
+ for(let depth=0;task.kind===REVISE&&depth<MAX_REVISION_DEPTH;depth++){
+  const stage=await verifiedRevision(data,task,signal);task=await readTask(data,stage.preview.manifest.taskId,null);
+ }
+ if(task.kind!==RENDER_NARRATED)return fail('PORTABLE','Portable v1 requires a completed narrated reviewed preview.');
+ const input=storedInput(NarratedRenderInput,task);
+ if(!input.factReviewReceipt)return fail('PORTABLE','Select a preview with an attributed complete source review.');
+ const stage=await verifiedNarratedRender(data,task,signal);
+ const author=await verifiedAuthor(data,await readTask(data,input.authorTaskId,AUTHOR),signal);
+ if(author.submission.disposition!=='proposal')return fail('PORTABLE','A proposal is required.');
+ return {snapshot:author.parent.snapshot,proposal:author.submission.proposal,presentation:renderPresentationSpec(input),
+  historicalReview:input.factReviewReceipt,maxSeconds:Math.min(60,author.manifest.request.maxSeconds),
+  clips:author.submission.proposal.beats.map((b,index)=>{
+   const audio=stage.files.get('voice/original/'+index+'.audio'),sourceReceipt=stage.files.get('voice/original/'+index+'.receipt.json');
+   if(!audio||!sourceReceipt)return fail('PORTABLE','Original audio closure unavailable.');
+   const receipt=parse(z.object({artifact:z.object({mediaType:z.enum(['audio/wav','audio/mpeg','audio/flac'])})}),decode(sourceReceipt));
+   return {beatId:b.id,audio,sourceReceipt,mediaType:receipt.artifact.mediaType};
+  })};
+}

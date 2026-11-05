@@ -1,3 +1,4 @@
+import {portableCommand} from './explanation-portable.js';
 import {EngineError} from '../core/errors.js';
 import {exportExplanation, exportExplanationFacts, prepareExplanationVoice, renderExplanation, renderNarratedExplanation,
   resumeExplanation, reviseExplanation, startExplanation, statusExplanation, submitExplanation} from './explanation-session.js';
@@ -6,6 +7,7 @@ const usage = 'explanation start --spec <request> --data <state> --out <packet> 
 
 export async function explanationCommand(positionals: string[], values: Record<string, unknown>, signal: AbortSignal) {
   const action = positionals[1];
+  if(action?.startsWith('portable-'))return portableCommand(positionals,values,signal);
   const keys = ['data', action === 'start' ? 'spec' : 'task'];
   if (action === 'start' || action === 'export' || action === 'fact-review') keys.push('out');
   if (action === 'fact-review' && values.spec !== undefined) keys.push('spec');

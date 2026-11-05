@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "portable-freeze/1.0",
+  "candidate": "portable-explanation-c1",
+  "commit": "e6ba82212d91e31016b802a36f6fe7f9adfaf927",
+  "base": "66053ec",
+  "frozenAt": "2026-11-05T05:53:44.998Z",
+  "activeRoles": [
+    "product",
+    "reliability",
+    "evidence",
+    "security",
+    "content_facts",
+    "video_quality"
+  ],
+  "sourceFiles": 705,
+  "sourceManifestSha256": "4d1cdf8f71f66ae870a931aaa0814c4f95de5700f24be90fc0b13dcb0e4e5754",
+  "sourceArchiveSha256": "2650c6f5772e0fced154f9bc779ccb3f411e89b5cce9aeddd0ced7389803b1c6",
+  "materialsFiles": 938,
+  "materialsManifestSha256": "4d4f6fc3fa24c490a2089b15ef06930c421c63778ee9918a8751bcd30c858f20",
+  "rendererCodeHash": "8ca4a8b6fd2d25099b77bf352763c5c68cb285830c9c392e7c04f7fb35957f7b",
+  "tests": {
+    "typecheck": "PASS",
+    "finalAffected": "55 PASS",
+    "finalPortable": "14 PASS; captured log",
+    "fullRegression": "non-frozen mixed-source run:453 PASS/1 FAIL; NOT candidate full-suite PASS"
+  },
+  "actualMedia": [
+    {
+      "id": "fastify",
+      "taskId": "e494d9494c74f2c17bf8bc58de6e091665c29764d2b28c10b68371c6951fcbe7",
+      "rendererCodeHash": "8ca4a8b6fd2d25099b77bf352763c5c68cb285830c9c392e7c04f7fb35957f7b",
+      "matchesCurrentSource": true,
+      "originalPcmPreserved": true
+    },
+    {
+      "id": "fd",
+      "taskId": "c7e03ee7e8cdc03a0e16e754a8ef36df97c73115829d82212718dec2b85a4e3e",
+      "rendererCodeHash": "8ca4a8b6fd2d25099b77bf352763c5c68cb285830c9c392e7c04f7fb35957f7b",
+      "matchesCurrentSource": true,
+      "originalPcmPreserved": true
+    }
+  ],
+  "limits": [
+    "All current local reviews pending; historical source review unauthenticated and not inherited",
+    "Actual listening/pixel/continuous perceptual AV and final owner/G6 pending",
+    "Original manuscript/audio only; supported local presentation/caption/timing edits only"
+  ]
+}
