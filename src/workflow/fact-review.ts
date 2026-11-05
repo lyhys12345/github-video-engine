@@ -55,6 +55,7 @@ export function narrativeFactReview(plan:NarrativeReviewPlan,sources:Source[]){
   {id:'scene-narration:'+s.id,kind:'narration',text:s.narration,claimIds:s.claimIds},
   {id:'scene-visual:'+s.id,kind:'visual',text:s.visual,claimIds:s.claimIds},
   {id:'scene-screen:'+s.id,kind:'on-screen-text',text:canonical(s.onScreenText),claimIds:s.claimIds},
+  ...(s.visualContext?[{id:'scene-authored-context:'+s.id,kind:'on-screen-text',text:canonical(s.visualContext),claimIds:s.visualContext.claimIds}]:[]),
   {id:'scene-transition:'+s.id,kind:'transition',text:s.transitionToNext,claimIds:s.claimIds},
   {id:'scene-execution:'+s.id,kind:'execution-disposition',text:canonical(s.execution),claimIds:s.claimIds}
  ])]);

@@ -132,8 +132,9 @@ it('complete author packet binds actual sources but refuses all unauthored draft
 });
 it('document-transform is versioned, code-to-code and one-tool only without widening legacy evidence',async()=>{
  const f=await fixture(),original=JSON.parse(await readFile(f.storyPath,'utf8')),story=structuredClone(original),claim=story.evidence.claims[0].id;
- // Frozen schema-byte hash from the pre-extension committed Express narrative export.
- expect(sha256(await readFile(join(f.result.output.bundle,'narrative.schema.json')))).toBe('0c982496d42aee120220254f7d39de4b070e476f2cda3cdf5f43d050308d6f48');
+ // The opt-in context owns its explicit version; removing that optional property preserves the frozen legacy schema exactly.
+ const exportedSchema=JSON.parse(await readFile(join(f.result.output.bundle,'narrative.schema.json'),'utf8'));expect(exportedSchema.properties.scenes.items.properties.visualContext.properties.schemaVersion.const).toBe('narrative-scene-context/1.0');delete exportedSchema.properties.scenes.items.properties.visualContext;
+ expect(sha256(canonical(exportedSchema))).toBe('0c982496d42aee120220254f7d39de4b070e476f2cda3cdf5f43d050308d6f48');
  story.evidence.schemaVersion='1.1';story.evidence.objects=[{id:'input',label:'Document input',kind:'code'},{id:'output',label:'Document output',kind:'code'}];story.evidence.actors=[{id:'tool',label:'Document tool',role:'tool'}];story.evidence.operations=[{id:'transform',kind:'document-transform',input:'input',output:'output',dependsOn:[],claimIds:[claim],actorIds:['tool'],parameters:{}}];
  expect(StorySchema.safeParse(story).success).toBe(true);expect(StorySchema.safeParse(original).success).toBe(true);expect(EvidenceGraphSchema.safeParse(story.evidence).success).toBe(false);
  for(const change of [(s:any)=>s.evidence.schemaVersion='1.0',(s:any)=>s.evidence.objects[0].kind='image',(s:any)=>s.evidence.actors[0].role='user',(s:any)=>s.evidence.operations[0].actorIds=['tool','tool'],(s:any)=>s.evidence.operations[0].parameters={initialRate:2},(s:any)=>s.evidence.operations[0].dependsOn=['missing']]){const bad=structuredClone(story);change(bad);expect(StorySchema.safeParse(bad).success).toBe(false);}
