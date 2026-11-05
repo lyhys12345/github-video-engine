@@ -54,7 +54,18 @@ export class ArtifactStore {
     try {
       // Same-volume hard link is atomic and refuses replacement; readers never see partial blobs.
       try { await link(temp, this.path(artifact)); }
-      catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
+      catch (error) {
+        const code = (error as NodeJS.ErrnoException).code;
+        // A permission boundary can change between invocations (for example,
+        // after local sandbox approval). Do not permanently poison the task.
+        // Keep atomic no-replacement publication; never fall back to a copy.
+        if (code === 'EPERM' || code === 'EACCES') throw new EngineError(
+          'ATOMIC_STORAGE_UNAVAILABLE',
+          `Artifact publication requires same-volume hard-link permission (${code}). Restore write/link access and resume the same task. No artifact was published.`,
+          'retryable',
+        );
+        if (code !== 'EEXIST') throw error;
+      }
       await this.verify(artifact);
       return artifact;
     } finally { await unlink(temp).catch(() => {}); }

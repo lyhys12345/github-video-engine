@@ -16,6 +16,28 @@ const makeDir=async()=>{const dir=await mkdtemp(join(tmpdir(),'gve-task-'));dirs
 const make=async()=>{const r=new TaskRunner(await makeDir());runners.push(r);return r;};
 afterEach(async()=>{for(const r of runners.splice(0))r.close();for(const d of dirs.splice(0))await rm(d,{recursive:true,force:true,maxRetries:3});});
 const signal=()=>new AbortController().signal;
+test.each(['EPERM','EACCES'])('CAS permission %s preserves a resumable task and atomic publication',async(code)=>{
+  const r=await make();
+  const original=fs.link;
+  const denied=vi.spyOn(fs,'link').mockImplementation(async()=>{throw Object.assign(new Error('Permission boundary'),{code});});
+  syncBuiltinESMExports();
+  const work=async()=>({value:{ready:true},outputs:[await r.artifacts.commit('complete','text/plain','PUBLISH',sha256('permission-fixture'))]});
+  try{
+    await expect(r.run('permission-recovery',{version:1},work,signal())).rejects.toMatchObject({code:'ATOMIC_STORAGE_UNAVAILABLE',classification:'retryable'});
+    const failed=r.list()[0]!;
+    expect(failed.state).toBe('failed');expect(failed.attempt).toBe(1);expect(failed.outputs).toEqual([]);
+    const dir=join(r.artifacts.root,sha256('complete').slice(0,2));
+    expect(await readdir(dir)).toEqual([]);
+    denied.mockRestore();syncBuiltinESMExports();
+    expect(fs.link).toBe(original);
+    const recovered=await r.run('permission-recovery',{version:1},work,signal());
+    expect(recovered.id).toBe(failed.id);expect(recovered.cached).toBe(false);
+    expect(r.get(failed.id)?.attempt).toBe(2);expect(r.get(failed.id)?.state).toBe('succeeded');
+    expect((await r.run('permission-recovery',{version:1},work,signal())).cached).toBe(true);
+    expect(await r.artifacts.readJson(r.get(failed.id)!.result!)).toEqual({ready:true});
+    expect(await readdir(dir)).toEqual([sha256('complete')+'.txt']);
+  }finally{denied.mockRestore();syncBuiltinESMExports();}
+});
 test('real CAS outputs persist, are reused and detect tampering; success cannot be edited',async()=>{
   const r=await make();let count=0;const work=async()=>{count++;const a=await r.artifacts.commit('sound','audio/wav','RENDER',sha256('input'));return{value:{answer:42},outputs:[a]};};
   const first=await r.run('fixture',{n:1},work,signal()),again=await r.run('fixture',{n:1},work,signal());expect(again.cached).toBe(true);expect(count).toBe(1);expect(again.id).toBe(first.id);
