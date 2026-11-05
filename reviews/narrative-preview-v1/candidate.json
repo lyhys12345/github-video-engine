@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "narrative-excerpt-freeze/1.0",
+  "candidate": "narrative-technical-excerpt-c1",
+  "commit": "888331050580d0079110264dbf8d080800583580",
+  "base": "67dd17b",
+  "frozenAt": "2026-11-05T07:13:25.625Z",
+  "activeRoles": [
+    "product",
+    "reliability",
+    "evidence",
+    "content_facts",
+    "security",
+    "video_quality"
+  ],
+  "sourceFiles": 726,
+  "sourceManifestSha256": "987cb91fa7da46a3c07df9710b0fbf7c6216e4db06f460c3c6602c2f927ab5ca",
+  "sourceArchiveSha256": "230098712dcabebb8d536b248c30487156cde04705dc14fb9a93d1240eb7d953",
+  "materialsFiles": 1634,
+  "materialsManifestSha256": "0a27d0521d76e6682189f006cf31676f36ad77f2348de332c07bcdbbc310245c",
+  "rendererCodeHash": "9b1090c380a321ab544b78df619d806019ca5bd5f49bb267fa13322e24994ec6",
+  "actualMedia": [
+    {
+      "project": "express",
+      "baselineTaskId": "886b7a545e696840fe656c0f2db6803fe2cfdd7a4e1f5d88ccfb3e163ba787c2",
+      "editedTaskId": "3bbd5970a0935476192c7b73e3b3ed9f2ecaf533347723c9a0c2e21ea9669548",
+      "recordedEngineCodeHash": "9b1090c380a321ab544b78df619d806019ca5bd5f49bb267fa13322e24994ec6",
+      "matchesFrozenSource": true
+    },
+    {
+      "project": "rembg",
+      "baselineTaskId": "3250782d4e7cd80bf73d58dd82e1c4ed9ced1b4fcebf94fbe3481984d291fa7b",
+      "editedTaskId": "dabba0e4a4c20ba4114aeaff138fa91e0717cbc6a7033dea0810ca1633ce80f3",
+      "recordedEngineCodeHash": "9b1090c380a321ab544b78df619d806019ca5bd5f49bb267fa13322e24994ec6",
+      "matchesFrozenSource": true
+    }
+  ],
+  "tests": {
+    "finalTypecheck": "PASS",
+    "finalAffected": "46 PASS",
+    "priorFull": "479 PASS across50 files before final display-only repair; precise source relation retained"
+  },
+  "scope": "silent20-second technical excerpts and21-second timing edits; reset cuts with all unresolved gaps visibly NOT PRODUCIBLE; not formal full film",
+  "currentExecutionReview": "pending",
+  "parentWrittenReview": "historical only",
+  "ownerAcceptance": "pending"
+}

@@ -1,3 +1,4 @@
+import {narrativeExcerptCommand} from './narrative-preview.js';
 import {narrativeCommand} from './narrative.js';
 import {portableCommand} from './explanation-portable.js';
 import {EngineError} from '../core/errors.js';
@@ -8,6 +9,7 @@ const usage = 'explanation start --spec <request> --data <state> --out <packet> 
 
 export async function explanationCommand(positionals: string[], values: Record<string, unknown>, signal: AbortSignal) {
   const action = positionals[1];
+  if(action?.startsWith('narrative-preview'))return narrativeExcerptCommand(positionals,values,signal);
   if(action?.startsWith('narrative-'))return narrativeCommand(positionals,values,signal);
   if(action?.startsWith('portable-'))return portableCommand(positionals,values,signal);
   const keys = ['data', action === 'start' ? 'spec' : 'task'];

@@ -307,3 +307,16 @@ export async function exportStoryPreview(data: string, id: string, output: strin
   }
   return publishAssetFiles(data, id, output, preview.files, signal, publication);
 }
+
+/** Typed immutable Story preview loader for exact narrative shot slicing, never a presentation preview. */
+export async function loadStoryPreviewForNarrative(data:string,id:string){
+ const checked=await checkedPreview(data,id,true);
+ if(!checked.files||!('sourceStory' in checked.status))throw new EngineError('PREVIEW_NOT_READY','Narrative excerpt needs a completed Story preview.');
+ const task=await readTask(data,id,KIND),input=Input.parse(task.input),pack=await checkedPack(data,input.assetTaskId);
+ const derived=planPreview(pack,input.mode,input.presentation),manifest=JSON.parse(checked.files.get('preview.json')!.toString('utf8'));
+ if(!Object.entries(input).every(([key,value])=>canonical(manifest[key])===canonical(value))||canonical(manifest.audience??null)!==canonical(derived.props.audience??null)||input.mode!=='silent'||manifest.taskId!==id||manifest.assetTaskId!==input.assetTaskId||manifest.assetManifestSha256!==input.assetManifestSha256||
+  canonical(manifest.sourceStory)!==canonical(derived.sourceStory)||canonical(manifest.timeline)!==canonical(derived.props.timeline)||canonical(manifest.samples)!==canonical(derived.samples)||
+  manifest.media?.sha256!==sha256(checked.files.get('preview.mp4')!)||manifest.media.fullDecodeExit!==0||manifest.voice?.status!=='omitted-explicitly'||
+  !checked.files.get('captions.vtt')!.equals(Buffer.from(captionFile(derived.props))))throw new EngineError('PREVIEW_INTEGRITY','Narrative source preview metadata, source Story, silence or captions differ.');
+ return {...checked,task,input,pack,props:derived.props,manifest};
+}

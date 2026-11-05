@@ -57,3 +57,10 @@ export function narrativeFactReview(plan:NarrativePlan,sources:Source[]){
   {id:'scene-execution:'+s.id,kind:'execution-disposition',text:canonical(s.execution),claimIds:s.claimIds}
  ])]);
 }
+
+/** New execution packets do not inherit parent narrative review. Full child visual/animation closure is data to review. */
+export function narrativePreviewFactReview(plan:NarrativePlan,sources:Source[],execution:unknown){
+ const base=narrativeFactReview(plan,sources),{packetHash,...content}=base;
+ const next={...content,candidateHash:sha256(canonical({plan,execution})),units:[...base.units,{id:'technical-preview-execution',kind:'full-child-visual-animation-timeline-and-omission-closure',text:canonical(execution),claimIds:[]}],requiredItems:[...base.requiredItems,'technical-preview-execution']};
+ return {...next,packetHash:sha256(canonical(next))};
+}
