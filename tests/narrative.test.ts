@@ -71,3 +71,21 @@ it('requires a new pending review for exact child visual labels, animation, time
  for(const change of [(e:any)=>e.parts[0].endFrame++,(e:any)=>e.child.animation.to=3,(e:any)=>e.child.actorLabels[0]='Changed assertion',(e:any)=>e.actualMovieSha256='5'.repeat(64)]){const edited=structuredClone(execution);change(edited);expect(()=>verifyFactReview(narrativePreviewFactReview(f.plan,sources,edited),receipt)).toThrow('Stale');}
  receipt.items=receipt.items.filter(i=>i.id!=='technical-preview-execution');expect(()=>verifyFactReview(packet,receipt)).toThrow('Incomplete');
 });
+import {validateSourceClockBridge,NarrativeContinuitySpec} from '../src/workflow/narrative-continuity.js';
+import {audienceRenderState,AUDIENCE_RENDER_STATE_PROFILE} from '../src/story-planner/audience-render-state.js';
+it('source clock bridge binds adjacent ranges, exact renderer states and typed source identities',()=>{
+ const audience:any={kind:'http',request:'GET /',body:'Hello World!',port:'3000',cuts:[100,200],intervals:[{start:10,end:80},{start:110,end:180},{start:210,end:280}]};
+ const child:any={input:{renderStateProfile:AUDIENCE_RENDER_STATE_PROFILE},props:{audience},pack:{input:{story:{evidence:{objects:[{id:'request',kind:'http-request'}]}}}}};
+ const left={kind:'story-slice',sceneId:'first',previewTaskId:'a'.repeat(64),sourceStartFrame:10,sourceEndFrame:100},right={kind:'story-slice',sceneId:'second',previewTaskId:'a'.repeat(64),sourceStartFrame:100,sourceEndFrame:190};
+ const hash=(f:number)=>sha256(canonical(audienceRenderState(audience,f)));
+ const bridge={fromSceneId:'first',toSceneId:'second',previewTaskId:'a'.repeat(64),sourceBoundaryFrame:100,entityMap:[{sourceObjectId:'request',renderEntityId:'http-request'}],expectedExitStateHash:hash(100),expectedEntryStateHash:hash(100),expectedLastVisibleStateHash:hash(99),expectedNextStateHash:hash(101)};
+ expect(validateSourceClockBridge(bridge,left,right,child).stateTrace.map(s=>s.state.frame)).toEqual([98,99,100,101]);
+ for(const mutated of [{...bridge,expectedEntryStateHash:hash(99)},{...bridge,sourceBoundaryFrame:101},{...bridge,entityMap:[{sourceObjectId:'request',renderEntityId:'http-response'}]},{...bridge,entityMap:[...bridge.entityMap,...bridge.entityMap]}])expect(()=>validateSourceClockBridge(mutated,left,right,child)).toThrow();
+ for(const changed of [{...right,sourceStartFrame:101},{...right,previewTaskId:'b'.repeat(64)},{...right,kind:'placeholder'}])expect(()=>validateSourceClockBridge(bridge,left,changed,child)).toThrow();
+ expect(()=>validateSourceClockBridge(bridge,left,right,{...child,input:{}})).toThrow();
+ expect(NarrativeContinuitySpec.safeParse({schemaVersion:'narrative-technical-excerpt/1.0'}).success).toBe(false);
+});
+it('distinct rembg outputs never acquire the persistent input identity',()=>{
+ const p:any={kind:'image-outputs',cuts:[100,200],intervals:[{start:10,end:80},{start:110,end:180},{start:210,end:280}]};
+ const s=audienceRenderState(p,100);expect(s.entities['image-input']).toMatchObject({visible:true,origin:'same-synthetic-input-photo'});expect(s.entities['image-cutout']).toMatchObject({origin:'distinct-derived-cutout-illustration'});expect(s.entities['image-mask']).toMatchObject({origin:'distinct-derived-mask-illustration'});
+});

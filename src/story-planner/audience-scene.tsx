@@ -1,6 +1,7 @@
 
 import React from 'react';
-import {audienceFrame, type AudiencePlan} from './audience-plan.js';
+import {type AudiencePlan} from './audience-plan.js';
+import {audienceRenderState} from './audience-render-state.js';
 
 const ink = '#102e31';
 const muted = '#416267';
@@ -18,16 +19,12 @@ function Packet({y, text, response = false}: {y: number; text: string; response?
   </g>;
 }
 
-function HttpExchange({plan, frame, phase, motion}: {plan: Extract<AudiencePlan, {kind: 'http'}>; frame: number} & ReturnType<typeof audienceFrame>) {
-  const [request, route, response] = motion;
-  const returning = phase === 2;
-  const responseStarted = frame >= plan.intervals[2]!.start;
-  const delivered = response >= 1;
-  const requestY = 485 + 177 * request + 223 * route;
-  const handler = route >= 1;
+function HttpExchange({plan, state}: {plan: Extract<AudiencePlan, {kind: 'http'}>; state:ReturnType<typeof audienceRenderState>}) {
+  const {returning,responseStarted,delivered,requestY,handler}=state.http!;
+  const [,route,response]=state.motion;
   return <g data-scene="http">
     <path d="M360 480 V887" stroke="#adc2b8" strokeWidth="5" strokeDasharray="7 13"/>
-    <path d={'M360 480 V' + requestY} stroke={accent} strokeWidth="5" opacity={returning ? 0.2 : 0.55}/>
+    <path d={'M360 480 V' + requestY} stroke={accent} strokeWidth="5" opacity={state.http!.requestPathOpacity}/>
     <rect x="104" y="310" width="512" height="177" rx="28" fill="#fffdf5" stroke={ink} strokeWidth="3"/>
     <path d="M104 379H616" stroke="#c5d4ca" strokeWidth="2"/>
     <circle cx="135" cy="345" r="7" fill={coral}/>
@@ -35,7 +32,7 @@ function HttpExchange({plan, frame, phase, motion}: {plan: Extract<AudiencePlan,
     <circle cx="185" cy="345" r="7" fill={accent}/>
     <text x="212" y="354" fontSize="25" fill={ink}>客户端</text>
     <text x="133" y="446" fontSize={delivered ? Math.min(47, 680 / plan.body.length) : 26} fontWeight={delivered ? 750 : 400} fill={delivered ? coral : muted}
-      data-client-content={delivered ? 'response' : 'waiting'}>{delivered ? plan.body : '等待响应'}</text>
+      data-client-content={delivered ? 'response' : 'waiting'}>{state.http!.clientText}</text>
 
     <rect x="104" y="677" width="512" height="347" rx="28" fill="#e4ede3" stroke={ink} strokeWidth="3"/>
     <text x="135" y="731" fontSize="28" fontWeight="700" fill={ink}>服务端</text>
@@ -49,8 +46,8 @@ function HttpExchange({plan, frame, phase, motion}: {plan: Extract<AudiencePlan,
     {returning && <text x="565" y="947" textAnchor="end" fontSize="22" fill="#ffd8c9" fontFamily={mono}>res.send(…)</text>}
     {!responseStarted && <Packet y={requestY} text={plan.request}/>}
     {responseStarted && !delivered && <>
-      <path d={'M360 887V' + (887 - 405 * response)} stroke={coral} strokeWidth="5" opacity="0.65"/>
-      <Packet y={887 - 405 * response} text={plan.body} response/>
+      <path d={'M360 887V' + state.http!.responseY} stroke={coral} strokeWidth="5" opacity="0.65"/>
+      <Packet y={state.http!.responseY} text={plan.body} response/>
     </>}
   </g>;
 }
@@ -99,10 +96,9 @@ function Picture({x, y, mode, background = 1, silhouette = 0}: {
   </svg>;
 }
 
-function ImageOutputs({phase, motion}: ReturnType<typeof audienceFrame>) {
-  const [setup, cutout, mask] = motion;
-  const maskMode = phase === 2;
-  const outputOpacity = phase === 0 ? 0 : 1;
+function ImageOutputs({state}: {state:ReturnType<typeof audienceRenderState>}) {
+  const {phase}=state;
+  const {setup,cutout,mask,maskMode,outputOpacity}=state.image!;
   return <g data-scene="image-outputs">
     <IllustrationDefinitions/>
     <path d="M360 574V797" stroke="#adc2b8" strokeWidth="5" strokeDasharray="7 13"/>
@@ -114,15 +110,15 @@ function ImageOutputs({phase, motion}: ReturnType<typeof audienceFrame>) {
       {phase > 0 && 'INPUT OUTPUT'}
     </text>
     <g opacity={outputOpacity}>
-      <Picture x={210} y={786} mode={maskMode ? 'mask' : 'cutout'} background={1 - cutout} silhouette={mask}/>
+      <Picture x={210} y={786} mode={maskMode ? 'mask' : 'cutout'} background={state.image!.background} silhouette={state.image!.silhouette}/>
       <text x="210" y="762" fill={ink} fontSize="27" fontFamily={mono}>OUTPUT</text>
       <text x="510" y="762" textAnchor="end" fill={muted} fontSize="25">{maskMode ? (mask < 1 ? '过渡预览' : '蒙版') : (cutout < 1 ? '处理中' : '透明背景')}</text>
     </g>
-    {phase === 0 && <g opacity={setup} transform={'translate(0 ' + (15 * (1 - setup)) + ')'}>
+    {phase === 0 && <g opacity={setup} transform={'translate(0 ' + state.image!.setupTranslateY + ')'}>
       <text x="360" y="860" textAnchor="middle" fill={muted} fontSize="31">同一张原图</text>
       <text x="360" y="921" textAnchor="middle" fill={ink} fontSize="39" fontWeight="700">两种输出</text>
     </g>}
-    {phase > 0 && <circle cx="360" cy={709 + 77 * (maskMode ? mask : cutout)} r="10" fill={maskMode ? coral : accent} stroke={paper} strokeWidth="4"/>}
+    {phase > 0 && <circle cx="360" cy={state.image!.pulseY} r="10" fill={state.image!.pulseFill} stroke={paper} strokeWidth="4"/>}
   </g>;
 }
 
@@ -132,8 +128,8 @@ const titles = {
 };
 
 export function AudienceScene({plan, frame}: {plan: AudiencePlan; frame: number}) {
-  const state = audienceFrame(plan, frame);
-  const camera = 1 + 0.014 * state.motion.reduce((sum, progress) => sum + progress, 0);
+  const state = audienceRenderState(plan, frame);
+  const camera = state.camera;
   const maskTransition = plan.kind === 'image-outputs' && state.phase === 2 && state.motion[2] < 1;
   return <svg width="720" height="1280" viewBox="0 0 720 1280" aria-label="示意·未执行">
     <rect width="720" height="1280" fill={paper}/>
@@ -143,7 +139,7 @@ export function AudienceScene({plan, frame}: {plan: AudiencePlan; frame: number}
     <text x="580" y="89" textAnchor="middle" fontSize="24" fontWeight="700" fill="#7f311d">示意·未执行</text>
     <text x="56" y="200" fontSize="56" fontWeight="750" fill={ink}>{maskTransition ? '正在生成蒙版' : titles[plan.kind][state.phase]}</text>
     <g data-camera={camera} transform={'translate(360 665) scale(' + camera + ') translate(-360 -665)'}>
-      {plan.kind === 'http' ? <HttpExchange plan={plan} frame={frame} {...state}/> : <ImageOutputs {...state}/>}
+      {plan.kind === 'http' ? <HttpExchange plan={plan} state={state}/> : <ImageOutputs state={state}/>}
     </g>
     <g transform="translate(56 1127)">
       {[0, 1, 2].map(index => <rect key={index} x={index * 206} width="196" height="8" rx="4" fill={index <= state.phase ? accent : '#ced8cc'}/>)}

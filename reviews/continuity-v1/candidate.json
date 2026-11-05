@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "narrative-source-clock-freeze/1.0",
+  "candidate": "narrative-source-clock-c1",
+  "commit": "e1c6fcb8dc13dee521b8612b80321ccc993e3eee",
+  "base": "91a3da6",
+  "frozenAt": "2026-11-05T07:52:57.158843+00:00",
+  "activeRoles": [
+    "product",
+    "reliability",
+    "evidence",
+    "content_facts",
+    "security",
+    "video_quality"
+  ],
+  "sourceFiles": 733,
+  "sourceManifestSha256": "a7234d02538dec93179eb6cff9178808339141fa364e5e8657126e85e864720f",
+  "sourceArchiveSha256": "b3146a0310da569f0181a68c30c36e137bb21205dee3979ced2aa94dd8b49251",
+  "materialsFiles": 644,
+  "materialsManifestSha256": "42e77c8986c4fed6b7d88f20719b0fe39458b4af42077bf267d25bf112c187ad",
+  "rendererCodeHash": "f3455b8080b85043032753947e8bc860a7163b13f22955ce43f29bc6b3cccb3c",
+  "scope": "same-child/source-clock adjacent illustrative scene continuity;14/15second silent technical excerpts only",
+  "tests": {
+    "typecheck": "PASS",
+    "affected": "49 PASS",
+    "full": "RUNNING; additive report required"
+  },
+  "currentExecutionFacts": "pending",
+  "currentMediaReview": "pending",
+  "historicalWrittenReview": "attribution only",
+  "approval": "none",
+  "ownerAcceptance": "pending"
+}

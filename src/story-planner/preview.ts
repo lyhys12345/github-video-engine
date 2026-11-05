@@ -1,3 +1,4 @@
+import {AUDIENCE_RENDER_STATE_PROFILE} from './audience-render-state.js';
 import {lstat, mkdir, writeFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
 import {z} from 'zod';
@@ -28,6 +29,7 @@ type Pack = Awaited<ReturnType<typeof checkedPack>>;
 const Input = z.object({
   assetTaskId: hash, assetManifestSha256: hash, mode: Mode,
   presentation: Presentation,
+  renderStateProfile:z.literal(AUDIENCE_RENDER_STATE_PROFILE).optional(),
   fontSha256: z.literal(FONT_HASH), environment: z.record(z.string(), z.string()),
 }).strict();
 type Input = z.infer<typeof Input>;
@@ -156,6 +158,7 @@ export async function renderStoryPreview(data: string, assetTaskId: string, mode
   const env = await environment();
   const input = Input.parse({
     assetTaskId, assetManifestSha256: sha256(pack.files.get('manifest.json')!), mode,
+    ...(props.audience?{renderStateProfile:AUDIENCE_RENDER_STATE_PROFILE}:{}),
     ...(presentation ? {presentation} : {}), fontSha256: FONT_HASH, environment: env,
   });
   const id = sha256(canonical({version: 'production-task-v1', kind: KIND, input}));
