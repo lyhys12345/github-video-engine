@@ -1,0 +1,51 @@
+{
+  "status": "experimental-unreviewed",
+  "repository": "https://github.com/sindresorhus/strip-bom",
+  "commit": "c691ec5724be8bb61e9df269a2577fcba41353f7",
+  "source": {
+    "bindingSha256": "c0ba69e15d5bcb04210db556ef6a23d37a7d3b9762ec1886a87ef3aa8b7eb541",
+    "schemaVersion": "repository-narrative-run-source/1.0",
+    "taskId": "234ef517f46f07418842ba8781fd05b65850ea3e00b4911c30ff1633156f1fb1"
+  },
+  "authorship": "actual session Agent; no target execution/model dispatch",
+  "changedNarrationScenes": [
+    "scene-limitation"
+  ],
+  "unchangedSourceScenesReused": 4,
+  "unchangedRecordingsReused": 4,
+  "media": [
+    {
+      "kind": "original",
+      "taskId": "a66e709806509a0ac4b1374c2c70cf2b25d9a293621875193c9d7740e11b251a",
+      "seconds": 48,
+      "frames": 1440,
+      "sha256": "acdc39344ccacf44fffa3666559a0bf042d9ec17966d9fb1298aa1c608b63231",
+      "fullDecode": true,
+      "recordingSeconds": 42.09
+    },
+    {
+      "kind": "edited",
+      "taskId": "8a4ade2a977318475bc4c1a34412c7c373f963ca4b554f81fed3e8849c1f810a",
+      "seconds": 48,
+      "frames": 1440,
+      "sha256": "1e0817c9ed74504a4ac5080627e01bfd54e3ff5dea8be6ce1663c4e5f32a409b",
+      "fullDecode": true,
+      "recordingSeconds": 41.54
+    }
+  ],
+  "pending": [
+    "semantic facts",
+    "listening",
+    "word alignment",
+    "continuous AV",
+    "owner acceptance"
+  ],
+  "limits": {
+    "Judge": false,
+    "paidAPI": false,
+    "targetExecution": false,
+    "formalFilm": false,
+    "deployment": false
+  },
+  "exactRepeatAllCached": true
+}
