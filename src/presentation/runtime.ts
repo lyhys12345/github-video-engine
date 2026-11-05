@@ -26,7 +26,7 @@ import {decodeClip, FRAME_SAMPLES, loadClip, matchVoice, MAX_PCM, mixClips, NARR
 import {EXTENDED_RENDER_PROFILE, EXTENDED_VERIFY_DEADLINE, EXTENDED_WORKER_DEADLINE, extendedRanges,
   MAX_MOVIE_BYTES, MAX_PART_BYTES, MAX_SAMPLE_BYTES, MAX_SAMPLES, requireExtendedDisk} from './duration.js';
 import {checkZhVisualText} from './visual-locale-check.js';
-import {HIDDEN_FILE_MOBILE_LAYOUT, hiddenFileLayout} from './hidden-file-layout.js';
+import {HIDDEN_FILE_MOBILE_LAYOUT, HIDDEN_FILE_NARRATED_LAYOUT, LEGACY_HIDDEN_FILE_NARRATED_LAYOUT, hiddenFileLayout} from './hidden-file-layout.js';
 import {ZH_VISUAL_PROFILE, type VisualLocaleProfile} from './visual-locale.js';
 
 export const PLAN_KIND = 'repository-presentation-plan-v1';
@@ -43,14 +43,14 @@ const requireQueueMigration = (): never => {
 const review = {semanticReview: 'pending', editorialReview: 'pending', audiovisualReview: 'pending', voice: 'omitted-explicitly', ownerAcceptance: 'pending'} as const;
 const Source = z.strictObject({id: Id, path: z.string().regex(/^source-[1-8]\.txt$/), url: z.string().max(600), sha256: Hash});
 const PlanInput = z.strictObject({projectId: Id, proposal: StoredStoryProposal, plan: PresentationPlan, evidenceSha256: Hash,
-  sources: z.array(Source).min(1).max(8), compiler: z.array(z.strictObject({path: z.string(), sha256: Hash})).min(1).max(20)});
+  hiddenVoicePreparationTaskId: Hash.optional(), sources: z.array(Source).min(1).max(8), compiler: z.array(z.strictObject({path: z.string(), sha256: Hash})).min(1).max(20)});
 type PlanInput = z.infer<typeof PlanInput>;
 const PreviewInput = z.strictObject({planTaskId: Hash, planManifestSha256: Hash, mode: z.literal('silent'),
   fontSha256: z.literal(FONT_SHA), environment: z.record(z.string(), z.string()),
   mediaMetadataProfile: z.literal(MEDIA_METADATA_PROFILE).optional(),
   renderProfile: z.literal(EXTENDED_RENDER_PROFILE).optional(), rendererSha256: Hash.optional(),
   capabilityProfile: z.literal(HiddenFileCapability).optional(),
-  hiddenFileLayoutProfile: z.literal(HIDDEN_FILE_MOBILE_LAYOUT).optional(), hiddenFileLayoutSha256: Hash.optional()});
+  hiddenFileLayoutProfile: z.enum([HIDDEN_FILE_MOBILE_LAYOUT, LEGACY_HIDDEN_FILE_NARRATED_LAYOUT, HIDDEN_FILE_NARRATED_LAYOUT]).optional(), hiddenFileLayoutSha256: Hash.optional()});
 const VoiceInput = z.strictObject({spec: VoiceSpec, decoder: z.record(z.string(), z.string()), implementationSha256: Hash});
 const NarratedInput = PreviewInput.extend({mode: z.literal('narrated'), voiceTaskId: Hash, voiceManifestSha256: Hash,
   captionLayoutProfile: z.literal(CAPTION_LAYOUT_PROFILE).optional(),
@@ -177,6 +177,7 @@ function planFiles(input: PlanInput, compiled: CompiledPresentation, id: string,
   files.set('plan-manifest.json', json({kind: PLAN_KIND, taskId: id, binding: compiled.binding, proposalHash: compiled.proposalHash,
     planSha256: compiled.planSha256, moduleId: compiled.moduleId, timeline: compiled.timeline, review,
     ...(compiled.moduleId === 'hidden-file-policy/1' ? {capabilityProfile: compiled.capabilityProfile, scope: compiled.scope} : {}),
+    ...(input.hiddenVoicePreparationTaskId && {hiddenVoicePreparationTaskId: input.hiddenVoicePreparationTaskId}),
     files: [...files].map(([path, bytes]) => ({path, bytes: bytes.length, sha256: sha256(bytes)}))}));
   return files;
 }
@@ -190,7 +191,7 @@ async function checkedPlan(data: string, id: string, signal: AbortSignal) {
   const files = await readArtifacts(data, task, names, signal);
   const derived = planFiles(input, compiled, id, files);
   for (const [path, bytes] of derived) if (!bytes.equals(files.get(path)!)) fail('Presentation plan derivation differs: ' + path);
-  return {files, compiled, task, maxFrames: presentationMaxFrames(input.plan.schemaVersion)};
+  return {files, compiled, task, hiddenVoicePreparationTaskId: input.hiddenVoicePreparationTaskId, maxFrames: presentationMaxFrames(input.plan.schemaVersion)};
 }
 
 export async function createPresentation(store: WorkflowStore, id: string, proposalHash: string, spec: string, data: string, signal: AbortSignal) {
@@ -206,7 +207,7 @@ export async function createPresentation(store: WorkflowStore, id: string, propo
 }
 
 export async function createPresentationFromPlan(store: WorkflowStore, id: string, proposalHash: string,
-  plan: PresentationPlan, data: string, signal: AbortSignal) {
+  plan: PresentationPlan, data: string, signal: AbortSignal, hiddenVoicePreparationTaskId?: string) {
   checkAbort(signal);
   if (plan.schemaVersion === '1.2') requireQueueMigration();
   const {proposal, bytes, workspace} = await loadAuthoringProposal(store, id, proposalHash, signal);
@@ -215,6 +216,9 @@ export async function createPresentationFromPlan(store: WorkflowStore, id: strin
     if (store.project(id).snapshotHash !== proposal.binding.snapshotHash) throw new EngineError('AUTHORING_STALE', 'Select a proposal for the current source revision.');
   };
   const compiled = compilePresentation(proposal, plan);
+  if (hiddenVoicePreparationTaskId && (compiled.moduleId !== 'hidden-file-policy/1' || compiled.language !== 'zh-CN')) {
+    throw new EngineError('VOICE_PARENT', 'Hidden-file voice requires a Chinese hidden-file plan.');
+  }
   const queueImplementation = compiled.moduleId === 'concurrency-queue/1' ? [
     'src/contracts/authoring.ts', 'src/contracts/concurrency-queue.ts', 'src/presentation/concurrency-queue.ts',
     'src/presentation/queue-frame.ts', 'src/presentation/queue-composition.tsx', 'src/presentation/composition.tsx',
@@ -226,7 +230,8 @@ export async function createPresentationFromPlan(store: WorkflowStore, id: strin
     'src/presentation/runtime.ts', ...queueImplementation, ...hiddenImplementation]
     .map(async path => ({path, sha256: sha256(await boundedFile(join(projectRoot, path)))})));
   const input = PlanInput.parse({projectId: id, proposal, plan, sources: workspace.manifest.sources,
-    evidenceSha256: sha256(workspace.files.get('evidence.json')!), compiler});
+    evidenceSha256: sha256(workspace.files.get('evidence.json')!), compiler,
+    ...(hiddenVoicePreparationTaskId && {hiddenVoicePreparationTaskId})});
   const taskId = fingerprint(PLAN_KIND, input);
   const files = planFiles(input, compiled, taskId, workspace.files);
   data = await preflightPresentationState(data);
@@ -277,7 +282,7 @@ function captions(plan: CompiledPresentation) {
 
 async function voicePlan(data: string, spec: VoiceSpec, signal: AbortSignal) {
   const plan = await checkedPlan(data, spec.planTaskId, signal);
-  if (plan.compiled.moduleId === 'hidden-file-policy/1') throw new EngineError('VOICE_PARENT', 'Hidden-file policy previews are silent in this profile.');
+  if (plan.compiled.moduleId === 'hidden-file-policy/1' && !plan.hiddenVoicePreparationTaskId) throw new EngineError('VOICE_PARENT', 'Hidden-file policy previews are silent in this profile.');
   if (sha256(plan.files.get('plan-manifest.json')!) !== spec.planManifestSha256) fail('Voice parent manifest differs.');
   return {plan, matches: matchVoice(plan.compiled, spec)};
 }
@@ -291,6 +296,9 @@ async function voiceFiles(data: string, input: z.infer<typeof VoiceInput>, id: s
   let originalBytes = 0;
   for (const [index, {beat, clip}] of matches.entries()) {
     const source = await loadClip(data, clip, input.spec.voicePolicy, signal);
+    if (plan.hiddenVoicePreparationTaskId && !('generationManifestBytes' in source && source.generationManifestBytes)) {
+      throw new EngineError('VOICE_RECEIPT', 'The hidden-file narrated plan requires verified Huihui source recordings.');
+    }
     originalBytes += source.audio.length;
     if (originalBytes > 32_000_000) throw new EngineError('VOICE_SIZE', 'Combined original recordings exceed 32 MB.');
     const pcm = await getPcm(source, index);
@@ -448,17 +456,19 @@ export async function renderPresentation(data: string, planTaskId: string, signa
   const plan = await checkedPlan(data, planTaskId, signal);
   if (plan.compiled.moduleId === 'concurrency-queue/1' && !plan.compiled.endingTitle) requireQueueMigration();
   const hidden = plan.compiled.moduleId === 'hidden-file-policy/1' ? plan.compiled : null;
-  if (hidden && voiceTaskId !== undefined) throw new EngineError('VOICE_PARENT', 'Hidden-file policy previews are silent in this profile.');
+  if (hidden && (!!voiceTaskId !== !!plan.hiddenVoicePreparationTaskId || (voiceTaskId && visualLocaleProfile !== ZH_VISUAL_PROFILE))) {
+    throw new EngineError('VOICE_PARENT', 'Select the mode and Chinese visual profile bound to this hidden-file plan.');
+  }
   const voice = voiceTaskId === undefined ? undefined : await checkedVoice(data, voiceTaskId, signal);
   if (voice && voice.input.spec.planTaskId !== planTaskId) throw new EngineError('VOICE_PARENT', 'Bind the voice to this exact plan task.');
   const font = await presentationFont();
-  if (hidden?.language === 'zh-CN') checkZhVisualText(font, hidden);
-  const fileLayout = hidden ? hiddenFileLayout(font, hidden) : undefined;
+  if (hidden?.language === 'zh-CN' && !voice) checkZhVisualText(font, hidden);
+  const fileLayout = hidden ? hiddenFileLayout(font, hidden, !!voice, !!voice) : undefined;
   if (visualLocaleProfile !== undefined) {
     if (!voice || visualLocaleProfile !== ZH_VISUAL_PROFILE) {
       throw new EngineError('PRESENTATION_VISUAL_LOCALE', 'The Chinese visual profile requires a narrated presentation.');
     }
-    checkZhVisualText(font, plan.compiled);
+    if (!hidden) checkZhVisualText(font, plan.compiled);
   }
   const captionLines = voice && layoutCaptions(font, voice.captionCues.map(cue => cue.transcript));
   const env = await environment();
@@ -476,7 +486,8 @@ export async function renderPresentation(data: string, planTaskId: string, signa
     ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {}),
     ...(moduleRenderer ? {rendererSha256: moduleRenderer} : {}),
     ...(hidden ? {capabilityProfile: hidden.capabilityProfile} : {}),
-    ...(fileLayout ? {hiddenFileLayoutProfile: HIDDEN_FILE_MOBILE_LAYOUT, hiddenFileLayoutSha256: sha256(canonical(fileLayout))} : {})};
+    ...(fileLayout ? {hiddenFileLayoutProfile: voice ? HIDDEN_FILE_NARRATED_LAYOUT : HIDDEN_FILE_MOBILE_LAYOUT,
+      hiddenFileLayoutSha256: sha256(canonical(fileLayout))} : {})};
   const input = voice ? NarratedInput.parse({...base, mode: 'narrated', voiceTaskId,
     voiceManifestSha256: sha256(voice.files.get('voice-manifest.json')!),
     captionLayoutProfile: CAPTION_LAYOUT_PROFILE, ...(visualLocaleProfile && {visualLocaleProfile})}) :
@@ -500,10 +511,10 @@ export async function renderPresentation(data: string, planTaskId: string, signa
       await writeFile(join(work, 'public', 'font.ttf'), font, {flag: 'wx'});
       const workerInput = join(work, 'input.json');
       await writeFile(workerInput, json({entry: join(projectRoot, 'src/presentation/composition.tsx'), browser: env.browser,
-        props: voice ? {...plan.compiled, ...(visualLocaleProfile && {visualLocaleProfile}),
-          cues: voice.captionCues.map(({startFrame, endFrame, transcript}, index) =>
-          ({startFrame, endFrame, transcript, lines: captionLines![index]}))} :
-          fileLayout ? {...plan.compiled, hiddenFileLayout: fileLayout} : plan.compiled,
+        props: {...plan.compiled, ...(fileLayout && {hiddenFileLayout: fileLayout}),
+          ...(voice && {...(visualLocaleProfile && {visualLocaleProfile}),
+            cues: voice.captionCues.map(({startFrame, endFrame, transcript}, index) =>
+              ({startFrame, endFrame, transcript, lines: captionLines![index]}))})},
         sampleFrames: samples, geometry: {...GEOMETRY, fps: plan.compiled.timeline.fps},
         ...(extended ? {renderProfile: EXTENDED_RENDER_PROFILE} : {})}), {flag: 'wx'});
       await command(process.execPath, ['--import', 'tsx', join(projectRoot, 'src/short-segment/worker.ts'), workerInput], {
@@ -581,13 +592,21 @@ export async function readPresentation(data: string, id: string, requested: Pres
   if (sha256(plan.files.get('plan-manifest.json')!) !== input.planManifestSha256) fail('Preview parent plan manifest differs.');
   const hidden = plan.compiled.moduleId === 'hidden-file-policy/1' ? plan.compiled : null;
   if ((!!hidden || plan.compiled.moduleId === 'concurrency-queue/1') !== !!input.rendererSha256 ||
-      input.capabilityProfile !== hidden?.capabilityProfile || (hidden && input.mode !== 'silent')) {
+      input.capabilityProfile !== hidden?.capabilityProfile || (hidden && (input.mode === 'narrated') !== !!plan.hiddenVoicePreparationTaskId)) {
     fail('Preview renderer fingerprint or capability differs from its module.');
   }
-  if (hidden?.language === 'zh-CN') checkZhVisualText(await presentationFont(), hidden);
-  if (input.hiddenFileLayoutProfile || input.hiddenFileLayoutSha256) {
-    if (!hidden || input.hiddenFileLayoutProfile !== HIDDEN_FILE_MOBILE_LAYOUT ||
-        input.hiddenFileLayoutSha256 !== sha256(canonical(hiddenFileLayout(await presentationFont(), hidden)))) {
+  if (hidden?.language === 'zh-CN' && input.mode === 'silent') checkZhVisualText(await presentationFont(), hidden);
+  const hiddenNarrated = !!hidden && input.mode === 'narrated';
+  if (input.mode === 'narrated' && hiddenNarrated && input.visualLocaleProfile !== ZH_VISUAL_PROFILE) {
+    fail('Hidden narration requires the Chinese visual profile.');
+  }
+  if (hiddenNarrated || input.hiddenFileLayoutProfile || input.hiddenFileLayoutSha256) {
+    const currentNarratedLayout = input.hiddenFileLayoutProfile === HIDDEN_FILE_NARRATED_LAYOUT;
+    const validProfile = hiddenNarrated
+      ? currentNarratedLayout || input.hiddenFileLayoutProfile === LEGACY_HIDDEN_FILE_NARRATED_LAYOUT
+      : input.hiddenFileLayoutProfile === HIDDEN_FILE_MOBILE_LAYOUT;
+    if (!hidden || !validProfile ||
+        input.hiddenFileLayoutSha256 !== sha256(canonical(hiddenFileLayout(await presentationFont(), hidden, hiddenNarrated, currentNarratedLayout)))) {
       fail('Preview mobile layout differs from the bound hidden-file presentation.');
     }
   }
@@ -596,7 +615,7 @@ export async function readPresentation(data: string, id: string, requested: Pres
       sha256(voice!.files.get('voice-manifest.json')!) !== input.voiceManifestSha256)) fail('Preview voice binding differs.');
   if (input.mode === 'narrated' && input.visualLocaleProfile) {
     if (!input.captionLayoutProfile) fail('The localized preview requires the pinned caption layout.');
-    checkZhVisualText(await presentationFont(), plan.compiled);
+    if (!hidden) checkZhVisualText(await presentationFont(), plan.compiled);
   }
   const captionLines = input.mode === 'narrated' && input.captionLayoutProfile ?
     layoutCaptions(await presentationFont(), voice!.captionCues.map(cue => cue.transcript)) : undefined;

@@ -49,7 +49,12 @@ const HiddenFileRequest = SourcePathsRequestBase.extend({
   schemaVersion: z.literal('explanation-session-request/1.3'),
   capabilityProfile: z.literal(HiddenFileCapability), voiceMode: z.literal('silent'),
 }).superRefine(checkSourcePaths);
-export const Request = z.discriminatedUnion('schemaVersion', [SilentRequest, NarratedRequest, SourcePathsRequest, HiddenFileRequest]);
+const NarratedHiddenFileRequest = SourcePathsRequestBase.extend({
+  schemaVersion: z.literal('explanation-session-request/1.4'), language: z.literal('zh-CN'),
+  capabilityProfile: z.literal(HiddenFileCapability), voiceMode: z.literal('windows-winrt-huihui'),
+}).superRefine(checkSourcePaths);
+export const Request = z.discriminatedUnion('schemaVersion',
+  [SilentRequest, NarratedRequest, SourcePathsRequest, HiddenFileRequest, NarratedHiddenFileRequest]);
 const Citation = z.strictObject({sourceId: z.string().regex(/^source-[1-8]$/), sourceSha256: Hash,
   startLine: z.number().int().min(1).max(200_001), endLine: z.number().int().min(1).max(200_001), quote: boundedText(8_000)});
 const Reason = z.strictObject({detail: boundedText(1_000), citations: z.array(Citation).min(1).max(4)});
@@ -78,6 +83,7 @@ export const NarratedAuthorPacketProfile = 'explanation-author-packet/1.1';
 export const LocalizedNarratedAuthorPacketProfile = 'explanation-author-packet/1.2';
 export const SourcePathsAuthorPacketProfile = 'explanation-author-packet/1.3';
 export const HiddenFileAuthorPacketProfile = 'explanation-author-packet/1.4';
+export const NarratedHiddenFileAuthorPacketProfile = 'explanation-author-packet/1.5';
 export const SourceCaptureProfile = 'github-pinned-git-blob/1.0';
 export const NarratedProfile = 'explanation-session-huihui/1.0';
 export const StartInput = z.union([
@@ -86,6 +92,8 @@ export const StartInput = z.union([
   Protocol.extend({request: SourcePathsRequest, packetProfile: z.literal(SourcePathsAuthorPacketProfile),
     sourceCaptureProfile: z.literal(SourceCaptureProfile)}),
   Protocol.extend({request: HiddenFileRequest, packetProfile: z.literal(HiddenFileAuthorPacketProfile),
+    sourceCaptureProfile: z.literal(SourceCaptureProfile)}),
+  Protocol.extend({request: NarratedHiddenFileRequest, packetProfile: z.literal(NarratedHiddenFileAuthorPacketProfile),
     sourceCaptureProfile: z.literal(SourceCaptureProfile)}),
 ]);
 export const AuthorInput = Protocol.extend({submission: SessionSubmission});
@@ -99,9 +107,15 @@ export const NarratedRenderSpec = z.strictObject({schemaVersion: z.literal('expl
   voicePreparationManifestSha256: Hash, plan: HistoricalPresentationPlan,
   offsets: z.array(z.strictObject({beatId: Id, startOffsetFrames: z.number().int().min(0).max(PRESENTATION_MAX_FRAMES - 1),
     captions: z.array(AuthoredCaption).min(1).max(40).optional()})).min(1).max(20)});
-export const NarratedRenderInput = z.strictObject({...renderFields, profile: z.literal(NarratedProfile),
+export const HiddenNarratedRenderSpec = NarratedRenderSpec.extend({
+  schemaVersion: z.literal('explanation-narrated-render/1.1'), plan: HiddenFilePlan,
+});
+const HistoricalNarratedRenderInput = z.strictObject({...renderFields, profile: z.literal(NarratedProfile),
   voicePreparationTaskId: Hash, voicePreparationManifestSha256: Hash, voiceTaskId: Hash, offsets: NarratedRenderSpec.shape.offsets,
   visualLocaleProfile: z.literal(ZH_VISUAL_PROFILE).optional()});
+export const NarratedRenderInput = z.union([HistoricalNarratedRenderInput, HistoricalNarratedRenderInput.extend({
+  plan: HiddenFilePlan, visualLocaleProfile: z.literal(ZH_VISUAL_PROFILE),
+})]);
 export const StartReceipt = z.strictObject({binding: AuthoringBinding, authoringRequestId: Hash, packetSha256: Hash,
   snapshot: ArtifactSchema});
 export const AuthorReceipt = z.strictObject({startManifestSha256: Hash, proposalHash: Hash.nullable()});

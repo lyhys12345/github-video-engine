@@ -56,7 +56,15 @@ Submit the draft with `explanation proposal`. Use the returned proposal hash, ex
 
 New previews use `hidden-file-mobile-layout/1`. The repository label comes from the pinned binding. Tree and result paths display at 30 px on the 720 px canvas. Long paths wrap without removing characters. Each settled result needs at least 72 frames at 24 fps, with additional time for more lines. If the tree, complete paths or available time cannot fit this layout, revise the authored plan. Existing previews retain their original bytes.
 
-The model covers the POSIX dot-prefix convention in the example. The video and trace identify the synthetic input, unchecked ignore rules, illustrative order and absence of target execution. Symlink traversal, globs, other platform rules and actual command output are outside this profile. This profile provides silent previews and does not support `presentation timing-check`. Use status, resume and receipt export for the resulting checkpoints. Existing session requests and historical unsupported dispositions keep their original scope and bytes.
+The model covers the POSIX dot-prefix convention in the example. The video and trace identify the synthetic input, unchecked ignore rules, illustrative order and absence of target execution. Symlink traversal, globs, other platform rules and actual command output are outside this profile. This request version provides silent previews. Hidden-file plans do not support `presentation timing-check`. Use status, resume and receipt export for the resulting checkpoints. Existing session requests and historical unsupported dispositions keep their original scope and bytes.
+
+## Hidden-file policy with Huihui narration
+
+Start a fresh `explanation-session-request/1.4` with `capabilityProfile: "hidden-file-policy/1.0"`, `language: "zh-CN"`, `voiceMode: "windows-winrt-huihui"`, a full commit and explicit `sourcePaths`. The `explanation-author-packet/1.5` includes the hidden-file proposal and plan schemas and the narrated render schema. Author the two beats in Chinese and submit nested proposal 1.2. The accepted checkpoint enters `awaiting-voice`.
+
+Run `explanation voice-prepare` for the accepted proposal. Use the exact returned manifest SHA-256 and measured per-beat frame minima to author `explanation-narrated-render/1.1`. Supply a Chinese hidden-file plan 1.4 and one explicit offset per beat. Use the same caption ranges and exact transcript rules as the Huihui preview below. The layout reserves space for captions and rejects dense examples that cannot display complete paths above the progress bar. An indented bent-line marker groups wrapped segments with their original result path. The result carries both the local narration and synthetic-example scope, with ignore rules unchecked and order illustrative.
+
+Use `explanation narrated-render`, then `explanation status`, `explanation resume` or `explanation export` as applicable. Hidden-file timing-check remains unsupported. Request 1.3 is the separate silent workflow.
 
 ## Huihui technical preview
 

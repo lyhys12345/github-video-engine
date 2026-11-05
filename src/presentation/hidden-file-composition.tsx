@@ -1,6 +1,6 @@
 import React from 'react';
 import type {CompiledHiddenFiles} from './hidden-file-policy.js';
-import {FILE_PATH_LINE_HEIGHT, FILE_PATH_SIZE, FILE_REPOSITORY_SIZE, FILE_RESULT_WIDTH, FILE_TITLE_SIZE,
+import {FILE_PATH_LINE_HEIGHT, FILE_PATH_SIZE, FILE_REPOSITORY_SIZE, FILE_RESULT_WIDTH, FILE_RESULT_CONTINUATION_WIDTH, FILE_TITLE_SIZE,
   FILE_TREE_INDENT, FILE_TREE_MARKER_WIDTH, FILE_TREE_STATUS_WIDTH,
   type HiddenFileLayout} from './hidden-file-layout.js';
 
@@ -17,6 +17,7 @@ const copy = {
       'prune-hidden-directory': 'Dir skipped', 'unvisited-ancestor': 'Model: unvisited'},
   },
   'zh-CN': {
+    narratedNotice: '本机旁白 · 合成示例 · 未运行目标项目',
     notice: '合成示例 · 未运行目标项目',
     tree: '示例目录',
     default: '默认规则',
@@ -29,11 +30,11 @@ const copy = {
   },
 } as const;
 
-export function hiddenFileNotice(plan: CompiledHiddenFiles) {
-  return copy[plan.language].notice;
+export function hiddenFileNotice(plan: CompiledHiddenFiles, narrated = false) {
+  return narrated ? copy['zh-CN'].narratedNotice : copy[plan.language].notice;
 }
 
-export function validateHiddenFileWidths(plan: CompiledHiddenFiles, layout: HiddenFileLayout) {
+export function validateHiddenFileWidths(plan: CompiledHiddenFiles, layout: HiddenFileLayout, narrated = false) {
   const context = document.createElement('canvas').getContext('2d');
   if (!context) throw new Error('Cannot measure the hidden-file preview with the pinned browser font.');
   const check = (lines: string[], width: number, size: number, weight: number, field: string) => {
@@ -44,11 +45,13 @@ export function validateHiddenFileWidths(plan: CompiledHiddenFiles, layout: Hidd
         Math.ceil(context.measureText(overflow).width) + 'px for ' + width + 'px).');
     }
   };
+  check([hiddenFileNotice(plan, narrated)], 612, 25, 700, 'illustration notice');
   check(layout.repository, 612, FILE_REPOSITORY_SIZE, 700, 'repository');
   for (const title of layout.titles) check(title.lines, 612, FILE_TITLE_SIZE, 800, 'title');
   for (const node of layout.tree) check(node.lines, node.width, FILE_PATH_SIZE, 700, 'tree path');
   for (const result of layout.results) for (const path of result.paths) {
-    check(path.lines, FILE_RESULT_WIDTH, FILE_PATH_SIZE, 700, 'result path');
+    check(path.lines, FILE_RESULT_WIDTH - (layout.markResultContinuation ? FILE_RESULT_CONTINUATION_WIDTH : 0),
+      FILE_PATH_SIZE, 700, 'result path');
   }
   const labels = copy[plan.language];
   check(Object.values(labels.decisions), FILE_TREE_STATUS_WIDTH, 23, 400, 'tree status');
@@ -99,7 +102,13 @@ export function HiddenFilePolicy({plan, frame, layout}: {plan: CompiledHiddenFil
     <div style={{border: '2px solid ' + border, borderRadius: 18, background: '#e8f1eb', padding: '10px 16px'}}>
       <div style={{fontSize: 26, lineHeight: '30px', fontWeight: 800, marginBottom: 6, color: accent}}>{text.result}</div>
       {result ? paths.map((path, index) => <div key={path.id} style={{...pathText, marginTop: index ? 4 : 0}}>
-        {path.lines.map((line, i) => <div key={i}>{line}</div>)}
+        {path.lines.map((line, i) => layout.markResultContinuation && i > 0
+          ? <div key={i} style={{position: 'relative', paddingLeft: FILE_RESULT_CONTINUATION_WIDTH}}>
+            <span aria-hidden="true" style={{position: 'absolute', left: 5, top: 8, width: 13, height: 13,
+              borderLeft: '3px solid ' + accent, borderBottom: '3px solid ' + accent}}/>
+            {line}
+          </div>
+          : <div key={i}>{line}</div>)}
       </div>) :
         <div style={{fontSize: 24}}>{text.pending}</div>}
     </div>

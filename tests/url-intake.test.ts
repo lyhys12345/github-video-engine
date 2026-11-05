@@ -15,7 +15,7 @@ import {checkPresentationTiming} from '../src/presentation/timing-check.js';
 import {HiddenFileCapability} from '../src/contracts/hidden-file-policy.js';
 import {FILE_PATH_SIZE, hiddenFileLayout} from '../src/presentation/hidden-file-layout.js';
 import type {CompiledHiddenFiles} from '../src/presentation/hidden-file-policy.js';
-import {exportExplanation, prepareExplanationVoice, resumeExplanation, startExplanation, statusExplanation, submitExplanation} from '../src/workflow/explanation-session.js';
+import {exportExplanation, prepareExplanationVoice, renderExplanation, resumeExplanation, startExplanation, statusExplanation, submitExplanation} from '../src/workflow/explanation-session.js';
 import {ExplanationAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedRenderSpec, SourceCaptureProfile,
   SourcePathsAuthorPacketProfile, StartInput, Submission} from '../src/workflow/explanation-contract.js';
 import {workflowRoot} from './workflow-support.js';
@@ -98,6 +98,34 @@ it('separates hidden-file authoring, derives pruned descendants, and refuses amb
   await writeSpec(draft);
   const accepted = await submitExplanation(data, started.taskId, spec, signal);
   if (!('stage' in accepted) || accepted.stage !== 'awaiting-plan') throw new Error('Expected accepted hidden-file proposal.');
+  const narratedRequest = {...request, schemaVersion: 'explanation-session-request/1.4',
+    language: 'zh-CN', voiceMode: 'windows-winrt-huihui'};
+  for (const invalid of [
+    {...narratedRequest, schemaVersion: 'explanation-session-request/1.3'},
+    {...narratedRequest, language: 'en-US'},
+    {...narratedRequest, ref: 'HEAD'},
+  ]) {
+    await writeSpec(invalid);
+    await expect(startExplanation(data, spec, join(root, 'invalid'), signal, undefined, transport))
+      .rejects.toMatchObject({code: 'EXPLANATION_SCHEMA'});
+  }
+  await writeSpec(narratedRequest);
+  const narrated = await startExplanation(data, spec, join(root, 'narrated-packet'), signal, undefined, transport);
+  if (!('stage' in narrated) || narrated.stage !== 'awaiting-author') throw new Error('Expected narrated hidden-file start.');
+  expect(narrated.taskId).not.toBe(started.taskId);
+  expect(narrated).toMatchObject({packetProfile: 'explanation-author-packet/1.5'});
+  const readNarratedPacket = async (name: string) => JSON.parse(await readFile(join(narrated.packet.bundle, name), 'utf8'));
+  expect(await readNarratedPacket('narrated-render.schema.json')).toMatchObject({
+    properties: {schemaVersion: {const: 'explanation-narrated-render/1.1'}},
+  });
+  const narratedDraft = await readNarratedPacket(packet.proposalDraft);
+  const {binding, authoringRequestId} = narratedDraft.proposal;
+  await writeSpec({...narratedDraft, proposal: {...draft.proposal, binding, authoringRequestId,
+    beats: draft.proposal.beats.map((beat: object) => ({...beat, purpose: '隐藏文件规则', narration: '旁白示例。'}))}});
+  const acceptedNarration = await submitExplanation(data, narrated.taskId, spec, signal);
+  expect(acceptedNarration).toMatchObject({stage: 'awaiting-voice'});
+  expect(await readPacket('work-package.json')).toEqual(packet);
+
   const plan = {
     schemaVersion: '1.4', kind: 'session-presentation-plan', capabilityProfile: HiddenFileCapability,
     proposalHash: accepted.proposalHash, binding: packet.binding, authoringRequestId: packet.authoringRequestId, authorship: {kind: 'session-agent'},
@@ -111,6 +139,9 @@ it('separates hidden-file authoring, derives pruned descendants, and refuses amb
     beats: ['default', 'include-hidden'].map((mode, index) => ({beatId: mode, frames: 90,
       events: [{kind: 'evaluate-policy', mode, atFrame: 0, motionFrames: 40, claimIds: [claimIds[index]]}]})),
   };
+  await writeSpec(plan);
+  await expect(renderExplanation(data, acceptedNarration.taskId, spec, signal))
+    .rejects.toMatchObject({code: 'EXPLANATION_VOICE_MODE'});
   const submitPlan = async (value: unknown) => {
     await writeSpec(value);
     return workflowCommand(['project', 'presentation-plan'], {data, id: started.binding.projectId, proposal: accepted.proposalHash!, spec}, signal);
@@ -148,13 +179,14 @@ it('separates hidden-file authoring, derives pruned descendants, and refuses amb
   const directory = '.' + 'W'.repeat(20), filename = 'W'.repeat(18), exactPath = directory + '/' + filename;
   fit.module.scenario.entries[1]!.name = directory;
   fit.module.scenario.entries[2]!.name = filename;
-  async function mobileLayout(value: typeof plan) {
+  async function layoutTrace(value: typeof plan) {
     const child = await submitPlan(value);
     if (!('taskId' in child)) throw new Error('Expected a committed layout fixture.');
     const checked = await readPresentation(data, child.taskId, 'plan', signal);
-    return hiddenFileLayout(font, JSON.parse(checked.files!.get('trace.json')!.toString('utf8')) as CompiledHiddenFiles);
+    return JSON.parse(checked.files!.get('trace.json')!.toString('utf8')) as CompiledHiddenFiles;
   }
-  const mobile = await mobileLayout(fit);
+  const fitTrace = await layoutTrace(fit);
+  const mobile = hiddenFileLayout(font, fitTrace);
   expect(FILE_PATH_SIZE).toBeGreaterThanOrEqual(28);
   expect(exactPath).toHaveLength(40);
   expect(mobile.repository.join('')).toBe('example/demo');
@@ -163,6 +195,16 @@ it('separates hidden-file authoring, derives pruned descendants, and refuses amb
   expect(displayed.lines.length).toBeGreaterThan(1);
   expect(displayed.lines.join('')).toBe(exactPath);
   expect(mobile.results[1]!.minimumHoldFrames).toBeGreaterThanOrEqual(72);
+
+  const narratedTrace = structuredClone(fitTrace);
+  narratedTrace.language = 'zh-CN';
+  narratedTrace.beats.forEach(beat => {beat.title = '隐藏项示意';});
+  const continuation = hiddenFileLayout(font, narratedTrace, true, true);
+  const marked = continuation.results[1]!.paths.find(path => path.id === 'inside')!;
+  expect(continuation.markResultContinuation).toBe(true);
+  expect(marked.lines.length).toBeGreaterThan(1);
+  expect(marked.lines.join('')).toBe(exactPath);
+  expect(hiddenFileLayout(font, narratedTrace, true).markResultContinuation).toBeUndefined();
 
   const crowded = structuredClone(fit);
   crowded.module.scenario.entries = [
@@ -175,7 +217,7 @@ it('separates hidden-file authoring, derives pruned descendants, and refuses amb
     {id: 'extra', parentId: null, kind: 'directory', name: 'Z' + 'W'.repeat(20)},
     {id: 'extra-file', parentId: 'extra', kind: 'file', name: filename},
   ];
-  await expect(mobileLayout(crowded)).rejects.toThrow('exceed the mobile display height');
+  await expect(layoutTrace(crowded).then(compiled => hiddenFileLayout(font, compiled))).rejects.toThrow('exceed the mobile display height');
 
   const ref = {beatId: 'default', indexInBeat: 0, sha256: '1'.repeat(64)};
   await writeSpec({schemaVersion: 'presentation-visual-cues/1.0', planTaskId: compiled.taskId,

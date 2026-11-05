@@ -1,0 +1,9 @@
+# Narrated hidden-file policy: verification
+
+Frozen c2 `d5c048b908da3a2183f713b7dd516cd55ce492ce159a962e72ffed28e6a9049d` connects the versioned hidden-file policy capability to explicitly authored zh-CN Huihui explanation sessions. The scene remains a synthetic POSIX-style example; order is illustrative, ignore rules are unchecked, and target repositories are not executed. Caption timing is caller-declared and semantic review, speech accuracy and owner listening remain pending. Hidden-file plans are not yet supported by `timing-check`.
+
+Real source-bound fd and ripgrep previews and a dense layout case were rendered and fully decoded. Independent reviewers reconstructed input WAV/PCM placements, checked exact source references and 262 historical/new exported files, and viewed mobile-sized boundary frames. The first facts review failed the selected rule anchors because they did not demonstrate default behavior; the first visual review found that wrapped paths resembled two separate results. Both original reports are retained. In c2 the selected rule citations were corrected and long paths gained a continuation marker and indentation; the finding judges reviewed the fixes. Real-device readability, continuous viewing, voice naturalness and word alignment were not evaluated. The voice is Windows Huihui, not the owner's preferred Chen.
+
+Frozen evidence and real media remain at `C:/Users/luyuh/Documents/Codex/gve-hidden-huihui-builder/work/hidden-voice/` and `C:/Users/luyuh/Documents/Codex/gve-hidden-huihui-c2/work/hidden-voice/` outside Git. No paid API or target repository execution was used. Raw independent reports are alongside this summary.
+
+Main-workspace `pnpm typecheck` and `pnpm test` passed: 47 Vitest files / 423 tests; mechanism tests 2 passed and 1 real-media test skipped. Some tests use mocks as labelled by the tests.

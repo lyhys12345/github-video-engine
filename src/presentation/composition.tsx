@@ -142,8 +142,8 @@ const Presentation: React.FC<Props> = (plan) => {
     void font.load().then(loaded => {
       document.fonts.add(loaded);
       if (plan.cues) validateCaptionWidths(plan.cues);
-      if (plan.visualLocaleProfile) validateZhWidths(plan);
-      if (plan.moduleId === 'hidden-file-policy/1' && plan.hiddenFileLayout) validateHiddenFileWidths(plan, plan.hiddenFileLayout);
+      if (plan.visualLocaleProfile && plan.moduleId !== 'hidden-file-policy/1') validateZhWidths(plan);
+      if (plan.moduleId === 'hidden-file-policy/1' && plan.hiddenFileLayout) validateHiddenFileWidths(plan, plan.hiddenFileLayout, !!plan.cues);
       setReady(true);
       continueRender(handle);
     }).catch(cancelRender);
@@ -159,7 +159,7 @@ const Presentation: React.FC<Props> = (plan) => {
   const cue = plan.cues?.find(item => frame >= item.startFrame && frame < item.endFrame);
   return <AbsoluteFill style={{fontFamily: 'GVE Presentation, sans-serif', background: '#f3f1e7', color: ink, padding: '54px 54px 45px'}}>
     <div style={{color: '#8c4736', fontSize: localized || hidden ? 25 : 22, ...(hidden ? {lineHeight: '30px'} : {}), fontWeight: 700}}>{plan.moduleId === 'hidden-file-policy/1'
-      ? hiddenFileNotice(plan) : localized ? zh.illustratedNarration :
+      ? hiddenFileNotice(plan, !!plan.cues) : localized ? zh.illustratedNarration :
       plan.cues ? 'Local voice · Illustration · No observed execution' : 'Silent · Illustration · No observed execution'}</div>
     {hidden ? <>
       <div style={{fontSize: FILE_REPOSITORY_SIZE, fontWeight: 700, lineHeight: '31px', whiteSpace: 'pre'}}>

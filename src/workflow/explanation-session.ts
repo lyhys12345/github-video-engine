@@ -20,7 +20,7 @@ import {generateHuihui, huihuiGenerationId, HuihuiSpec} from '../tts/huihui.js';
 import {importHuihuiTts, readLocalTts} from '../tts/runtime.js';
 import {authoringPacket, loadAuthoringProposal, submitParsedAuthoringProposal, verifyProposal} from './agent-authoring.js';
 import {checkDatabaseFiles} from './cli.js';
-import {AuthorInput, AuthorReceipt, ExplanationAuthorPacketProfile, HiddenFileAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedProfile,
+import {AuthorInput, AuthorReceipt, ExplanationAuthorPacketProfile, HiddenFileAuthorPacketProfile, NarratedHiddenFileAuthorPacketProfile, HiddenNarratedRenderSpec, LocalizedNarratedAuthorPacketProfile, NarratedProfile,
   NarratedRenderInput, NarratedRenderReceipt, NarratedRenderSpec, RenderInput, RenderReceipt, Request, StartInput,
   SourceCaptureProfile, SourcePathsAuthorPacketProfile, StartReceipt, SessionSubmission, VoicePrepareInput, VoicePrepareReceipt} from './explanation-contract.js';
 import {explanationAuthorPacket} from './explanation-author-packet.js';
@@ -127,7 +127,7 @@ function packet(id: string, input: StartInput, snapshot: ReturnType<typeof valid
     }
   }
   const workspace = evidenceWorkspace(projectFor(id), sourceFingerprint(snapshot), snapshot);
-  const author = authoringPacket(workspace, input.request.schemaVersion === 'explanation-session-request/1.3'
+  const author = authoringPacket(workspace, 'capabilityProfile' in input.request
     ? input.request.capabilityProfile : undefined);
   author.files.set('session-request.json', json({sessionTaskId: id, request: input.request, ...author.request}));
   if (input.packetProfile) explanationAuthorPacket(id, input, author);
@@ -158,7 +158,7 @@ async function verifiedStart(data: string, task: TaskRecord, signal: AbortSignal
 function validateSubmission(submission: SessionSubmission, parent: Awaited<ReturnType<typeof verifiedStart>>) {
   const {manifest, workspace} = parent;
   const request = manifest.request;
-  const hidden = request.schemaVersion === 'explanation-session-request/1.3' ? request : null;
+  const hidden = 'capabilityProfile' in request ? request : null;
   if (hidden ? submission.schemaVersion !== 'explanation-session-author/1.1' || submission.capabilityProfile !== hidden.capabilityProfile
     : submission.schemaVersion !== 'explanation-session-author/1.0') {
     return fail('BINDING', 'Use the submission profile supplied by the exact start checkpoint.');
@@ -239,7 +239,7 @@ function checkPlan(author: VerifiedAuthor, plan: PresentationPlan) {
       plan.authorship.kind !== 'session-agent') return fail('BINDING', 'Rendering requires the accepted exact proposal and session-agent plan.');
   if (plan.schemaVersion === '1.2') return fail('SCHEMA', 'Use queue plan 1.3 for new sessions.');
   const request = author.manifest.request;
-  if (request.schemaVersion === 'explanation-session-request/1.3'
+  if ('capabilityProfile' in request
     ? plan.schemaVersion !== '1.4' || plan.capabilityProfile !== request.capabilityProfile || plan.module.language !== request.language
     : plan.schemaVersion === '1.4') {
     return fail('BINDING', 'The presentation plan must use the start checkpoint’s capability and requested language.');
@@ -254,7 +254,12 @@ function checkPlan(author: VerifiedAuthor, plan: PresentationPlan) {
 async function verifiedPlan(data: string, author: VerifiedAuthor, input: RenderInput | NarratedRenderInput, signal: AbortSignal) {
   checkPlan(author, input.plan);
   const result = await readPresentation(data, input.planTaskId, 'plan', signal);
-  if (!result.files || !result.files.get('presentation.json')?.equals(json(input.plan)) ||
+  const manifest = result.files && parse(z.object({hiddenVoicePreparationTaskId: Hash.optional()}),
+    decode(result.files.get('plan-manifest.json')!));
+  const hiddenVoicePreparationTaskId = input.plan.schemaVersion === '1.4' && 'voicePreparationTaskId' in input
+    ? input.voicePreparationTaskId : undefined;
+  if (!result.files || manifest?.hiddenVoicePreparationTaskId !== hiddenVoicePreparationTaskId ||
+      !result.files.get('presentation.json')?.equals(json(input.plan)) ||
       sha256(result.files.get('plan-manifest.json')!) !== input.planManifestSha256) {
     return fail('INTEGRITY', 'Child plan differs from the exact authored plan or its committed manifest.');
   }
@@ -585,9 +590,10 @@ export async function statusExplanation(data: string, id: string, signal: AbortS
 export async function startExplanation(data: string, path: string, out: string, signal: AbortSignal, onTask?: Announce,
   transport?: ReadonlyTransport) {
   const request = await spec(Request, path, 12_000);
-  const input = StartInput.parse(request.schemaVersion === 'explanation-session-request/1.2' || request.schemaVersion === 'explanation-session-request/1.3'
+  const input = StartInput.parse('sourcePaths' in request
     ? {profile: PROFILE, request, sourceCaptureProfile: SourceCaptureProfile,
-      packetProfile: request.schemaVersion === 'explanation-session-request/1.3' ? HiddenFileAuthorPacketProfile : SourcePathsAuthorPacketProfile}
+      packetProfile: request.schemaVersion === 'explanation-session-request/1.4' ? NarratedHiddenFileAuthorPacketProfile :
+        request.schemaVersion === 'explanation-session-request/1.3' ? HiddenFileAuthorPacketProfile : SourcePathsAuthorPacketProfile}
     : {profile: PROFILE, request,
       packetProfile: request.voiceMode === 'silent' ? ExplanationAuthorPacketProfile : LocalizedNarratedAuthorPacketProfile});
   const status = await executeStart(data, input, signal, onTask, transport);
@@ -626,15 +632,18 @@ export async function prepareExplanationVoice(data: string, id: string, signal: 
 }
 
 export async function renderNarratedExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce) {
-  const {plan, offsets, voicePreparationManifestSha256} = await spec(NarratedRenderSpec, path, 170_000);
+  const {schemaVersion, plan, offsets, voicePreparationManifestSha256} = await spec(z.union([NarratedRenderSpec, HiddenNarratedRenderSpec]), path, 170_000);
   const voice = await verifiedVoicePreparation(data, await readTask(data, id, PREPARE_VOICE), signal);
   if (voicePreparationManifestSha256 !== sha256(json(voice.manifest))) {
     return fail('BINDING', 'Select the exact voice preparation manifest.');
   }
+  if ((schemaVersion === 'explanation-narrated-render/1.1') !== (voice.author.manifest.request.schemaVersion === 'explanation-session-request/1.4')) {
+    return fail('BINDING', 'The narrated render specification must match the voice session profile.');
+  }
   checkPlan(voice.author, plan);
   data = await preflightPresentationState(data);
   const created = await withWorkflow(data, false, store => createPresentationFromPlan(store, voice.manifest.binding.projectId,
-    plan.proposalHash, plan, data, signal));
+    plan.proposalHash, plan, data, signal, plan.schemaVersion === '1.4' ? id : undefined));
   const verified = await readPresentation(data, created.taskId, 'plan', signal);
   if (!verified.files) return fail('NOT_READY', 'Child plan has no completed output.');
   const base = {profile: NarratedProfile, authorTaskId: voice.manifest.authorTaskId, voicePreparationTaskId: id,

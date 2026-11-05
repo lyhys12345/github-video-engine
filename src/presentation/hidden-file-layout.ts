@@ -4,6 +4,8 @@ import {CAPTION_FONT_SIZE} from './caption-layout-style.js';
 import type {CompiledHiddenFiles} from './hidden-file-policy.js';
 
 export const HIDDEN_FILE_MOBILE_LAYOUT = 'hidden-file-mobile-layout/1';
+export const LEGACY_HIDDEN_FILE_NARRATED_LAYOUT = 'hidden-file-narrated-layout/1';
+export const HIDDEN_FILE_NARRATED_LAYOUT = 'hidden-file-narrated-layout/2';
 export const FILE_PATH_SIZE = 30;
 export const FILE_PATH_LINE_HEIGHT = 36;
 export const FILE_TREE_STATUS_WIDTH = 190;
@@ -13,11 +15,14 @@ export const FILE_REPOSITORY_SIZE = 26;
 export const FILE_TITLE_SIZE = 42;
 const NAME_WIDTH = 360;
 export const FILE_RESULT_WIDTH = 576;
+export const FILE_RESULT_CONTINUATION_WIDTH = 28;
 const PANEL_FIXED_HEIGHT = 240;
 const MAX_CONTENT_HEIGHT = 860;
+// The longest header ends at y=256. Reserve a gap before the narrated progress bar at y=1104.
+const MAX_NARRATED_CONTENT_HEIGHT = 824;
 const fail = (message: string): never => {throw new EngineError('PRESENTATION_HIDDEN_FILE_LAYOUT', message);};
 
-export function hiddenFileLayout(font: Buffer, plan: CompiledHiddenFiles) {
+export function hiddenFileLayout(font: Buffer, plan: CompiledHiddenFiles, narrated = false, markResultContinuation = false) {
   const advance = fontMetrics(font, fail);
   function lines(text: string, width: number, size: number, boundary = '/') {
     const characters = [...text];
@@ -45,6 +50,9 @@ export function hiddenFileLayout(font: Buffer, plan: CompiledHiddenFiles) {
   const repository = lines(new URL(plan.binding.repository).pathname.slice(1), 612, FILE_REPOSITORY_SIZE);
   if (repository.length > 2) return fail('The full repository label exceeds two lines.');
   const titles = plan.beats.map(beat => {
+    if (narrated && (!/\p{Script=Han}/u.test(beat.title) || /[\p{C}\p{Zl}\p{Zp}]/u.test(beat.title))) {
+      return fail('Beat ' + beat.id + ' needs a Chinese title for its narrated preview.');
+    }
     const title = lines(beat.title, 612, FILE_TITLE_SIZE, ' ');
     if (title.length > 2) return fail('Beat ' + beat.id + ' title exceeds two lines. Shorten it to keep paths readable.');
     return {beatId: beat.id, lines: title};
@@ -59,11 +67,11 @@ export function hiddenFileLayout(font: Buffer, plan: CompiledHiddenFiles) {
   const results = plan.trace.map(event => {
     const paths = event.model.resultIds.map(id => {
       const path = plan.nodes.find(node => node.id === id)!.path;
-      return {id, lines: lines(path, FILE_RESULT_WIDTH, FILE_PATH_SIZE)};
+      return {id, lines: lines(path, FILE_RESULT_WIDTH - (markResultContinuation ? FILE_RESULT_CONTINUATION_WIDTH : 0), FILE_PATH_SIZE)};
     });
     const lineCount = paths.reduce((sum, path) => sum + path.lines.length, 0);
     const contentHeight = PANEL_FIXED_HEIGHT + treeHeight + lineCount * FILE_PATH_LINE_HEIGHT + (paths.length - 1) * 4;
-    if (contentHeight > MAX_CONTENT_HEIGHT) {
+    if (contentHeight > (narrated ? MAX_NARRATED_CONTENT_HEIGHT : MAX_CONTENT_HEIGHT)) {
       return fail('The complete paths and status column exceed the mobile display height. Use fewer entries or shorter names.');
     }
     const minimumHoldFrames = Math.max(72, 36 + 12 * lineCount);
@@ -73,7 +81,7 @@ export function hiddenFileLayout(font: Buffer, plan: CompiledHiddenFiles) {
     }
     return {beatId: beat.id, paths, minimumHoldFrames, contentHeight};
   });
-  return {repository, titles, tree, results};
+  return {repository, titles, tree, results, ...(markResultContinuation && {markResultContinuation: true})};
 }
 
 export type HiddenFileLayout = ReturnType<typeof hiddenFileLayout>;

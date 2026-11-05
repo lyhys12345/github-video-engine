@@ -2,13 +2,13 @@ import {z} from 'zod';
 import {authoringDraft, type authoringPacket} from './agent-authoring.js';
 import {HiddenFileStoryProposal} from '../contracts/authoring.js';
 import {HiddenFilePlan} from '../contracts/presentation.js';
-import {HiddenFileSubmission, LocalizedNarratedAuthorPacketProfile, NarratedRenderSpec, Submission, type StartInput} from './explanation-contract.js';
+import {HiddenNarratedRenderSpec, HiddenFileSubmission, LocalizedNarratedAuthorPacketProfile, NarratedRenderSpec, Submission, type StartInput} from './explanation-contract.js';
 
 const json = (value: unknown) => Buffer.from(JSON.stringify(value, null, 2) + '\n');
 
 export function explanationAuthorPacket(sessionTaskId: string, input: StartInput, author: ReturnType<typeof authoringPacket>) {
   const {request, packetProfile} = input;
-  const hidden = request.schemaVersion === 'explanation-session-request/1.3' ? request : null;
+  const hidden = 'capabilityProfile' in request ? request : null;
   const {authoringRequestId, binding} = author.request;
   const envelope = {schemaVersion: hidden ? 'explanation-session-author/1.1' : 'explanation-session-author/1.0', sessionTaskId,
     ...(hidden ? {capabilityProfile: hidden.capabilityProfile} : {}),
@@ -33,7 +33,9 @@ export function explanationAuthorPacket(sessionTaskId: string, input: StartInput
       hidden
         ? 'Complete nested proposal 1.2. Link each hidden-file rule to an exact documented citation in the selected sourcePaths. Use two illustrative beats for the default policy and the --hidden policy.'
         : 'For proposal, complete the nested proposal using the requested audience and language. Describe the documented inputs, process and outputs with exact citations. Identify inferences and illustrative depictions. Use nested proposal 1.1 for concurrency-queue and 1.0 for HTTP or image-mask.',
-      hidden
+      hidden && request.voiceMode === 'windows-winrt-huihui'
+        ? 'On awaiting-voice, run pnpm gve explanation voice-prepare --task <AUTHOR_TASK_ID> --data "<STATE>". Author plan 1.4 with a synthetic tree, measured clip offsets, and exact caption ranges if needed. Use narrated render 1.1. The model shows POSIX dot-prefix names, with ignore rules unchecked and example output order.'
+        : hidden
         ? 'On awaiting-plan, use the returned proposalHash and exact source binding in presentation plan 1.4. Declare an original synthetic directory tree. Match the plan language to this request. The model shows POSIX dot-prefix names, with ignore rules unchecked and example output order.'
         : request.voiceMode === 'silent'
         ? 'The available presentation modules cover bounded HTTP, image-mask and concurrency-queue operations. A proposal submission verifies structure and provenance. On awaiting-plan, use the returned proposalHash and the original source binding in a separately authored session-presentation-plan.'
@@ -69,6 +71,6 @@ export function explanationAuthorPacket(sessionTaskId: string, input: StartInput
     reason: {code: 'insufficient-pinned-evidence', detail: '', citations: []}}));
   author.files.set('work-package.json', json(workPackage));
   if (request.voiceMode === 'windows-winrt-huihui') {
-    author.files.set('narrated-render.schema.json', json(z.toJSONSchema(NarratedRenderSpec)));
+    author.files.set('narrated-render.schema.json', json(z.toJSONSchema(hidden ? HiddenNarratedRenderSpec : NarratedRenderSpec)));
   }
 }
