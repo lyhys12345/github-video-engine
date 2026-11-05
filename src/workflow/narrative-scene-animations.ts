@@ -1,3 +1,4 @@
+import {deriveNarrativeSceneStory} from './narrative-scene-evidence.js';
 import {MultiInputAnimationSchema} from '../story-planner/multi-input-operation.js';
 import {z} from 'zod';
 import {AnimationSchema,LegacyAnimationSchema,IndependentAnimationSchema,compileAnimation} from '../story-planner/animation.js';
@@ -13,15 +14,15 @@ const SceneAnimation=z.discriminatedUnion('profile',[
 export const NarrativeSceneAnimations=z.strictObject({schemaVersion:z.literal('narrative-scene-animations/1.0'),storyId:Id,scenes:z.array(SceneAnimation).min(2).max(40)});
 export const NarrativeRunAnimation=z.union([AnimationSchema,NarrativeSceneAnimations]);
 /** Normalize only trusted versioned data; each scene still compiles against its exact source Story. */
-export function prepareNarrativeSceneAnimations(story:any,plan:any,raw:unknown){
+export function prepareNarrativeSceneAnimations(story:any,plan:any,raw:unknown,evidenceOverrides:Parameters<typeof deriveNarrativeSceneStory>[2]=new Map()){
  const parsed=NarrativeRunAnimation.parse(raw),supported=plan.scenes.filter((s:any)=>s.execution?.kind==='supported-story'),out=new Map<string,{profile:string;animation:z.infer<typeof AnimationSchema>}>();
  if(parsed.storyId!==story.id)throw Error('Scene animation Story identity differs');
  if(parsed.schemaVersion==='narrative-scene-animations/1.0'){
   if(canonical(parsed.scenes.map(s=>s.sceneId))!==canonical(supported.map((s:any)=>s.id)))throw Error('Scene animation profiles must cover every supported scene exactly once in narrative order; gaps have no animation');
-  for(const scene of supported){const entry=parsed.scenes.find(s=>s.sceneId===scene.id)!;if(entry.animation.storyId!==story.id||canonical(entry.animation.shots.map(s=>s.shotId))!==canonical(scene.execution.shotIds))throw Error('Scene animation must bind its exact ordered source shots, without cross-scene shots');const derived={...story,shots:scene.execution.shotIds.map((id:string)=>story.shots.find((s:any)=>s.id===id))};compileAnimation(derived,entry.animation);if(['causal-operation/1.0','multi-input-operation/1.0'].includes(entry.profile)&&scene.visualContext)throw Error('Native causal scene must not carry a separate context overlay');out.set(scene.id,{profile:entry.profile,animation:entry.animation});}
+  for(const scene of supported){const entry=parsed.scenes.find(s=>s.sceneId===scene.id)!;if(entry.animation.storyId!==story.id||canonical(entry.animation.shots.map(s=>s.shotId))!==canonical(scene.execution.shotIds))throw Error('Scene animation must bind its exact ordered source shots, without cross-scene shots');const derived=deriveNarrativeSceneStory(story,scene,evidenceOverrides,false);compileAnimation(derived,entry.animation);if(['causal-operation/1.0','multi-input-operation/1.0'].includes(entry.profile)&&scene.visualContext)throw Error('Native causal scene must not carry a separate context overlay');out.set(scene.id,{profile:entry.profile,animation:entry.animation});}
  }else{
   compileAnimation(story,parsed);
-  for(const scene of supported){const animation={...parsed,shots:parsed.shots.filter(s=>scene.execution.shotIds.includes(s.shotId))} as z.infer<typeof AnimationSchema>;out.set(scene.id,{profile:parsed.schemaVersion==='1.3'?'multi-input-operation/1.0':parsed.schemaVersion==='1.2'?'causal-operation/1.0':parsed.schemaVersion==='1.1'?'independent-flow/1.0':'legacy-animation/1.0',animation});}
+  for(const scene of supported){const animation={...parsed,shots:parsed.shots.filter(s=>scene.execution.shotIds.includes(s.shotId))} as z.infer<typeof AnimationSchema>;if(evidenceOverrides.size)compileAnimation(deriveNarrativeSceneStory(story,scene,evidenceOverrides,false),animation);out.set(scene.id,{profile:parsed.schemaVersion==='1.3'?'multi-input-operation/1.0':parsed.schemaVersion==='1.2'?'causal-operation/1.0':parsed.schemaVersion==='1.1'?'independent-flow/1.0':'legacy-animation/1.0',animation});}
  }
  return out;
 }

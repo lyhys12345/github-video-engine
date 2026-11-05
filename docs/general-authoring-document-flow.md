@@ -27,3 +27,5 @@ For a source-backed single-input/tool/output continuous operation view, see [cau
 For explicit legacy/independent/causal animation choices within one complete unified run, see [per-scene profiles](mixed-scene-animation-run-v1.md). All scenes, whole recordings and source checks remain required; profile selection is Agent-authored data and cannot invent support.
 
 For an explicit source-bound image+mask or ordered-two-page join, see [two-input operation v1](multi-input-operation-animation-v1.md). Both input connections and independent output need real source claims; object/claim binding is not semantic or pixel correctness approval.
+
+For mixed evidence families in one complete run, see [scene evidence overrides](scene-evidence-portable-long-v1.md). The run-only envelope changes evidence for an existing scene using exact same-source/base-claim subsets; it cannot promote gaps or change the original shots/timing.
