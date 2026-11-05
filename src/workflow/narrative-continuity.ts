@@ -26,6 +26,7 @@ const fail=(message:string):never=>{throw new EngineError('NARRATIVE_CONTINUITY'
 function parsed<T>(schema:z.ZodType<T>,raw:unknown){const p=schema.safeParse(raw);if(!p.success)return fail(p.error.message);return p.data;}
 function decode(bytes:Buffer):unknown{try{return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));}catch{return fail('Expected UTF-8 JSON.');}}
 export function validateSourceClockBridge(bridge:z.infer<typeof Bridge>,left:any,right:any,child:any){
+ if(canonical(left?.visualContext??null)!==canonical(right?.visualContext??null))fail('Different authored visual contexts require a reset; source-clock merging cannot hide a scene context.');
  if(left?.kind!=='story-slice'||right?.kind!=='story-slice'||left.sceneId!==bridge.fromSceneId||right.sceneId!==bridge.toSceneId||left.previewTaskId!==right.previewTaskId||left.previewTaskId!==bridge.previewTaskId||left.sourceEndFrame!==right.sourceStartFrame||right.sourceStartFrame!==bridge.sourceBoundaryFrame)fail('Only adjacent half-open ranges of the same verified source child may continue.');
  if(child.input.renderStateProfile!==AUDIENCE_RENDER_STATE_PROFILE||!child.props.audience)fail('Source must have been rendered with the shared audience render-state profile.');
  const b=bridge.sourceBoundaryFrame,states=[b-2,b-1,b,b+1].map(f=>audienceRenderState(child.props.audience,f)),hashes=states.map(s=>sha256(json(s)));
