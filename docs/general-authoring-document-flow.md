@@ -29,3 +29,5 @@ For explicit legacy/independent/causal animation choices within one complete uni
 For an explicit source-bound image+mask or ordered-two-page join, see [two-input operation v1](multi-input-operation-animation-v1.md). Both input connections and independent output need real source claims; object/claim binding is not semantic or pixel correctness approval.
 
 For mixed evidence families in one complete run, see [scene evidence overrides](scene-evidence-portable-long-v1.md). The run-only envelope changes evidence for an existing scene using exact same-source/base-claim subsets; it cannot promote gaps or change the original shots/timing.
+
+For evidence-bound object/camera emphasis without repeating an overview in each scene, see [source-bound scene focus](source-bound-scene-focus-v1.md). This is a versioned authored illustration, never target execution or semantic approval.

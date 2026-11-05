@@ -1,4 +1,4 @@
-import {MultiInputAnimationSchema,compileMultiInputAnimation,sampleMultiInputOperation} from './multi-input-operation.js';
+import {MultiInputAnimationSchema,FocusMultiInputAnimationSchema,compileMultiInputAnimation,sampleMultiInputOperation} from './multi-input-operation.js';
 import {CausalAnimationSchema,compileCausalAnimation,sampleCausalOperation} from './causal-operation.js';
 import {z} from 'zod';
 import {compileStory} from './compile.js';
@@ -8,7 +8,7 @@ export type IndependentFlowLane={id:string;label:string;operationIds:string[];ob
 const ruleEffect=z.object({inputLabel:z.string().min(1).max(80),outputLabel:z.string().min(1).max(80),effect:z.enum(['speed','opacity']),from:z.number().finite(),to:z.number().finite(),unit:z.string().max(20)}).strict().superRefine((r,c)=>{if(r.effect==='opacity'&&[r.from,r.to].some(n=>n<0||n>1))c.addIssue({code:'custom',message:'Opacity range must be 0..1'});if(r.effect==='speed'&&[r.from,r.to].some(n=>n<0||n>10))c.addIssue({code:'custom',message:'Speed range must be 0..10'});});
 export const LegacyAnimationSchema=z.object({schemaVersion:z.literal('1.0'),storyId:id,shots:z.array(z.object({shotId:id,objects:z.array(z.object({id,label:z.string().min(1).max(200),visual:z.enum(['code','agent','scene','mask','cutout','runner','gauge','request','route','response']).optional(),kind:z.enum(['document','actor','image','state'])}).strict()).min(1).max(30),actions:z.array(z.object({kind:z.enum(['reveal','transfer','transform','compare','emphasize','rule-build','mask-apply']),target:id,source:id.optional(),operand:id.optional(),rule:ruleEffect.optional(),destinationX:z.number().min(0).max(1).optional(),start:z.number().min(0).max(1),end:z.number().min(0).max(1),claimIds:z.array(id).min(1)}).strict()).min(1).max(50)}).strict()).min(1).max(100)}).strict();
 export const IndependentAnimationSchema=z.strictObject({schemaVersion:z.literal('1.1'),storyId:id,shots:z.array(z.strictObject({shotId:id,flows:z.array(z.strictObject({flowId:id,steps:z.array(z.strictObject({operationId:id,start:z.number().min(0).max(1),end:z.number().min(0).max(1)})).min(1).max(4)})).min(1).max(4)})).min(1).max(100)});
-export const AnimationSchema=z.discriminatedUnion('schemaVersion',[LegacyAnimationSchema,IndependentAnimationSchema,CausalAnimationSchema,MultiInputAnimationSchema]);
+export const AnimationSchema=z.discriminatedUnion('schemaVersion',[LegacyAnimationSchema,IndependentAnimationSchema,CausalAnimationSchema,MultiInputAnimationSchema,FocusMultiInputAnimationSchema]);
 function compileIndependentAnimation(rawStory:unknown,animation:z.infer<typeof IndependentAnimationSchema>){
  const raw=StorySchema.parse(rawStory),timeline=compileStory(raw),graph=raw.evidence;
  if(graph.schemaVersion!=='1.2'||animation.storyId!==raw.id)throw new Error('Independent animation requires the exact independent evidence1.2 Story');
@@ -40,7 +40,7 @@ function compileIndependentAnimation(rawStory:unknown,animation:z.infer<typeof I
 export function compileAnimation(rawStory:unknown,rawAnimation:unknown){
  const story=compileStory(rawStory),animation=AnimationSchema.parse(rawAnimation);
  const input=rawStory as {id:string;evidence:any};
- if(animation.schemaVersion==='1.3')return compileMultiInputAnimation(rawStory,animation);
+ if((animation.schemaVersion==='1.3'||animation.schemaVersion==='1.4'))return compileMultiInputAnimation(rawStory,animation);
  if(input.evidence.schemaVersion==='1.3')throw new Error('Multi-input evidence requires animation1.3; cannot bypass connection binding');
  if(animation.schemaVersion==='1.2')return compileCausalAnimation(rawStory,animation);
  if(animation.schemaVersion==='1.1')return compileIndependentAnimation(rawStory,animation);
