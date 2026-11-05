@@ -20,9 +20,9 @@ import {generateHuihui, huihuiGenerationId, HuihuiSpec} from '../tts/huihui.js';
 import {importHuihuiTts, readLocalTts} from '../tts/runtime.js';
 import {authoringPacket, loadAuthoringProposal, submitParsedAuthoringProposal, verifyProposal} from './agent-authoring.js';
 import {checkDatabaseFiles} from './cli.js';
-import {AuthorInput, AuthorReceipt, ExplanationAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedProfile,
+import {AuthorInput, AuthorReceipt, ExplanationAuthorPacketProfile, HiddenFileAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedProfile,
   NarratedRenderInput, NarratedRenderReceipt, NarratedRenderSpec, RenderInput, RenderReceipt, Request, StartInput,
-  SourceCaptureProfile, SourcePathsAuthorPacketProfile, StartReceipt, Submission, VoicePrepareInput, VoicePrepareReceipt} from './explanation-contract.js';
+  SourceCaptureProfile, SourcePathsAuthorPacketProfile, StartReceipt, SessionSubmission, VoicePrepareInput, VoicePrepareReceipt} from './explanation-contract.js';
 import {explanationAuthorPacket} from './explanation-author-packet.js';
 import {evidenceWorkspace} from './project-evidence.js';
 import {sourceFingerprint, validateSnapshot, WorkflowStore} from './store.js';
@@ -127,7 +127,8 @@ function packet(id: string, input: StartInput, snapshot: ReturnType<typeof valid
     }
   }
   const workspace = evidenceWorkspace(projectFor(id), sourceFingerprint(snapshot), snapshot);
-  const author = authoringPacket(workspace);
+  const author = authoringPacket(workspace, input.request.schemaVersion === 'explanation-session-request/1.3'
+    ? input.request.capabilityProfile : undefined);
   author.files.set('session-request.json', json({sessionTaskId: id, request: input.request, ...author.request}));
   if (input.packetProfile) explanationAuthorPacket(id, input, author);
   return {workspace, author, packetSha256: digestFiles(author.files)};
@@ -154,8 +155,14 @@ async function verifiedStart(data: string, task: TaskRecord, signal: AbortSignal
   return {manifest, files, snapshot, workspace: material.workspace, input};
 }
 
-function validateSubmission(submission: Submission, parent: Awaited<ReturnType<typeof verifiedStart>>) {
+function validateSubmission(submission: SessionSubmission, parent: Awaited<ReturnType<typeof verifiedStart>>) {
   const {manifest, workspace} = parent;
+  const request = manifest.request;
+  const hidden = request.schemaVersion === 'explanation-session-request/1.3' ? request : null;
+  if (hidden ? submission.schemaVersion !== 'explanation-session-author/1.1' || submission.capabilityProfile !== hidden.capabilityProfile
+    : submission.schemaVersion !== 'explanation-session-author/1.0') {
+    return fail('BINDING', 'Use the submission profile supplied by the exact start checkpoint.');
+  }
   if (submission.sessionTaskId !== manifest.taskId || submission.snapshotHash !== manifest.binding.snapshotHash ||
       submission.authoringRequestId !== manifest.authoringRequestId || submission.language !== manifest.request.language) {
     return fail('BINDING', 'Submission differs from the pinned authoring request or language.');
@@ -166,6 +173,17 @@ function validateSubmission(submission: Submission, parent: Awaited<ReturnType<t
       return fail('AUTHORSHIP', 'Proposal must declare session-agent authorship and the exact requested audience.');
     }
     verifyProposal(submission.proposal, workspace);
+    if (hidden && submission.proposal.schemaVersion === '1.2') {
+      const captured = new Set(workspace.manifest.documents.filter(row => hidden.sourcePaths.includes(row.repositoryPath)).map(row => row.sourceId));
+      const mechanism = submission.proposal.mechanisms[0];
+      for (const rule of Object.values(mechanism.rules)) {
+        const claim = submission.proposal.claims.find(row => row.id === rule.claimId);
+        const citation = claim?.citations[rule.citationIndex];
+        if (claim?.basis.kind !== 'documented' || !citation || !captured.has(citation.sourceId) || !mechanism.claimIds.includes(rule.claimId)) {
+          return fail('CITATION', 'Each hidden-file rule must cite an exact documented line in a selected sourcePaths file.');
+        }
+      }
+    }
     if (json(submission.proposal).length > 300_000) return fail('LIMIT', 'Session proposals are limited to 300 kB.');
   }
   if ('reason' in submission) for (const item of submission.reason.citations) {
@@ -216,10 +234,16 @@ async function verifiedAuthor(data: string, task: TaskRecord, signal: AbortSigna
 
 type VerifiedAuthor = Awaited<ReturnType<typeof verifiedAuthor>>;
 
-function checkPlan(author: VerifiedAuthor, plan: RenderInput['plan']) {
+function checkPlan(author: VerifiedAuthor, plan: PresentationPlan) {
   if (author.submission.disposition !== 'proposal' || plan.proposalHash !== author.manifest.proposalHash ||
       plan.authorship.kind !== 'session-agent') return fail('BINDING', 'Rendering requires the accepted exact proposal and session-agent plan.');
   if (plan.schemaVersion === '1.2') return fail('SCHEMA', 'Use queue plan 1.3 for new sessions.');
+  const request = author.manifest.request;
+  if (request.schemaVersion === 'explanation-session-request/1.3'
+    ? plan.schemaVersion !== '1.4' || plan.capabilityProfile !== request.capabilityProfile || plan.module.language !== request.language
+    : plan.schemaVersion === '1.4') {
+    return fail('BINDING', 'The presentation plan must use the start checkpoint’s capability and requested language.');
+  }
   const compiled = compilePresentation(author.submission.proposal, plan);
   if (compiled.timeline.totalFrames > author.manifest.request.maxSeconds * PRESENTATION_FPS) {
     return fail('DURATION', 'Compiled timeline exceeds the requested maximum frame count.');
@@ -561,8 +585,9 @@ export async function statusExplanation(data: string, id: string, signal: AbortS
 export async function startExplanation(data: string, path: string, out: string, signal: AbortSignal, onTask?: Announce,
   transport?: ReadonlyTransport) {
   const request = await spec(Request, path, 12_000);
-  const input = StartInput.parse(request.schemaVersion === 'explanation-session-request/1.2'
-    ? {profile: PROFILE, request, packetProfile: SourcePathsAuthorPacketProfile, sourceCaptureProfile: SourceCaptureProfile}
+  const input = StartInput.parse(request.schemaVersion === 'explanation-session-request/1.2' || request.schemaVersion === 'explanation-session-request/1.3'
+    ? {profile: PROFILE, request, sourceCaptureProfile: SourceCaptureProfile,
+      packetProfile: request.schemaVersion === 'explanation-session-request/1.3' ? HiddenFileAuthorPacketProfile : SourcePathsAuthorPacketProfile}
     : {profile: PROFILE, request,
       packetProfile: request.voiceMode === 'silent' ? ExplanationAuthorPacketProfile : LocalizedNarratedAuthorPacketProfile});
   const status = await executeStart(data, input, signal, onTask, transport);
@@ -570,7 +595,7 @@ export async function startExplanation(data: string, path: string, out: string, 
 }
 
 export async function submitExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce) {
-  const submission = await spec(Submission, path, 360_000);
+  const submission = await spec(SessionSubmission, path, 360_000);
   if (submission.sessionTaskId !== id) return fail('BINDING', 'Submission must name the exact start task.');
   return executeAuthor(data, AuthorInput.parse({profile: PROFILE, submission}), signal, onTask);
 }
@@ -586,6 +611,7 @@ export async function renderExplanation(data: string, id: string, path: string, 
   const verified = await readPresentation(data, created.taskId, 'plan', signal);
   if (!verified.files) return fail('NOT_READY', 'Child plan has no completed output.');
   const input = RenderInput.parse({profile: PROFILE, authorTaskId: id, plan, planTaskId: created.taskId,
+    ...(plan.schemaVersion === '1.4' ? {capabilityProfile: plan.capabilityProfile} : {}),
     planManifestSha256: sha256(verified.files.get('plan-manifest.json')!), rendererEnvironment: await environment()});
   return executeRender(data, input, signal, onTask);
 }

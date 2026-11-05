@@ -33,6 +33,7 @@ export function zhTextSlots(plan: CompiledPresentation): TextSlot[] {
   const slot = (field: string, text: string, size: number, width: number, weight: number, authored = true): TextSlot =>
     ({field, text, size, width, weight, authored});
   const titles = plan.beats.map(beat => slot('beat ' + beat.id + ' title', beat.title, ZH_TITLE_SIZE, 612, 800));
+  if (plan.moduleId === 'hidden-file-policy/1') return titles;
   const header = slot('illustration notice', zh.illustratedNarration, 25, 612, 700, false);
   if (plan.moduleId === 'concurrency-queue/1') {
     const queue = (field: string, value: string, count: string) => slot(field, value + ' · ' + count, 22, 180, 700);

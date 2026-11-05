@@ -3,6 +3,8 @@ import {AbsoluteFill, Composition, cancelRender, continueRender, delayRender, re
 import {CAPTION_FONT_SIZE, CAPTION_FONT_WEIGHT, CAPTION_TEXT_WIDTH, type CaptionLine} from './caption-layout-style.js';
 import type {CompiledLegacy, CompiledPresentation} from './compile.js';
 import {ConcurrencyQueue} from './queue-composition.js';
+import {HiddenFilePolicy, hiddenFileNotice, validateHiddenFileWidths} from './hidden-file-composition.js';
+import {FILE_REPOSITORY_SIZE, FILE_TITLE_SIZE, type HiddenFileLayout} from './hidden-file-layout.js';
 import {queueTitle} from './queue-frame.js';
 import {httpResponseArrived, imageResultPanels, presentationFrame} from './frame-state.js';
 import {type VisualLocaleProfile, ZH_TITLE_SIZE, zh, zhTextSlots} from './visual-locale.js';
@@ -83,7 +85,7 @@ function ImageChoice({plan, frame}: {plan: CompiledLegacy; frame: ReturnType<typ
 }
 
 type Cue = {startFrame: number; endFrame: number; transcript: string; lines: CaptionLine[]};
-type Props = CompiledPresentation & {cues?: Cue[]; visualLocaleProfile?: VisualLocaleProfile};
+type Props = CompiledPresentation & {cues?: Cue[]; visualLocaleProfile?: VisualLocaleProfile; hiddenFileLayout?: HiddenFileLayout};
 const lineStyle: React.CSSProperties = {fontFamily: 'GVE Presentation', fontSize: CAPTION_FONT_SIZE,
   fontWeight: CAPTION_FONT_WEIGHT, fontKerning: 'none', fontVariantLigatures: 'none', lineHeight: '34px',
   whiteSpace: 'pre', direction: 'ltr'};
@@ -141,24 +143,36 @@ const Presentation: React.FC<Props> = (plan) => {
       document.fonts.add(loaded);
       if (plan.cues) validateCaptionWidths(plan.cues);
       if (plan.visualLocaleProfile) validateZhWidths(plan);
+      if (plan.moduleId === 'hidden-file-policy/1' && plan.hiddenFileLayout) validateHiddenFileWidths(plan, plan.hiddenFileLayout);
       setReady(true);
       continueRender(handle);
     }).catch(cancelRender);
-  }, [handle, plan.cues, plan.visualLocaleProfile]);
+  }, [handle, plan.cues, plan.visualLocaleProfile, plan.hiddenFileLayout]);
   if (!ready) return null;
   const beat = plan.beats.find(row => frame >= row.start && frame < row.end);
   if (!beat) throw new Error('Frame outside presentation timeline');
   const localized = !!plan.visualLocaleProfile;
+  const hidden = plan.moduleId === 'hidden-file-policy/1';
+  if (hidden && !plan.hiddenFileLayout) throw new Error('The hidden-file preview requires its verified mobile layout.');
   const title = plan.moduleId === 'concurrency-queue/1' ? queueTitle(plan, beat, frame, localized ? zh : undefined) : beat.title;
   const titleLength = characters(title);
   const cue = plan.cues?.find(item => frame >= item.startFrame && frame < item.endFrame);
   return <AbsoluteFill style={{fontFamily: 'GVE Presentation, sans-serif', background: '#f3f1e7', color: ink, padding: '54px 54px 45px'}}>
-    <div style={{color: '#8c4736', fontSize: localized ? 25 : 22, fontWeight: 700}}>{localized ? zh.illustratedNarration :
+    <div style={{color: '#8c4736', fontSize: localized || hidden ? 25 : 22, ...(hidden ? {lineHeight: '30px'} : {}), fontWeight: 700}}>{plan.moduleId === 'hidden-file-policy/1'
+      ? hiddenFileNotice(plan) : localized ? zh.illustratedNarration :
       plan.cues ? 'Local voice · Illustration · No observed execution' : 'Silent · Illustration · No observed execution'}</div>
-    <div style={{fontSize: localized ? ZH_TITLE_SIZE : titleLength > 45 ? 30 : titleLength > 25 ? 38 : 48, fontWeight: 800, lineHeight: 1.12,
-      height: 175, marginTop: 22, overflowWrap: 'anywhere'}}>{title}</div>
+    {hidden ? <>
+      <div style={{fontSize: FILE_REPOSITORY_SIZE, fontWeight: 700, lineHeight: '31px', whiteSpace: 'pre'}}>
+        {plan.hiddenFileLayout!.repository.map((line, index) => <div key={index}>{line}</div>)}
+      </div>
+      <div style={{fontSize: FILE_TITLE_SIZE, fontWeight: 800, height: 100, marginTop: 10, lineHeight: '49px', whiteSpace: 'pre'}}>
+        {plan.hiddenFileLayout!.titles.find(row => row.beatId === beat.id)!.lines.map((line, index) => <div key={index}>{line}</div>)}
+      </div>
+    </> : <div style={{fontSize: localized ? ZH_TITLE_SIZE : titleLength > 45 ? 30 : titleLength > 25 ? 38 : 48,
+      fontWeight: 800, lineHeight: 1.12, height: 175, marginTop: 22, overflowWrap: 'anywhere'}}>{title}</div>}
     {plan.moduleId === 'concurrency-queue/1' ? <ConcurrencyQueue plan={plan} frame={frame} localized={localized}/> :
       plan.moduleId === 'http-exchange/1' ? <Http plan={plan} frame={presentationFrame(plan, frame)}/> :
+      plan.moduleId === 'hidden-file-policy/1' ? <HiddenFilePolicy plan={plan} frame={frame} layout={plan.hiddenFileLayout!}/> :
       <ImageChoice plan={plan} frame={presentationFrame(plan, frame)}/>}
     <div style={{position: 'absolute', bottom: plan.cues ? 170 : 130, left: 54, right: 54, height: 6, borderRadius: 6, background: border}}>
       <div style={{width: `${100 * (frame + 1) / plan.timeline.totalFrames}%`, height: '100%', borderRadius: 6, background: accent}}/>

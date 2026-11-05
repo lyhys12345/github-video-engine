@@ -1,6 +1,7 @@
 import {z} from 'zod';
 import {Hash, Id} from './video.js';
 import {RepositoryUrl} from './planning.js';
+import {HiddenFileCapability, HiddenFileRules} from './hidden-file-policy.js';
 
 const text = (max: number) => z.string().min(1).max(max).regex(/\S/);
 const ids = z.array(Id).min(1).max(20);
@@ -82,7 +83,18 @@ export const QueueStoryProposal = LegacyStoryProposal.extend({
   })).min(1).max(20),
 });
 export const StoryProposal = z.discriminatedUnion('schemaVersion', [LegacyStoryProposal, QueueStoryProposal]);
+export const HiddenFileStoryProposal = LegacyStoryProposal.extend({
+  schemaVersion: z.literal('1.2'),
+  capabilityProfile: z.literal(HiddenFileCapability),
+  mechanisms: z.tuple([LegacyStoryProposal.shape.mechanisms.element.extend({
+    adapterCandidate: z.literal('hidden-file-policy'),
+    rules: HiddenFileRules,
+  })]),
+});
+export const StoredStoryProposal = z.discriminatedUnion('schemaVersion', [LegacyStoryProposal, QueueStoryProposal, HiddenFileStoryProposal]);
 export const ProposalAuthorship = LegacyStoryProposal.shape.authorship;
 
 export type AuthoringBinding = z.infer<typeof AuthoringBinding>;
 export type StoryProposal = z.infer<typeof StoryProposal>;
+export type HiddenFileStoryProposal = z.infer<typeof HiddenFileStoryProposal>;
+export type StoredStoryProposal = z.infer<typeof StoredStoryProposal>;

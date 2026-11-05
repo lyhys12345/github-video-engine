@@ -143,6 +143,9 @@ function longestOverlap(cue: Interval, visual: Interval[]) {
 
 async function derive(data: string, input: Input, spec: Spec, taskId: string, signal: AbortSignal) {
   const plan = await readPresentation(data, spec.planTaskId, 'plan', signal);
+  if ('moduleId' in plan.status && plan.status.moduleId === 'hidden-file-policy/1') {
+    return fail('STATE', 'Hidden-file policy does not support presentation timing checks.');
+  }
   const voice = await readPresentation(data, spec.voiceTaskId, 'voice', signal);
   if (!plan.files || !voice.files) return fail('PARENT', 'Timing check requires completed and verified plan and voice tasks.');
   const planManifest = plan.files.get('plan-manifest.json')!;
@@ -189,7 +192,9 @@ async function derive(data: string, input: Input, spec: Spec, taskId: string, si
         if (compiled.moduleId !== 'concurrency-queue/1') return fail('STATE', 'Queue check requires a queue trace.');
         measured = queueIntervals(compiled, check, eventIndex, frames, signal);
       } else {
-        if (compiled.moduleId === 'concurrency-queue/1') return fail('STATE', 'Legacy check requires an HTTP or image trace.');
+        if (compiled.moduleId !== 'http-exchange/1' && compiled.moduleId !== 'image-output-choice/1') {
+          return fail('STATE', 'Legacy check requires an HTTP or image trace.');
+        }
         measured = {intervals: legacyIntervals(compiled, check.state, eventIndex, signal)};
       }
       visualCache.set(visualKey, measured);

@@ -1,9 +1,10 @@
-import type {StoryProposal} from '../contracts/authoring.js';
-import {PRESENTATION_FPS, presentationMaxFrames, type LegacyPlan, type PresentationEventKind, type PresentationPlan, type QueuePlan} from '../contracts/presentation.js';
+import type {StoryProposal, StoredStoryProposal} from '../contracts/authoring.js';
+import {PRESENTATION_FPS, presentationMaxFrames, type HiddenFilePlan, type LegacyPlan, type PresentationEventKind, type PresentationPlan, type QueuePlan} from '../contracts/presentation.js';
 import {EngineError} from '../core/errors.js';
 import {canonical, sha256} from '../core/util.js';
 import {compileQueue, type CompiledQueue} from './concurrency-queue.js';
 import {PAPER_BIRD, PAPER_BIRD_SHA256} from './asset.js';
+import {compileHiddenFiles, type CompiledHiddenFiles} from './hidden-file-policy.js';
 
 type Transition = {from: readonly string[]; to: string; roles: readonly string[]; parameters: readonly string[]};
 const step = (from: string[], to: string, roles: string[], parameters: string[] = []): Transition => ({from, to, roles, parameters});
@@ -27,8 +28,9 @@ const labelLength = (text: string) => [...text].length;
 
 export function compilePresentation(proposal: StoryProposal, plan: LegacyPlan): CompiledLegacy;
 export function compilePresentation(proposal: StoryProposal, plan: QueuePlan): CompiledQueue;
-export function compilePresentation(proposal: StoryProposal, plan: PresentationPlan): CompiledLegacy | CompiledQueue;
-export function compilePresentation(proposal: StoryProposal, plan: PresentationPlan) {
+export function compilePresentation(proposal: StoredStoryProposal, plan: HiddenFilePlan): CompiledHiddenFiles;
+export function compilePresentation(proposal: StoredStoryProposal, plan: PresentationPlan): CompiledLegacy | CompiledQueue | CompiledHiddenFiles;
+export function compilePresentation(proposal: StoredStoryProposal, plan: PresentationPlan) {
   if (sha256(canonical(proposal)) !== plan.proposalHash || proposal.authoringRequestId !== plan.authoringRequestId ||
       canonical(proposal.binding) !== canonical(plan.binding)) {
     fail('PRESENTATION_BINDING', 'Presentation differs from the saved proposal, request or evidence revision.');
@@ -37,6 +39,11 @@ export function compilePresentation(proposal: StoryProposal, plan: PresentationP
   if (proposal.beats.length !== plan.beats.length || proposal.beats.some((beat, index) => beat.id !== plan.beats[index]!.beatId)) {
     fail('PRESENTATION_BEATS', 'Every proposal beat must map once in its original order.');
   }
+  if (plan.schemaVersion === '1.4') {
+    if (proposal.schemaVersion !== '1.2') return fail('PRESENTATION_UNSUPPORTED', 'The hidden-file plan requires its own proposal version.');
+    return compileHiddenFiles(proposal, plan);
+  }
+  if (proposal.schemaVersion === '1.2') return fail('PRESENTATION_UNSUPPORTED', 'The hidden-file proposal requires presentation plan 1.4.');
   if (plan.schemaVersion === '1.2' || plan.schemaVersion === '1.3') return compileQueue(proposal, plan);
   return compileLegacy(proposal, plan);
 }

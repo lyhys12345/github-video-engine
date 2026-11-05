@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {expect, it} from 'vitest';
 import type {StoryProposal} from '../src/contracts/authoring.js';
-import {PresentationPlan} from '../src/contracts/presentation.js';
+import {HistoricalPresentationPlan, PresentationPlan} from '../src/contracts/presentation.js';
 import {canonical, sha256} from '../src/core/util.js';
 import {command} from '../src/core/process.js';
 import {ffmpegPath} from '../src/providers/local.js';
@@ -82,7 +82,7 @@ function example(count: number, mode: 'http' | 'image-mask' = 'http', sourceBind
   const param = <T>(value: T) => ({value, evidence: {claimId: 'fact', citationIndex: 0}});
   const names = isHttp ? ['listen', 'request', 'match', 'respond'] as const :
     ['show-input', 'select-cutout', 'show-cutout', 'select-mask', 'show-mask', 'compare'] as const;
-  const plan = PresentationPlan.parse({schemaVersion: '1.0', kind: 'session-presentation-plan', proposalHash: sha256(canonical(proposal)),
+  const plan = HistoricalPresentationPlan.parse({schemaVersion: '1.0', kind: 'session-presentation-plan', proposalHash: sha256(canonical(proposal)),
     binding: sourceBinding, authoringRequestId: requestId, authorship: {kind: 'session-agent'},
     module: isHttp ? {id: 'http-exchange/1', initialState: 'ready', entities: {listener: 'listener', request: 'request', handler: 'handler', response: 'response'},
       parameters: {port: param(4000), method: param('POST'), path: param('/fixture'), body: param('Fixture body')}} :

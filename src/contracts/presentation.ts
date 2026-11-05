@@ -2,11 +2,12 @@ import {z} from 'zod';
 import {AuthoringBinding, ProposalAuthorship} from './authoring.js';
 import {QueueEvent, QueueModule} from './concurrency-queue.js';
 import {Hash, Id} from './video.js';
+import {HiddenFileCapability, HiddenFileEvent, HiddenFileModule} from './hidden-file-policy.js';
 
 export const PRESENTATION_FPS = 24;
 export const PRESENTATION_LEGACY_MAX_FRAMES = PRESENTATION_FPS * 60;
 export const PRESENTATION_MAX_FRAMES = PRESENTATION_FPS * 300;
-export const presentationMaxFrames = (version: '1.0' | '1.1' | '1.2' | '1.3') =>
+export const presentationMaxFrames = (version: '1.0' | '1.1' | '1.2' | '1.3' | '1.4') =>
   version === '1.0' ? PRESENTATION_LEGACY_MAX_FRAMES : PRESENTATION_MAX_FRAMES;
 const evidence = z.strictObject({claimId: Id, citationIndex: z.number().int().min(0).max(7)});
 const fact = <T extends z.ZodType>(value: T) => z.strictObject({value, evidence});
@@ -50,7 +51,13 @@ const queuePlan = legacyPlan.extend({
   beats: z.array(legacyPlan.shape.beats.element.extend({events: z.array(QueueEvent).max(24)})).min(1).max(20),
 });
 const queueEndingPlan = queuePlan.extend({schemaVersion: z.literal('1.3')});
-export const PresentationPlan = z.discriminatedUnion('schemaVersion', [legacyPlan, queuePlan, queueEndingPlan]).superRefine((plan, context) => {
+export const HiddenFilePlan = legacyPlan.extend({
+  schemaVersion: z.literal('1.4'),
+  capabilityProfile: z.literal(HiddenFileCapability),
+  module: HiddenFileModule,
+  beats: z.array(legacyPlan.shape.beats.element.extend({events: z.tuple([HiddenFileEvent])})).length(2),
+});
+function checkFrameBounds(plan: z.infer<typeof legacyPlan | typeof queuePlan | typeof queueEndingPlan | typeof HiddenFilePlan>, context: z.RefinementCtx) {
   const max = presentationMaxFrames(plan.schemaVersion);
   for (const [index, beat] of plan.beats.entries()) {
     if (beat.frames > max) context.addIssue({code: 'custom', path: ['beats', index, 'frames'], message: 'Beat exceeds plan version frame limit'});
@@ -59,8 +66,11 @@ export const PresentationPlan = z.discriminatedUnion('schemaVersion', [legacyPla
         message: 'Event exceeds plan version frame limit'});
     }
   }
-});
+}
+export const HistoricalPresentationPlan = z.discriminatedUnion('schemaVersion', [legacyPlan, queuePlan, queueEndingPlan]).superRefine(checkFrameBounds);
+export const PresentationPlan = z.discriminatedUnion('schemaVersion', [legacyPlan, queuePlan, queueEndingPlan, HiddenFilePlan]).superRefine(checkFrameBounds);
 export type QueuePlan = z.infer<typeof queuePlan> | z.infer<typeof queueEndingPlan>;
 export type LegacyPlan = z.infer<typeof legacyPlan>;
 export type PresentationPlan = z.infer<typeof PresentationPlan>;
 export type PresentationEventKind = z.infer<typeof PresentationEventKind>;
+export type HiddenFilePlan = z.infer<typeof HiddenFilePlan>;

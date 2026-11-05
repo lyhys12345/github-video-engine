@@ -10,6 +10,11 @@ import {statusStory, exportStory} from '../src/story-planner/runtime.js';
 import {ArtifactStore} from '../src/assets/store.js';
 import {sha256} from '../src/core/util.js';
 import {readTask} from '../src/story-planner/runtime.js';
+import {readPresentation, renderPresentation} from '../src/presentation/runtime.js';
+import {checkPresentationTiming} from '../src/presentation/timing-check.js';
+import {HiddenFileCapability} from '../src/contracts/hidden-file-policy.js';
+import {FILE_PATH_SIZE, hiddenFileLayout} from '../src/presentation/hidden-file-layout.js';
+import type {CompiledHiddenFiles} from '../src/presentation/hidden-file-policy.js';
 import {exportExplanation, prepareExplanationVoice, resumeExplanation, startExplanation, statusExplanation, submitExplanation} from '../src/workflow/explanation-session.js';
 import {ExplanationAuthorPacketProfile, LocalizedNarratedAuthorPacketProfile, NarratedRenderSpec, SourceCaptureProfile,
   SourcePathsAuthorPacketProfile, StartInput, Submission} from '../src/workflow/explanation-contract.js';
@@ -51,6 +56,134 @@ const sourcePathsRequest = {
   schemaVersion: 'explanation-session-request/1.2', repository, ref: commit, sourcePaths: ['src/main.ts', 'src/other.ts'],
   audience: 'Readers of the fixture', language: 'en-US', maxSeconds: 12, voiceMode: 'silent',
 };
+
+it('separates hidden-file authoring, derives pruned descendants, and refuses ambiguous or unsupported plans', async () => {
+  const root = await workflowRoot('hp'), data = join(root, 'db'), spec = join(root, 'spec.json');
+  const {transport, sources} = sourcePathsTransport();
+  const request = {...sourcePathsRequest, schemaVersion: 'explanation-session-request/1.3', capabilityProfile: HiddenFileCapability};
+  const writeSpec = (value: unknown) => writeFile(spec, JSON.stringify(value));
+  await writeSpec(request);
+  const started = await startExplanation(data, spec, join(root, 'packet'), signal, undefined, transport);
+  if (!('stage' in started) || started.stage !== 'awaiting-author') throw new Error('Expected completed hidden-file start.');
+  const readPacket = async (name: string) => JSON.parse(await readFile(join(started.packet.bundle, name), 'utf8'));
+  const packet = await readPacket('work-package.json');
+  expect(packet).toMatchObject({schemaVersion: 'explanation-author-packet/1.4', capabilityProfile: HiddenFileCapability,
+    proposalSchema: 'proposal-hidden-file.schema.json', presentationSchema: 'hidden-file-presentation.schema.json'});
+  const {capabilityProfile: _, ...wrongEnvelope} = await readPacket(packet.needsEvidenceDraft);
+  wrongEnvelope.reason = {code: 'insufficient-pinned-evidence', detail: 'Need more evidence',
+    citations: [{sourceId: 'source-1', sourceSha256: sha256(readme), startLine: 3, endLine: 3, quote: 'Use the flag to return a mask.'}]};
+  await writeSpec({...wrongEnvelope, schemaVersion: 'explanation-session-author/1.0'});
+  await expect(submitExplanation(data, started.taskId, spec, signal)).rejects.toMatchObject({code: 'EXPLANATION_BINDING'});
+
+  const draft = await readPacket(packet.proposalDraft);
+  const claimIds = ['default', 'include'];
+  const entities = ['tree', 'results'];
+  Object.assign(draft.proposal, {
+    useCase: {title: 'Test hidden entries', audience: request.audience, question: 'Which paths appear?', scope: 'Synthetic example',
+      exclusions: [], goalClaimIds: claimIds, inputClaimIds: claimIds, processClaimIds: claimIds, outputClaimIds: claimIds, limitationClaimIds: []},
+    claims: claimIds.map(id => ({id, statement: 'Fixture claim for ' + id, basis: {kind: 'documented'},
+      citations: [{sourceId: 'source-2', sourceSha256: sha256(sources[0]!), startLine: 2, endLine: 2, quote: 'const mask = true;'}]})),
+    entities: entities.map(id => ({id, label: id, role: 'Fixture role', claimIds})),
+    mechanisms: [{id: 'filter', adapterCandidate: 'hidden-file-policy', explanation: 'Fixture mechanism', inputEntityIds: ['tree'],
+      outputEntityIds: ['results'], claimIds, assumptions: [], visualIntent: 'Synthetic paths',
+      rules: {default: {claimId: 'default', citationIndex: 0}, includeHidden: {claimId: 'include', citationIndex: 0}}}],
+    beats: ['default', 'include-hidden'].map((id, index) => ({id, purpose: id, narration: 'Fixture rule ' + id,
+      narrationClaimIds: [claimIds[index]], entityIds: entities, mechanismIds: ['filter'], timingIntent: 'Illustrative timing',
+      visual: {description: 'Fixture visual', depiction: 'illustrative', claimIds: [claimIds[index]]}})),
+  });
+  const wrongCitation = structuredClone(draft);
+  wrongCitation.proposal.claims[0].citations = wrongEnvelope.reason.citations;
+  await writeSpec(wrongCitation);
+  await expect(submitExplanation(data, started.taskId, spec, signal)).rejects.toMatchObject({code: 'EXPLANATION_CITATION'});
+  await writeSpec(draft);
+  const accepted = await submitExplanation(data, started.taskId, spec, signal);
+  if (!('stage' in accepted) || accepted.stage !== 'awaiting-plan') throw new Error('Expected accepted hidden-file proposal.');
+  const plan = {
+    schemaVersion: '1.4', kind: 'session-presentation-plan', capabilityProfile: HiddenFileCapability,
+    proposalHash: accepted.proposalHash, binding: packet.binding, authoringRequestId: packet.authoringRequestId, authorship: {kind: 'session-agent'},
+    module: {id: 'hidden-file-policy/1', initialState: 'ready', language: 'en-US', mechanismId: 'filter',
+      scenario: {basis: 'synthetic', entries: [
+        {id: 'visible', parentId: null, kind: 'file', name: 'guide.txt'},
+        {id: 'hidden', parentId: null, kind: 'directory', name: '.cache'},
+        {id: 'inside', parentId: 'hidden', kind: 'file', name: 'entry.txt'},
+        {id: 'dot-file', parentId: null, kind: 'file', name: '.notes'},
+      ]}},
+    beats: ['default', 'include-hidden'].map((mode, index) => ({beatId: mode, frames: 90,
+      events: [{kind: 'evaluate-policy', mode, atFrame: 0, motionFrames: 40, claimIds: [claimIds[index]]}]})),
+  };
+  const submitPlan = async (value: unknown) => {
+    await writeSpec(value);
+    return workflowCommand(['project', 'presentation-plan'], {data, id: started.binding.projectId, proposal: accepted.proposalHash!, spec}, signal);
+  };
+  for (const [code, edit] of [
+    ['PRESENTATION_SCHEMA', (copy: typeof plan) => {copy.module.scenario.entries[0]!.name = '../outside.txt';}],
+    ['PRESENTATION_SCHEMA', (copy: typeof plan) => {copy.module.scenario.entries[1]!.name = '.git';}],
+    ['PRESENTATION_HIDDEN_FILES', (copy: typeof plan) => {copy.module.scenario.entries[2]!.parentId = 'visible';}],
+    ['PRESENTATION_HIDDEN_FILES', (copy: typeof plan) => {copy.beats[0]!.events[0]!.mode = 'include-hidden';}],
+    ['PRESENTATION_HIDDEN_FILES', (copy: typeof plan) => {copy.beats[1]!.frames = 75;}],
+  ] as const) {
+    const invalid = structuredClone(plan);
+    edit(invalid);
+    await expect(submitPlan(invalid)).rejects.toMatchObject({code});
+  }
+  const compiled = await submitPlan(plan);
+  if (!('taskId' in compiled)) throw new Error('Expected a committed hidden-file plan.');
+  expect(await submitPlan(plan)).toMatchObject({taskId: compiled.taskId, cached: true});
+  const verified = await readPresentation(data, compiled.taskId, 'plan', signal);
+  const bytes = verified.files!.get('trace.json')!;
+  const trace = JSON.parse(bytes.toString('utf8'));
+  expect(trace.scope).toEqual({tree: 'synthetic', convention: 'posix-dot-prefix', ignoreRules: 'unchecked', order: 'illustrative', targetExecution: 'none'});
+  expect(trace.trace[0].model).toMatchObject({consideredIds: ['visible', 'hidden', 'dot-file'], resultIds: ['visible'], rows: [
+    {id: 'visible', decision: 'include-file'}, {id: 'hidden', decision: 'prune-hidden-directory'},
+    {id: 'inside', decision: 'unvisited-ancestor', blockedBy: 'hidden'}, {id: 'dot-file', decision: 'skip-hidden-file'},
+  ]});
+  expect(trace.trace[1].model.resultIds).toEqual(['visible', 'inside', 'dot-file']);
+  const dispatch = vi.fn();
+  await expect(renderPresentation(data, compiled.taskId, signal, dispatch)).rejects.toMatchObject({code: 'PRESENTATION_HIDDEN_FILE_LAYOUT'});
+  expect(dispatch).not.toHaveBeenCalled();
+
+  const font = await readFile(new URL('../assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf', import.meta.url));
+  const fit = structuredClone(plan);
+  fit.beats.forEach(beat => {beat.frames = 180;});
+  const directory = '.' + 'W'.repeat(20), filename = 'W'.repeat(18), exactPath = directory + '/' + filename;
+  fit.module.scenario.entries[1]!.name = directory;
+  fit.module.scenario.entries[2]!.name = filename;
+  async function mobileLayout(value: typeof plan) {
+    const child = await submitPlan(value);
+    if (!('taskId' in child)) throw new Error('Expected a committed layout fixture.');
+    const checked = await readPresentation(data, child.taskId, 'plan', signal);
+    return hiddenFileLayout(font, JSON.parse(checked.files!.get('trace.json')!.toString('utf8')) as CompiledHiddenFiles);
+  }
+  const mobile = await mobileLayout(fit);
+  expect(FILE_PATH_SIZE).toBeGreaterThanOrEqual(28);
+  expect(exactPath).toHaveLength(40);
+  expect(mobile.repository.join('')).toBe('example/demo');
+  expect(mobile.tree.find(row => row.id === 'inside')!.lines.join('')).toBe(filename);
+  const displayed = mobile.results[1]!.paths.find(path => path.id === 'inside')!;
+  expect(displayed.lines.length).toBeGreaterThan(1);
+  expect(displayed.lines.join('')).toBe(exactPath);
+  expect(mobile.results[1]!.minimumHoldFrames).toBeGreaterThanOrEqual(72);
+
+  const crowded = structuredClone(fit);
+  crowded.module.scenario.entries = [
+    {id: 'visible', parentId: null, kind: 'file', name: 'W'.repeat(22)},
+    {id: 'hidden', parentId: null, kind: 'directory', name: directory},
+    {id: 'inside', parentId: 'hidden', kind: 'file', name: filename},
+    {id: 'inside-second', parentId: 'hidden', kind: 'file', name: 'V' + 'W'.repeat(17)},
+    {id: 'other', parentId: null, kind: 'directory', name: 'Q' + 'W'.repeat(20)},
+    {id: 'other-file', parentId: 'other', kind: 'file', name: filename},
+    {id: 'extra', parentId: null, kind: 'directory', name: 'Z' + 'W'.repeat(20)},
+    {id: 'extra-file', parentId: 'extra', kind: 'file', name: filename},
+  ];
+  await expect(mobileLayout(crowded)).rejects.toThrow('exceed the mobile display height');
+
+  const ref = {beatId: 'default', indexInBeat: 0, sha256: '1'.repeat(64)};
+  await writeSpec({schemaVersion: 'presentation-visual-cues/1.0', planTaskId: compiled.taskId,
+    planManifestSha256: sha256(verified.files!.get('plan-manifest.json')!), traceSha256: sha256(bytes),
+    voiceTaskId: '2'.repeat(64), voiceManifestSha256: '3'.repeat(64),
+    checks: [{id: 'old-check', cue: ref, event: ref, state: 'http-response-arrived', minContinuousFrames: 1}]});
+  await expect(checkPresentationTiming(data, spec, signal)).rejects.toMatchObject({code: 'PRESENTATION_TIMING_STATE'});
+});
 
 it('captures ordered Git blobs in a new session and reverifies exact text and dispositions offline', async () => {
   const root = await workflowRoot('sp'), data = join(root, 'db'), request = join(root, 'request.json');

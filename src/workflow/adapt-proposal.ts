@@ -17,6 +17,7 @@ export async function adaptAuthoringProposal(store: WorkflowStore, id: string, h
   if (!mapping.success) throw new EngineError('MAPPING_SCHEMA', 'Expected a bounded audience-http-v1 or audience-rembg-outputs-v1 mapping. ' +
     mapping.error.issues.slice(0, 6).map(issue => issue.path.join('.') + ' ' + issue.message).join(', '));
   const {proposal, workspace} = await loadAuthoringProposal(store, id, hash, signal);
+  if (proposal.schemaVersion === '1.2') throw new EngineError('MAPPING_SCHEMA', 'Hidden-file proposals use a presentation plan 1.4.');
   const checkCurrent = () => {
     if (store.project(id).snapshotHash !== proposal.binding.snapshotHash) {
       throw new EngineError('AUTHORING_STALE', 'Obtain a proposal for the current evidence revision. Previously committed tasks remain readable.');

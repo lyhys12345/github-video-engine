@@ -48,6 +48,16 @@ The new work package records `explanation-author-packet/1.3` and `github-pinned-
 
 After `needs-evidence`, take `binding.commit` from status and start a fresh request and output directory using that exact `ref`. List the source paths needed by the new request within the three-file limit. The original packet and disposition remain available. Completed status, resume and receipt export reverify the local evidence. Request versions 1.0 and 1.1 retain their original packet formats. Version 1.2 also accepts the existing Huihui mode when `language` is `zh-CN`.
 
+## Hidden-file policy comparison
+
+Use a new `explanation-session-request/1.3` with `capabilityProfile: "hidden-file-policy/1.0"`, `voiceMode: "silent"`, a fixed commit and explicit `sourcePaths`. The packet supports English and Simplified Chinese. It includes the exact submission draft and the hidden-file proposal and presentation schemas. Complete nested proposal 1.2 with two illustrative beats. For each policy, cite exact lines from the captured source files. The engine checks the references. Semantic review remains pending.
+
+Submit the draft with `explanation proposal`. Use the returned proposal hash, exact binding and requested language in presentation plan 1.4, then use `explanation render`. Supply an original synthetic tree with three to eight named file or directory entries and at most three levels. Declare a visible file and a file below a hidden directory. The plan presents the default policy first and `--hidden` second, each with an evaluation interval and a settled result. The renderer derives the illustrated paths from the tree and distinguishes skipping a directory from leaving its descendants untraversed.
+
+New previews use `hidden-file-mobile-layout/1`. The repository label comes from the pinned binding. Tree and result paths display at 30 px on the 720 px canvas. Long paths wrap without removing characters. Each settled result needs at least 72 frames at 24 fps, with additional time for more lines. If the tree, complete paths or available time cannot fit this layout, revise the authored plan. Existing previews retain their original bytes.
+
+The model covers the POSIX dot-prefix convention in the example. The video and trace identify the synthetic input, unchecked ignore rules, illustrative order and absence of target execution. Symlink traversal, globs, other platform rules and actual command output are outside this profile. This profile provides silent previews and does not support `presentation timing-check`. Use status, resume and receipt export for the resulting checkpoints. Existing session requests and historical unsupported dispositions keep their original scope and bytes.
+
 ## Huihui technical preview
 
 Use `explanation-session-request/1.1` with `language: "zh-CN"` and `voiceMode: "windows-winrt-huihui"`. An accepted proposal enters `awaiting-voice`. Write one Chinese narration line of at most 120 Unicode code points per beat, across up to 20 beats. The installed Windows WinRT Huihui voice synthesizes the exact text from the accepted proposal. If the voice is unavailable, the command reports the error. The engine sends no explicit provider request for this mode. Windows speech subsystem network behavior has not been audited.

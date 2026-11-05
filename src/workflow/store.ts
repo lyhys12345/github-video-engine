@@ -12,7 +12,7 @@ import {checkAbort,EngineError} from '../core/errors.js';
 import {projectRoot} from '../providers/local.js';
 import {checkGateV2} from '../evaluation/judge-gate.mjs';
 import {rejectLegacyReviewExport} from './review-export.js';
-import type {StoryProposal} from '../contracts/authoring.js';
+import type {StoredStoryProposal} from '../contracts/authoring.js';
 
 const ProjectRow=z.object({id:Id,repository:z.string(),snapshotHash:Hash,currentRevision:Hash.nullable(),createdAt:z.string(),updatedAt:z.string()}).strict();
 const SnapshotRow=z.object({hash:Hash,artifact:ArtifactSchema,createdAt:z.string()}).strict();
@@ -119,7 +119,7 @@ export class WorkflowStore{
     }
     return record;
   }
-  async saveValidatedProposal(proposal: StoryProposal, signal: AbortSignal) {
+  async saveValidatedProposal(proposal: StoredStoryProposal, signal: AbortSignal) {
     const {projectId, snapshotHash} = proposal.binding;
     const bytes = canonical(proposal);
     const hash = sha256(bytes);

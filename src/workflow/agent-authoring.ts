@@ -1,6 +1,7 @@
 import {dirname, isAbsolute, relative, resolve, sep} from 'node:path';
 import {z} from 'zod';
-import {AuthoringBinding, LegacyStoryProposal, QueueStoryProposal, StoryProposal} from '../contracts/authoring.js';
+import {AuthoringBinding, LegacyStoryProposal, QueueStoryProposal, StoredStoryProposal, StoryProposal} from '../contracts/authoring.js';
+import {HiddenFileCapability} from '../contracts/hidden-file-policy.js';
 import {Hash} from '../contracts/video.js';
 import {checkAbort, EngineError} from '../core/errors.js';
 import {canonical, sha256} from '../core/util.js';
@@ -46,15 +47,15 @@ function safeOutput(store: WorkflowStore, directory: string) {
   return output;
 }
 
-function identity(manifest: Workspace['manifest']) {
+function identity(manifest: Workspace['manifest'], profile?: typeof HiddenFileCapability) {
   const {projectId, repository, commit, snapshotHash, fingerprint} = manifest;
   const binding = {projectId, repository, commit, snapshotHash, evidenceFingerprint: fingerprint};
-  const authoringRequestId = sha256(canonical({binding, contract, capabilityVersion, lineConvention}));
+  const authoringRequestId = sha256(canonical({binding, contract, capabilityVersion: profile ?? capabilityVersion, lineConvention}));
   return {binding, authoringRequestId};
 }
 
-function checkBinding(input: ReturnType<typeof identity>, manifest: Workspace['manifest']) {
-  const expected = identity(manifest);
+function checkBinding(input: ReturnType<typeof identity>, manifest: Workspace['manifest'], profile?: typeof HiddenFileCapability) {
+  const expected = identity(manifest, profile);
   if (canonical(input.binding) !== canonical(expected.binding) || input.authoringRequestId !== expected.authoringRequestId) {
     throw new EngineError('AUTHORING_STALE', 'The submission binding differs from this evidence revision. Open a fresh authoring work package.');
   }
@@ -74,8 +75,8 @@ function decode(bytes: Buffer) {
   catch {throw new EngineError('AUTHORING_JSON', 'Expected a valid UTF-8 authoring JSON file');}
 }
 
-export function verifyProposal(proposal: StoryProposal, workspace: Workspace) {
-  checkBinding(proposal, workspace.manifest);
+export function verifyProposal(proposal: StoredStoryProposal, workspace: Workspace) {
+  checkBinding(proposal, workspace.manifest, proposal.schemaVersion === '1.2' ? proposal.capabilityProfile : undefined);
   const claims = new Map(proposal.claims.map(claim => [claim.id, claim]));
   const entities = new Map(proposal.entities.map(entity => [entity.id, entity]));
   const mechanisms = new Map(proposal.mechanisms.map(mechanism => [mechanism.id, mechanism]));
@@ -132,8 +133,8 @@ export function authoringDraft(request: ReturnType<typeof identity>, audience = 
       processClaimIds: [], outputClaimIds: [], limitationClaimIds: []}, claims: [], entities: [], mechanisms: [], beats: [], openQuestions: []};
 }
 
-export function authoringPacket({manifest, files}: Workspace) {
-  const request = identity(manifest);
+export function authoringPacket({manifest, files}: Workspace, profile?: typeof HiddenFileCapability) {
+  const request = identity(manifest, profile);
   const packet = {
     schemaVersion: '1.0', kind: 'session-agent-authoring-work-package', state: 'awaiting-author', ...request,
     contract, capabilityVersion, sourceManifest: 'evidence.json', proposalSchema: 'proposal.schema.json', queueProposalSchema: 'proposal-queue.schema.json', captureSchema: 'capture.schema.json',
@@ -183,14 +184,15 @@ export async function captureAuthoringText(store: WorkflowStore, id: string, spe
     snapshotHash: project.snapshotHash, files: request.files, next: 'Reopen authoring for the new evidence revision'};
 }
 
-function reviewState(proposal: StoryProposal, hash: string) {
+function reviewState(proposal: StoredStoryProposal, hash: string) {
   return {
     schemaVersion: '1.0', hash, binding: proposal.binding, authoringRequestId: proposal.authoringRequestId,
     provenance: 'provenance-checked', semanticReview: 'pending', editorialReview: 'pending', audiovisualReview: 'pending',
     authorship: {kind: proposal.authorship.kind, verification: 'caller-declared'},
-    renderability: {status: 'needs-adapter', renderable: false, capabilityVersion,
+    renderability: {status: 'needs-adapter', renderable: false, capabilityVersion: proposal.schemaVersion === '1.2' ? proposal.capabilityProfile : capabilityVersion,
       mechanisms: proposal.mechanisms.map(mechanism => ({id: mechanism.id, status: 'needs-adapter',
-        candidate: mechanism.adapterCandidate, reason: adapters[mechanism.adapterCandidate]}))},
+        candidate: mechanism.adapterCandidate, reason: mechanism.adapterCandidate === 'hidden-file-policy'
+          ? 'This proposal requires a separately authored hidden-file policy plan 1.4.' : adapters[mechanism.adapterCandidate]}))},
     scope: 'Structure, pinned source hashes, exact lines and reference closure verified. Visuals describe intent. No adapter, model call, repository execution or media generation was run.',
   };
 }
@@ -201,7 +203,7 @@ export async function submitAuthoringProposal(store: WorkflowStore, id: string, 
   return submitParsedAuthoringProposal(store, id, proposal, signal);
 }
 
-export async function submitParsedAuthoringProposal(store: WorkflowStore, id: string, proposal: StoryProposal, signal: AbortSignal) {
+export async function submitParsedAuthoringProposal(store: WorkflowStore, id: string, proposal: StoredStoryProposal, signal: AbortSignal) {
   checkAbort(signal);
   verifyProposal(proposal, await buildWorkspace(store, id));
   const {hash, reused} = await store.saveValidatedProposal(proposal, signal);
@@ -215,7 +217,7 @@ export async function loadAuthoringProposal(store: WorkflowStore, id: string, ha
   if (bytes.length !== record.artifact.bytes || sha256(bytes) !== hash) {
     throw new EngineError('PROPOSAL_INTEGRITY', 'Stored proposal bytes do not match the committed hash');
   }
-  const proposal = parse(StoryProposal, decode(bytes));
+  const proposal = parse(StoredStoryProposal, decode(bytes));
   const workspace = await buildWorkspace(store, id, record.snapshotHash);
   verifyProposal(proposal, workspace);
   const report = reviewState(proposal, hash);
