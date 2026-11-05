@@ -1,0 +1,16 @@
+import {EngineError} from '../core/errors.js';
+import {sha256} from '../core/util.js';
+const RATE=48000,FRAME_SAMPLES=1600;
+const fail=(s:string):never=>{throw new EngineError('NARRATIVE_AUDIO',s);};
+export type NarrativeTimedClip={beatId:string;receiptFingerprint:string;receiptSha256:string;sourceAudioSha256:string;transcript:string;transcriptSha256:string;startOffsetFrames:number;captions:{startChar:number;endChar:number;startSample:number;endSample:number}[]};
+export function captionSafeLines(text:string){if(/[^\p{Script=Han}\p{Script=Latin}\p{N}\p{P}\p{Zs}]/u.test(text))throw new EngineError('NARRATIVE_CAPTION_LAYOUT','This font/layout profile requires Chinese/Latin text, numbers, punctuation and spaces.');const chars=[...text],lines=[];for(let i=0;i<chars.length;i+=22)lines.push(chars.slice(i,i+22).join(''));if(!lines.length||lines.length>3)throw new EngineError('NARRATIVE_CAPTION_LAYOUT','Caption needs shorter caller-authored cue partitions for the reserved safe area.');return lines;}
+export function narrativeCaptionTiming(scene:{id:string;narration:string},interval:{startFrame:number;endFrame:number},clip:NarrativeTimedClip,sampleCount:number){
+ if(clip.beatId!==scene.id||clip.transcript!==scene.narration||sha256(clip.transcript)!==clip.transcriptSha256)fail('Recording must match the complete exact current narrative scene text.');
+ if(!Number.isSafeInteger(sampleCount)||sampleCount<1)fail('Expected positive integral complete recording sample count.');
+ const startFrame=interval.startFrame+clip.startOffsetFrames,startSample=startFrame*FRAME_SAMPLES,endSample=startSample+sampleCount;
+ if(startFrame<interval.startFrame||endSample>interval.endFrame*FRAME_SAMPLES)fail('Complete original-speed recording does not fit the selected scene; no clipping, stretching or spill into gaps.');
+ const recording={beatId:scene.id,startFrame,endFrame:Math.ceil(endSample/FRAME_SAMPLES),startSample,endSample,sampleCount:sampleCount,transcript:clip.transcript,transcriptSha256:clip.transcriptSha256,sourceAudioSha256:clip.sourceAudioSha256,receiptSha256:clip.receiptSha256};
+ const chars=[...clip.transcript];let char=0,previousEnd=0,previousFrame=startFrame;
+ const captions=clip.captions.map(c=>{if(c.startChar!==char||c.endChar<=char||c.endChar>chars.length||c.startSample<previousEnd||c.endSample<=c.startSample||c.endSample>recording.sampleCount)fail('Caption must partition the full exact transcript with nonoverlapping recording-relative sample bounds.');char=c.endChar;const text=chars.slice(c.startChar,c.endChar).join(''),weight=[...text].reduce((n,ch)=>n+(ch.codePointAt(0)!>127?2:1),0),start=startSample+c.startSample,end=startSample+c.endSample,startFrame=Math.floor(start/FRAME_SAMPLES),endFrame=Math.ceil(end/FRAME_SAMPLES);if(!text.trim()||/[\p{C}\p{Zl}\p{Zp}]/u.test(text)||weight>100||end-start<Math.max(RATE/2,weight*RATE/20)||startFrame<previousFrame||Math.round(start*1000/RATE)>=Math.round(end*1000/RATE))fail('Caption text/readability/timing cannot be represented safely within the scene.');previousEnd=c.endSample;previousFrame=endFrame;return {beatId:scene.id,startSample:start,endSample:end,startFrame,endFrame,transcript:text};});
+ if(char!==chars.length)fail('Captions omit part of the exact current transcript.');return {recording,captions};
+}

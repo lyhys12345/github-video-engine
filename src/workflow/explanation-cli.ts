@@ -1,3 +1,4 @@
+import {narrativeAuthorRevisionCommand} from './narrative-author-revision.js';
 import {narrativeRunCommand} from './narrative-run.js';
 import {projectPortableCommand} from './project-portable.js';
 import {explanationNextCommand} from './narrative-next-actions.js';
@@ -16,6 +17,7 @@ const usage = 'explanation start --spec <request> --data <state> --out <packet> 
 
 export async function explanationCommand(positionals: string[], values: Record<string, unknown>, signal: AbortSignal) {
   const action = positionals[1];
+  if(action==='run-revise')return narrativeAuthorRevisionCommand(positionals,values,signal);
   if(action==='run')return narrativeRunCommand(positionals,values,signal);
   if(action==='project-export'||action==='project-import')return projectPortableCommand(positionals,values,signal);
   if(action==='next')return explanationNextCommand(positionals,values,signal);
