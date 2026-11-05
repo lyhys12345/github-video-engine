@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "narrative-feedback-plan/1.0",
+  "expectedCurrentResultSha256": "bedb7b4b00ee586ef10aaacf824d8f22264196324701f96f0c025888dd030987",
+  "expectedAuthorSha256": "05c73fb205f06c2df74a2952b18c70fba0a861fd6d692e452f5ffe0b9bd3f0dc",
+  "source": {
+    "bindingSha256": "68bd1f6b73f4f9932c00e85938c327e2d54976ed4018ace0fc65d892d5b8b076",
+    "captureTaskId": "ead9c10f1114aa44a90401cd373b2fa3c3de389c33aeb5d7a064371cc569e7f6"
+  },
+  "feedback": {
+    "text": "请读清2012年9月1日这个日期，先显示日期，稍后再亮文档结果为真，并保留未运行说明。",
+    "origin": "session-agent-validation",
+    "interpretedBy": "current-session-agent",
+    "interpretation": "将日期明确化映射到唯一文档示例章；不改变来源给出的true，也不制造运行测量。先展示日期再展示文档结果；11秒是Agent显式作者时长。"
+  },
+  "changes": [
+    {
+      "sceneId": "scene-example",
+      "expectedSceneSha256": "d9505503fd83be20bdb8180cd4a296bf6210bf856d3702e8583bec93ee167429",
+      "reason": "当前会话Agent将这一句自然语言反馈明确映射为本章旁白、输入输出标签、动作相位及作者时长；源断言不变，语义仍待审。",
+      "narration": {
+        "expectedNarrationSha256": "564ee1c09913512b884a06fd31d1998d466e2b882a68f604907bfde19bb89da9",
+        "text": "源码文档的日期是二零一二年九月一日，注明结果为真。这只是引用，未运行函数。"
+      },
+      "visual": {
+        "expectedAnimationSha256": "50cce8449765b51d40d74c80ed91ea7a574756151736ef7027305f9b1d349c88",
+        "description": "先显示并强调具体输入，稍后出现文档所述结果；所有动作均为作者示意，未执行目标。",
+        "sceneAnimation": {
+          "animation": {
+            "schemaVersion": "1.0",
+            "shots": [
+              {
+                "actions": [
+                  {
+                    "kind": "reveal",
+                    "target": "left",
+                    "start": 0,
+                    "end": 0.14,
+                    "claimIds": [
+                      "example"
+                    ]
+                  },
+                  {
+                    "kind": "emphasize",
+                    "target": "left",
+                    "start": 0.12,
+                    "end": 0.4,
+                    "claimIds": [
+                      "example"
+                    ]
+                  },
+                  {
+                    "kind": "compare",
+                    "source": "left",
+                    "target": "right",
+                    "start": 0.56,
+                    "end": 0.88,
+                    "claimIds": [
+                      "example"
+                    ]
+                  },
+                  {
+                    "kind": "emphasize",
+                    "target": "right",
+                    "start": 0.9,
+                    "end": 0.99,
+                    "claimIds": [
+                      "example"
+                    ]
+                  }
+                ],
+                "objects": [
+                  {
+                    "id": "left",
+                    "kind": "document",
+                    "label": "2012年9月1日",
+                    "visual": "code"
+                  },
+                  {
+                    "id": "right",
+                    "kind": "document",
+                    "label": "文档注明为真",
+                    "visual": "code"
+                  }
+                ],
+                "shotId": "scene-example"
+              }
+            ],
+            "storyId": "date-leap-story"
+          },
+          "profile": "legacy-animation/1.0",
+          "sceneId": "scene-example"
+        },
+        "title": "具体日期示例",
+        "visualContext": {
+          "boundary": "来源示意，未执行，待审",
+          "claimIds": [
+            "example"
+          ],
+          "explanation": "先看输入，随后展示文档结果",
+          "question": "这一章解释什么",
+          "schemaVersion": "narrative-scene-context/1.0",
+          "title": "具体日期示例"
+        }
+      },
+      "timing": {
+        "visualSeconds": 11
+      }
+    }
+  ]
+}

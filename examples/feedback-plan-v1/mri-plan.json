@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "narrative-feedback-plan/1.0",
+  "expectedCurrentResultSha256": "39a537dd7df3972f20376531bcd6c52573c7d1cb36adc20f07c7300b1f3da3fe",
+  "expectedAuthorSha256": "9dbabb4b4e105a1f4a92d6b0f136c999b208adf48d25d5489ec5a141bf76232d",
+  "source": {
+    "bindingSha256": "98dc3894b3f72a6b12eebdbb2845881f7303e1069ba5354b7f3ea3437d5f25d2",
+    "captureTaskId": "1001ed4cfa406a3865ef7f281f1fa27327be6e8050e2a5f65a61534a3f876e39"
+  },
+  "feedback": {
+    "text": "例子太抽象，请把 --foo bar 的输入和结果说清楚，画面先强调输入，再出现结果。",
+    "origin": "session-agent-validation",
+    "interpretedBy": "current-session-agent",
+    "interpretation": "将输入/结果的明确化映射到唯一示例章；保留原example来源事实，只重写旁白并延后该章输出。11秒为Agent明确的阅读和讲解安排，不由录音自动延长。"
+  },
+  "changes": [
+    {
+      "sceneId": "scene-example",
+      "expectedSceneSha256": "e4c6ff2841fdcd1b8b80406348be36ae3c3211e3255e886bd5474e8711f393ae",
+      "reason": "当前会话Agent将这一句自然语言反馈明确映射为本章旁白、输入输出标签、动作相位及作者时长；源断言不变，语义仍待审。",
+      "narration": {
+        "expectedNarrationSha256": "e8414f08e34ff3d984c6cdb071b96364759b83bea9d4bd4046b1546db5d019db",
+        "text": "文档示例给出双横线foo和bar两个参数，解析对象里的foo值是bar。这不是实测结果。"
+      },
+      "visual": {
+        "expectedAnimationSha256": "8b9b3fcb7a4ed595cd29826d5d262a3a5fd3e59415d4295c5394ff3e26c242ad",
+        "description": "先显示并强调具体输入，稍后出现文档所述结果；所有动作均为作者示意，未执行目标。",
+        "sceneAnimation": {
+          "animation": {
+            "schemaVersion": "1.0",
+            "shots": [
+              {
+                "actions": [
+                  {
+                    "kind": "reveal",
+                    "target": "left",
+                    "start": 0,
+                    "end": 0.14,
+                    "claimIds": [
+                      "example"
+                    ]
+                  },
+                  {
+                    "kind": "emphasize",
+                    "target": "left",
+                    "start": 0.12,
+                    "end": 0.4,
+                    "claimIds": [
+                      "example"
+                    ]
+                  },
+                  {
+                    "kind": "compare",
+                    "source": "left",
+                    "target": "right",
+                    "start": 0.56,
+                    "end": 0.88,
+                    "claimIds": [
+                      "example"
+                    ]
+                  },
+                  {
+                    "kind": "emphasize",
+                    "target": "right",
+                    "start": 0.9,
+                    "end": 0.99,
+                    "claimIds": [
+                      "example"
+                    ]
+                  }
+                ],
+                "objects": [
+                  {
+                    "id": "left",
+                    "kind": "document",
+                    "label": "--foo bar",
+                    "visual": "code"
+                  },
+                  {
+                    "id": "right",
+                    "kind": "document",
+                    "label": "foo:bar",
+                    "visual": "code"
+                  }
+                ],
+                "shotId": "scene-example"
+              }
+            ],
+            "storyId": "mri-story"
+          },
+          "profile": "legacy-animation/1.0",
+          "sceneId": "scene-example"
+        },
+        "title": "具体参数示例",
+        "visualContext": {
+          "boundary": "来源示意，未执行，待审",
+          "claimIds": [
+            "example"
+          ],
+          "explanation": "先看输入，随后展示文档结果",
+          "question": "这一章解释什么",
+          "schemaVersion": "narrative-scene-context/1.0",
+          "title": "具体参数示例"
+        }
+      },
+      "timing": {
+        "visualSeconds": 11
+      }
+    }
+  ]
+}
