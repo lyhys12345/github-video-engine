@@ -21,3 +21,5 @@ Seven targeted narrative/authoring/document/audio tests and25 directly affected 
 This proves a general source-bound authoring entry and a new project through the real media path. It does not prove automatic repository understanding, arbitrary mechanism coverage, natural voice/alignment, audience-ready visual quality or90% readiness. Complex/braching mechanisms outside finite supported operations must remain explicitly unsupported; fact semantics, continuous viewing/listening and final owner acceptance are pending.
 
 Optional Chinese explanation and gap text: see [scene context v1](narrative-scene-context-v1.md). The session Agent authors the data; claim references are pending provenance, not semantic approval. Use only if a smaller complete source frame is acceptable and author timing for the actual audience. No field is inferred automatically.
+
+For a source-backed single-input/tool/output continuous operation view, see [causal operation animation v1](causal-operation-animation-v1.md). It retains input/output identities, uses separate illustrative signals and rejects compound operations; facts and hearing remain pending.

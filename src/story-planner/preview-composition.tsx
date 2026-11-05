@@ -32,9 +32,9 @@ const Preview: React.FC<PreviewProps> = ({animation, context, mode, audience}) =
   </AbsoluteFill> : null;
   return ready ? <AbsoluteFill style={{fontFamily: 'GVE Preview, sans-serif', backgroundColor: '#101827'}}>
     <div dangerouslySetInnerHTML={{__html: renderFramePreview(animation, frame, context)}}/>
-    <div style={{position: 'absolute', bottom: 16, left: 24, color: '#ffe180', fontSize: 16}}>
+    {animation.schemaVersion!=='1.2'&&<div style={{position: 'absolute', bottom: 16, left: 24, color: '#ffe180', fontSize: 16}}>
       Authored illustration · No observed execution
-    </div>
+    </div>}
   </AbsoluteFill> : null;
 };
 
