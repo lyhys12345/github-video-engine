@@ -9,7 +9,7 @@ import {ArtifactSchema} from '../contracts/runtime.js';
 import {PRESENTATION_MAX_FRAMES} from '../contracts/presentation.js';
 import {AuthoredCaption} from '../presentation/narration.js';
 import {ZH_VISUAL_PROFILE} from '../presentation/visual-locale.js';
-import {TextCaptureLimits, TextCapturePath} from '../providers/github-readonly.js';
+import {TextCaptureLimits, TextCapturePath, DeepTextCapturePath} from '../providers/github-readonly.js';
 
 const boundedText = (max: number) => z.string().min(1).max(max).regex(/\S/u);
 const Language = z.enum(['en-US', 'zh-CN']);
@@ -54,8 +54,9 @@ const NarratedHiddenFileRequest = SourcePathsRequestBase.extend({
   schemaVersion: z.literal('explanation-session-request/1.4'), language: z.literal('zh-CN'),
   capabilityProfile: z.literal(HiddenFileCapability), voiceMode: z.literal('windows-winrt-huihui'),
 }).superRefine(checkSourcePaths);
+const DeepSourcePathsRequest=SourcePathsRequestBase.extend({schemaVersion:z.literal('explanation-session-request/1.5'),sourceDepth:z.literal('deep'),voiceMode:z.literal('silent'),sourcePaths:z.array(DeepTextCapturePath).min(1).max(TextCaptureLimits.filesPerRequest)}).superRefine(checkSourcePaths);
 export const Request = z.discriminatedUnion('schemaVersion',
-  [SilentRequest, NarratedRequest, SourcePathsRequest, HiddenFileRequest, NarratedHiddenFileRequest]);
+  [SilentRequest, NarratedRequest, SourcePathsRequest, HiddenFileRequest, NarratedHiddenFileRequest,DeepSourcePathsRequest]);
 const Citation = z.strictObject({sourceId: z.string().regex(/^source-[1-8]$/), sourceSha256: Hash,
   startLine: z.number().int().min(1).max(200_001), endLine: z.number().int().min(1).max(200_001), quote: boundedText(8_000)});
 const Reason = z.strictObject({detail: boundedText(1_000), citations: z.array(Citation).min(1).max(4)});
@@ -86,6 +87,7 @@ export const SourcePathsAuthorPacketProfile = 'explanation-author-packet/1.3';
 export const HiddenFileAuthorPacketProfile = 'explanation-author-packet/1.4';
 export const NarratedHiddenFileAuthorPacketProfile = 'explanation-author-packet/1.5';
 export const SourceCaptureProfile = 'github-pinned-git-blob/1.0';
+export const DeepSourceCaptureProfile='github-pinned-git-blob/1.1';
 export const NarratedProfile = 'explanation-session-huihui/1.0';
 export const StartInput = z.union([
   Protocol.extend({request: SilentRequest, packetProfile: z.literal(ExplanationAuthorPacketProfile).optional()}),
@@ -96,6 +98,7 @@ export const StartInput = z.union([
     sourceCaptureProfile: z.literal(SourceCaptureProfile)}),
   Protocol.extend({request: NarratedHiddenFileRequest, packetProfile: z.literal(NarratedHiddenFileAuthorPacketProfile),
     sourceCaptureProfile: z.literal(SourceCaptureProfile)}),
+  Protocol.extend({request:DeepSourcePathsRequest,packetProfile:z.literal(SourcePathsAuthorPacketProfile),sourceCaptureProfile:z.literal(DeepSourceCaptureProfile)}),
 ]);
 export const AuthorInput = Protocol.extend({submission: SessionSubmission});
 const renderFields = {factReviewReceipt: FactReviewReceipt.optional(), authorTaskId: Hash, plan: HistoricalPresentationPlan, planTaskId: Hash,

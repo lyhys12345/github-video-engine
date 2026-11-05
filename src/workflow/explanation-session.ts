@@ -22,7 +22,7 @@ import {authoringPacket, loadAuthoringProposal, submitParsedAuthoringProposal, v
 import {checkDatabaseFiles} from './cli.js';
 import {AuthorInput, AuthorReceipt, ExplanationAuthorPacketProfile, HiddenFileAuthorPacketProfile, NarratedHiddenFileAuthorPacketProfile, HiddenNarratedRenderSpec, LocalizedNarratedAuthorPacketProfile, NarratedProfile,
   NarratedRenderInput, NarratedRenderReceipt, NarratedRenderSpec, PreparedRevisionInput, RenderInput, RenderReceipt, Request, RevisionInput, RevisionReceipt, RevisionSpec, StartInput,
-  SourceCaptureProfile, SourcePathsAuthorPacketProfile, StartReceipt, SessionSubmission, VoicePrepareInput, VoicePrepareReceipt} from './explanation-contract.js';
+  SourceCaptureProfile, DeepSourceCaptureProfile, SourcePathsAuthorPacketProfile, StartReceipt, SessionSubmission, VoicePrepareInput, VoicePrepareReceipt} from './explanation-contract.js';
 import {explanationAuthorPacket} from './explanation-author-packet.js';
 import {evidenceWorkspace} from './project-evidence.js';
 import {sourceFingerprint, validateSnapshot, WorkflowStore} from './store.js';
@@ -449,7 +449,7 @@ async function executeStart(data: string, input: StartInput, signal: AbortSignal
     const {request} = input;
     const base = await researchRepository(request.repository, request.ref, request.documents, transport, child);
     const snapshot = 'sourcePaths' in request
-      ? validateSnapshot(await captureRepositoryText(base, request.sourcePaths, child, transport))
+      ? validateSnapshot(await captureRepositoryText(base, request.sourcePaths, child, transport,request.schemaVersion==='explanation-session-request/1.5'?DeepSourceCaptureProfile:SourceCaptureProfile))
       : base;
     const material = packet(id, input, snapshot);
     const artifact = await runner.artifacts.commit(json(snapshot), 'application/json', 'PUBLISH', id);
@@ -613,7 +613,7 @@ export async function startExplanation(data: string, path: string, out: string, 
   transport?: ReadonlyTransport) {
   const request = await spec(Request, path, 12_000);
   const input = StartInput.parse('sourcePaths' in request
-    ? {profile: PROFILE, request, sourceCaptureProfile: SourceCaptureProfile,
+    ? {profile: PROFILE, request, sourceCaptureProfile: request.schemaVersion==='explanation-session-request/1.5'?DeepSourceCaptureProfile:SourceCaptureProfile,
       packetProfile: request.schemaVersion === 'explanation-session-request/1.4' ? NarratedHiddenFileAuthorPacketProfile :
         request.schemaVersion === 'explanation-session-request/1.3' ? HiddenFileAuthorPacketProfile : SourcePathsAuthorPacketProfile}
     : {profile: PROFILE, request,

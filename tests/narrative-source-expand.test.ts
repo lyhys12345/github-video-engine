@@ -40,6 +40,16 @@ it('preserves existing fixed source paths when a later expansion adds another fi
  await expandNarrativeSource(f.old,f.out,[],['src/new.ts'],new AbortController().signal);
  expect(mocks.run.mock.calls[0]![6]).toEqual({ref:f.binding.commit,documents:['guide.md'],sourcePaths:['src/old.js','src/new.ts']});
 });
+it('requires explicit deep opt-in and retains it when expanding a deep parent',async()=>{
+ const f=await fixture(),deepPath='pkgs/core/src/helper/index.ts';
+ await expect(expandNarrativeSource(f.old,f.out,[],[deepPath],new AbortController().signal)).rejects.toThrow();
+ await expandNarrativeSource(f.old,f.out,[],[deepPath],new AbortController().signal,undefined,'deep');
+ expect(mocks.run.mock.calls[0]![6]).toMatchObject({sourceDepth:'deep',sourcePaths:[deepPath]});
+ const request={...f.request,schemaVersion:'explanation-session-request/1.5',sourceDepth:'deep',ref:f.binding.commit,sourcePaths:[deepPath]};
+ await writeFile(join(f.old,'request.json'),canonical(request));mocks.capture.mockResolvedValue({manifest:{binding:f.binding,request}});
+ await expandNarrativeSource(f.old,join(f.root,'next'),[],['src/extra.ts'],new AbortController().signal);
+ expect(mocks.run.mock.calls[1]![6]).toMatchObject({sourceDepth:'deep',sourcePaths:[deepPath,'src/extra.ts']});
+});
 it('refuses changed original request, custom preferences and mismatched provenance without overwriting history',async()=>{
  const f=await fixture();
  await writeFile(join(f.old,'request.json'),canonical({...f.request,ref:'new-head'}));await expect(expandNarrativeSource(f.old,f.out,[],['x.js'],new AbortController().signal)).rejects.toThrow('binding');

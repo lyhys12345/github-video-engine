@@ -36,6 +36,11 @@ export const TextCapturePath = z.string().max(160)
     const parts = path.split('/');
     return parts.length <= TextCaptureLimits.pathComponents && parts.every(part => part && part !== '.' && part !== '..');
   });
+export const DeepTextCaptureLimits={...TextCaptureLimits,pathComponents:8} as const;
+export const DeepTextCapturePath=z.string().max(160)
+ .regex(/^[A-Za-z0-9_.\/-]+\.(?:md|txt|js|mjs|cjs|ts|tsx|jsx|py|rs|go|json)$/i)
+ .refine(path=>{const parts=path.split('/');return parts.length<=DeepTextCaptureLimits.pathComponents&&parts.every(part=>part&&part!=='.'&&part!=='..');});
+export const PinnedTextCaptureProfile=z.enum(['github-pinned-git-blob/1.0','github-pinned-git-blob/1.1']);
 
 const gitHash = z.string().regex(/^[a-f0-9]{40}$/);
 const gitCommit = z.object({sha: gitHash, tree: z.object({sha: gitHash})});
@@ -43,10 +48,12 @@ const gitTree = z.object({sha: gitHash, truncated: z.boolean(), tree: z.array(z.
 const gitBlob = z.object({sha: gitHash, encoding: z.literal('base64'), size: z.number().int().min(1).max(TextCaptureLimits.fileBytes), content: z.string()});
 
 /** Explicit bounded text reads at the existing commit. Each path is resolved through ordinary Git tree entries. */
-export async function captureRepositoryText(snapshot: RepositorySnapshot, requested: string[], signal: AbortSignal, transport: ReadonlyTransport = githubGetJson) {
+export async function captureRepositoryText(snapshot: RepositorySnapshot, requested: string[], signal: AbortSignal, transport: ReadonlyTransport = githubGetJson, profile:z.infer<typeof PinnedTextCaptureProfile>='github-pinned-git-blob/1.0') {
+  PinnedTextCaptureProfile.parse(profile);
+  const pathSchema=profile==='github-pinned-git-blob/1.1'?DeepTextCapturePath:TextCapturePath;
   const {filesPerRequest, totalFiles, fileBytes, totalBytes} = TextCaptureLimits;
   if (requested.length < 1 || requested.length > filesPerRequest || new Set(requested).size !== requested.length ||
-      requested.some(path => !TextCapturePath.safeParse(path).success || snapshot.documents.some(document => document.path === path))) {
+      requested.some(path => !pathSchema.safeParse(path).success || snapshot.documents.some(document => document.path === path))) {
     throw new EngineError('SOURCE_PATH', 'Request one to three unique, safe, uncaptured repository text paths');
   }
   const documents = [...snapshot.documents];

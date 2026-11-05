@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "workspace-quote-edit-evidence/1.0",
+  "sourceBase": "b9e4b73",
+  "workspace": "C:/Users/luyuh/Documents/Codex/gve-qe",
+  "request": {
+    "schemaVersion": "workspace-narration-quote-edit/1.0",
+    "expectedCurrentResultSha256": "88e49e6d03443f6f26235e5b80ca19a10ee8bdacbcf6fe98241f1dc9cbdf512a",
+    "oldText": "美元符和问号需要转义。",
+    "newText": "用户文本里的特殊字符，需要先转义。"
+  },
+  "currentEditTaskId": "e2260925ded35dd13895528d2736370a92d008800a7e2ddac5697263424424e2",
+  "scope": "Session agent authored exact quote replacement; no model interpretation or approval",
+  "previews": [
+    {
+      "label": "baseline",
+      "taskId": "c9b0a614916470d6da80f5ac4e4f0ca8dfd0e71eec44521abf1ca945dba4063a",
+      "sha256": "cc33d5545c905231b96f59c5a48993fa6aa432742269ca3183a9862abfe51676",
+      "engineCodeHash": "28cc5d1fcc10f9042bcc6477a069c9a009a94ed646bd90d2377604055867120e",
+      "frames": 2250,
+      "seconds": 75,
+      "completeRecordings": 7,
+      "captions": 7,
+      "checkedCaptionBoundaries": 28
+    },
+    {
+      "label": "edited",
+      "taskId": "e2260925ded35dd13895528d2736370a92d008800a7e2ddac5697263424424e2",
+      "sha256": "2408e0fb7299613ab49f6ff352cdbab16721cad90144d9811fdf6714d92bfc64",
+      "engineCodeHash": "757affc5123f31d6c330633f4b09cc831941d7d37154fce30c0e78a8f6e1a79d",
+      "frames": 2250,
+      "seconds": 75,
+      "completeRecordings": 7,
+      "captions": 7,
+      "checkedCaptionBoundaries": 28
+    }
+  ],
+  "retry": {
+    "status": "existing-edit-checkpoint",
+    "actionsExecuted": 0,
+    "task": "e2260925ded35dd13895528d2736370a92d008800a7e2ddac5697263424424e2"
+  },
+  "staleRequestRejected": "Error: Requested checkpoint is stale; no candidate was created.",
+  "staleOutputCreated": false,
+  "staleTaskCountUnchanged": true,
+  "originalAuthorUnchanged": true,
+  "softwareVersionSourceRefresh": true,
+  "speechCache": [
+    {
+      "sceneId": "scene-hook",
+      "generation": false,
+      "import": false
+    },
+    {
+      "sceneId": "scene-context",
+      "generation": true,
+      "import": true
+    },
+    {
+      "sceneId": "scene-mechanism",
+      "generation": true,
+      "import": true
+    },
+    {
+      "sceneId": "scene-example",
+      "generation": true,
+      "import": true
+    },
+    {
+      "sceneId": "scene-limitation",
+      "generation": true,
+      "import": true
+    },
+    {
+      "sceneId": "scene-benefit",
+      "generation": true,
+      "import": true
+    },
+    {
+      "sceneId": "scene-closing",
+      "generation": true,
+      "import": true
+    }
+  ],
+  "tests": {
+    "typecheck": "PASS",
+    "targeted": "10 PASS",
+    "fullRegression": "NOT RUN",
+    "judges": "NOT RUN"
+  },
+  "facts": "pending",
+  "naturalListening": "not performed",
+  "ownerAcceptance": "pending",
+  "evidenceDirectory": "C:/Users/luyuh/Documents/Codex/gve-prose-edit-builder/work/prose-edit-v1"
+}
