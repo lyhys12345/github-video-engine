@@ -173,16 +173,21 @@ export async function publishAssetFiles(data:string,id:string,out:string,files:R
  const receiptMode=publication===RECEIPT_PUBLICATION;
  const version=receiptMode?'3.0':'2.0';
  const Owner=z.object({schemaVersion:z.literal(version),taskId:hash,output:z.string(),
-  payloadSha256:hash,token:z.string().uuid()}).strict();
+  payloadSha256:hash,token:z.string().uuid(),pathLayout:z.literal('compact-v1').optional()}).strict();
  let reserved=false;
  try{await mkdir(out);reserved=true;}
  catch(error){if((error as NodeJS.ErrnoException).code!=='EEXIST')throw error;}
- if(reserved)await writeFile(marker,json({schemaVersion:version,taskId:id,output:out,payloadSha256,token:randomUUID()}),{flag:'wx'});
+ // Windows SQLite/mkdtemp still have short-path limits even when ordinary
+ // file I/O supports longer names. Only new deep receipt exports opt in;
+ // existing ownership records retain their exact historical names.
+ const compact=receiptMode&&process.platform==='win32'&&join(out,'.asset-staging-'+'0'.repeat(36)+'-'+'0'.repeat(6)).length>240;
+ if(reserved)await writeFile(marker,json({schemaVersion:version,taskId:id,output:out,payloadSha256,token:randomUUID(),...(compact?{pathLayout:'compact-v1'}:{})}),{flag:'wx'});
  const readOwner=async()=>{try{return Owner.parse(parse(await boundedFile(marker,4096)));}catch{throw refuse();}};
  const owner=await readOwner();
  if(owner.taskId!==id||owner.output!==out||owner.payloadSha256!==payloadSha256)throw refuse();
- const lockName=`.asset-lock-${owner.token}.sqlite`, stagePrefix=`.asset-staging-${owner.token}-`;
- const receiptPrefix=`.asset-published-${owner.token}-`, draftPrefix=`.asset-draft-${owner.token}-`;
+ const compactOwner=receiptMode&&owner.pathLayout==='compact-v1',shortToken=owner.token.replaceAll('-','').slice(0,12);
+ const lockName=compactOwner?`.l-${shortToken}.sqlite`:`.asset-lock-${owner.token}.sqlite`, stagePrefix=compactOwner?`.s-${shortToken}-`:`.asset-staging-${owner.token}-`;
+ const receiptPrefix=compactOwner?`.p-${shortToken}-`:`.asset-published-${owner.token}-`, draftPrefix=compactOwner?`.d-${shortToken}-`:`.asset-draft-${owner.token}-`;
  const isNamedJson=(name:string,prefix:string)=>name.startsWith(prefix)&&/^[A-Za-z0-9]{6}\.json$/.test(name.slice(prefix.length));
  const receiptBytes=(suffix:string)=>Buffer.from(json({schemaVersion:'1.0',publication:RECEIPT_PUBLICATION,
   taskId:id,bundle:stagePrefix+suffix,payloadSha256,files:entries}));

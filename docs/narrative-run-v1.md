@@ -37,7 +37,7 @@ Change an author data file and rerun. Exact byte changes create a new candidate/
 
 Tested: changing labels in two different animation scenes produces new source-animation and narrated-preview tasks and actual different MP4/packet hashes, while reusing unchanged Story, plan, card and all complete recordings. Story/narrative prose or timing edits must update their owning source-bound files and caption character ranges; changed speech requires a complete new exact recording. Unsupported operations/layouts are not accepted just because an author edited JSON. Final facts, listening, alignment, continuous AV and owner approval stay pending.
 
-Keep workspace paths short on Windows: deeply nested paths can still hit underlying SQLite publication limits. An initial long-directory publication failure was retained; after shortening candidate display keys, the same committed Story/plan tasks resumed with cache hits. No forced mid-render process-kill recovery was tested.
+Keep workspace paths reasonably short on Windows: arbitrary nesting can still exceed OS limits. New deep receipt exports now use compact internal lock/staging/receipt names when the historical staging path would exceed240 characters. The owner still records its full UUID, task identity and payload hash; receipts still bind every exact file. Existing exports retain their historical names and exact-input reuse. This removes the observed later planning/publication failure in a realistic deep project workspace without relocating the workspace; it does not remove all Windows path limits. No forced mid-render process-kill recovery was tested.
 
 ## Actual new-directory Marked run
 
