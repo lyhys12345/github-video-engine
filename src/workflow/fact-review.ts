@@ -34,3 +34,11 @@ export function verifyFactReview(packetValue:ReturnType<typeof storyFactReview>,
  if(seen.size!==expected.size)fail('Incomplete claim/narration/visual coverage');
  return {status:receipt.items.every(i=>i.verdict==='supported')?'attributed-review-complete':'review-unresolved',reviewer:receipt.reviewer,receiptHash:sha256(canonical(receipt)),candidateHash:receipt.candidateHash,packetHash,semanticTruth:'not-machine-verified',identityAuthentication:'not-provided',approval:'none',unresolved:receipt.items.filter(i=>i.verdict!=='supported').map(i=>i.id)};
 }
+
+/** Adds every authored parameter/caption to the review; no frame or listening judgment. */
+export function presentationFactReview(proposal:StoredStoryProposal,sources:Source[],presentation:unknown){
+ const base=proposalFactReview(proposal,sources);
+ const {packetHash,...content}=base;
+ const next={...content,candidateHash:sha256(canonical({proposal,presentation})),units:[...base.units,{id:'authored-presentation',kind:'presentation',text:canonical(presentation),claimIds:[]}],requiredItems:[...base.requiredItems,'authored-presentation']};
+ return {...next,packetHash:sha256(canonical(next))};
+}

@@ -1,3 +1,4 @@
+import {FactReviewReceipt} from './fact-review.js';
 import {z} from 'zod';
 import {AuthoringBinding, HiddenFileStoryProposal, StoryProposal} from '../contracts/authoring.js';
 import {HiddenFileCapability} from '../contracts/hidden-file-policy.js';
@@ -97,7 +98,7 @@ export const StartInput = z.union([
     sourceCaptureProfile: z.literal(SourceCaptureProfile)}),
 ]);
 export const AuthorInput = Protocol.extend({submission: SessionSubmission});
-const renderFields = {authorTaskId: Hash, plan: HistoricalPresentationPlan, planTaskId: Hash,
+const renderFields = {factReviewReceipt: FactReviewReceipt.optional(), authorTaskId: Hash, plan: HistoricalPresentationPlan, planTaskId: Hash,
   planManifestSha256: Hash, rendererEnvironment: z.record(z.string(), z.string())};
 export const RenderInput = z.union([Protocol.extend(renderFields),
   Protocol.extend({...renderFields, plan: HiddenFilePlan, capabilityProfile: z.literal(HiddenFileCapability)})]);

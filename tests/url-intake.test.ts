@@ -6,7 +6,7 @@ import {join} from 'node:path';
 import {z} from 'zod';
 import {workflowCommand} from '../src/workflow/cli.js';
 import {explanationCommand} from '../src/workflow/explanation-cli.js';
-import {proposalFactReview} from '../src/workflow/fact-review.js';
+import {proposalFactReview, presentationFactReview, verifyFactReview} from '../src/workflow/fact-review.js';
 import {StorySchema} from '../src/contracts/story.js';
 import {statusStory, exportStory} from '../src/story-planner/runtime.js';
 import {ArtifactStore} from '../src/assets/store.js';
@@ -171,6 +171,33 @@ it('separates hidden-file authoring, derives pruned descendants, and refuses amb
   await writeSpec(plan);
   await expect(renderExplanation(data, acceptedNarration.taskId, spec, signal))
     .rejects.toMatchObject({code: 'EXPLANATION_VOICE_MODE'});
+  // Full presentation receipt must bind parameters, not only the proposal.
+  const presentationPath=join(root,'review-presentation.json');
+  await writeFile(presentationPath,JSON.stringify({mode:'silent',plan}));
+  const pf=await explanationCommand(['explanation','fact-review'],{data,task:accepted.taskId,out:join(root,'presentation-facts'),presentation:presentationPath},signal) as any;
+  const pp=JSON.parse(await readFile(join(pf.output.bundle,'fact-review-packet.json'),'utf8'));
+  expect(pp.requiredItems).toContain('authored-presentation');
+  const boundPresentation={mode:'narrated',spec:{plan,voicePreparationManifestSha256:'1'.repeat(64),offsets:[{beatId:'default',startOffsetFrames:0,captions:[{text:'Visible caption',startFrame:0,endFrame:30}]}]}};
+  const sourceRows=[{id:'source-2',url:'https://github.com/example/demo',sha256:sha256(sources[0]!),bytes:sources[0]!}];
+  const boundPacket=presentationFactReview(draft.proposal,sourceRows,boundPresentation);
+  const boundReceipt={schemaVersion:'fact-review-receipt/1.0',candidateHash:boundPacket.candidateHash,packetHash:boundPacket.packetHash,reviewer:{kind:'session-agent',identity:'TEST ONLY'},items:boundPacket.requiredItems.map(id=>({id,verdict:'supported',reason:'TEST ONLY',limitations:'No factual conclusion'}))};
+  for(const mutate of [
+    (p:any)=>{p.spec.voicePreparationManifestSha256='2'.repeat(64);},
+    (p:any)=>{p.spec.offsets[0].startOffsetFrames=1;},
+    (p:any)=>{p.spec.offsets[0].captions[0].text='Changed factual assertion';},
+    (p:any)=>{p.spec.plan.module.scenario.entries[0].name='different.txt';},
+    (p:any)=>{p.spec.plan.beats[0].events[0].atFrame=1;}
+  ]){const changed=structuredClone(boundPresentation);mutate(changed);expect(()=>verifyFactReview(presentationFactReview(draft.proposal,sourceRows,changed),boundReceipt)).toThrow('Stale');}
+  const manuscript=structuredClone(draft.proposal);manuscript.beats[0].narration+=' Added assertion';
+  expect(()=>verifyFactReview(presentationFactReview(manuscript,sourceRows,boundPresentation),boundReceipt)).toThrow('Stale');
+  const pr={schemaVersion:'fact-review-receipt/1.0',candidateHash:pp.candidateHash,packetHash:pp.packetHash,reviewer:{kind:'session-agent',identity:'TEST ONLY; no factual judgment'},items:pp.requiredItems.map((id:string)=>({id,verdict:'unverified',reason:'Synthetic validation only',limitations:'Not semantic review'}))};
+  const receiptPath=join(root,'presentation-receipt.json');
+  await writeFile(receiptPath,JSON.stringify(pr));await writeSpec(plan);
+  await expect(explanationCommand(['explanation','render'],{data,task:accepted.taskId,spec,review:receiptPath},signal)).rejects.toMatchObject({code:'EXPLANATION_FACT_REVIEW'});
+  pr.items.forEach((i:any)=>{i.verdict='supported';});
+  const changed=structuredClone(plan);changed.beats[0]!.frames=91;
+  await writeFile(receiptPath,JSON.stringify(pr));await writeSpec(changed);
+  await expect(explanationCommand(['explanation','render'],{data,task:accepted.taskId,spec,review:receiptPath},signal)).rejects.toMatchObject({code:'FACT_REVIEW'});
   const revision = {schemaVersion: 'explanation-revision/1.0', kind: 'presentation',
     reason: 'Clarify the synthetic comparison', expectedBaseManifestSha256: '0'.repeat(64),
     presentation: {mode: 'silent', plan}};

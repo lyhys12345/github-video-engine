@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "review-binding-freeze/2.0",
+  "candidate": "review-binding-c2",
+  "supersedes": "review-binding-c1 packaging only; C1 retained",
+  "commit": "3236062258f2c02cdc6f702d799de0a9a16a8eba",
+  "frozenAt": "2026-11-05T05:22:34.203Z",
+  "sourceFiles": 689,
+  "sourceManifestSha256": "b0194237006610ade793c4f816bf7f626c329c74f75a3fb2a7e38fbce879fa19",
+  "sourceArchiveSha256": "923c40b82e1a694a16abd42efb7adce9ae0047e30c5686c43df59b9e6a19f8f6",
+  "materialsFiles": 886,
+  "materialsManifestSha256": "51895c9560e9e97d8ee2d698300ac0c9a294d6d5b83b62067bb982ba49540369",
+  "rendererCodeHash": "0878c28fee4e25b963c5f69cd05b62a5c9adf6cb91ffc04ed1ccc225078ab460",
+  "sourceMatchesC1TestedWorktree": true,
+  "archiveMemberMismatches": [],
+  "revalidation": {
+    "frozenSourceTypecheck": "PASS",
+    "frozenSourceFocused": "27 PASS",
+    "actualTwoProjectPublicCli": "cached:true; identical checkpoints",
+    "twoProjectResume": "cached:true",
+    "freshTwoProjectExports": "PASS; same attributed receipts",
+    "freshExportMediaDecode": "PASS",
+    "fullRegression": "440 PASS across 48 files on byte-identical tested worktree; raw log copied, no second full run",
+    "mechanism": "2 PASS / 1 SKIP retained"
+  },
+  "checkpoints": [
+    {
+      "id": "fastify",
+      "taskId": "8515ea8cc4f8b34f4d6165b2f4b7ea79c7a5ef0f382ff4bc9fff8b9d116a3993",
+      "receiptHash": "ff544b6bb6af31f506f5d870f9d83afa353cd8953c010d77a0c848a03fe18be5"
+    },
+    {
+      "id": "fd",
+      "taskId": "eb8b0d513db66be3a552a67e14fc9f42200a31f896b2f3f9e13369c72ec716a3",
+      "receiptHash": "3b7f0c5ee1f403b0cb9653b721cf8715e624ff21b39a54187b2de81d20c6fff3"
+    }
+  ],
+  "limits": [
+    "No actual listening or rendered-pixel review",
+    "Final owner acceptance pending",
+    "Attributed reviewer identity unauthenticated; approval:none"
+  ]
+}

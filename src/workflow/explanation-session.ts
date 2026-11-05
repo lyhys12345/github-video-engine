@@ -27,7 +27,7 @@ import {explanationAuthorPacket} from './explanation-author-packet.js';
 import {evidenceWorkspace} from './project-evidence.js';
 import {sourceFingerprint, validateSnapshot, WorkflowStore} from './store.js';
 import {ZH_VISUAL_PROFILE} from '../presentation/visual-locale.js';
-import {proposalFactReview, verifyFactReview, FactReviewReceipt} from './fact-review.js';
+import {proposalFactReview, presentationFactReview, verifyFactReview, FactReviewReceipt} from './fact-review.js';
 
 const START = 'repository-explanation-start-v1';
 const AUTHOR = 'repository-explanation-author-v1';
@@ -374,6 +374,17 @@ function narrationBindings(voice: Awaited<ReturnType<typeof verifiedVoicePrepara
   return spec;
 }
 
+function presentationReview(author:VerifiedAuthor,input:RenderInput | NarratedRenderInput,files?:Map<string,Buffer>){
+ if(!input.factReviewReceipt)return {};
+ if(author.submission.disposition!=='proposal')return fail('FACT_REVIEW','A proposal is required.');
+ const workspace=author.parent.workspace;
+ const packet=presentationFactReview(author.submission.proposal,workspace.manifest.sources.map(s=>({...s,bytes:workspace.files.get(s.path)!})),renderPresentationSpec(input));
+ const result=verifyFactReview(packet,input.factReviewReceipt);
+ if(result.status!=='attributed-review-complete')return fail('FACT_REVIEW','Review is unresolved; create an explicitly unreviewed preview without --review or supply a complete new receipt.');
+ if(files){files.set('fact-review/packet.json',json(packet));files.set('fact-review/receipt.json',json(input.factReviewReceipt));files.set('fact-review/result.json',json(result));}
+ return {factReview:result};
+}
+
 async function verifiedNarratedRender(data: string, task: TaskRecord, signal: AbortSignal) {
   const input = storedInput(NarratedRenderInput, task);
   const saved = await receipt(NarratedRenderReceipt, data, task, signal);
@@ -395,13 +406,14 @@ async function verifiedNarratedRender(data: string, task: TaskRecord, signal: Ab
     voiceManifestSha256: saved.voiceManifestSha256, previewTaskId: saved.previewTaskId,
     previewManifestSha256: saved.previewManifestSha256, timeline: preview.metadata.timeline,
     ...(input.visualLocaleProfile && {visualLocaleProfile: input.visualLocaleProfile}),
-    review: {...review, ...speechReview}} as const;
+    review: {...review, ...speechReview}, ...presentationReview(voice.author,input)} as const;
   const files = new Map(preview.files);
   files.set('session-manifest.json', json(manifest));
   files.set('start-manifest.json', json(voice.author.parent.manifest));
   files.set('author-manifest.json', json(voice.author.manifest));
   files.set('authoring-submission.json', json(voice.author.submission));
   files.set('voice-preparation.json', json(voice.manifest));
+  presentationReview(voice.author,input,files);
   return {manifest, files};
 }
 
@@ -422,12 +434,13 @@ async function verifiedRender(data: string, task: TaskRecord, signal: AbortSigna
     request: author.manifest.request, proposalHash: author.manifest.proposalHash, planTaskId: input.planTaskId,
     planManifestSha256: input.planManifestSha256, previewTaskId: saved.previewTaskId,
     previewManifestSha256: saved.previewManifestSha256, authorManifestSha256: saved.authorManifestSha256,
-    timeline: preview.metadata.timeline, review} as const;
+    timeline: preview.metadata.timeline, review, ...presentationReview(author,input)} as const;
   const files = new Map(preview.files);
   files.set('session-manifest.json', json(manifest));
   files.set('start-manifest.json', json(author.parent.manifest));
   files.set('author-manifest.json', json(author.manifest));
   files.set('authoring-submission.json', json(author.submission));
+  presentationReview(author,input,files);
   return {manifest, files};
 }
 
@@ -505,6 +518,7 @@ async function executeNarratedRender(data: string, input: NarratedRenderInput, s
   const voice = await verifiedVoicePreparation(data, await readTask(data, input.voicePreparationTaskId, PREPARE_VOICE), signal);
   const spec = narrationBindings(voice, input);
   await verifiedPlan(data, voice.author, input, signal);
+  presentationReview(voice.author,input);
   const result = await run(data, RENDER_NARRATED, input, signal, onTask, async (_runner, _id, child) => {
     if (canonical(await environment()) !== canonical(input.rendererEnvironment)) {
       return fail('ENVIRONMENT', 'Renderer identity changed. Submit the authored narrated plan again.');
@@ -535,6 +549,7 @@ async function executeRender(data: string, input: RenderInput, signal: AbortSign
   const author = await verifiedAuthor(data, await readTask(data, input.authorTaskId, AUTHOR), signal);
   if (author.manifest.request.voiceMode !== 'silent') return fail('VOICE_MODE', 'Use the narrated render checkpoint for Huihui sessions.');
   await verifiedPlan(data, author, input, signal);
+  presentationReview(author,input);
   const result = await run(data, RENDER, input, signal, onTask, async (_runner, _id, child) => {
     if (canonical(await environment()) !== canonical(input.rendererEnvironment)) {
       return fail('ENVIRONMENT', 'Renderer identity changed. Submit the authored plan again to create a new render checkpoint.');
@@ -613,9 +628,9 @@ export async function submitExplanation(data: string, id: string, path: string, 
   return executeAuthor(data, AuthorInput.parse({profile: PROFILE, submission}), signal, onTask);
 }
 
-export async function renderExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce) {
+export async function renderExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce, reviewPath?:string) {
   const plan = await spec(PresentationPlan, path, 160_000);
-  return executeRender(data, await prepareExplanationRender(data, id, plan, signal), signal, onTask);
+  return executeRender(data, {...await prepareExplanationRender(data, id, plan, signal),...await reviewInput(reviewPath)}, signal, onTask);
 }
 
 async function prepareExplanationRender(data: string, id: string, plan: PresentationPlan, signal: AbortSignal) {
@@ -641,9 +656,9 @@ export async function prepareExplanationVoice(data: string, id: string, signal: 
   return executeVoicePreparation(data, input, signal, onTask);
 }
 
-export async function renderNarratedExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce) {
+export async function renderNarratedExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce, reviewPath?:string) {
   const authored = await spec(z.union([NarratedRenderSpec, HiddenNarratedRenderSpec]), path, 170_000);
-  return executeNarratedRender(data, await prepareNarratedExplanationRender(data, id, authored, signal), signal, onTask);
+  return executeNarratedRender(data, {...await prepareNarratedExplanationRender(data, id, authored, signal),...await reviewInput(reviewPath)}, signal, onTask);
 }
 
 async function prepareNarratedExplanationRender(data: string, id: string, authored: z.infer<typeof NarratedRenderSpec | typeof HiddenNarratedRenderSpec>,
@@ -770,6 +785,7 @@ async function verifiedRevision(data: string, task: TaskRecord, signal: AbortSig
     proposalHash: child.manifest.proposalHash, authorTaskId: child.authorTaskId,
     ...(child.voicePreparationTaskId && {voicePreparationTaskId: child.voicePreparationTaskId}),
     kind: input.edit.kind, reason: input.edit.reason, review: child.manifest.review,
+    ...(child.manifest.factReview && {factReview:child.manifest.factReview}),
   };
   const files = new Map(child.files);
   files.set('base-manifest.json', json(base.manifest));
@@ -820,15 +836,16 @@ async function executeRevision(data: string, input: PreparedRevisionInput, signa
   return {...await statusExplanation(data, result.id, signal), cached: result.cached};
 }
 
-export async function reviseExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce) {
+export async function reviseExplanation(data: string, id: string, path: string, signal: AbortSignal, onTask?: Announce, reviewPath?:string) {
   const edit = await spec(RevisionSpec, path, 175_000);
   const baseInput = {baseTaskId: parse(Hash, id), edit};
   const base = await revisionBase(data, baseInput, signal, MAX_REVISION_DEPTH);
   const parents = await revisionParents(data, base.preview, edit, signal);
   const presentation = edit.presentation;
-  const childRender = presentation.mode === 'silent'
+  const preparedRender = presentation.mode === 'silent'
     ? await prepareExplanationRender(data, parents.authorTaskId, presentation.plan, signal)
     : await prepareNarratedExplanationRender(data, parents.voicePreparationTaskId!, presentation.spec, signal);
+  const childRender={...preparedRender,...await reviewInput(reviewPath)};
   return executeRevision(data, PreparedRevisionInput.parse({...baseInput, profile: 'explanation-revision-task/1.1', childRender}),
     signal, onTask);
 }
@@ -855,11 +872,14 @@ export async function exportExplanation(data: string, id: string, out: string, s
 }
 
 /** Separate review sidecar: never mutates historical stage receipts or grants approval. */
-export async function exportExplanationFacts(data:string,id:string,out:string,signal:AbortSignal,receiptPath?:string){
+export async function exportExplanationFacts(data:string,id:string,out:string,signal:AbortSignal,receiptPath?:string,presentationPath?:string){
  const author=await verifiedAuthor(data,await readTask(data,id,AUTHOR),signal);
  if(author.submission.disposition!=='proposal')return fail('FACT_REVIEW','Select a proposal checkpoint.');
  const workspace=author.parent.workspace;
- const packet=proposalFactReview(author.submission.proposal,workspace.manifest.sources.map(s=>({...s,bytes:workspace.files.get(s.path)!})));
+ const sources=workspace.manifest.sources.map(s=>({...s,bytes:workspace.files.get(s.path)!}));
+ const presentation=presentationPath?await spec(ReviewPresentation,presentationPath,175_000):undefined;
+ if(presentation)checkPlan(author,presentation.mode==='silent'?presentation.plan:presentation.spec.plan);
+ const packet=presentation?presentationFactReview(author.submission.proposal,sources,presentation):proposalFactReview(author.submission.proposal,sources);
  const files=new Map<string,Buffer>([['fact-review-packet.json',json(packet)],['fact-review-receipt.schema.json',json(z.toJSONSchema(FactReviewReceipt))]]);
  let result:unknown={status:'pending-independent-review',semanticTruth:'not-machine-verified',approval:'none'};
  if(receiptPath){const raw=decode(await boundedFile(resolve(receiptPath),4_000_000));result=verifyFactReview(packet,raw);files.set('fact-review-receipt.json',json(FactReviewReceipt.parse(raw)));}
@@ -867,3 +887,9 @@ export async function exportExplanationFacts(data:string,id:string,out:string,si
  checkAbort(signal);
  return {taskId:id,packetHash:packet.packetHash,result,output:await publishAssetFiles(data,id,out,files,signal,RECEIPT_PUBLICATION)};
 }
+
+const ReviewPresentation=z.union([
+ z.strictObject({mode:z.literal('silent'),plan:PresentationPlan}),
+ z.strictObject({mode:z.literal('narrated'),spec:z.union([NarratedRenderSpec,HiddenNarratedRenderSpec])})
+]);
+async function reviewInput(path?:string){return path?{factReviewReceipt:await spec(FactReviewReceipt,path,4_000_000)}:{};}
