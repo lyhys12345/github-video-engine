@@ -1,4 +1,5 @@
 import {narrativeAuthorRevisionCommand} from './narrative-author-revision.js';
+import {narrativeSourceExpandCommand} from './narrative-source-expand.js';
 import {narrativeWorkspaceCommand} from './narrative-workspace.js';
 import {narrativeRunCommand} from './narrative-run.js';
 import {projectPortableCommand} from './project-portable.js';
@@ -18,6 +19,7 @@ const usage = 'explanation start --spec <request> --data <state> --out <packet> 
 
 export async function explanationCommand(positionals: string[], values: Record<string, unknown>, signal: AbortSignal) {
   const action = positionals[1];
+  if(action==='source-expand')return narrativeSourceExpandCommand(positionals,values,signal);
   if(action==='workspace-status')return narrativeWorkspaceCommand(positionals,values,signal);
   if(action==='run-revise')return narrativeAuthorRevisionCommand(positionals,values,signal);
   if(action==='run')return narrativeRunCommand(positionals,values,signal);

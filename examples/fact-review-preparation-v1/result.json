@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "fact-review-preparation-evidence/1.0",
+  "sourceBase": "7484ddd",
+  "scope": "Evidence preparation only. No real review or attribution was started; no rendering or semantic approval.",
+  "records": [
+    {
+      "project": "escape",
+      "previewTaskId": "cc5087ea0d1f5613a9ad4233b7c0732966797cd69b53f0c7d920bf4b0a01cd8b",
+      "packetHash": "0e3b1fe3ff5b8e000dd58b81f02191a0ab7956662c8d31715159deb40978dcba",
+      "candidateHash": "6eeba04e931e9ca48eed3c2f51ca207833829e3ad526afd282c8e7bd9153ed43",
+      "sources": [
+        {
+          "id": "source-1",
+          "sha256": "cb79427055ab184af8b9bbdaf1061030a6e37ee2c7c1ee88b575d9fb3cc28c86",
+          "bytes": 1155,
+          "lineCount": 28
+        },
+        {
+          "id": "source-2",
+          "sha256": "af2065ad2f2d2b91946c2121e21618daa3f4b18787af9226f8c953ca54cca2f5",
+          "bytes": 469,
+          "lineCount": 12
+        }
+      ],
+      "items": 56,
+      "unlinkedTextItems": 1,
+      "allRawSourcesExact": true,
+      "allItemTextsExact": true,
+      "allDraftItemsUnverified": true,
+      "draftRejectedByActualReceiptSchema": true,
+      "reviewer": null,
+      "originalPreviewReview": "pending",
+      "reviewTasksBefore": 0,
+      "reviewTasksAfter": 0,
+      "newReviewTasks": 0,
+      "relocatedBytesIdentical": true,
+      "changedPreview": {
+        "taskId": "c9b0a614916470d6da80f5ac4e4f0ca8dfd0e71eec44521abf1ca945dba4063a",
+        "packetHash": "04ddd6d992a43da8b869e6b173d022a79da43da70c94a7f3116dd57013ec4be8",
+        "candidateHash": "84852ae2e90297b1edd2d1aca730007033dac11606d2267cdda489f38d16d5f1"
+      },
+      "worksheetBundle": "C:\\Users\\luyuh\\Documents\\Codex\\gve-fact-loop-builder\\work\\fact-worksheet-v1\\escape\\worksheet\\.asset-staging-01bb6338-8188-42db-8322-909a81ee53b3-VkSObV",
+      "reviewStatus": "pending; no semantic reviewer or Judge run",
+      "openIndex": "C:\\Users\\luyuh\\Documents\\Codex\\gve-fact-loop-builder\\work\\fact-worksheet-v1\\escape\\open\\index.html"
+    },
+    {
+      "project": "rembg",
+      "previewTaskId": "3d42cdf6076f90fd987e095a716ef53491853432e7f9025b41037792d5e1ebe9",
+      "packetHash": "ef536f8ed1e460e3bd40225d267844052ce8a226fbea49a97b61c36216e3a27d",
+      "candidateHash": "ea4d5a950593fdbf07b517a4b22aa4b451cea4fc9a2d1de1e1d8d21fa77c9c30",
+      "sources": [
+        {
+          "id": "source-1",
+          "sha256": "8455c52c60130199ab61858d359f2d25440dd95772844e2b3a037e490b31179d",
+          "bytes": 27006,
+          "lineCount": 603
+        },
+        {
+          "id": "source-2",
+          "sha256": "90a3215072968fd304669c5389f04f1274a587abdd0507d99dead0f5511f8999",
+          "bytes": 1069,
+          "lineCount": 22
+        },
+        {
+          "id": "source-3",
+          "sha256": "2e1977b6d16d5369e2c20c5ca5d9ba2e2c0228f8beef39c5d2296df1879df62b",
+          "bytes": 14502,
+          "lineCount": 398
+        }
+      ],
+      "items": 63,
+      "unlinkedTextItems": 8,
+      "allRawSourcesExact": true,
+      "allItemTextsExact": true,
+      "allDraftItemsUnverified": true,
+      "draftRejectedByActualReceiptSchema": true,
+      "reviewer": null,
+      "originalPreviewReview": "pending",
+      "reviewTasksBefore": 0,
+      "reviewTasksAfter": 0,
+      "newReviewTasks": 0,
+      "relocatedBytesIdentical": true,
+      "changedPreview": null,
+      "worksheetBundle": "C:\\Users\\luyuh\\Documents\\Codex\\gve-fact-loop-builder\\work\\fact-worksheet-v1\\rembg\\worksheet\\.asset-staging-3c89dd12-5be5-4d39-8b73-7c01a2c456f2-ucKTBe",
+      "reviewStatus": "pending; no semantic reviewer or Judge run",
+      "openIndex": "C:\\Users\\luyuh\\Documents\\Codex\\gve-fact-loop-builder\\work\\fact-worksheet-v1\\rembg\\open\\index.html"
+    }
+  ],
+  "tests": {
+    "typecheck": "PASS",
+    "targetedFactReview": "20 PASS",
+    "fullRegression": "NOT RUN",
+    "semanticReview": "NOT STARTED",
+    "judges": "NOT STARTED"
+  },
+  "evidenceDirectory": "C:/Users/luyuh/Documents/Codex/gve-fact-loop-builder/work/fact-worksheet-v1"
+}
