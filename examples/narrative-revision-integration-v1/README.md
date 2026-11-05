@@ -1,0 +1,14 @@
+# Actual complete-preview narration edit integration
+
+Validated on source base `d23f24e` in an isolated checkout and read-only snapshot of the real escape-string-regexp project. The existing engine passed the full edit chain without a runtime/CLI source fix:
+
+1. Produce the current-version complete editable technical baseline using `explanation run ... --through preview`.
+2. Run the actual CLI `explanation run-revise --author BASE --spec PATCH --out CANDIDATE`, with an explicit new first-scene script and exact old author/shot hashes.
+3. Run `explanation run ... --author CANDIDATE/author --through speech`; require measured whole-recording and authored caption readiness.
+4. Run through `preview`, then repeat the same command to validate exact output cache reuse.
+
+Both baseline and modified previews are75seconds,2250frames,7complete produced scenes and7recordings. Only the first script changed, to `美元符和问号需要转义。`. Existing visual timing was retained by the standard whole-shot compilation policy; no speech stretching, truncation or automatic measured-duration padding was introduced. The remaining six Story/asset/source-preview caches and six speech caches were reused. The first source scene and final assembly changed; exact final repeat was cached. The old task/export and original author's exact hash remain valid.
+
+The generic checker `node --import tsx examples/narrative-revision-integration-v1/verify.ts EVIDENCE_DIRECTORY` validates already-produced baseline/edit results; it does not synthesize or render movies. It decodes every full local recording and requires mixed PCM to equal exact whole recordings plus silence, checks exact caption text/line closure and each cue's first/last/adjacent rendered boundary frame, probes actual H264/AAC frame count/duration, and revalidates retained tasks and movie hashes. See result.json for recorded task/media hashes and raw evidence location. Both75-second movies and their full editable exports remain in the owning isolated workspace, and friendly copies are in the evidence directory as baseline.mp4/edited.mp4.
+
+Actual artifacts: C:/Users/luyuh/Documents/Codex/gve-revoice-preview-builder/work/revoice-preview-v1/media-verification.json; editable workspace C:/Users/luyuh/Documents/Codex/gve-rvp-e; changed author C:/Users/luyuh/Documents/Codex/gve-rvp-e/revision/author. The source workspace C:/Users/luyuh/Documents/Codex/gve-e was only read/copied via readonly SQLite backups and immutable CAS copying. No target code, paid provider, Judge, full regression or formal film was executed. Source semantics, word alignment, natural listening/continuous perceptual AV and final owner acceptance remain pending. Sampled builder inspection saw the changed and original caption text in the reserved caption area; this is not an independent review or player/listening approval.

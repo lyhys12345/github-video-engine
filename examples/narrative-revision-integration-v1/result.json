@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "narration-revision-integration-result/1.0",
+  "sourceBase": "d23f24e",
+  "engineSourceCodeHash": "28cc5d1fcc10f9042bcc6477a069c9a009a94ed646bd90d2377604055867120e",
+  "workspace": "C:/Users/luyuh/Documents/Codex/gve-rvp-e",
+  "originalWorkspace": "C:/Users/luyuh/Documents/Codex/gve-e",
+  "originalAuthorSha256": "3292867ceb1c62088449f37147164a79cd90a0afb064419382e0275cec0c8ae4",
+  "originalAuthorUnchanged": true,
+  "changedScenes": [
+    "scene-hook"
+  ],
+  "baseline": {
+    "taskId": "cc5087ea0d1f5613a9ad4233b7c0732966797cd69b53f0c7d920bf4b0a01cd8b",
+    "sha256": "ff6ab3618d35dacf5b939181328cb7e947416f65a7b24cbe3ebafa23aad4fd59",
+    "frames": 2250,
+    "seconds": 75,
+    "recordings": 7,
+    "captions": 7,
+    "checkedCaptionBoundaryFrames": 28
+  },
+  "edited": {
+    "taskId": "c9b0a614916470d6da80f5ac4e4f0ca8dfd0e71eec44521abf1ca945dba4063a",
+    "sha256": "cc33d5545c905231b96f59c5a48993fa6aa432742269ca3183a9862abfe51676",
+    "frames": 2250,
+    "seconds": 75,
+    "recordings": 7,
+    "captions": 7,
+    "checkedCaptionBoundaryFrames": 28
+  },
+  "unchangedSceneCache": [
+    {
+      "sceneId": "scene-context",
+      "animationProfile": "legacy-animation/1.0",
+      "story": true,
+      "assets": true,
+      "sourcePreview": true
+    },
+    {
+      "sceneId": "scene-mechanism",
+      "animationProfile": "causal-operation/1.0",
+      "story": true,
+      "assets": true,
+      "sourcePreview": true
+    },
+    {
+      "sceneId": "scene-example",
+      "animationProfile": "legacy-animation/1.0",
+      "story": true,
+      "assets": true,
+      "sourcePreview": true
+    },
+    {
+      "sceneId": "scene-limitation",
+      "animationProfile": "legacy-animation/1.0",
+      "story": true,
+      "assets": true,
+      "sourcePreview": true
+    },
+    {
+      "sceneId": "scene-benefit",
+      "animationProfile": "legacy-animation/1.0",
+      "story": true,
+      "assets": true,
+      "sourcePreview": true
+    },
+    {
+      "sceneId": "scene-closing",
+      "animationProfile": "legacy-animation/1.0",
+      "story": true,
+      "assets": true,
+      "sourcePreview": true
+    }
+  ],
+  "editedSpeechCache": [
+    {
+      "sceneId": "scene-hook",
+      "generation": true,
+      "import": true,
+      "generationTaskId": "ee5c4aa11b4228562bf40d8ac063e3d9ee140ee38836d3455d32fbcc28102231",
+      "receiptFingerprint": "05d9c2c3bb1a04caa8ed7559622b2b653df7d0dd6955f4d64ddcccb4f5c3ce0f",
+      "samples": 150240
+    },
+    {
+      "sceneId": "scene-context",
+      "generation": true,
+      "import": true,
+      "generationTaskId": "b1098ca01004fe0dd68e47b42bcbb988c23fa6dc9bd2291971d72a6b144dc2a2",
+      "receiptFingerprint": "b6ff68ca6be08beb704df8d0c5d13043ddfbfd6faf6dd7e369c2b2c912dd4ee7",
+      "samples": 424080
+    },
+    {
+      "sceneId": "scene-mechanism",
+      "generation": true,
+      "import": true,
+      "generationTaskId": "189acc576cf08645bcb17d67c2e7a5969eef11ef96adc84ade4aff81cb1f534b",
+      "receiptFingerprint": "6ededa37593598a8a03f5d2544093a3e6e3915a8ae79f1fd4ac68feddcad4ee2",
+      "samples": 442320
+    },
+    {
+      "sceneId": "scene-example",
+      "generation": true,
+      "import": true,
+      "generationTaskId": "e5eb38244d3282aeb7420090e880785ca37a3dbf6dee89d19a0e1dafdfa393be",
+      "receiptFingerprint": "5b457c524619d7cbaab9b57470b98401b31bae2913bd9ef30cc0233228e3f581",
+      "samples": 434160
+    },
+    {
+      "sceneId": "scene-limitation",
+      "generation": true,
+      "import": true,
+      "generationTaskId": "2c605cb75760ed7ab646cafdd7ddb05db869c5c2487571cb7e271ac24bd95396",
+      "receiptFingerprint": "d5aed19ced3c115d74a3bf82248e0f4b72cda669a29516f599c35ce6a7a444ba",
+      "samples": 399840
+    },
+    {
+      "sceneId": "scene-benefit",
+      "generation": true,
+      "import": true,
+      "generationTaskId": "e17ecca4e78f8af655682d8b1ea2589eeaea2e3a6607185652680c87e5228363",
+      "receiptFingerprint": "e4d6d185681ded660648599939d3b2b3fd0491ee3b994c2f1351b750243183f1",
+      "samples": 438000
+    },
+    {
+      "sceneId": "scene-closing",
+      "generation": true,
+      "import": true,
+      "generationTaskId": "54114299b7df9b31ef2e25d939cee9cc45884d8aff2ac0c3150743ceb20efa59",
+      "receiptFingerprint": "03d162cca19f3bf8dcdb0600933a152e28eed55901028332d9a8ebf5ae0a40a7",
+      "samples": 456240
+    }
+  ],
+  "exactFinalRepeatHit": true,
+  "oldTaskAndExportPreserved": true,
+  "actualCliRevision": true,
+  "tests": {
+    "typecheck": "PASS",
+    "speechUnitTests": "4 PASS",
+    "actualCompletePreviewIntegration": "PASS",
+    "fullRegression": "NOT RUN",
+    "independentJudges": "NOT RUN"
+  },
+  "formalFilm": false,
+  "semanticReview": "pending",
+  "speechAlignment": "unverified",
+  "naturalListening": "not performed; pending",
+  "ownerAcceptance": "pending",
+  "evidenceDirectory": "C:/Users/luyuh/Documents/Codex/gve-revoice-preview-builder/work/revoice-preview-v1"
+}
