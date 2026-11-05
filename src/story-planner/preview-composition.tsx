@@ -33,7 +33,7 @@ const Preview: React.FC<PreviewProps> = ({animation, context, mode, audience}) =
   return ready ? <AbsoluteFill style={{fontFamily: 'GVE Preview, sans-serif', backgroundColor: '#101827'}}>
     <div dangerouslySetInnerHTML={{__html: renderFramePreview(animation, frame, context)}}/>
     <div style={{position: 'absolute', bottom: 16, left: 24, color: '#ffe180', fontSize: 16}}>
-      {mode === 'silent' ? 'Silent preview' : 'Narration review pending'} · Authored illustration · No observed execution
+      Authored illustration · No observed execution
     </div>
   </AbsoluteFill> : null;
 };

@@ -1,11 +1,11 @@
 import {z} from 'zod';
 import {AuthoringBinding, ProposalAuthorship, StoryProposal} from './authoring.js';
-import {StoryEvidenceGraphSchema} from './evidence-plan.js';
+import {LegacyStoryEvidenceGraphSchema} from './evidence-plan.js';
 import {StorySchema} from './story.js';
 import {Hash, Id} from './video.js';
 import {AnimationSchema} from '../story-planner/animation.js';
 
-const graph = StoryEvidenceGraphSchema.shape;
+const graph = LegacyStoryEvidenceGraphSchema.shape;
 const animation = AnimationSchema.shape.shots.element.shape;
 const shot = StorySchema.shape.shots.element.shape;
 export const MappingProfile = z.enum(['audience-http-v1', 'audience-rembg-outputs-v1']);

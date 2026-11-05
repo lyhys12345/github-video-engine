@@ -88,3 +88,7 @@ The repository contains maintained source, documentation, tests, contracts, lice
 The bundled Noto Sans SC font retains its SIL Open Font License. Remotion has its own license; review [licensing and platform decisions](docs/decisions.md) before commercial use. Upstream REA/rembg fixture notices are retained in `fixtures/sources`; model weights are not included. Derived motion code retains attribution under `src/final-renderer/ATTRIBUTION.md` and `src/final-renderer/upstream/LICENSE`. No new license for this project's original code is inferred by this private repository preparation.
 
 Known limits include agent-curated semantics, a bounded visual vocabulary, incomplete production narrative automation, Windows path constraints, and pending final perceptual review. Code generation, successful decoding and test counts do not establish audience retention or cinematic quality.
+
+完整叙事的 Agent 入口与机器可读 next actions：[操作说明](docs/agent-narrative-workflow.md)。从 GitHub URL 开始，按当前已提交检查点执行 explanation next；内容解释和创作仍需真实 Agent/人工输入，事实和视听保持待审。
+
+统一 URL→作者等待→检查点恢复→完整有声可编辑预览入口：[explanation run](docs/narrative-run-v1.md)。已用全新 Marked 工作目录实跑，并验证离线缓存、跨场景编辑及原目录不可见时的可移植重导出。

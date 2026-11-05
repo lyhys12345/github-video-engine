@@ -1,0 +1,26 @@
+# Pinned source paths through the unified run entry
+
+`explanation run` accepts optional `--ref`, repeatable `--doc` and repeatable `--source-path`. This reuses the existing Request1.2/pinned Git-blob capture contract rather than adding an arbitrary file/network executor. Source paths require an explicit full40hex commit. Markdown/text documents and ordinary bounded UTF-8 source files are read only; unsafe paths, duplicate requests, unsupported extensions, excessive depth/count/bytes, links/submodules or mismatched Git identities are refused by the existing capture validators. No target source is imported as a module or executed.
+
+```text
+pnpm gve explanation run --repo https://github.com/morluto/rea --workspace <NEW_SHORT_REA_DIRECTORY> --ref f4cc6c85efe7f3513d587df3bd5086adb1bc6a76 --doc website/evidence/calculator-and-dino.md --source-path website/public/assets/dino-speed.js --source-path website/public/assets/dino-demo.js
+```
+
+The first capture is persisted as an immutable request/source checkpoint. Resume with only the same repository/workspace and author directory; omitted source options reuse the stored request without network refresh. If explicitly supplied options differ, the entry refuses the change and requires a new workspace. This preserves the exact sources the Agent read and authored against.
+
+## Actual independent REA and rembg runs
+
+Two new workspaces, `work/run-rea-fresh` and `work/run-rembg-fresh`, were initialized directly from URLs. No earlier project task, SQLite database or CAS was imported. This session explicitly filled each newly emitted author packet using existing authored content only as a starting point, relocated every citation in the newly captured source bytes, rebound source/authoring identities and supplied complete scene/animation/caption data. `work/run-mechanisms-checks/agent-authorship.json` records those inputs and fresh quotation bindings.
+
+- REA: pinned `f4cc6c85efe7f3513d587df3bd5086adb1bc6a76`, README/license/official case Markdown/two JavaScript files, generic source-rule diagrams. Actual preview `063faa6daa81ae76ce6e1564f1b23d5516dd7d55548e6a9bae469787617099a2`.
+- rembg: fresh HEAD resolved to `e2c2e3f72701357b9bb3f2be32a4330d74ce8f47`, current README/license, audience-v1 file/cutout/mask illustration. Actual preview `c4fd136ee90a0b731cfcb5665e0c1f2860394ba6de33032515a1fc4c52295c8f`.
+
+Both are20seconds/600frames, full five-scene narrative coverage, H264+AAC and four complete newly generated local Huihui recordings. The three supported scenes AND documented closing have exact full original-speed speech/captions. Every first-run generated stage and voice reported cache=false. A repeat run with fetch disabled and source options omitted reported every stage and voice cache=true, proving both independent generation and correct pinned offline resume.
+
+Both retain a visible, digitally silent `evidence-limit` scene and refuse adding speech to that unproduced gap. The closing is explicitly only a documented-summary alternative; the original requested capability remains unimplemented. REA's official historical investigation was not repeated, and rembg's art is illustrative: no segmentation model/result measurement is claimed. Current facts, transcript accuracy, alignment, listening, continuous perceptual AV and owner acceptance remain pending.
+
+The actual media passed complete decode, measured600-frame/H264+AAC counts, five-scene/four-recording closure, silent-gap/nonzero-card PCM checks, source/main task success checks, and byte-identical complete editable reexport. All eight local speech generation tasks and their exact successful import receipts were also independently read back through typed state APIs (`voice-task-states.json`). Sampled mechanism/gap/card/subtitle frames were observed by the builder, without listening or Judge.
+
+Each mechanism then received a real authored timing edit in its second animation scene. The resulting new MP4 and pending packet identities differ while Story, complete plan, card and all complete recordings remain cached; mixed PCM is unchanged. New preview tasks are REA `e29efa99f38e9db4c19ef31d4ce949268f177fdd95d82073ba2b097f87d9dff3` and rembg `699cef7a658c7f5bf7f7e6f68f6bd5ffd95e2f672d7c8d181105e20bb392e25d`. Both edited600-frame movies fully decode and the original movie hashes remain intact. In the rembg sample the authored earlier completion changes the visible processing state to transparent-background completion; it remains labeled illustrative/not executed.
+
+Four narrowly scoped run-entry tests and TypeScript pass, including invalid/unpinned/deep/duplicate/unsafe source input refusal before fetching and changed-source request refusal. Complete evidence and current bundle locations are in `work/run-mechanisms-checks/{rea,rembg}-{source,complete,cached,edited}.json`, verification.json, edit-verification.json and voice-task-states.json. No Judge, full regression, paid service, target-repository execution, deployment or formal full film was run. These runs prove the reusable workflow across two different supported mechanism families; they do not certify arbitrary repository understanding or90% readiness.

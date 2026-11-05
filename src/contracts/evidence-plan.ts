@@ -20,12 +20,16 @@ const storyGraph=legacyGraph.extend({
  objects:z.array(graphObject.extend({kind:z.enum([...objectKind.options,'http-request','route-handler','http-response'])})).min(1),
  operations:z.array(graphOperation.extend({kind:z.enum([...operationKind.options,'match-route','send-response'])})).min(1).max(5),
 });
-function validateGraph(g:z.infer<typeof storyGraph>,c:z.RefinementCtx){
+const documentStoryGraph=storyGraph.extend({
+ schemaVersion:z.literal('1.1'),
+ operations:z.array(graphOperation.extend({kind:z.enum([...operationKind.options,'match-route','send-response','document-transform'])})).min(1).max(5),
+});
+function validateGraph(g:z.infer<typeof storyGraph>|z.infer<typeof documentStoryGraph>,c:z.RefinementCtx){
  const fail=(message:string)=>c.addIssue({code:'custom',message});
  for(const list of [g.sources,g.claims,g.objects,g.actors,g.operations])if(new Set(list.map(x=>x.id)).size!==list.length)fail('Duplicate identity');
  const sources=new Set(g.sources.map(x=>x.id)),claims=new Set(g.claims.map(x=>x.id)),objects=new Map(g.objects.map(x=>[x.id,x])),actors=new Set(g.actors.map(x=>x.id)),ops=new Map(g.operations.map(x=>[x.id,x]));
  for(const claim of g.claims)for(const q of claim.citations)if(!sources.has(q.document)||q.endLine<q.startLine)fail('Invalid citation');
- const expected={handoff:['code','code'],'rate-change':['code','game'],control:['game','demo'],segment:['image','mask'],extract:['mask','cutout'],composite:['cutout','image'],'match-route':['http-request','route-handler'],'send-response':['route-handler','http-response']} as const;
+ const expected={handoff:['code','code'],'rate-change':['code','game'],control:['game','demo'],segment:['image','mask'],extract:['mask','cutout'],composite:['cutout','image'],'match-route':['http-request','route-handler'],'send-response':['route-handler','http-response'],'document-transform':['code','code']} as const;
  for(const op of g.operations){const types=expected[op.kind];if(objects.get(op.input)?.kind!==types[0]||objects.get(op.output)?.kind!==types[1])fail('Operation input/output type mismatch');
  if(op.actorIds.some(id=>!actors.has(id))||op.claimIds.some(id=>!claims.has(id))||op.dependsOn.some(id=>!ops.has(id)||id===op.id))fail('Unknown operation reference');
  if(op.kind==='handoff'&&op.actorIds.length!==3)fail('Handoff requires source/tool/interpreter');
@@ -35,6 +39,7 @@ function validateGraph(g:z.infer<typeof storyGraph>,c:z.RefinementCtx){
  if(op.kind==='control'&&(roles.length!==2||roles[0]!=='interpreter'||roles[1]!=='user'))fail('Reconstruction needs interpreter then user');
  if(['segment','extract','composite'].includes(op.kind)&&(roles.length!==1||roles[0]!=='tool'))fail('Image transform needs one tool');
  if((op.kind==='match-route'||op.kind==='send-response')&&(roles.length!==1||roles[0]!=='tool'))fail('HTTP operation needs one tool');
+ if(op.kind==='document-transform'&&(roles.length!==1||roles[0]!=='tool'))fail('Document transform needs exactly one tool; it represents an authored source-backed diagram, not executed code');
  if(op.kind==='rate-change'&&(!op.parameters.initialRate||!op.parameters.rateMultiplier))fail('Rule needs illustrative rate parameters');
  if(op.kind!=='rate-change'&&Object.keys(op.parameters).length)fail('Unsupported parameters for operation');
  if(op.dependsOn.length>1||op.dependsOn.some(id=>ops.get(id)?.output!==op.input))fail('Dependency does not supply unique semantic input');
@@ -43,7 +48,8 @@ function validateGraph(g:z.infer<typeof storyGraph>,c:z.RefinementCtx){
  const done=new Set<string>();let pending=[...g.operations];while(pending.length){const ready=pending.filter(x=>x.dependsOn.every(id=>done.has(id)));if(!ready.length){fail('Cyclic semantic graph');break;}for(const x of ready)done.add(x.id);pending=pending.filter(x=>!done.has(x.id));}
 }
 export const EvidenceGraphSchema=legacyGraph.superRefine(validateGraph);
-export const StoryEvidenceGraphSchema=storyGraph.superRefine(validateGraph);
+export const LegacyStoryEvidenceGraphSchema=storyGraph.superRefine(validateGraph);
+export const StoryEvidenceGraphSchema=z.discriminatedUnion('schemaVersion',[LegacyStoryEvidenceGraphSchema,documentStoryGraph.superRefine(validateGraph)]);
 export type EvidenceGraph=z.infer<typeof EvidenceGraphSchema>;
 export const CompiledPlanSchema=z.object({schemaVersion:z.literal('1.0'),compilerVersion:z.literal('evidence-planner-1'),graphHash:z.string().length(64),graph:EvidenceGraphSchema,
  goals:z.array(z.object({question:text,answer:text,claimIds:z.array(Id).min(1)}).strict()).length(3),

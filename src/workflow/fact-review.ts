@@ -44,8 +44,10 @@ export function presentationFactReview(proposal:StoredStoryProposal,sources:Sour
  return {...next,packetHash:sha256(canonical(next))};
 }
 
+export type NarrativeReviewPlan=Omit<NarrativePlan,'schemaVersion'|'scenes'>&{schemaVersion:string;scenes:(Omit<NarrativePlan['scenes'][number],'execution'>&{execution:unknown})[]};
+
 /** Full narrative review includes thesis, all transitions, ending and unresolved scene dispositions. */
-export function narrativeFactReview(plan:NarrativePlan,sources:Source[]){
+export function narrativeFactReview(plan:NarrativeReviewPlan,sources:Source[]){
  return packet(plan,sources,plan.claims.map(c=>({id:c.id,statement:c.statement,kind:c.basis.kind,...(c.basis.kind==='inference'?{reasoning:c.basis.reasoning}:{}),citations:c.citations.map(q=>{if(sources.find(s=>s.id===q.sourceId)?.sha256!==q.sourceSha256)fail('Citation source hash mismatch');return {document:q.sourceId,startLine:q.startLine,endLine:q.endLine,quote:q.quote};})})),[
  {id:'narrative-brief',kind:'scope-and-thesis',text:canonical({brief:plan.brief,authorship:plan.authorship,interpretation:plan.interpretation,openQuestions:plan.openQuestions}),claimIds:plan.brief.claimIds},
  ...plan.scenes.flatMap(s=>[
@@ -59,7 +61,7 @@ export function narrativeFactReview(plan:NarrativePlan,sources:Source[]){
 }
 
 /** New execution packets do not inherit parent narrative review. Full child visual/animation closure is data to review. */
-export function narrativePreviewFactReview(plan:NarrativePlan,sources:Source[],execution:unknown){
+export function narrativePreviewFactReview(plan:NarrativeReviewPlan,sources:Source[],execution:unknown){
  const base=narrativeFactReview(plan,sources),{packetHash,...content}=base;
  const next={...content,candidateHash:sha256(canonical({plan,execution})),units:[...base.units,{id:'technical-preview-execution',kind:'full-child-visual-animation-timeline-and-omission-closure',text:canonical(execution),claimIds:[]}],requiredItems:[...base.requiredItems,'technical-preview-execution']};
  return {...next,packetHash:sha256(canonical(next))};
