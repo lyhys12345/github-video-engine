@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0",
+  "candidate": "fact-review-C2",
+  "parent": "fact-audit-1104",
+  "frozenAt": "2026-11-04T20:08:20.6316794-08:00",
+  "tests": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/fact-review.test.ts tests/url-intake.test.ts",
+    "passed": 27,
+    "failed": 0
+  },
+  "typecheck": "passed",
+  "topLevelHelp": "verified",
+  "defaultTestEntry": "verified",
+  "files": [
+    {
+      "path": "src/workflow/fact-review.ts",
+      "sha256": "8c230b6dff9b7a25a03d627732b84d4a0a1d0fbba632cef6e15122095f6aa2a5"
+    },
+    {
+      "path": "src/workflow/explanation-session.ts",
+      "sha256": "f42e6548fc9c5be2e39f516ec2435530d479cd27d5c9aaf8680a4625f669de60"
+    },
+    {
+      "path": "src/workflow/explanation-cli.ts",
+      "sha256": "a1e0901690b4fe4ee9442bf63f581d5067ff9878be8472f341e9a1611efd4e35"
+    },
+    {
+      "path": "src/cli.ts",
+      "sha256": "132d8c6a4bfb529f36f26dd329d64996ac312311cc72256058caad7343057dff"
+    },
+    {
+      "path": "package.json",
+      "sha256": "390c655819a6295b8c761e0bcf536446a9c7fedae5e7fa9078bb658e793a7449"
+    },
+    {
+      "path": "tests/fact-review.test.ts",
+      "sha256": "73001b2dddb575c4cc3724ea9c8b58cab6946264b96d821991b8743b623013ff"
+    },
+    {
+      "path": "tests/url-intake.test.ts",
+      "sha256": "60414a2410c18b65f46ca78cb96d5b60077fa101ead1e3e1d0daa4f3630d5fe7"
+    },
+    {
+      "path": "FACT-REVIEW-C2.md",
+      "sha256": "a4461f5f769ad3e4325eff51ac1e35d411d52b0ea434e47dffed4425fc250229"
+    }
+  ]
+}

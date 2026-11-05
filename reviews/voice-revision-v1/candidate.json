@@ -1,0 +1,57 @@
+{
+  "sourceCommit": "af374796dc5b44c16912d442f4dfe3cbe42e9f9f",
+  "sourceArchive": "../gve-vr-source.tar",
+  "sourceArchiveSha256": "eeb63121e98c0bb0c9a50b2d858948735f3a9049bcf01f7341283fe8fd214ba0",
+  "proof": {
+    "replay.mts": "4cc821ca8cdbcb89ad7d01bdc938dcfc53bb88f71d2853df8c56a3f0fa8f6b32",
+    "replay.log": "eb7c420fc2dfec8f8ec0fe3b2498c7253ca877a6be41a1703e09fadfaa4a83e1",
+    "new-submission.json": "5fd3886058eee42591e472c993c1f69c41fae4920b8933c4c26681115d13305f",
+    "new-author.json": "d82d2354c1e3e57eea2b4bfb28523cabf1860e7449e57b6a27ccb7963d39ad6e",
+    "new-voice.json": "8af1f2ef1eed3cd14ac8e1801d219fb056845bc40f2314e1604ebbdcfaa2e21d",
+    "edit.json": "8643d11f9208f7cb4c34263b965ba514135386387908c8b1a48b0316668d2c58",
+    "interrupted.json": "dec28674b812969756b4eda8f6726196264d39c2673f332f934b2485f121f889",
+    "resumed.json": "ee56d20fded14b041a3e022c1448502700faa5dbb5200760be8d84d1d046504a",
+    "result.json": "90da797d03d375087dc944b8fba598f632964c42ed819de8ed27b9314280c692",
+    "ffprobe.json": "28fd72179a4598053b6f7e32485887372c007f4d600d7133b83e0468d612de35",
+    "decode.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cli-resume.json": "f710f9eaf8d0a2f7ee8b7a935f828d110226a890532045de9c047918df0099c4",
+    "negative.mts": "e53dec52a6408fb70a7e4c457d54bee4f61e770c532804b311cf71bc59e07182",
+    "negative.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "negative-first.log": "ae8643428a27427bf720898d8fa0d4f8cd7eecfbdb0417edfd4f0076a72cf9c2",
+    "negative.json": "d7e43bf9ca56807747307cec58ac9bb4e74ebb27f114c36ff294e199fdb76976",
+    "stale-voice-edit.json": "2c6b5dfd16cd456fa5357e6305dae0fafb95d46e1e2b1a0a23f7947977ea15e1",
+    "typecheck.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "revisionTask": "54f537700d549922ba0ef7bfa01b378d41e5b79c25bad4039658720a0737f641",
+  "baseTask": "3134461a79362de94b8d5239e1f37d7ceb3e03e28c64fd22e578525bfb490ca5",
+  "newPublication": {
+    "taskId": "54f537700d549922ba0ef7bfa01b378d41e5b79c25bad4039658720a0737f641",
+    "output": "C:\\Users\\luyuh\\Documents\\Codex\\gve-vr\\proof\\revised",
+    "bundle": "C:\\Users\\luyuh\\Documents\\Codex\\gve-vr\\proof\\revised\\.asset-staging-8299192f-dc3f-43c6-be4a-dc94acb15eb1-gg7xF5",
+    "publication": "receipt-v1",
+    "receipt": "C:\\Users\\luyuh\\Documents\\Codex\\gve-vr\\proof\\revised\\.asset-published-8299192f-dc3f-43c6-be4a-dc94acb15eb1-gg7xF5.json",
+    "receiptSha256": "e960fdd08da772b79c69a8d9e6b969f04841a16f9e232e8129f805eb8ae5ff7b",
+    "reused": false,
+    "review": "pending"
+  },
+  "oldReexport": {
+    "taskId": "3134461a79362de94b8d5239e1f37d7ceb3e03e28c64fd22e578525bfb490ca5",
+    "output": "C:\\Users\\luyuh\\Documents\\Codex\\gve-vr\\proof\\original-reexport",
+    "bundle": "C:\\Users\\luyuh\\Documents\\Codex\\gve-vr\\proof\\original-reexport\\.asset-staging-7f318d71-b706-4b96-9453-461277df005d-7l74gT",
+    "publication": "receipt-v1",
+    "receipt": "C:\\Users\\luyuh\\Documents\\Codex\\gve-vr\\proof\\original-reexport\\.asset-published-7f318d71-b706-4b96-9453-461277df005d-7l74gT.json",
+    "receiptSha256": "5a970659cdbd7d2d73c0a1647e62f5c030875567df1c1ee9298dfd455437f532",
+    "reused": false,
+    "review": "pending"
+  },
+  "commands": [
+    "git -c core.longpaths=true archive -o ../gve-vr-source.tar HEAD",
+    "node node_modules/tsx/dist/cli.mjs proof/replay.mts",
+    "node node_modules/tsx/dist/cli.mjs src/cli.ts explanation resume --task <revisionTask> --data proof/state",
+    "ffprobe -v error -count_frames -show_entries stream=codec_name,width,height,sample_rate,nb_read_frames,duration -of json <new preview.mp4>",
+    "ffmpeg -v error -xerror -i <new preview.mp4> -map 0:v -map 0:a -f null NUL",
+    "node node_modules/typescript/bin/tsc --noEmit",
+    "node node_modules/tsx/dist/cli.mjs proof/negative.mts"
+  ],
+  "review": "Technical validation only. Listening, word alignment and final acceptance pending."
+}

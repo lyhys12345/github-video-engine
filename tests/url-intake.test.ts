@@ -5,6 +5,8 @@ import {DatabaseSync} from 'node:sqlite';
 import {join} from 'node:path';
 import {z} from 'zod';
 import {workflowCommand} from '../src/workflow/cli.js';
+import {explanationCommand} from '../src/workflow/explanation-cli.js';
+import {proposalFactReview} from '../src/workflow/fact-review.js';
 import {StorySchema} from '../src/contracts/story.js';
 import {statusStory, exportStory} from '../src/story-planner/runtime.js';
 import {ArtifactStore} from '../src/assets/store.js';
@@ -82,7 +84,7 @@ it('separates hidden-file authoring, derives pruned descendants, and refuses amb
     useCase: {title: 'Test hidden entries', audience: request.audience, question: 'Which paths appear?', scope: 'Synthetic example',
       exclusions: [], goalClaimIds: claimIds, inputClaimIds: claimIds, processClaimIds: claimIds, outputClaimIds: claimIds, limitationClaimIds: []},
     claims: claimIds.map(id => ({id, statement: 'Fixture claim for ' + id, basis: {kind: 'documented'},
-      citations: [{sourceId: 'source-2', sourceSha256: sha256(sources[0]!), startLine: 2, endLine: 2, quote: 'const mask = true;'}]})),
+      citations: [{sourceId: 'source-2', sourceSha256: sha256(sources[0]!), startLine: 1, endLine: 1, quote: '\uFEFF// Demo'}]})),
     entities: entities.map(id => ({id, label: id, role: 'Fixture role', claimIds})),
     mechanisms: [{id: 'filter', adapterCandidate: 'hidden-file-policy', explanation: 'Fixture mechanism', inputEntityIds: ['tree'],
       outputEntityIds: ['results'], claimIds, assumptions: [], visualIntent: 'Synthetic paths',
@@ -95,9 +97,36 @@ it('separates hidden-file authoring, derives pruned descendants, and refuses amb
   wrongCitation.proposal.claims[0].citations = wrongEnvelope.reason.citations;
   await writeSpec(wrongCitation);
   await expect(submitExplanation(data, started.taskId, spec, signal)).rejects.toMatchObject({code: 'EXPLANATION_CITATION'});
+  const strippedBom=structuredClone(draft);
+  strippedBom.proposal.claims[0].citations[0].quote='// Demo';
+  await writeSpec(strippedBom);
+  await expect(submitExplanation(data, started.taskId, spec, signal)).rejects.toMatchObject({code:'AUTHORING_CITATION'});
   await writeSpec(draft);
   const accepted = await submitExplanation(data, started.taskId, spec, signal);
   if (!('stage' in accepted) || accepted.stage !== 'awaiting-plan') throw new Error('Expected accepted hidden-file proposal.');
+  const facts=await explanationCommand(['explanation','fact-review'],{data,task:accepted.taskId,out:join(root,'fact-review')},signal) as any;
+  expect(facts.result).toMatchObject({status:'pending-independent-review',approval:'none'});
+  const factPacket=JSON.parse(await readFile(join(facts.output.bundle,'fact-review-packet.json'),'utf8'));
+  expect(factPacket.claims).toHaveLength(2);
+  for(const beat of draft.proposal.beats){
+    expect(factPacket.units.find((u:any)=>u.id==='title:'+beat.id)?.text).toBe(beat.purpose);
+    expect(factPacket.requiredItems).toContain('title:'+beat.id);
+  }
+  const infer=structuredClone(draft.proposal);infer.claims[0].basis={kind:'inference',reasoning:'Explicit inferential reasoning must remain visible to the reviewer'};
+  const inferPacket=proposalFactReview(infer,[{id:'source-2',url:'https://github.com/example/demo',sha256:sha256(sources[0]!),bytes:sources[0]!}]);
+  expect(inferPacket.claims[0]?.reasoning).toBe(infer.claims[0].basis.reasoning);
+  expect(factPacket.claims[0].citations[0].quote).toBe('\uFEFF// Demo');
+  expect(factPacket.claims[0].citations[0].context.startsWith('\uFEFF// Demo')).toBe(true);
+  expect(factPacket.units.filter((u:any)=>u.kind==='narration')).toHaveLength(2);
+  const reviewSpec=join(root,'fact-receipt.json');
+  const factReceipt={schemaVersion:'fact-review-receipt/1.0',candidateHash:factPacket.candidateHash,packetHash:factPacket.packetHash,
+    reviewer:{kind:'session-agent',identity:'TEST ONLY'},items:factPacket.requiredItems.map((id:string)=>({id,verdict:'unverified',reason:'Test has not reviewed semantics',limitations:'Synthetic fixture'}))};
+  await writeFile(reviewSpec,JSON.stringify(factReceipt));
+  const reviewed=await explanationCommand(['explanation','fact-review'],{data,task:accepted.taskId,out:join(root,'fact-reviewed'),spec:reviewSpec},signal) as any;
+  expect(reviewed.result).toMatchObject({status:'review-unresolved',semanticTruth:'not-machine-verified',approval:'none'});
+  factReceipt.items.pop();await writeFile(reviewSpec,JSON.stringify(factReceipt));
+  await expect(explanationCommand(['explanation','fact-review'],{data,task:accepted.taskId,out:join(root,'fact-incomplete'),spec:reviewSpec},signal)).rejects.toMatchObject({code:'FACT_REVIEW'});
+  expect((await statusExplanation(data,accepted.taskId,signal) as any).review.semantic).toBe('pending');
   const narratedRequest = {...request, schemaVersion: 'explanation-session-request/1.4',
     language: 'zh-CN', voiceMode: 'windows-winrt-huihui'};
   for (const invalid of [

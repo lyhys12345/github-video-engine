@@ -27,6 +27,7 @@ import {explanationAuthorPacket} from './explanation-author-packet.js';
 import {evidenceWorkspace} from './project-evidence.js';
 import {sourceFingerprint, validateSnapshot, WorkflowStore} from './store.js';
 import {ZH_VISUAL_PROFILE} from '../presentation/visual-locale.js';
+import {proposalFactReview, verifyFactReview, FactReviewReceipt} from './fact-review.js';
 
 const START = 'repository-explanation-start-v1';
 const AUTHOR = 'repository-explanation-author-v1';
@@ -851,4 +852,18 @@ export async function resumeExplanation(data: string, id: string, signal: AbortS
 export async function exportExplanation(data: string, id: string, out: string, signal: AbortSignal) {
   const stage = await checkedStage(data, await sessionTask(data, id, signal), signal);
   return publishAssetFiles(data, id, out, stage.files, signal, RECEIPT_PUBLICATION);
+}
+
+/** Separate review sidecar: never mutates historical stage receipts or grants approval. */
+export async function exportExplanationFacts(data:string,id:string,out:string,signal:AbortSignal,receiptPath?:string){
+ const author=await verifiedAuthor(data,await readTask(data,id,AUTHOR),signal);
+ if(author.submission.disposition!=='proposal')return fail('FACT_REVIEW','Select a proposal checkpoint.');
+ const workspace=author.parent.workspace;
+ const packet=proposalFactReview(author.submission.proposal,workspace.manifest.sources.map(s=>({...s,bytes:workspace.files.get(s.path)!})));
+ const files=new Map<string,Buffer>([['fact-review-packet.json',json(packet)],['fact-review-receipt.schema.json',json(z.toJSONSchema(FactReviewReceipt))]]);
+ let result:unknown={status:'pending-independent-review',semanticTruth:'not-machine-verified',approval:'none'};
+ if(receiptPath){const raw=decode(await boundedFile(resolve(receiptPath),4_000_000));result=verifyFactReview(packet,raw);files.set('fact-review-receipt.json',json(FactReviewReceipt.parse(raw)));}
+ files.set('fact-review-result.json',json(result));
+ checkAbort(signal);
+ return {taskId:id,packetHash:packet.packetHash,result,output:await publishAssetFiles(data,id,out,files,signal,RECEIPT_PUBLICATION)};
 }
