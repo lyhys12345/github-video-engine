@@ -10,7 +10,7 @@ import {ancestors,boundedFile} from '../story-planner/runtime.js';
 import {compileStory} from '../story-planner/compile.js';
 import {prepareNarrativeRunStory} from './narrative-scene-evidence.js';
 import {prepareNarrativeSceneAnimations,NarrativeSceneAnimations} from './narrative-scene-animations.js';
-import {applyNarrativeAuthorRevision,NarrativeAuthorRevision} from './narrative-author-revision.js';
+import {applyNarrativeAuthorRevision,NarrativeAuthorRevision,NarrativeRevisionCaption} from './narrative-author-revision.js';
 import {readNarrativeAuthorData,NarrativeRunAuthor,validateCompleteRunInputs,runNarrativeWorkspace} from './narrative-run.js';
 import {statusNarrativeWorkspace} from './narrative-workspace.js';
 const fail=(s:string):never=>{throw new EngineError('NARRATIVE_FEEDBACK',s);};
@@ -23,7 +23,7 @@ export const NarrativeFeedbackPlan=z.strictObject({
  source:z.strictObject({captureTaskId:Hash,bindingSha256:Hash}),
  feedback:z.strictObject({text:text(4000),origin:z.enum(['user','session-agent-validation']),interpretedBy:z.literal('current-session-agent'),interpretation:text(4000)}),
  changes:z.array(z.strictObject({sceneId:Id,expectedSceneSha256:Hash,reason:text(2000),
-  narration:z.strictObject({expectedNarrationSha256:Hash,text:text(240)}).optional(),
+  narration:z.strictObject({expectedNarrationSha256:Hash,text:text(240),captions:z.array(NarrativeRevisionCaption).min(1).max(40).optional()}).optional(),
   visual:z.strictObject({expectedAnimationSha256:Hash,description:text(3000),sceneAnimation:SceneAnimation,title:text(240).optional(),visualContext:NarrativeSceneContext.nullable().optional()}).optional(),
   timing:z.strictObject({visualSeconds:z.number().min(0).max(120),holdSeconds:z.number().min(0).max(120).optional(),transitionSeconds:z.number().min(0).max(30).optional()}).optional(),
  }).refine(c=>!!(c.narration||c.visual||c.timing),'Supply an explicit narration, renderable visual or authored timing change.')).min(1).max(40),
@@ -46,7 +46,7 @@ export function applyNarrativeFeedback(rawStory:any,rawPlan:any,rawConfig:unknow
   if(scene.execution.kind!=='supported-story'||scene.execution.shotIds.length!==1)fail('Only produced single-shot scenes are supported; gaps/multi-shot partitions require explicit author work.');
   const shot=original.story.shots.find(s=>s.id===scene.execution.shotIds[0])!;
   if(!shot||shot.narration!==scene.narration||shot.visual!==scene.visual)fail('Owning scene and Story differ.');
-  if(c.narration)narEdits.push({shotId:shot.id,expectedNarrationSha256:c.narration.expectedNarrationSha256,text:c.narration.text});
+  if(c.narration)narEdits.push({shotId:shot.id,expectedNarrationSha256:c.narration.expectedNarrationSha256,text:c.narration.text,...(c.narration.captions?{captions:c.narration.captions}:{})});
   if(c.visual){const before=beforeAnimations.find(x=>x.sceneId===c.sceneId)!;if(sha256(canonical(before))!==c.visual.expectedAnimationSha256||c.visual.sceneAnimation.sceneId!==c.sceneId)fail('Stale animation hash or cross-scene visual replacement.');if(canonical(before)===canonical(c.visual.sceneAnimation)&&canonical(c.visual.visualContext===undefined?scene.visualContext:c.visual.visualContext)===canonical(scene.visualContext))fail('Description/title-only edits are export-only; supply an actual animation/context change.');}
  }
  if(narEdits.length){const revision=applyNarrativeAuthorRevision(storyFile,plan,config,rawAnimation,NarrativeAuthorRevision.parse({schemaVersion:'narrative-author-revision/1.0',expectedAuthorSha256:spec.expectedAuthorSha256,selectionPolicy:'recompute-existing-whole-shot-estimates',captionPolicy:'rebuild-single-whole-recording-cue',edits:narEdits}));storyFile=revision.story;plan=revision.plan;config=revision.config;}

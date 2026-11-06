@@ -1,0 +1,667 @@
+{
+  "schemaVersion": "codex-policy-diagnostic/1.0",
+  "capturedAt": "2026-11-05T23:54:44.651Z",
+  "baseCommit": "b94cc39",
+  "cliVersion": "0.166.0-alpha.6",
+  "verifiedInvocation": "codex --approve-for-me exec --json --color never -o work/policy-diagnostic/url-final.txt <ordinary URL prompt>",
+  "initialPrompt": "请把 https://github.com/lukeed/clsx 做成可编辑的中文有声技术预览。",
+  "threadId": "01a1ae0e-d724-7541-afb3-67257e54f923",
+  "permissions": [
+    {
+      "id": "01a1ae01-8bdb-7980-a43d-8af336efb960",
+      "approvalMode": "never",
+      "rootRead": true,
+      "writeEntries": [],
+      "network": "restricted"
+    },
+    {
+      "id": "01a1ae0e-30b9-77d1-80b9-d0b869195c4b",
+      "approvalMode": "on-request",
+      "rootRead": true,
+      "writeEntries": [
+        "owned-checkout",
+        "slash_tmp",
+        "tmpdir"
+      ],
+      "network": "restricted"
+    }
+  ],
+  "doctor": {
+    "config.load": {
+      "status": "ok",
+      "summary": "config loaded"
+    },
+    "sandbox.helpers": {
+      "status": "ok",
+      "summary": "sandbox configuration is readable",
+      "details": {
+        "approval policy": "OnRequest",
+        "codex-linux-sandbox helper": "none",
+        "denied-read glob rules": "0",
+        "denied-read restrictions": "false",
+        "denied-read rules": "0",
+        "filesystem sandbox": "restricted",
+        "glob scan max depth": "unbounded",
+        "managed filesystem source": "none",
+        "network sandbox": "restricted",
+        "sandbox backend": "elevated",
+        "sandbox provisioning": "complete"
+      }
+    },
+    "desktop.security.enforcement": {
+      "status": "ok",
+      "summary": "no locally visible recent Codex security enforcement was found"
+    }
+  },
+  "observations": {
+    "automaticSkillSelection": true,
+    "skillReadSucceeded": true,
+    "readOnlyCaptureBySession": true,
+    "sourceExpansionBySession": true,
+    "authoredByRealSessionAgent": true,
+    "localNarrationMeasured": true,
+    "firstPreviewProduced": true,
+    "firstPreviewPhysicalValidation": {
+      "result": "work/clsx-cn/runs/5d1ff1137ea7fbdb-261e590f4e5c/attempts/b53ddf31-993e-4cf7-94a6-8c4536d2af03/result.json",
+      "task": "e24bf1540465ee9e9c80b1021e90b0c535c08b7fdcef8fdca475043753a2d339",
+      "sha256": "dd5d18c096babbd625996c8bb672810fed711dacf724ae66a90890660319e820",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 720,
+            "height": 1280,
+            "nb_frames": "3015"
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "nb_frames": "4712"
+          }
+        ],
+        "format": {
+          "duration": "100.500000"
+        }
+      },
+      "fullDecodeExit": 0,
+      "expectedFrames": 3015,
+      "voiceScenes": null
+    },
+    "latestOwnedCheckpoint": "editable-preview-complete",
+    "sessionTurnCompleted": true,
+    "finalBaselinePhysicalValidation": {
+      "result": "work/clsx-cn/runs/62bf2a8c84e5b5cc-261e590f4e5c/attempts/a1c51886-7970-495b-9e6a-c429295d76db/result.json",
+      "resultSha256": "7b6f084dfb5cddcc5c5f5f6bd7ac21e81c8bd5a8a2e69f3de64c343af2f0a174",
+      "authorSha256": "62bf2a8c84e5b5cc1b38c38c3140729fa0f0b6f97ae24ba03b701f85d3fec202",
+      "authorFiles": [
+        {
+          "path": "work/clsx-cn/author/story.json",
+          "sha256": "f2709284a564aa5830eb6e2dffdc00e07478bc0151b4a63fc9d51e3b72055754"
+        },
+        {
+          "path": "work/clsx-cn/author/narrative.json",
+          "sha256": "89297b6d45f7e7f8ad1b4e236944e8446552d8bfe0b47beaca3f5b9396d8e0c2"
+        },
+        {
+          "path": "work/clsx-cn/author/animation.json",
+          "sha256": "98fb3c2246629517ec731c0a32c79c3e238e5eea4e4469704dd513da9bad3ecb"
+        },
+        {
+          "path": "work/clsx-cn/author/run.json",
+          "sha256": "c3c655362725c6d704851a6397f879ada3ee7072127c1b4546890af27ecdac83"
+        }
+      ],
+      "sourceSha256": "eb3b0a7baac0642e1d6ecb162c104cf79a726fc12fa6b241b80eaec9bc44431e",
+      "task": "69e58c2678c8c2ddc88e45108a5517d80116b1dae8a0e2cbeadb6da5480d71e6",
+      "movieSha256": "23b69ffc99aa2a4335e5c9bd7655e5c442487e0fba9e0fae8e07029e9664f38e",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 720,
+            "height": 1280,
+            "nb_frames": "3030"
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "nb_frames": "4736"
+          }
+        ],
+        "format": {
+          "duration": "101.000000"
+        }
+      },
+      "fullDecodeExit": 0,
+      "cache": {
+        "narratedPreview": false,
+        "narrative": false,
+        "sceneStories": [
+          {
+            "cached": true,
+            "sceneId": "hook"
+          },
+          {
+            "cached": true,
+            "sceneId": "outer"
+          },
+          {
+            "cached": true,
+            "sceneId": "arrays"
+          },
+          {
+            "cached": true,
+            "sceneId": "objects"
+          },
+          {
+            "cached": false,
+            "sceneId": "booleans"
+          },
+          {
+            "cached": true,
+            "sceneId": "lite"
+          },
+          {
+            "cached": true,
+            "sceneId": "closing"
+          }
+        ],
+        "scenes": [
+          {
+            "assets": false,
+            "sceneId": "hook",
+            "sourcePreview": false,
+            "story": true
+          },
+          {
+            "assets": false,
+            "sceneId": "outer",
+            "sourcePreview": false,
+            "story": true
+          },
+          {
+            "assets": false,
+            "sceneId": "arrays",
+            "sourcePreview": false,
+            "story": true
+          },
+          {
+            "assets": false,
+            "sceneId": "objects",
+            "sourcePreview": false,
+            "story": true
+          },
+          {
+            "assets": false,
+            "sceneId": "booleans",
+            "sourcePreview": false,
+            "story": false
+          },
+          {
+            "assets": false,
+            "sceneId": "lite",
+            "sourcePreview": false,
+            "story": true
+          },
+          {
+            "assets": false,
+            "sceneId": "closing",
+            "sourcePreview": false,
+            "story": true
+          }
+        ],
+        "speech": [
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "hook"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "outer"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "arrays"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "objects"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "booleans"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "lite"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "closing"
+          }
+        ],
+        "voice": [
+          {
+            "generation": true,
+            "generationTaskId": "55fce27827498986307d74864d9fed81530ddf4c9709c8f317b174a9fd2ef36d",
+            "import": true,
+            "receiptFingerprint": "d0f070a9a6a3a4a75129ffc8b3b9646a2c75c133605876582082c24346689bf7",
+            "samples": 602640,
+            "sceneId": "hook"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "e3ad8b9638b33efbafb1dd23efed69a3b211941dce5ef05769400bbdc6145e52",
+            "import": true,
+            "receiptFingerprint": "65098bf61127047b069123075a69ff7fa2881c311dd2fec623136192cab3e73b",
+            "samples": 564480,
+            "sceneId": "outer"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "d3a0808c5227211ade12ed221123f3a2f970d99a90eb094264ac67ff7050e1b8",
+            "import": true,
+            "receiptFingerprint": "78b32b517a180f066248655cb3219bfe31e4024da8f2232cc3df7c73e3bfa2e5",
+            "samples": 658080,
+            "sceneId": "arrays"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "157748e385369e73a49dc9b7e6118672f1d9377d6eecdce2c7903ca7af2df4bf",
+            "import": true,
+            "receiptFingerprint": "dda3f9db292951d09c479068246e9d2affc9fdf0a2b07464e973c263bdc608fa",
+            "samples": 608880,
+            "sceneId": "objects"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "625b4c8a9c41365a95c8a87dbac2d27a41efdb0a01f77e7f3df45390f2419d62",
+            "import": true,
+            "receiptFingerprint": "b9833c1f7091715d24ea64ba7c3a1c3c2a9480994742d29f5aea02a243286c68",
+            "samples": 686880,
+            "sceneId": "booleans"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "d31ec7bd2b5505f49f060e7a479a5920ecacb971404114691abc30a260fb59e1",
+            "import": true,
+            "receiptFingerprint": "473e2a89f9ea64c999c51c34005ce22c23d571beda5cb6ebf9b0e7ee179a4e08",
+            "samples": 670800,
+            "sceneId": "lite"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "99803d29251ffa1b03b61bd613392ccbf5cc92ee5f5bf4525d533666572c1583",
+            "import": true,
+            "receiptFingerprint": "fea243e3120c7b8e5ef82eab7dba80f595f1ea86adf613a965ba1d2446110a98",
+            "samples": 715920,
+            "sceneId": "closing"
+          }
+        ]
+      }
+    }
+  },
+  "source": {
+    "bindingSha256": "68339eb1489a98119afff40357df6d223ffbe991d31693d1815d7feee877af1d",
+    "repository": "https://github.com/lukeed/clsx",
+    "commit": "925494cf31bcd97d3337aacd34e659e80cae7fe2",
+    "sourcePaths": [
+      "src/index.js",
+      "src/lite.js"
+    ]
+  },
+  "interventions": [
+    {
+      "type": "ordinary-user-priority-and-feedback-queue",
+      "message": "请优先完成当前修正并交付，不再扩展润色；请把数组示例的旁白改得更直白，画面先显示输入，再出现结果，保留旧版。",
+      "queueAccepted": true,
+      "consumptionVerified": false,
+      "feedbackMediaProduced": false
+    },
+    {
+      "type": "explicit ordinary feedback resume after URL turn completed",
+      "role": "validation-operator user-role prompt, not final owner review",
+      "feedbackApplied": true
+    }
+  ],
+  "rejectedDiagnostic": {
+    "action": "Repeat --ignore-user-config as a single-variable read-only test",
+    "executed": false,
+    "reason": "Automatic approval rejected skipping user configuration because it can bypass safety rules; no workaround attempted."
+  },
+  "limitations": [
+    "Effective earlier read-only/never versus successful workspace-write/on-request is directly verified; unique internal cause remains unisolated.",
+    "First preview has pending semantics/listening/continuous AV/owner acceptance; session identified an input-number wording correction after first render.",
+    "Raw event log snapshot is local/private; no credentials or unrelated connector inventories published.",
+    "No security-policy edits/bypass, paid API, Judge, target code execution or formal film.",
+    "Segmented captions refused by guarded helper; Agent-authored fallback succeeded and is recorded separately.",
+    "Queued feedback consumption alone was not verified; explicit same-session resume was used."
+  ],
+  "logHashes": [
+    {
+      "path": "work/policy-diagnostic/minimal-events.jsonl",
+      "sha256": "0acaad62e85522b5975a016a227046bb13d1dbd6941095d5f35f928c90e48f49"
+    },
+    {
+      "path": "work/policy-diagnostic/minimal-stderr.log",
+      "sha256": "8f2743cc64a152e8c85cb3336f9a3aaa6f4a734821f292ff1e5d0afbc354e868"
+    },
+    {
+      "path": "work/policy-diagnostic/url-events-checkpoint.jsonl",
+      "sha256": "072849001fce90960432adebc2c8af1f1a68f1678c7111a09e679943954d93d7"
+    },
+    {
+      "path": "work/policy-diagnostic/url-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "work/policy-diagnostic/permission-comparison.json",
+      "sha256": "8ea78d37ec5970895ea6c1334da78ff30c4f76a61b5e4d0c5128d0d532a2ab0d"
+    },
+    {
+      "path": "work/policy-diagnostic/selected-doctor.json",
+      "sha256": "ec55da6bd8512de7d405563255ab120a85b25d311943bb14aa58a72c011113d8"
+    },
+    {
+      "path": "work/policy-diagnostic/first-media-check.json",
+      "sha256": "10ea01ad2364536401ba324423a3b75471879c4116f756ac1a8aa29d63905c5b"
+    },
+    {
+      "path": "work/policy-diagnostic/queued-feedback.json",
+      "sha256": "388fa9f316b34cd36c5cd29d530976b80bbc9370155ec1ebb1d0dab515c6a775"
+    },
+    {
+      "path": "work/policy-diagnostic/url-events-final-snapshot.jsonl",
+      "sha256": "4fa8ff237a103d45865bc2e58b60bfaadcfdc1388bcf8ad6b73433a9fc0c4307"
+    },
+    {
+      "path": "work/policy-diagnostic/url-final.txt",
+      "sha256": "6f01ae6adb47a49d17439fac674cb4755eae2de591f9ff94c3310ea1e1abfbf7"
+    },
+    {
+      "path": "work/policy-diagnostic/feedback-events-final-snapshot.jsonl",
+      "sha256": "8c5c155c4a5672226fa01ce2cf40cd186035775a16b5d76350a4864a17b4b5c2"
+    },
+    {
+      "path": "work/policy-diagnostic/feedback-final.txt",
+      "sha256": "a8f46651a9b1ad5fca8bb2cadd79b98aca8c94953cdab23c22dc1c7221ed6a9d"
+    },
+    {
+      "path": "work/policy-diagnostic/baseline-media-check.json",
+      "sha256": "75e7649406d14a103e063150331d2613de235ee12d9fc512752bc698ef1dbfc4"
+    },
+    {
+      "path": "work/policy-diagnostic/feedback-media-check.json",
+      "sha256": "23d514c7d4b6d19b13eea6c3cf18c9662d72b578e74139b5fe0715eceefde5bf"
+    }
+  ],
+  "feedback": {
+    "resumePrompt": "请应用刚才排队的反馈：数组示例旁白更直白，画面先显示输入，再出现结果；保留旧版，只做这项修改并重新生成预览。",
+    "realSessionResumed": true,
+    "turnCompleted": true,
+    "guardedHelperSucceeded": false,
+    "sessionAgentExplicitFallback": true,
+    "physicalValidation": {
+      "task": "325aea1b796137dd6df5c75da4ab015d4c5b3e2eddab1cf6358fbfa4bb5a10e5",
+      "result": "work/clsx-cn/runs/6fc4c904076878b0-261e590f4e5c/attempts/68397a1e-90fe-4c08-b230-0a07c026a48c/result.json",
+      "movieSha256": "1fa88e49e38785e115cae24112e1cf519ed166ad6c9877cd7c3ab8729a81d655",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "nb_frames": "3030"
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "nb_frames": "4736"
+          }
+        ],
+        "format": {
+          "duration": "101.000000"
+        }
+      },
+      "fullDecodeExit": 0,
+      "originalMovieUnchanged": true,
+      "originalAuthorUnchanged": true,
+      "cache": {
+        "narratedPreview": false,
+        "narrative": true,
+        "sceneStories": [
+          {
+            "cached": true,
+            "sceneId": "hook"
+          },
+          {
+            "cached": true,
+            "sceneId": "outer"
+          },
+          {
+            "cached": true,
+            "sceneId": "arrays"
+          },
+          {
+            "cached": true,
+            "sceneId": "objects"
+          },
+          {
+            "cached": true,
+            "sceneId": "booleans"
+          },
+          {
+            "cached": true,
+            "sceneId": "lite"
+          },
+          {
+            "cached": true,
+            "sceneId": "closing"
+          }
+        ],
+        "scenes": [
+          {
+            "animationProfile": "independent-flow/1.0",
+            "assets": true,
+            "sceneId": "hook",
+            "sourcePreview": true,
+            "story": true
+          },
+          {
+            "animationProfile": "independent-flow/1.0",
+            "assets": true,
+            "sceneId": "outer",
+            "sourcePreview": true,
+            "story": true
+          },
+          {
+            "animationProfile": "legacy-animation/1.0",
+            "assets": false,
+            "sceneId": "arrays",
+            "sourcePreview": false,
+            "story": true
+          },
+          {
+            "animationProfile": "independent-flow/1.0",
+            "assets": true,
+            "sceneId": "objects",
+            "sourcePreview": true,
+            "story": true
+          },
+          {
+            "animationProfile": "independent-flow/1.0",
+            "assets": true,
+            "sceneId": "booleans",
+            "sourcePreview": true,
+            "story": true
+          },
+          {
+            "animationProfile": "independent-flow/1.0",
+            "assets": true,
+            "sceneId": "lite",
+            "sourcePreview": true,
+            "story": true
+          },
+          {
+            "animationProfile": "independent-flow/1.0",
+            "assets": true,
+            "sceneId": "closing",
+            "sourcePreview": true,
+            "story": true
+          }
+        ],
+        "speech": [
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "hook"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "outer"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "arrays"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "objects"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "booleans"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "lite"
+          },
+          {
+            "generation": true,
+            "import": true,
+            "sceneId": "closing"
+          }
+        ],
+        "voice": [
+          {
+            "generation": true,
+            "generationTaskId": "55fce27827498986307d74864d9fed81530ddf4c9709c8f317b174a9fd2ef36d",
+            "import": true,
+            "receiptFingerprint": "d0f070a9a6a3a4a75129ffc8b3b9646a2c75c133605876582082c24346689bf7",
+            "samples": 602640,
+            "sceneId": "hook"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "e3ad8b9638b33efbafb1dd23efed69a3b211941dce5ef05769400bbdc6145e52",
+            "import": true,
+            "receiptFingerprint": "65098bf61127047b069123075a69ff7fa2881c311dd2fec623136192cab3e73b",
+            "samples": 564480,
+            "sceneId": "outer"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "fc22d20bd181c7e1367dc889e9f8336cfb80b6847211bbf720a7e28a58bbb6ae",
+            "import": true,
+            "receiptFingerprint": "f4305dd5d4d75fa775ae927c0a982b1c0c3046e826e086c3af66298c4cb34b1e",
+            "samples": 465600,
+            "sceneId": "arrays"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "157748e385369e73a49dc9b7e6118672f1d9377d6eecdce2c7903ca7af2df4bf",
+            "import": true,
+            "receiptFingerprint": "dda3f9db292951d09c479068246e9d2affc9fdf0a2b07464e973c263bdc608fa",
+            "samples": 608880,
+            "sceneId": "objects"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "625b4c8a9c41365a95c8a87dbac2d27a41efdb0a01f77e7f3df45390f2419d62",
+            "import": true,
+            "receiptFingerprint": "b9833c1f7091715d24ea64ba7c3a1c3c2a9480994742d29f5aea02a243286c68",
+            "samples": 686880,
+            "sceneId": "booleans"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "d31ec7bd2b5505f49f060e7a479a5920ecacb971404114691abc30a260fb59e1",
+            "import": true,
+            "receiptFingerprint": "473e2a89f9ea64c999c51c34005ce22c23d571beda5cb6ebf9b0e7ee179a4e08",
+            "samples": 670800,
+            "sceneId": "lite"
+          },
+          {
+            "generation": true,
+            "generationTaskId": "99803d29251ffa1b03b61bd613392ccbf5cc92ee5f5bf4525d533666572c1583",
+            "import": true,
+            "receiptFingerprint": "fea243e3120c7b8e5ef82eab7dba80f595f1ea86adf613a965ba1d2446110a98",
+            "samples": 715920,
+            "sceneId": "closing"
+          }
+        ]
+      },
+      "changeVerification": {
+        "taskId": "325aea1b796137dd6df5c75da4ab015d4c5b3e2eddab1cf6358fbfa4bb5a10e5",
+        "seconds": 101,
+        "oldMovieUnchanged": true,
+        "oldAuthorsUnchanged": true,
+        "unchangedSceneSourcesAndRecordings": [
+          "hook",
+          "outer",
+          "objects",
+          "booleans",
+          "lite",
+          "closing"
+        ],
+        "sourceClaimsUnchanged": true,
+        "changedScenes": [
+          "arrays"
+        ],
+        "arrayNarration": "输入是 foo、零、假、bar。跳过零和假，留下 foo 和 bar，再用空格连接。",
+        "arrayRecordingSeconds": 9.7,
+        "outputRevealSeconds": [
+          5.2,
+          5.8
+        ],
+        "captionTiming": "Explicit authored split at 3.6667 seconds; not verified word alignment.",
+        "semanticReview": "pending",
+        "listening": "pending"
+      },
+      "fallback": "Explicit session-Agent authored fork. Existing two-cue array captions are replaced with one newly authored complete cue. Existing scene-evidence override and legacy reveal profiles are used; no engine change.",
+      "guardedHelperError": {
+        "code": "NARRATIVE_AUTHOR_REVISION",
+        "message": "Only a complete single whole-recording caption cue may be explicitly rebuilt. Existing segmented/authored alignment is never automatically repartitioned."
+      }
+    },
+    "frameObservation": "array-input.png showed input only; array-result.png showed input plus foo bar. Inspected by builder, not independent Judge/owner approval.",
+    "review": "pending"
+  }
+}

@@ -33,3 +33,8 @@ it('allows explicit timing without speech stretching and enforces complete-story
  const f=await fixture(),p=structuredClone(f.spec);p.changes[0]!.timing={visualSeconds:7};const r=applyNarrativeFeedback(f.story,f.plan,f.config,f.animation,p);expect(r.story.shots[0].visualSeconds).toBe(7);expect((r.config.selection[0] as any).slices[0].endFrame).toBe(210);
  const over={...f.spec,changes:f.plan.scenes.slice(0,3).map((s:any)=>({sceneId:s.id,expectedSceneSha256:sha256(canonical(s)),reason:'TEST ONLY budget refusal',timing:{visualSeconds:120}}))};expect(()=>applyNarrativeFeedback(f.story,f.plan,f.config,f.animation,over)).toThrow();
 });
+it('accepts only explicitly replaced full segmented partitions; preserves old author and rejects omissions/overlap',async()=>{
+ const f=await fixture();f.config.speech[0].captions=[{startChar:0,endChar:3,startSample:0,endSample:48000},{startChar:3,endChar:8,startSample:48000,endSample:'$FULL_RECORDING_SAMPLES'}];const before=canonical(f.config),p=structuredClone(f.spec);p.changes[0]!.narration!.captions=[{startChar:0,endChar:4,startSample:0,endSample:96000},{startChar:4,endChar:9,startSample:96000,endSample:'$FULL_RECORDING_SAMPLES'}];
+ const r=applyNarrativeFeedback(f.story,f.plan,f.config,f.animation,p);expect(r.config.speech[0]!.captions).toEqual(p.changes[0]!.narration!.captions);expect(canonical(f.config)).toBe(before);
+ for(const kind of ['omit','overlap','early-full']){const bad=structuredClone(p),c=bad.changes[0]!.narration!.captions!;if(kind==='omit')c[1]!.endChar=8;if(kind==='overlap')c[1]!.startSample=95000;if(kind==='early-full')c[0]!.endSample='$FULL_RECORDING_SAMPLES';expect(()=>applyNarrativeFeedback(f.story,f.plan,f.config,f.animation,bad)).toThrow();}
+});
