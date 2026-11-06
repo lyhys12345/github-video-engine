@@ -1,0 +1,476 @@
+{
+  "baseCommit": "0510adf",
+  "checkout": "C:/Users/luyuh/Documents/Codex/gve-segmented-preview-builder",
+  "workspace": "C:/Users/luyuh/Documents/Codex/gve-seg-clsx",
+  "evidenceDirectory": "C:/Users/luyuh/Documents/Codex/gve-segmented-preview-builder/work/segmented-feedback-preview-v1",
+  "previews": [
+    {
+      "label": "edited",
+      "taskId": "67818d73755f3b8cd56ee284e9e26d812f16fdc51d80a6f8224fe57013edd4f2",
+      "moviePath": "C:\\Users\\luyuh\\Documents\\Codex\\gve-seg-clsx\\runs\\34f7189bf653d3ba-be2659746cb9\\editable-preview\\.asset-staging-4ede9a91-3d70-4d25-a6be-229fb0605d02-arFy0o\\excerpt.mp4",
+      "movieSha256": "f36bd49b2579055baaa438f6659c28aaa691d73f86698062af8562da42b332f4",
+      "engineCodeHash": "be2659746cb97fc9630901dea3f2090450532138bda273999c4473988e337016",
+      "frames": 3030,
+      "seconds": 101,
+      "completeRecordings": 7,
+      "pcmSamples": 4848000,
+      "pcmSha256": "4ad1ac9174f03acb320adee4006ff89bf804307423012a8daaaed412b7655dde",
+      "captionCount": 14,
+      "captionFrameChecks": [
+        {
+          "sceneId": "hook",
+          "frame": 59,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "c65d2bac72166eb7f3129c5b5dc5b885eb2adab9625e6e44cee5e0c2de74825b"
+        },
+        {
+          "sceneId": "hook",
+          "frame": 60,
+          "captionExpected": true,
+          "brightPixels": 532,
+          "pngSha256": "6ccfba1c29496051cefb1bbf8aed6a026f67125b87ce43fda95ad506f15e2f5e"
+        },
+        {
+          "sceneId": "hook",
+          "frame": 201,
+          "captionExpected": true,
+          "brightPixels": 533,
+          "pngSha256": "89a34305d1393e0e093a84ba13063d776355335318f18af792538418ea95a9f6"
+        },
+        {
+          "sceneId": "hook",
+          "frame": 202,
+          "captionExpected": true,
+          "brightPixels": 1041,
+          "pngSha256": "4a7a0a152566ff121fe8f1d564c0e864d869c71372650a5ce4e99fcdebbf8949"
+        },
+        {
+          "sceneId": "hook",
+          "frame": 201,
+          "captionExpected": true,
+          "brightPixels": 533,
+          "pngSha256": "89a34305d1393e0e093a84ba13063d776355335318f18af792538418ea95a9f6"
+        },
+        {
+          "sceneId": "hook",
+          "frame": 202,
+          "captionExpected": true,
+          "brightPixels": 1041,
+          "pngSha256": "4a7a0a152566ff121fe8f1d564c0e864d869c71372650a5ce4e99fcdebbf8949"
+        },
+        {
+          "sceneId": "hook",
+          "frame": 436,
+          "captionExpected": true,
+          "brightPixels": 1055,
+          "pngSha256": "7444e7a0f055a0766711bc327519a2ee63c543511b6e3d8ce0d82aec0aead096"
+        },
+        {
+          "sceneId": "hook",
+          "frame": 437,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "0f2808a9a8f5dedd1d6923507f3260affa8b91435aee64e63e50c841b033ed2c"
+        },
+        {
+          "sceneId": "outer",
+          "frame": 464,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "5462c65270ce857feedb2762ecbd8bb4a4b0514bbd442519777562f5ac729206"
+        },
+        {
+          "sceneId": "outer",
+          "frame": 465,
+          "captionExpected": true,
+          "brightPixels": 822,
+          "pngSha256": "f44e95a64123b6b98359018078af04bd8930c834bcdb4cb63d6872527a5ba376"
+        },
+        {
+          "sceneId": "outer",
+          "frame": 636,
+          "captionExpected": true,
+          "brightPixels": 839,
+          "pngSha256": "5aa58e27b245a3043f74089f8637aaba6b32e3fa58c92330f42242fc0d61cdf0"
+        },
+        {
+          "sceneId": "outer",
+          "frame": 637,
+          "captionExpected": true,
+          "brightPixels": 705,
+          "pngSha256": "19a0f73cee71351638cb6a6a26906ecee32430d21366398bb60c7ead9bd52c09"
+        },
+        {
+          "sceneId": "outer",
+          "frame": 636,
+          "captionExpected": true,
+          "brightPixels": 839,
+          "pngSha256": "5aa58e27b245a3043f74089f8637aaba6b32e3fa58c92330f42242fc0d61cdf0"
+        },
+        {
+          "sceneId": "outer",
+          "frame": 637,
+          "captionExpected": true,
+          "brightPixels": 705,
+          "pngSha256": "19a0f73cee71351638cb6a6a26906ecee32430d21366398bb60c7ead9bd52c09"
+        },
+        {
+          "sceneId": "outer",
+          "frame": 817,
+          "captionExpected": true,
+          "brightPixels": 702,
+          "pngSha256": "fa31aaea5600419e0d3d2a8889f3ced3e72b1e3c3edd9aa2fe2130dd18064382"
+        },
+        {
+          "sceneId": "outer",
+          "frame": 818,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "5b469b4c0fd9a4f75ca97277e9262cc8a75f146a0ce0d679940a1f952df37669"
+        },
+        {
+          "sceneId": "arrays",
+          "frame": 839,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "ed5e22e0a6d41032d9ec90c0988f0b747b8c19f8e51eac47b1c3e3e003cf0e35"
+        },
+        {
+          "sceneId": "arrays",
+          "frame": 840,
+          "captionExpected": true,
+          "brightPixels": 374,
+          "pngSha256": "ec3fc449d720e03f3a9a95aafc432368be3f24ce6f5a9a1ff97cc182b6508349"
+        },
+        {
+          "sceneId": "arrays",
+          "frame": 959,
+          "captionExpected": true,
+          "brightPixels": 375,
+          "pngSha256": "5c398bcabad5793e22ce8c7ed00cb009f33d875bd18af30c38c6d42466a96da6"
+        },
+        {
+          "sceneId": "arrays",
+          "frame": 960,
+          "captionExpected": true,
+          "brightPixels": 748,
+          "pngSha256": "3089be41494db1844725954b25731f51e0c0038f610a5395be0bf658a4d1bdcd"
+        },
+        {
+          "sceneId": "arrays",
+          "frame": 959,
+          "captionExpected": true,
+          "brightPixels": 375,
+          "pngSha256": "5c398bcabad5793e22ce8c7ed00cb009f33d875bd18af30c38c6d42466a96da6"
+        },
+        {
+          "sceneId": "arrays",
+          "frame": 960,
+          "captionExpected": true,
+          "brightPixels": 748,
+          "pngSha256": "3089be41494db1844725954b25731f51e0c0038f610a5395be0bf658a4d1bdcd"
+        },
+        {
+          "sceneId": "arrays",
+          "frame": 1131,
+          "captionExpected": true,
+          "brightPixels": 747,
+          "pngSha256": "596943eb5a79d95e10ee9f1015919af2b82a9030221702ec034c1e18a5ca57a6"
+        },
+        {
+          "sceneId": "arrays",
+          "frame": 1132,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "5a81780db3b91bad60d8c87b0b4e0e4128a6f3bc09bf17ac7f3cd66c6ca50841"
+        },
+        {
+          "sceneId": "objects",
+          "frame": 1274,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "24061bd0f185731299bd65f82718fa027b7db85b25812b6cea84b406588b3a2b"
+        },
+        {
+          "sceneId": "objects",
+          "frame": 1275,
+          "captionExpected": true,
+          "brightPixels": 739,
+          "pngSha256": "aa67e793317e34962b361c21b0b7edcd2dade73708d0c97d6ac131bc255646f6"
+        },
+        {
+          "sceneId": "objects",
+          "frame": 1435,
+          "captionExpected": true,
+          "brightPixels": 752,
+          "pngSha256": "dd796aeaf4b2bd0d83e8d43b848898b42f829f86fd06b6bdc15a63b05f14d26e"
+        },
+        {
+          "sceneId": "objects",
+          "frame": 1436,
+          "captionExpected": true,
+          "brightPixels": 973,
+          "pngSha256": "0e35763462ffbcec3d73d9fd6096a120199e608321d818b2ec5ec2c9dcac3110"
+        },
+        {
+          "sceneId": "objects",
+          "frame": 1435,
+          "captionExpected": true,
+          "brightPixels": 752,
+          "pngSha256": "dd796aeaf4b2bd0d83e8d43b848898b42f829f86fd06b6bdc15a63b05f14d26e"
+        },
+        {
+          "sceneId": "objects",
+          "frame": 1436,
+          "captionExpected": true,
+          "brightPixels": 973,
+          "pngSha256": "0e35763462ffbcec3d73d9fd6096a120199e608321d818b2ec5ec2c9dcac3110"
+        },
+        {
+          "sceneId": "objects",
+          "frame": 1655,
+          "captionExpected": true,
+          "brightPixels": 1004,
+          "pngSha256": "86e42f7d5a8eba07b755015080041b69723055038b74c2cc70e98da6db21eaf8"
+        },
+        {
+          "sceneId": "objects",
+          "frame": 1656,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "9a34d6b7e435d767116e4d928919c84e22bc64e46d8afac0d4a2d5433fa35972"
+        },
+        {
+          "sceneId": "booleans",
+          "frame": 1679,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "f285651025506b772be24cf3c6fc68101f682f0af9f349aeb684c76c5626ba6d"
+        },
+        {
+          "sceneId": "booleans",
+          "frame": 1680,
+          "captionExpected": true,
+          "brightPixels": 1038,
+          "pngSha256": "372b75c45e479326437ce8a2f5b762d129910a596ed3af0cb46fcd9ca82bd2ee"
+        },
+        {
+          "sceneId": "booleans",
+          "frame": 1959,
+          "captionExpected": true,
+          "brightPixels": 1068,
+          "pngSha256": "273b1faeb4954b893246aaa4d5d31dab924b514e3e11c5c6f08b5e9a2a8bad3e"
+        },
+        {
+          "sceneId": "booleans",
+          "frame": 1960,
+          "captionExpected": true,
+          "brightPixels": 568,
+          "pngSha256": "16336549a9c8b9654be6d8091e64d4607b9e5ff12ac611e1730f6b9e6e9d0b34"
+        },
+        {
+          "sceneId": "booleans",
+          "frame": 1959,
+          "captionExpected": true,
+          "brightPixels": 1068,
+          "pngSha256": "273b1faeb4954b893246aaa4d5d31dab924b514e3e11c5c6f08b5e9a2a8bad3e"
+        },
+        {
+          "sceneId": "booleans",
+          "frame": 1960,
+          "captionExpected": true,
+          "brightPixels": 568,
+          "pngSha256": "16336549a9c8b9654be6d8091e64d4607b9e5ff12ac611e1730f6b9e6e9d0b34"
+        },
+        {
+          "sceneId": "booleans",
+          "frame": 2109,
+          "captionExpected": true,
+          "brightPixels": 590,
+          "pngSha256": "e403438d4f438e94b650300519362c2be5d6cf39b1be4ce6efa39e45a1361391"
+        },
+        {
+          "sceneId": "booleans",
+          "frame": 2110,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "1c8ae2592b9924344c54233a40a338d34ff643bcb3768e7433d6f225843dfea7"
+        },
+        {
+          "sceneId": "lite",
+          "frame": 2129,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "12a198efe8ddd6408db8da6b532bb418215d7b0be841db6ecd3b4eee9813f18e"
+        },
+        {
+          "sceneId": "lite",
+          "frame": 2130,
+          "captionExpected": true,
+          "brightPixels": 1024,
+          "pngSha256": "62522f2f113410744820dc9efbd03b649ecc80c7f296e0da75582b5c8cdb361f"
+        },
+        {
+          "sceneId": "lite",
+          "frame": 2351,
+          "captionExpected": true,
+          "brightPixels": 1059,
+          "pngSha256": "4c6c66fa3d80a5c10ee29e4f8cf9270a49d950cfc9deb4cb1bdeb0fc3afad0aa"
+        },
+        {
+          "sceneId": "lite",
+          "frame": 2352,
+          "captionExpected": true,
+          "brightPixels": 908,
+          "pngSha256": "83f7b086b1b1d75c6dc82a0a6734899e574651ec4f46c48434b007de1c2c91be"
+        },
+        {
+          "sceneId": "lite",
+          "frame": 2351,
+          "captionExpected": true,
+          "brightPixels": 1059,
+          "pngSha256": "4c6c66fa3d80a5c10ee29e4f8cf9270a49d950cfc9deb4cb1bdeb0fc3afad0aa"
+        },
+        {
+          "sceneId": "lite",
+          "frame": 2352,
+          "captionExpected": true,
+          "brightPixels": 908,
+          "pngSha256": "83f7b086b1b1d75c6dc82a0a6734899e574651ec4f46c48434b007de1c2c91be"
+        },
+        {
+          "sceneId": "lite",
+          "frame": 2549,
+          "captionExpected": true,
+          "brightPixels": 917,
+          "pngSha256": "7178123ab4f4b2cf97ebd2f457fdac1aa100601b5834d37ff4e45220cacf9e43"
+        },
+        {
+          "sceneId": "lite",
+          "frame": 2550,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "cd8d7bdcfab58792dd70f3b84dcf6af85b949916f5c94b4696ddf7de93c77841"
+        },
+        {
+          "sceneId": "closing",
+          "frame": 2564,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "5e94e80da494e264d67a28e268b4571313e90e904e563f870f8b442cae9e7cf5"
+        },
+        {
+          "sceneId": "closing",
+          "frame": 2565,
+          "captionExpected": true,
+          "brightPixels": 1255,
+          "pngSha256": "8736d8bd3748466d1c236b45c96eb9ccf20fa4074e506a0359cf512e6a370a0f"
+        },
+        {
+          "sceneId": "closing",
+          "frame": 2816,
+          "captionExpected": true,
+          "brightPixels": 1270,
+          "pngSha256": "3d966508a2bda051b011822d7f506502d3b1ed722e13460f6d5064cbfca49b37"
+        },
+        {
+          "sceneId": "closing",
+          "frame": 2817,
+          "captionExpected": true,
+          "brightPixels": 791,
+          "pngSha256": "bcdf116c16a3ca9e2e54ae3b93d5fc7af41a13d783e043f88ffd907ddbcc221d"
+        },
+        {
+          "sceneId": "closing",
+          "frame": 2816,
+          "captionExpected": true,
+          "brightPixels": 1270,
+          "pngSha256": "3d966508a2bda051b011822d7f506502d3b1ed722e13460f6d5064cbfca49b37"
+        },
+        {
+          "sceneId": "closing",
+          "frame": 2817,
+          "captionExpected": true,
+          "brightPixels": 791,
+          "pngSha256": "bcdf116c16a3ca9e2e54ae3b93d5fc7af41a13d783e043f88ffd907ddbcc221d"
+        },
+        {
+          "sceneId": "closing",
+          "frame": 3012,
+          "captionExpected": true,
+          "brightPixels": 796,
+          "pngSha256": "23d89cde1f47c4a633b39c1f4e0561f7d2c147b9d8b37aa7d155b3ddd39d928d"
+        },
+        {
+          "sceneId": "closing",
+          "frame": 3013,
+          "captionExpected": false,
+          "brightPixels": 0,
+          "pngSha256": "35606f88f52d25d4a3a3cd41c420a567b76ecdb87f9c53679b889501aa66fbea"
+        }
+      ],
+      "oldTaskVerifiedAfterEdit": true,
+      "scope": "Technical audio/visual data checks; not word alignment, listening, independent facts or final acceptance"
+    }
+  ],
+  "cache": {
+    "checks": [
+      {
+        "cacheHit": true,
+        "sameReceipt": true,
+        "sceneId": "hook"
+      },
+      {
+        "cacheHit": true,
+        "sameReceipt": true,
+        "sceneId": "outer"
+      },
+      {
+        "cacheHit": true,
+        "sameReceipt": false,
+        "sceneId": "arrays"
+      },
+      {
+        "cacheHit": true,
+        "sameReceipt": true,
+        "sceneId": "objects"
+      },
+      {
+        "cacheHit": true,
+        "sameReceipt": true,
+        "sceneId": "booleans"
+      },
+      {
+        "cacheHit": true,
+        "sameReceipt": true,
+        "sceneId": "lite"
+      },
+      {
+        "cacheHit": true,
+        "sameReceipt": true,
+        "sceneId": "closing"
+      }
+    ],
+    "repeatActionsExecuted": 0,
+    "repeatStatus": "existing-feedback-checkpoint",
+    "review": "pending"
+  },
+  "original": {
+    "authorSha256": "6fc4c904076878b0cac531b81e57eb0e7853cb041265ef333d24441b514ca83a",
+    "movieSha256": "1fa88e49e38785e115cae24112e1cf519ed166ad6c9877cd7c3ab8729a81d655",
+    "taskId": "325aea1b796137dd6df5c75da4ab015d4c5b3e2eddab1cf6358fbfa4bb5a10e5",
+    "verified": true
+  },
+  "typecheck": "passed",
+  "targetedTests": {
+    "files": 2,
+    "tests": 9,
+    "passed": true
+  },
+  "visualSpotCheck": "Observed arrays frames840 and960; captions readable within reserved bottom region, source uncut. Not continuous playback/listening.",
+  "facts": "pending",
+  "ownerListening": "pending",
+  "alignment": "caller-authored sample windows, not verified speech alignment",
+  "approval": "none"
+}

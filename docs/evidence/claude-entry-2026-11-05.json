@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "claude-entry-check/1.0",
+  "date": "2026-11-05",
+  "baseCommit": "0510adf",
+  "cliProbe": {
+    "normalHostPath": "claude not found",
+    "standardLocations": [
+      {
+        "path": "~/.local/bin/claude.exe",
+        "exists": false
+      },
+      {
+        "path": "~/AppData/Roaming/npm/claude.cmd",
+        "exists": false
+      },
+      {
+        "path": "~/AppData/Local/Microsoft/WinGet/Links/claude.exe",
+        "exists": false
+      }
+    ],
+    "authentication": "unverified: no executable available; credentials not inspected"
+  },
+  "implementation": {
+    "projectMemory": "CLAUDE.md imports AGENTS.md",
+    "skill": "thin Claude project skill routes to canonical maintained .agents workflow",
+    "permissionChanges": false,
+    "sourceModuleChanges": false
+  },
+  "entryCheck": {
+    "schemaVersion": "agent-entrypoint-check/1.0",
+    "status": "pass",
+    "checked": [
+      ".agents/skills/github-explainer/SKILL.md",
+      ".claude/skills/github-explainer/SKILL.md",
+      "CLAUDE.md",
+      "AGENTS.md",
+      "docs/long-preview-portability-v1.md",
+      "docs/codex-session-discovery-v1.md",
+      "docs/general-authoring-document-flow.md",
+      "docs/complete-technical-preview-v1.md",
+      "docs/independent-document-flows-v1.md",
+      "docs/narrative-feedback-plan-v1.md",
+      "docs/narrative-run-v1.md",
+      "docs/run-source-paths-and-mechanisms.md",
+      "docs/execution-fact-receipts-v1.md"
+    ],
+    "modelCalls": 0,
+    "targetCodeExecuted": false,
+    "limitation": "Static local paths/frontmatter only; Claude CLI discovery, instruction loading, authentication, model use and media execution are unverified."
+  },
+  "control": {
+    "actor": "trusted-engine operator, not Claude Code",
+    "status": "awaiting-session-agent",
+    "modelCalls": 0,
+    "repository": "https://github.com/sindresorhus/escape-string-regexp",
+    "commit": "a7f7dabaf336bda98d2166848af15d9168b10bcf",
+    "source": {
+      "schemaVersion": "repository-narrative-run-source/1.0",
+      "taskId": "6513432d554c0069bdaef74dc85cdedfd84866dd54c612e5f9432e11bde1872d",
+      "bindingSha256": "2622bc7a6ad3e16306d603f38cd732ff63dee6eabf9ae6c92709dab3eca8d760"
+    }
+  },
+  "officialSources": [
+    {
+      "url": "https://code.claude.com/docs/en/memory#import-additional-files",
+      "supports": "CLAUDE.md project memory and relative @ imports"
+    },
+    {
+      "url": "https://code.claude.com/docs/en/skills",
+      "supports": "project .claude/skills directories with name/description metadata and relevant-task invocation"
+    },
+    {
+      "url": "https://code.claude.com/docs/en/cli-reference",
+      "supports": "normal interactive prompt and auth status command"
+    }
+  ],
+  "fileHashes": [
+    {
+      "path": "CLAUDE.md",
+      "sha256": "0da0fadc398ecc3a4c8e0f94533d129ee57dd5c71fb4b2cf23f84f2db1510412"
+    },
+    {
+      "path": ".claude/skills/github-explainer/SKILL.md",
+      "sha256": "d7436658da8169313adca1648dc6cefc8d52180c30e240abdfbc795ffd6dbf72"
+    },
+    {
+      "path": ".agents/skills/github-explainer/SKILL.md",
+      "sha256": "746474874adf450871e1e8f70ff7221ddba13599a75534f94644de05e245e27c"
+    },
+    {
+      "path": "scripts/check-agent-entrypoints.mjs",
+      "sha256": "9c1611f58cec815cb2dff922a55f07248d026b9fff023fa89b18ec295b43f016"
+    }
+  ],
+  "localEvidenceHashes": [
+    {
+      "path": "work/claude-entry-check/entrypoints.json",
+      "sha256": "050b59083ce7caafdb711ea4609a7e8461c633796c67dbcdda66c310a985f516"
+    },
+    {
+      "path": "work/claude-entry-check/engine-control.json",
+      "sha256": "72161ea98b9eb90f2a0fae4e5a5974ec26f790b2eb33aaa7d2b419b67a223c9d"
+    },
+    {
+      "path": "work/claude-entry-check/engine-control-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "unverified": [
+    "Claude CLI instruction loading/discovery",
+    "Claude authentication/account eligibility",
+    "Claude model authorship, media execution and ordinary feedback",
+    "Cross-device continuation"
+  ],
+  "restrictionsPreserved": [
+    "No install/registration/login/API billing",
+    "No target code execution",
+    "No permission bypass or tool pre-approval",
+    "No Judge/formal film",
+    "No segmented-caption module changes"
+  ],
+  "additionalValidation": {
+    "skillCreatorQuickValidate": {
+      "status": "unavailable",
+      "attempts": [
+        "Default python resolved to inaccessible WindowsApps alias",
+        "Bundled trusted Python started but lacks PyYAML: ModuleNotFoundError: yaml"
+      ],
+      "packagesInstalled": false
+    },
+    "nodeSyntaxCheck": "passed",
+    "gitDiffCheck": "passed"
+  }
+}
