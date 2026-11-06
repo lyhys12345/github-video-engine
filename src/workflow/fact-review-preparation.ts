@@ -1,7 +1,7 @@
 import {z} from 'zod';
 import {EngineError} from '../core/errors.js';
 import {canonical,sha256} from '../core/util.js';
-import type {narrativePreviewFactReview} from './fact-review.js';
+import {validateFactReviewCoverage,type narrativePreviewFactReview} from './fact-review.js';
 const Hash=z.string().regex(/^[a-f0-9]{64}$/);
 export const FactReviewDraft=z.strictObject({schemaVersion:z.literal('fact-review-receipt-draft/1.0'),candidateHash:Hash,packetHash:Hash,reviewer:z.null(),state:z.literal('unassigned-unreviewed'),items:z.array(z.strictObject({id:z.string().min(1),verdict:z.literal('unverified'),reason:z.literal('UNREVIEWED DRAFT: no semantic judgment has been made.'),limitations:z.literal('Reviewer must inspect exact sources and current authored/execution text; no approval is implied.')})).min(1).max(1000)});
 const fail=(s:string):never=>{throw new EngineError('FACT_REVIEW_PREPARATION',s);};
@@ -11,8 +11,7 @@ const escape=(s:string)=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replac
 export function prepareFactReviewWorksheet(previewTaskId:string,packet:ReturnType<typeof narrativePreviewFactReview>,captured:ReadonlyMap<string,Buffer>){
  Hash.parse(previewTaskId);const {packetHash,...body}=packet;if(sha256(json(body))!==packetHash)fail('Review packet content/hash differs.');
  if(new Set(packet.sources.map(s=>s.id)).size!==packet.sources.length)fail('Duplicate source identity.');
- if(new Set(packet.requiredItems).size!==packet.requiredItems.length)fail('Duplicate required review identity.');
- const expected=[...packet.claims.map(c=>'claim:'+c.id),...packet.units.map(u=>u.id)];if(canonical(expected)!==canonical(packet.requiredItems))fail('Required review items do not exactly cover claims and authored units.');
+ validateFactReviewCoverage(packet);
  const files=new Map<string,Buffer>(),sourceIndex=[];
  for(const [index,source]of packet.sources.entries()){const matches=[...captured].filter(([,bytes])=>bytes.length===source.bytes&&sha256(bytes)===source.sha256);if(!matches.length)fail('Exact captured source bytes missing: '+source.id);const bytes=matches[0]![1];let text:string;try{text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);}catch{return fail('Source is not UTF-8.');}const lines=text!.split(/\r?\n/),path='sources/'+String(index+1).padStart(3,'0')+'.txt',numbered='sources/'+String(index+1).padStart(3,'0')+'-numbered.txt';files.set(path,bytes);files.set(numbered,Buffer.from(lines.map((line,i)=>String(i+1).padStart(6,' ')+' | '+line).join('\n')));sourceIndex.push({id:source.id,url:source.url,sha256:source.sha256,bytes:bytes.length,lineCount:lines.length,path,numberedPath:numbered,capturedAliases:matches.map(([path])=>path)});
  }

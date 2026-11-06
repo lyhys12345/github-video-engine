@@ -1,0 +1,55 @@
+{
+  "results": [
+    {
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\gve-seg-clsx\\runs\\34f7189bf653d3ba-be2659746cb9\\narrative-export\\.asset-staging-c563bf4e-d306-4e60-a444-dda28f9cc10b-BNDU58\\fact-review\\packet.json",
+      "packetHash": "ce1d4023be932f626f13e5263b8deefb9b894b78f4661833acbd9b1fb07ca4e7",
+      "rawSha256": "b6576ddc4a208ca4c9b02c12aeb42a7435763cc4bf68c3bd06df38aa942495be",
+      "requiredItems": 60,
+      "originalBytesPreserved": true,
+      "cases": [
+        {
+          "kind": "claim-omitted",
+          "omitted": "claim:strings",
+          "priorPredicateAccepted": true,
+          "newVerifierRejected": true,
+          "error": "Error: Required review items do not exactly cover claims and authored units"
+        },
+        {
+          "kind": "unit-omitted",
+          "omitted": "narrative-brief",
+          "priorPredicateAccepted": true,
+          "newVerifierRejected": true,
+          "error": "Error: Required review items do not exactly cover claims and authored units"
+        }
+      ],
+      "scope": "Mechanical integrity regression only; synthetic receipts never imported, persisted as reviews or presented as actual verdicts"
+    },
+    {
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\gve-narrative-gap-builder\\work\\focus-l-restored-rembg\\runs\\78d1312779fa91db-e29f5fc4a9fa\\narrative-export\\.asset-staging-eec75bff-210f-4ca2-b276-45faa499432a-GMbqxO\\fact-review\\packet.json",
+      "packetHash": "8bd40c99bd5f53a199878e394f93e1185aaf5edbfd90bd7907814383e1146f36",
+      "rawSha256": "d523f1e2c522f81ff3b7ee2773947c368289752e8ca8b9406921dae08c5b381d",
+      "requiredItems": 62,
+      "originalBytesPreserved": true,
+      "cases": [
+        {
+          "kind": "claim-omitted",
+          "omitted": "claim:local-file",
+          "priorPredicateAccepted": true,
+          "newVerifierRejected": true,
+          "error": "Error: Required review items do not exactly cover claims and authored units"
+        },
+        {
+          "kind": "unit-omitted",
+          "omitted": "narrative-brief",
+          "priorPredicateAccepted": true,
+          "newVerifierRejected": true,
+          "error": "Error: Required review items do not exactly cover claims and authored units"
+        }
+      ],
+      "scope": "Mechanical integrity regression only; synthetic receipts never imported, persisted as reviews or presented as actual verdicts"
+    }
+  ],
+  "actualReviewRecorded": false,
+  "approval": "none",
+  "facts": "pending"
+}

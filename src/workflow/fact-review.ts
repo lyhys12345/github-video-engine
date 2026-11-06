@@ -9,6 +9,13 @@ type Source = {id:string; url:string; sha256:string; bytes:Buffer};
 type Claim = {id:string; statement:string; kind:string; reasoning?:string; citations:{document:string; startLine:number; endLine:number; quote:string}[]};
 type Unit = {id:string; kind:string; text:string; claimIds:string[]};
 const fail=(message:string):never=>{throw new EngineError('FACT_REVIEW',message);};
+/** Hash integrity alone cannot establish that the review checklist covers the packet. */
+export function validateFactReviewCoverage(value:{claims:{id:string}[];units:Unit[];requiredItems:string[]}){
+ const claimIds=value.claims.map(c=>c.id),unitIds=value.units.map(u=>u.id),expected=[...claimIds.map(id=>'claim:'+id),...unitIds];
+ if(new Set(claimIds).size!==claimIds.length||new Set(expected).size!==expected.length)fail('Duplicate or colliding review identity');
+ if(canonical(expected)!==canonical(value.requiredItems))fail('Required review items do not exactly cover claims and authored units');
+ const known=new Set(claimIds);for(const unit of value.units)if(unit.claimIds.some(id=>!known.has(id)))fail('Unknown claim in '+unit.id);
+}
 function packet(candidate:unknown, sources:Source[], claims:Claim[], units:Unit[]){
  const sourceMap=new Map(sources.map(s=>[s.id,s]));
  if(sourceMap.size!==sources.length||new Set(claims.map(c=>c.id)).size!==claims.length||new Set(units.map(u=>u.id)).size!==units.length)fail('Duplicate review identity');
@@ -28,6 +35,7 @@ export function proposalFactReview(proposal:StoredStoryProposal,sources:Source[]
 const text=z.string().trim().min(1).max(4000),hash=z.string().regex(/^[a-f0-9]{64}$/);
 export const FactReviewReceipt=z.strictObject({schemaVersion:z.literal('fact-review-receipt/1.0'),candidateHash:hash,packetHash:hash,reviewer:z.strictObject({kind:z.enum(['human','session-agent']),identity:text}),items:z.array(z.strictObject({id:text,verdict:z.enum(['supported','unsupported','unverified']),reason:text,limitations:text})).min(1).max(1000)});
 export function verifyFactReview(packetValue:ReturnType<typeof storyFactReview>,raw:unknown){
+ validateFactReviewCoverage(packetValue);
  const receipt=FactReviewReceipt.parse(raw),{packetHash,...content}=packetValue;
  if(sha256(canonical(content))!==packetHash||receipt.packetHash!==packetHash||receipt.candidateHash!==packetValue.candidateHash)fail('Stale or altered review binding');
  const expected=new Set(packetValue.requiredItems),seen=new Set<string>();

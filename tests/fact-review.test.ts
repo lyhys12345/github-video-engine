@@ -45,3 +45,19 @@ it('pending worksheets refuse missing sources, tampered packets and rehashed fal
 it('changed authored execution text creates a new pending worksheet and leaves old draft exactly bound to history',async()=>{
  const {story,sources}=await fixture('rembg'),captured=new Map(sources.map(s=>[s.id,s.bytes])),old=prepareFactReviewWorksheet('a'.repeat(64),storyFactReview(story,sources),captured);story.shots[0]!.narration+=' New unreviewed assertion.';const next=prepareFactReviewWorksheet('b'.repeat(64),storyFactReview(story,sources),captured);expect(next.summary.packetHash).not.toBe(old.summary.packetHash);expect(next.draft.reviewer).toBeNull();expect(next.draft.items.every(i=>i.verdict==='unverified')).toBe(true);expect(old.draft.packetHash).toBe(old.summary.packetHash);
 });
+it.each(['rea','rembg'])('rejects rehashed incomplete/colliding review checklists for real %s source packets',async name=>{
+ const {story,sources}=await fixture(name),original=storyFactReview(story,sources),originalBytes=canonical(original);
+ for(const kind of ['claim-omitted','unit-omitted','duplicate-required','duplicate-claim','namespace-collision','unknown-link']){
+  const p=structuredClone(original);
+  if(kind==='claim-omitted')p.requiredItems=p.requiredItems.filter(id=>id!=='claim:'+p.claims[0]!.id);
+  if(kind==='unit-omitted')p.requiredItems=p.requiredItems.filter(id=>id!==p.units[0]!.id);
+  if(kind==='duplicate-required')p.requiredItems.push(p.requiredItems[0]!);
+  if(kind==='duplicate-claim')p.claims.push(structuredClone(p.claims[0]!));
+  if(kind==='namespace-collision'){p.units[0]!.id='claim:'+p.claims[0]!.id;p.requiredItems=[...p.claims.map(c=>'claim:'+c.id),...p.units.map(u=>u.id)];}
+  if(kind==='unknown-link')p.units[0]!.claimIds=['nonexistent-claim'];
+  const {packetHash,...content}=p;p.packetHash=sha256(canonical(content));const testOnly=receipt(p);testOnly.items=[...new Map(testOnly.items.map(item=>[item.id,item])).values()];
+  expect(()=>verifyFactReview(p,testOnly),kind).toThrow();
+  expect(()=>prepareFactReviewWorksheet('a'.repeat(64),p,new Map(sources.map(s=>[s.id,s.bytes]))),kind).toThrow();
+ }
+ expect(canonical(original)).toBe(originalBytes);expect(verifyFactReview(original,receipt(original))).toMatchObject({semanticTruth:'not-machine-verified',approval:'none'});
+});
