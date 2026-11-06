@@ -3,7 +3,7 @@ import {NarrativeRunAnimation} from './narrative-scene-animations.js';
 import {resolve,join} from 'node:path';
 import {z} from 'zod';
 import {ArtifactStore} from '../assets/store.js';
-import {NarrativePlan,LegacyNarrativePlan,ApiNarrativePlan} from '../contracts/narrative.js';
+import {NarrativePlan,LegacyNarrativePlan,ApiNarrativePlan,AudienceNarrativePlan} from '../contracts/narrative.js';
 import {StorySchema} from '../contracts/story.js';
 import {AnimationSchema} from '../story-planner/animation.js';
 import {Hash} from '../contracts/video.js';
@@ -26,7 +26,7 @@ async function spec<T>(schema:z.ZodType<T>,path:string,max=1_000_000){return par
 // Preserve the exact exported schema bytes of pre-document-flow committed plans.
 // Their stored closure is immutable; new authoring packets expose the extended schema.
 function boundNarrativeSchema(plan:z.infer<typeof NarrativePlan>){
- const schema:any=z.toJSONSchema(plan.schemaVersion==='repository-narrative-plan/1.1'?ApiNarrativePlan:LegacyNarrativePlan),usesMulti=plan.scenes.some(scene=>scene.execution.kind==='supported-story'&&scene.execution.adapter==='multi-input/1.0');
+ const schema:any=z.toJSONSchema(plan.schemaVersion==='repository-narrative-plan/1.1'?ApiNarrativePlan:plan.schemaVersion==='repository-narrative-plan/1.2'?AudienceNarrativePlan:LegacyNarrativePlan),usesMulti=plan.scenes.some(scene=>scene.execution.kind==='supported-story'&&scene.execution.adapter==='multi-input/1.0');
  if(!usesMulti)schema.properties.scenes.items.properties.execution.oneOf[0].properties.adapter.enum=schema.properties.scenes.items.properties.execution.oneOf[0].properties.adapter.enum.filter((value:string)=>value!=='multi-input/1.0');
  if(!usesMulti&&!plan.scenes.some(scene=>scene.execution.kind==='supported-story'&&scene.execution.adapter==='document-independent/1.0'))schema.properties.scenes.items.properties.execution.oneOf[0].properties.adapter.enum=plan.scenes.some(scene=>scene.execution.kind==='supported-story'&&scene.execution.adapter==='document-flow/1.0')?['http','image-mask','scalar-rule','document-flow/1.0']:['http','image-mask','scalar-rule'];
  return schema;

@@ -31,3 +31,29 @@ it('keeps the entire disclosure visible across SVG lines and gives transfer trac
  expect(legacy).not.toContain('<tspan ');
  expect(legacy).not.toContain('marker-end=');
 });
+it('enlarges only bounded short object labels and keeps long labels at legacy size',async()=>{
+ const read=async(name:string)=>JSON.parse(await readFile('examples/http-story-v1/'+name+'.json','utf8'));
+ const story=await read('express-story'),animation=await read('express-animation');
+ animation.shots[0].objects[0].label='POST→405';
+ animation.shots[0].objects[1].label='THIS IS A DELIBERATELY LONG LABEL';
+ const plan=compileAnimation(story,animation),svg=renderFramePreview(plan,plan.shots[0]!.endFrame-1);
+ expect(svg).toContain('font-size="28">POST→405</text>');
+ expect(svg).toContain('font-size="20">THIS IS A DELIBERATELY LONG LABEL</text>');
+});
+it('renders two explicitly disjoint request-response transfers as independent lanes',async()=>{
+ const read=async(name:string)=>JSON.parse(await readFile('examples/http-story-v1/'+name+'.json','utf8'));
+ const story=await read('express-story'),a=await read('express-animation'),shot=a.shots[0],claims=shot.actions[0].claimIds;
+ shot.objects=[{id:'one-in',label:'POST /books',kind:'state',visual:'request'},{id:'one-out',label:'405',kind:'state',visual:'response'},{id:'two-in',label:'GET /missing',kind:'state',visual:'request'},{id:'two-out',label:'404',kind:'state',visual:'response'}];
+ shot.actions=[{kind:'transfer',source:'one-in',target:'one-out',start:.1,end:.4,claimIds:claims},{kind:'transfer',source:'two-in',target:'two-out',start:.6,end:.9,claimIds:claims}];
+ const p=compileAnimation(story,a),svg=renderFramePreview(p,p.shots[0]!.endFrame-1);
+ expect(svg).toContain('data-independent-lane="1"');expect(svg).toContain('data-independent-lane="2"');expect(svg).toContain('POST /books');expect(svg).toContain('GET /missing');
+ expect(svg).toContain('M260 420 H460');expect(svg).toContain('M260 700 H460');
+});
+it('does not disguise a shared-input graph as independent request lanes',async()=>{
+ const read=async(name:string)=>JSON.parse(await readFile('examples/http-story-v1/'+name+'.json','utf8'));
+ const story=await read('express-story'),a=await read('express-animation'),shot=a.shots[0],claims=shot.actions[0].claimIds;
+ shot.objects=[{id:'in-a',label:'REQUEST A',kind:'state',visual:'request'},{id:'out-a',label:'A',kind:'state',visual:'response'},{id:'in-b',label:'REQUEST B',kind:'state',visual:'request'},{id:'out-b',label:'B',kind:'state',visual:'response'}];
+ shot.actions=[{kind:'transfer',source:'in-a',target:'out-a',start:.1,end:.4,claimIds:claims},{kind:'transfer',source:'in-a',target:'out-b',start:.6,end:.9,claimIds:claims}];
+ const p=compileAnimation(story,a),svg=renderFramePreview(p,p.shots[0]!.endFrame-1);
+ expect(svg).not.toContain('data-independent-lane=');
+});

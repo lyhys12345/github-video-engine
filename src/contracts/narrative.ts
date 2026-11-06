@@ -4,7 +4,9 @@ import {Hash,Id} from './video.js';
 const text=(max:number)=>z.string().min(1).max(max).regex(/\S/);
 // Authored explanation, never automatic source interpretation or semantic approval.
 const screenText=z.string().min(1).max(24).regex(/^[\p{Script=Han}\p{Script=Latin}\p{N}\p{P}\p{Zs}]+$/u).regex(/\S/);
-export const NarrativeSceneContext=z.strictObject({schemaVersion:z.literal('narrative-scene-context/1.0'),title:screenText,question:screenText,explanation:screenText,boundary:screenText,claimIds:z.array(Id).max(12),nextStep:screenText.optional()});
+export const LegacyNarrativeSceneContext=z.strictObject({schemaVersion:z.literal('narrative-scene-context/1.0'),title:screenText,question:screenText,explanation:screenText,boundary:screenText,claimIds:z.array(Id).max(12),nextStep:screenText.optional()});
+export const AudienceNarrativeSceneContext=LegacyNarrativeSceneContext.extend({schemaVersion:z.literal('narrative-scene-context/1.1')});
+export const NarrativeSceneContext=z.discriminatedUnion('schemaVersion',[LegacyNarrativeSceneContext,AudienceNarrativeSceneContext]);
 const execution=z.discriminatedUnion('kind',[
  z.strictObject({kind:z.literal('supported-story'),adapter:z.enum(['http','image-mask','scalar-rule','document-flow/1.0','document-independent/1.0','multi-input/1.0']),storyTaskId:Hash,expectedGraphHash:Hash,shotIds:z.array(Id).min(1).max(12)}),
  z.strictObject({kind:z.literal('needs-evidence'),reason:text(1000),missingEvidence:text(1000)}),
@@ -16,7 +18,7 @@ const NarrativePlanBase=z.strictObject({
  interpretation:z.literal('human-or-session-agent-authored-not-automatic-repository-understanding'),
  brief:z.strictObject({title:text(240),audience:text(500),question:text(1000),thesis:text(1500),scope:text(1000),exclusions:z.array(text(500)).max(20),claimIds:z.array(Id).min(1).max(60)}),
  claims:LegacyStoryProposal.shape.claims,
- scenes:z.array(z.strictObject({id:Id,role:z.enum(['hook','context','mechanism','example','benefit','limitation','closing']),title:text(240),narration:text(3000),visual:text(3000),onScreenText:z.array(text(500)).max(8),claimIds:z.array(Id).max(60),estimatedSeconds:z.number().finite().min(1).max(120),transitionToNext:z.string().max(1500),execution,visualContext:NarrativeSceneContext.optional()})).min(5).max(40),
+ scenes:z.array(z.strictObject({id:Id,role:z.enum(['hook','context','mechanism','example','benefit','limitation','closing']),title:text(240),narration:text(3000),visual:text(3000),onScreenText:z.array(text(500)).max(8),claimIds:z.array(Id).max(60),estimatedSeconds:z.number().finite().min(1).max(120),transitionToNext:z.string().max(1500),execution,visualContext:LegacyNarrativeSceneContext.optional()})).min(5).max(40),
  openQuestions:z.array(text(1000)).max(30)
 });
 function refineNarrative(p:Omit<z.infer<typeof NarrativePlanBase>,'schemaVersion'|'authorship'|'interpretation'>,c:z.RefinementCtx){
@@ -33,5 +35,6 @@ function refineNarrative(p:Omit<z.infer<typeof NarrativePlanBase>,'schemaVersion
 }
 export const LegacyNarrativePlan=NarrativePlanBase.superRefine(refineNarrative);
 export const ApiNarrativePlan=NarrativePlanBase.extend({schemaVersion:z.literal('repository-narrative-plan/1.1'),authorship:z.strictObject({kind:z.literal('api-model')}),interpretation:z.literal('api-model-authored-not-semantic-approval')}).superRefine(refineNarrative);
-export const NarrativePlan=z.discriminatedUnion('schemaVersion',[LegacyNarrativePlan,ApiNarrativePlan]);
+export const AudienceNarrativePlan=NarrativePlanBase.extend({schemaVersion:z.literal('repository-narrative-plan/1.2'),scenes:z.array(NarrativePlanBase.shape.scenes.element.extend({visualContext:NarrativeSceneContext.optional()})).min(5).max(40)}).superRefine((p,c)=>refineNarrative(p as unknown as z.infer<typeof NarrativePlanBase>,c));
+export const NarrativePlan=z.discriminatedUnion('schemaVersion',[LegacyNarrativePlan,ApiNarrativePlan,AudienceNarrativePlan]);
 export type NarrativePlan=z.infer<typeof NarrativePlan>;

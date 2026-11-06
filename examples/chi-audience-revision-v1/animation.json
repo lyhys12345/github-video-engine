@@ -1,0 +1,307 @@
+{
+  "schemaVersion": "1.0",
+  "storyId": "chi-method-miss",
+  "shots": [
+    {
+      "shotId": "scene-hook",
+      "objects": [
+        {
+          "id": "left",
+          "kind": "state",
+          "label": "请求进来",
+          "visual": "request"
+        },
+        {
+          "id": "right",
+          "kind": "state",
+          "label": "找到处理器",
+          "visual": "response"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "reveal",
+          "target": "left",
+          "start": 0,
+          "end": 0.15,
+          "claimIds": [
+            "dispatch",
+            "defaults"
+          ]
+        },
+        {
+          "kind": "transfer",
+          "source": "left",
+          "target": "right",
+          "start": 0.2,
+          "end": 0.75,
+          "claimIds": [
+            "dispatch",
+            "defaults"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "scene-context",
+      "objects": [
+        {
+          "id": "left",
+          "kind": "state",
+          "label": "取出上下文",
+          "visual": "code"
+        },
+        {
+          "id": "right",
+          "kind": "state",
+          "label": "标记为假",
+          "visual": "code"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "reveal",
+          "target": "left",
+          "start": 0,
+          "end": 0.15,
+          "claimIds": [
+            "reset"
+          ]
+        },
+        {
+          "kind": "compare",
+          "source": "left",
+          "target": "right",
+          "start": 0.18,
+          "end": 0.5,
+          "claimIds": [
+            "reset"
+          ]
+        },
+        {
+          "kind": "emphasize",
+          "target": "right",
+          "start": 0.6,
+          "end": 0.85,
+          "claimIds": [
+            "reset"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "scene-mechanism",
+      "objects": [
+        {
+          "id": "left",
+          "kind": "state",
+          "label": "路径命中",
+          "visual": "code"
+        },
+        {
+          "id": "right",
+          "kind": "state",
+          "label": "方法不符",
+          "visual": "code"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "reveal",
+          "target": "left",
+          "start": 0,
+          "end": 0.15,
+          "claimIds": [
+            "leaf"
+          ]
+        },
+        {
+          "kind": "compare",
+          "source": "left",
+          "target": "right",
+          "start": 0.18,
+          "end": 0.5,
+          "claimIds": [
+            "leaf"
+          ]
+        },
+        {
+          "kind": "emphasize",
+          "target": "right",
+          "start": 0.6,
+          "end": 0.85,
+          "claimIds": [
+            "leaf"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "scene-example",
+      "objects": [
+        {
+          "id": "req-a",
+          "kind": "state",
+          "label": "POST /books",
+          "visual": "request"
+        },
+        {
+          "id": "res-a",
+          "kind": "state",
+          "label": "405",
+          "visual": "response"
+        },
+        {
+          "id": "req-b",
+          "kind": "state",
+          "label": "GET /missing",
+          "visual": "request"
+        },
+        {
+          "id": "res-b",
+          "kind": "state",
+          "label": "404",
+          "visual": "response"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "reveal",
+          "target": "req-a",
+          "start": 0,
+          "end": 0.1,
+          "claimIds": [
+            "books",
+            "dispatch",
+            "defaults"
+          ]
+        },
+        {
+          "kind": "transfer",
+          "source": "req-a",
+          "target": "res-a",
+          "start": 0.12,
+          "end": 0.4,
+          "claimIds": [
+            "books",
+            "dispatch",
+            "defaults"
+          ]
+        },
+        {
+          "kind": "reveal",
+          "target": "req-b",
+          "start": 0.45,
+          "end": 0.55,
+          "claimIds": [
+            "books",
+            "dispatch",
+            "defaults"
+          ]
+        },
+        {
+          "kind": "transfer",
+          "source": "req-b",
+          "target": "res-b",
+          "start": 0.56,
+          "end": 0.86,
+          "claimIds": [
+            "books",
+            "dispatch",
+            "defaults"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "scene-limitation",
+      "objects": [
+        {
+          "id": "left",
+          "kind": "state",
+          "label": "未知方法",
+          "visual": "request"
+        },
+        {
+          "id": "right",
+          "kind": "state",
+          "label": "可自定义处理器",
+          "visual": "response"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "reveal",
+          "target": "left",
+          "start": 0,
+          "end": 0.15,
+          "claimIds": [
+            "known",
+            "defaults"
+          ]
+        },
+        {
+          "kind": "transfer",
+          "source": "left",
+          "target": "right",
+          "start": 0.2,
+          "end": 0.75,
+          "claimIds": [
+            "known",
+            "defaults"
+          ]
+        }
+      ]
+    },
+    {
+      "shotId": "scene-closing",
+      "objects": [
+        {
+          "id": "left",
+          "kind": "state",
+          "label": "标记为真：405",
+          "visual": "code"
+        },
+        {
+          "id": "right",
+          "kind": "state",
+          "label": "标记为假：404",
+          "visual": "code"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "reveal",
+          "target": "left",
+          "start": 0,
+          "end": 0.15,
+          "claimIds": [
+            "dispatch",
+            "defaults"
+          ]
+        },
+        {
+          "kind": "compare",
+          "source": "left",
+          "target": "right",
+          "start": 0.18,
+          "end": 0.5,
+          "claimIds": [
+            "dispatch",
+            "defaults"
+          ]
+        },
+        {
+          "kind": "emphasize",
+          "target": "right",
+          "start": 0.6,
+          "end": 0.85,
+          "claimIds": [
+            "dispatch",
+            "defaults"
+          ]
+        }
+      ]
+    }
+  ]
+}

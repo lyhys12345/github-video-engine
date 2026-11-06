@@ -1,0 +1,422 @@
+{
+  "authoringRequestId": "ba102e0a18006d0ecf87cd0881d894f951602cc9e6b0f879d9112ce12eeea605",
+  "authorship": {
+    "kind": "session-agent"
+  },
+  "binding": {
+    "commit": "9f8adb1aabaa8a91180a821111d3f8e668d1c0bf",
+    "evidenceFingerprint": "9136f23239fe4e4277659a9b7140062476938a71eff65cef159bcb0604fc7e80",
+    "projectId": "explain-0dbf83d7a5d30570d06bb81c3642a9f575b66b1479f1e699",
+    "repository": "https://github.com/go-chi/chi",
+    "snapshotHash": "93f080a375e6bdfba6a7b7b6abfe397fefb4d9674ea083a6ed86836e60169bb7"
+  },
+  "brief": {
+    "title": "chi 怎样区分 404 和 405？",
+    "audience": "不了解 chi 的普通观众",
+    "question": "chi 怎样区分 404 和 405？",
+    "thesis": "路径相同但方法不符时，树留下标记。查找失败后，路由器读取它来选择错误处理器。",
+    "scope": "只讲已知方法、默认错误处理器的静态路由示例，并点明未知方法的提前分支。",
+    "exclusions": [
+      "未运行 chi 或教学请求"
+    ],
+    "claimIds": [
+      "reset",
+      "leaf",
+      "dispatch",
+      "defaults",
+      "known",
+      "books"
+    ]
+  },
+  "claims": [
+    {
+      "id": "reset",
+      "statement": "从池中取出的路由上下文先复位，方法不匹配标记清零，允许方法列表清空。",
+      "basis": {
+        "kind": "documented"
+      },
+      "citations": [
+        {
+          "startLine": 80,
+          "endLine": 84,
+          "quote": "\t// into the pool for reuse from another request.\n\trctx = mx.pool.Get().(*Context)\n\trctx.Reset()\n\trctx.Routes = mx\n\trctx.parentCtx = r.Context()",
+          "sourceId": "source-3",
+          "sourceSha256": "cc44c2d620e6306b16d6d80f5f6c70f02b5814b357a4f5823372818f355ae67d"
+        },
+        {
+          "startLine": 77,
+          "endLine": 78,
+          "quote": "\tmethodsAllowed   []methodTyp // allowed methods in case of a 405\n\tmethodNotAllowed bool",
+          "sourceId": "source-5",
+          "sourceSha256": "b19edcca252e2fe74e82802c4c7ce1a1c0855728f9ede1288f0224283dfc7e53"
+        },
+        {
+          "startLine": 93,
+          "endLine": 95,
+          "quote": "\tx.methodNotAllowed = false\n\tx.methodsAllowed = x.methodsAllowed[:0]\n\tx.parentCtx = nil",
+          "sourceId": "source-5",
+          "sourceSha256": "b19edcca252e2fe74e82802c4c7ce1a1c0855728f9ede1288f0224283dfc7e53"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "statement": "路径耗尽并到达叶节点时，找到对应方法的处理函数就返回节点，否则收集允许方法并设标记。",
+      "basis": {
+        "kind": "documented"
+      },
+      "citations": [
+        {
+          "startLine": 518,
+          "endLine": 524,
+          "quote": "\t\tif len(xsearch) == 0 {\n\t\t\tif xn.isLeaf() {\n\t\t\t\th := xn.endpoints[method]\n\t\t\t\tif h != nil && h.handler != nil {\n\t\t\t\t\trctx.routeParams.Keys = append(rctx.routeParams.Keys, h.paramKeys...)\n\t\t\t\t\treturn xn\n\t\t\t\t}",
+          "sourceId": "source-4",
+          "sourceSha256": "f4b12b63b662fb8e36658172b36b35705cfb24eefae0665635f4fbd52e64fb79"
+        },
+        {
+          "startLine": 526,
+          "endLine": 537,
+          "quote": "\t\t\t\tfor endpoints := range xn.endpoints {\n\t\t\t\t\tif endpoints == mALL || endpoints == mSTUB {\n\t\t\t\t\t\tcontinue\n\t\t\t\t\t}\n\t\t\t\t\tif !slices.Contains(rctx.methodsAllowed, endpoints) {\n\t\t\t\t\t\trctx.methodsAllowed = append(rctx.methodsAllowed, endpoints)\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// flag that the routing context found a route, but not a corresponding\n\t\t\t\t// supported method\n\t\t\t\trctx.methodNotAllowed = true",
+          "sourceId": "source-4",
+          "sourceSha256": "f4b12b63b662fb8e36658172b36b35705cfb24eefae0665635f4fbd52e64fb79"
+        }
+      ]
+    },
+    {
+      "id": "dispatch",
+      "statement": "查到处理函数就调用并返回；查找失败后，按标记选择方法不允许或路径未找到的处理函数。",
+      "basis": {
+        "kind": "documented"
+      },
+      "citations": [
+        {
+          "startLine": 482,
+          "endLine": 484,
+          "quote": "\t// Find the route\n\tif _, _, h := mx.tree.FindRoute(rctx, method, routePath); h != nil {\n\t\t// Set http.Request path values from our request context",
+          "sourceId": "source-3",
+          "sourceSha256": "cc44c2d620e6306b16d6d80f5f6c70f02b5814b357a4f5823372818f355ae67d"
+        },
+        {
+          "startLine": 491,
+          "endLine": 498,
+          "quote": "\t\th.ServeHTTP(w, r)\n\t\treturn\n\t}\n\tif rctx.methodNotAllowed {\n\t\tmx.MethodNotAllowedHandler(rctx.methodsAllowed...).ServeHTTP(w, r)\n\t} else {\n\t\tmx.NotFoundHandler().ServeHTTP(w, r)\n\t}",
+          "sourceId": "source-3",
+          "sourceSha256": "cc44c2d620e6306b16d6d80f5f6c70f02b5814b357a4f5823372818f355ae67d"
+        }
+      ]
+    },
+    {
+      "id": "defaults",
+      "statement": "默认的未找到处理器是 http.NotFound；默认方法不允许处理器设置 Allow 并写入 405。两者均可覆盖。",
+      "basis": {
+        "kind": "documented"
+      },
+      "citations": [
+        {
+          "startLine": 410,
+          "endLine": 416,
+          "quote": "// NotFoundHandler returns the default Mux 404 responder whenever a route\n// cannot be found.\nfunc (mx *Mux) NotFoundHandler() http.HandlerFunc {\n\tif mx.notFoundHandler != nil {\n\t\treturn mx.notFoundHandler\n\t}\n\treturn http.NotFound",
+          "sourceId": "source-3",
+          "sourceSha256": "cc44c2d620e6306b16d6d80f5f6c70f02b5814b357a4f5823372818f355ae67d"
+        },
+        {
+          "startLine": 419,
+          "endLine": 425,
+          "quote": "// MethodNotAllowedHandler returns the default Mux 405 responder whenever\n// a method cannot be resolved for a route.\nfunc (mx *Mux) MethodNotAllowedHandler(methodsAllowed ...methodTyp) http.HandlerFunc {\n\tif mx.methodNotAllowedHandler != nil {\n\t\treturn mx.methodNotAllowedHandler\n\t}\n\treturn methodNotAllowedHandler(methodsAllowed...)",
+          "sourceId": "source-3",
+          "sourceSha256": "cc44c2d620e6306b16d6d80f5f6c70f02b5814b357a4f5823372818f355ae67d"
+        },
+        {
+          "startLine": 534,
+          "endLine": 537,
+          "quote": "\t\tfor _, m := range methodsAllowed {\n\t\t\tw.Header().Add(\"Allow\", reverseMethodMap[m])\n\t\t}\n\t\tw.WriteHeader(405)",
+          "sourceId": "source-3",
+          "sourceSha256": "cc44c2d620e6306b16d6d80f5f6c70f02b5814b357a4f5823372818f355ae67d"
+        }
+      ]
+    },
+    {
+      "id": "known",
+      "statement": "不在方法表中的方法在查树之前就进入方法不允许处理器。",
+      "basis": {
+        "kind": "documented"
+      },
+      "citations": [
+        {
+          "startLine": 476,
+          "endLine": 483,
+          "quote": "\tmethod, ok := methodMap[rctx.RouteMethod]\n\tif !ok {\n\t\tmx.MethodNotAllowedHandler().ServeHTTP(w, r)\n\t\treturn\n\t}\n\n\t// Find the route\n\tif _, _, h := mx.tree.FindRoute(rctx, method, routePath); h != nil {",
+          "sourceId": "source-3",
+          "sourceSha256": "cc44c2d620e6306b16d6d80f5f6c70f02b5814b357a4f5823372818f355ae67d"
+        }
+      ]
+    },
+    {
+      "id": "books",
+      "statement": "教学假设：仅注册 GET /books 且使用默认处理器。POST /books 将走 405，GET /missing 将走 404。",
+      "basis": {
+        "kind": "inference",
+        "reasoning": "将两个假设请求逐一代入上述分支；没有实际发送请求。"
+      },
+      "citations": [
+        {
+          "startLine": 518,
+          "endLine": 524,
+          "quote": "\t\tif len(xsearch) == 0 {\n\t\t\tif xn.isLeaf() {\n\t\t\t\th := xn.endpoints[method]\n\t\t\t\tif h != nil && h.handler != nil {\n\t\t\t\t\trctx.routeParams.Keys = append(rctx.routeParams.Keys, h.paramKeys...)\n\t\t\t\t\treturn xn\n\t\t\t\t}",
+          "sourceId": "source-4",
+          "sourceSha256": "f4b12b63b662fb8e36658172b36b35705cfb24eefae0665635f4fbd52e64fb79"
+        },
+        {
+          "startLine": 535,
+          "endLine": 537,
+          "quote": "\t\t\t\t// flag that the routing context found a route, but not a corresponding\n\t\t\t\t// supported method\n\t\t\t\trctx.methodNotAllowed = true",
+          "sourceId": "source-4",
+          "sourceSha256": "f4b12b63b662fb8e36658172b36b35705cfb24eefae0665635f4fbd52e64fb79"
+        },
+        {
+          "startLine": 494,
+          "endLine": 498,
+          "quote": "\tif rctx.methodNotAllowed {\n\t\tmx.MethodNotAllowedHandler(rctx.methodsAllowed...).ServeHTTP(w, r)\n\t} else {\n\t\tmx.NotFoundHandler().ServeHTTP(w, r)\n\t}",
+          "sourceId": "source-3",
+          "sourceSha256": "cc44c2d620e6306b16d6d80f5f6c70f02b5814b357a4f5823372818f355ae67d"
+        }
+      ]
+    }
+  ],
+  "interpretation": "human-or-session-agent-authored-not-automatic-repository-understanding",
+  "openQuestions": [
+    "语义复核、人工试听及连续视听验收待完成。"
+  ],
+  "scenes": [
+    {
+      "id": "scene-hook",
+      "role": "hook",
+      "title": "chi：请求如何找到处理器？",
+      "narration": "chi 是 Go 的路由工具。请求来了，它决定交给哪个处理器。",
+      "visual": "chi：请求如何找到处理器？ · 路由是什么？ · 请求交给对应处理器 · 源码讲解，未运行",
+      "onScreenText": [
+        "请求进来",
+        "找到处理器",
+        "源码讲解，未运行"
+      ],
+      "claimIds": [
+        "dispatch",
+        "defaults"
+      ],
+      "estimatedSeconds": 10,
+      "transitionToNext": "每次查找从哪里开始",
+      "execution": {
+        "kind": "supported-story",
+        "adapter": "http",
+        "storyTaskId": "$SCENE_STORY_TASK_ID",
+        "expectedGraphHash": "$SCENE_STORY_GRAPH_HASH",
+        "shotIds": [
+          "scene-hook"
+        ]
+      },
+      "visualContext": {
+        "schemaVersion": "narrative-scene-context/1.1",
+        "title": "chi：请求如何找到处理器？",
+        "question": "路由是什么？",
+        "explanation": "路由：请求交给对应处理器",
+        "boundary": "源码示意，未运行目标",
+        "claimIds": [
+          "dispatch",
+          "defaults"
+        ]
+      }
+    },
+    {
+      "id": "scene-context",
+      "role": "context",
+      "title": "每次查找从哪里开始",
+      "narration": "路由器从池里取出上下文，先清掉上次的方法标记。",
+      "visual": "每次查找从哪里开始 · 取出上下文 · 标记为假 · 清除上次请求的状态 · context.go / mux.go",
+      "onScreenText": [
+        "每次查找从哪里开始",
+        "取出上下文",
+        "标记为假",
+        "context.go / mux.go"
+      ],
+      "claimIds": [
+        "reset"
+      ],
+      "estimatedSeconds": 6.3,
+      "transitionToNext": "谁写入标记",
+      "execution": {
+        "kind": "supported-story",
+        "adapter": "http",
+        "storyTaskId": "$SCENE_STORY_TASK_ID",
+        "expectedGraphHash": "$SCENE_STORY_GRAPH_HASH",
+        "shotIds": [
+          "scene-context"
+        ]
+      },
+      "visualContext": {
+        "schemaVersion": "narrative-scene-context/1.1",
+        "title": "每次查找从哪里开始",
+        "question": "这一步判断什么？",
+        "explanation": "清除上次请求的状态",
+        "boundary": "context.go / mux.go",
+        "claimIds": [
+          "reset"
+        ]
+      }
+    },
+    {
+      "id": "scene-mechanism",
+      "role": "mechanism",
+      "title": "谁写入标记",
+      "narration": "路由树找到路径，却找不到对应方法，就记下允许的方法，并把标记设为真。",
+      "visual": "谁写入标记 · 路径命中 · 方法不符 · 允许的方法保存在上下文中 · tree.go",
+      "onScreenText": [
+        "谁写入标记",
+        "路径命中",
+        "方法不符",
+        "tree.go"
+      ],
+      "claimIds": [
+        "leaf"
+      ],
+      "estimatedSeconds": 8.8,
+      "transitionToNext": "假设只注册 GET /books",
+      "execution": {
+        "kind": "supported-story",
+        "adapter": "http",
+        "storyTaskId": "$SCENE_STORY_TASK_ID",
+        "expectedGraphHash": "$SCENE_STORY_GRAPH_HASH",
+        "shotIds": [
+          "scene-mechanism"
+        ]
+      },
+      "visualContext": {
+        "schemaVersion": "narrative-scene-context/1.1",
+        "title": "谁写入标记",
+        "question": "这一步判断什么？",
+        "explanation": "允许的方法保存在上下文中",
+        "boundary": "tree.go",
+        "claimIds": [
+          "leaf"
+        ]
+      }
+    },
+    {
+      "id": "scene-example",
+      "role": "example",
+      "title": "两次独立请求",
+      "narration": "假设只注册读取书单。提交书单与读取不存在的页面，是两次独立请求。默认处理器分别返回四零五和四零四。",
+      "visual": "两次独立请求 · 假设只注册 GET /books · 默认处理器下分别判断 · 教学推演，未发请求",
+      "onScreenText": [
+        "POST /books → 405",
+        "GET /missing → 404",
+        "教学推演，未发请求"
+      ],
+      "claimIds": [
+        "books",
+        "dispatch",
+        "defaults"
+      ],
+      "estimatedSeconds": 16,
+      "transitionToNext": "查树之前还有一道判断",
+      "execution": {
+        "kind": "supported-story",
+        "adapter": "http",
+        "storyTaskId": "$SCENE_STORY_TASK_ID",
+        "expectedGraphHash": "$SCENE_STORY_GRAPH_HASH",
+        "shotIds": [
+          "scene-example"
+        ]
+      },
+      "visualContext": {
+        "schemaVersion": "narrative-scene-context/1.1",
+        "title": "两个请求，各自判断",
+        "question": "假设只注册 GET /books",
+        "explanation": "仅注册 GET /books",
+        "boundary": "默认处理器，教学推演",
+        "claimIds": [
+          "books",
+          "dispatch",
+          "defaults"
+        ]
+      }
+    },
+    {
+      "id": "scene-limitation",
+      "role": "limitation",
+      "title": "未知方法的边界",
+      "narration": "未知方法在查树前进入方法不允许处理器。默认返回四零五；自定义处理器可能不同。",
+      "visual": "未知方法的边界 · 会直接返回 405 吗？ · 先调用方法不允许处理器 · 默认 405；自定义可能不同",
+      "onScreenText": [
+        "未知方法",
+        "可自定义处理器",
+        "默认 405；自定义可能不同"
+      ],
+      "claimIds": [
+        "known",
+        "defaults"
+      ],
+      "estimatedSeconds": 14,
+      "transitionToNext": "读回标记",
+      "execution": {
+        "kind": "supported-story",
+        "adapter": "http",
+        "storyTaskId": "$SCENE_STORY_TASK_ID",
+        "expectedGraphHash": "$SCENE_STORY_GRAPH_HASH",
+        "shotIds": [
+          "scene-limitation"
+        ]
+      },
+      "visualContext": {
+        "schemaVersion": "narrative-scene-context/1.1",
+        "title": "未知方法的边界",
+        "question": "会直接返回 405 吗？",
+        "explanation": "查树前调用可自定义处理器",
+        "boundary": "默认返回405，自定义可不同",
+        "claimIds": [
+          "known",
+          "defaults"
+        ]
+      }
+    },
+    {
+      "id": "scene-closing",
+      "role": "closing",
+      "title": "读回标记",
+      "narration": "查找失败才读标记。以上是源码推演，未运行示例。",
+      "visual": "读回标记 · 标记为真：405 · 标记为假：404 · 默认处理器下的分支 · mux.go",
+      "onScreenText": [
+        "读回标记",
+        "标记为真：405",
+        "标记为假：404",
+        "mux.go"
+      ],
+      "claimIds": [
+        "dispatch",
+        "defaults"
+      ],
+      "estimatedSeconds": 6.7,
+      "transitionToNext": "",
+      "execution": {
+        "kind": "supported-story",
+        "adapter": "http",
+        "storyTaskId": "$SCENE_STORY_TASK_ID",
+        "expectedGraphHash": "$SCENE_STORY_GRAPH_HASH",
+        "shotIds": [
+          "scene-closing"
+        ]
+      },
+      "visualContext": {
+        "schemaVersion": "narrative-scene-context/1.1",
+        "title": "读回标记",
+        "question": "这一步判断什么？",
+        "explanation": "默认处理器下的分支",
+        "boundary": "mux.go",
+        "claimIds": [
+          "dispatch",
+          "defaults"
+        ]
+      }
+    }
+  ],
+  "schemaVersion": "repository-narrative-plan/1.2"
+}

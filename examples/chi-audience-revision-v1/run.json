@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "repository-narrative-run-author/2.0",
+  "profile": "complete-technical-preview/1.0",
+  "presentation": "generic",
+  "captureTaskId": "0dbf83d7a5d30570d06bb81c3642a9f575b66b1479f1e6991f420aef6d98f7fd",
+  "bindingSha256": "66a82d0d1f9a643d6b52f62189fb11a00d684af1c958ad3eeb15aab97c301294",
+  "selection": [
+    {
+      "kind": "story-slice",
+      "sceneId": "scene-hook",
+      "slices": [
+        {
+          "shotId": "scene-hook",
+          "startFrame": 0,
+          "endFrame": 300
+        }
+      ]
+    },
+    {
+      "kind": "story-slice",
+      "sceneId": "scene-context",
+      "slices": [
+        {
+          "shotId": "scene-context",
+          "startFrame": 0,
+          "endFrame": 189
+        }
+      ]
+    },
+    {
+      "kind": "story-slice",
+      "sceneId": "scene-mechanism",
+      "slices": [
+        {
+          "shotId": "scene-mechanism",
+          "startFrame": 0,
+          "endFrame": 264
+        }
+      ]
+    },
+    {
+      "kind": "story-slice",
+      "sceneId": "scene-example",
+      "slices": [
+        {
+          "shotId": "scene-example",
+          "startFrame": 0,
+          "endFrame": 480
+        }
+      ]
+    },
+    {
+      "kind": "story-slice",
+      "sceneId": "scene-limitation",
+      "slices": [
+        {
+          "shotId": "scene-limitation",
+          "startFrame": 0,
+          "endFrame": 420
+        }
+      ]
+    },
+    {
+      "kind": "story-slice",
+      "sceneId": "scene-closing",
+      "slices": [
+        {
+          "shotId": "scene-closing",
+          "startFrame": 0,
+          "endFrame": 201
+        }
+      ]
+    }
+  ],
+  "speech": [
+    {
+      "sceneId": "scene-hook",
+      "captions": [
+        {
+          "startChar": 0,
+          "endChar": 31,
+          "startSample": 0,
+          "endSample": "$FULL_RECORDING_SAMPLES"
+        }
+      ]
+    },
+    {
+      "sceneId": "scene-context",
+      "captions": [
+        {
+          "startChar": 0,
+          "endChar": 23,
+          "startSample": 0,
+          "endSample": "$FULL_RECORDING_SAMPLES"
+        }
+      ]
+    },
+    {
+      "sceneId": "scene-mechanism",
+      "captions": [
+        {
+          "startChar": 0,
+          "endChar": 34,
+          "startSample": 0,
+          "endSample": "$FULL_RECORDING_SAMPLES"
+        }
+      ]
+    },
+    {
+      "sceneId": "scene-example",
+      "captions": [
+        {
+          "startChar": 0,
+          "endChar": 49,
+          "startSample": 0,
+          "endSample": "$FULL_RECORDING_SAMPLES"
+        }
+      ]
+    },
+    {
+      "sceneId": "scene-limitation",
+      "captions": [
+        {
+          "startChar": 0,
+          "endChar": 38,
+          "startSample": 0,
+          "endSample": "$FULL_RECORDING_SAMPLES"
+        }
+      ]
+    },
+    {
+      "sceneId": "scene-closing",
+      "captions": [
+        {
+          "startChar": 0,
+          "endChar": 23,
+          "startSample": 0,
+          "endSample": "$FULL_RECORDING_SAMPLES"
+        }
+      ]
+    }
+  ]
+}
