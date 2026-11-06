@@ -3,6 +3,7 @@ import {sha256} from '../core/util.js';
 import {EngineError} from '../core/errors.js';
 import {generateHuihui} from '../tts/huihui.js';
 import {importHuihuiTts} from '../tts/runtime.js';
+import {requireNarrationVoice} from './narration-voice-policy.js';
 
 type Selection={kind:string;sceneId:string;frames?:number;slices?:{shotId:string;startFrame:number;endFrame:number}[]};
 type Measurement={sceneId:string;samples:number;generationTaskId:string;receiptFingerprint:string;generation:boolean;import:boolean};
@@ -28,6 +29,7 @@ export function narrativeSpeechTiming(selection:Selection[],measurements:Measure
 }
 
 export async function measureNarrativeSpeech(data:string,plan:any,config:any,signal:AbortSignal){
+ requireNarrationVoice();
  const measurements:Measurement[]=[],captionChecks:any[]=[];
  const requested=config.speech.map((s:any)=>s.sceneId),produced=config.selection.filter((s:any)=>s.kind==='story-slice').map((s:any)=>s.sceneId);
  for(const speech of config.speech){const scene=plan.scenes.find((s:any)=>s.id===speech.sceneId);if(!scene||scene.execution.kind!=='supported-story')throw new EngineError('NARRATIVE_SPEECH','Cannot measure speech for an unproduced evidence/adapter scene.');}

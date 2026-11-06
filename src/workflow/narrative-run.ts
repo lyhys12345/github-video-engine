@@ -1,4 +1,5 @@
 import {recordNarrativeWorkspace} from './narrative-workspace.js';
+import {requireNarrationVoice} from './narration-voice-policy.js';
 import {measureNarrativeSpeech} from './narrative-speech-checkpoint.js';
 import {prepareNarrativeRunStory,deriveNarrativeSceneStory} from './narrative-scene-evidence.js';
 import {prepareNarrativeSceneAnimations} from './narrative-scene-animations.js';
@@ -59,6 +60,7 @@ export async function runNarrativeWorkspace(repository:string,workspace:string,a
    else{const storyPath=join(root,'story.json');await immutable(storyPath,json(story));const child=await narrativeStory(data,sourceRecord.taskId,storyPath,join(root,'story-export'),signal),childStatus=await statusStory(data,child.taskId);if(!('graphHash'in childStatus))return fail('Story did not commit.');tasks.story=child.taskId;cache.story=child.cached;for(const scene of plan.scenes??[])if(scene.execution?.kind==='supported-story'){bind(scene.execution,'storyTaskId','$STORY_TASK_ID',child.taskId);bind(scene.execution,'expectedGraphHash','$STORY_GRAPH_HASH',childStatus.graphHash);sceneStories.set(scene.id,{taskId:child.taskId,graphHash:childStatus.graphHash,storyId:story.id,shots:scene.execution.shotIds,cached:child.cached});}}
    noDraft(plan);NarrativePlan.parse(plan);await immutable(join(root,'narrative.json'),json(plan));const narrative=await submitNarrative(data,sourceRecord.taskId,join(root,'narrative.json'),join(root,'narrative-export'),signal);tasks.narrative=narrative.taskId;cache.narrative=narrative.cached;if(through==='planning')return finish('checkpoint-complete',{through});
    if(through==='speech'&&!complete)fail('The speech-first checkpoint requires repository-narrative-run-author/2.0. Legacy card/voice behavior is unchanged.');
+   if(through==='speech'||through==='voice'||through==='preview')requireNarrationVoice();
    if(complete&&(through==='speech'||through==='preview')){
     phase='speech';const timing=await measureNarrativeSpeech(data,plan,config,signal);cache.speech=timing.scenes.map(s=>({sceneId:s.sceneId,generation:s.generation,import:s.import}));
     await immutable(join(attempt,'speech-timing.json'),json(timing));

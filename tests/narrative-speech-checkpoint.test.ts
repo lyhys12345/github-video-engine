@@ -1,11 +1,17 @@
-import {it,expect,vi,afterEach} from 'vitest';
+import {it,expect,vi,afterEach,beforeEach} from 'vitest';
 const mocks=vi.hoisted(()=>({generate:vi.fn(),import:vi.fn()}));
 vi.mock('../src/tts/huihui.js',()=>({generateHuihui:mocks.generate}));
 vi.mock('../src/tts/runtime.js',()=>({importHuihuiTts:mocks.import}));
 import {narrativeSpeechTiming,measureNarrativeSpeech} from '../src/workflow/narrative-speech-checkpoint.js';
 const selection=[{kind:'story-slice',sceneId:'first',slices:[{shotId:'a',startFrame:0,endFrame:30}]},{kind:'placeholder',sceneId:'gap',frames:60},{kind:'story-slice',sceneId:'last',slices:[{shotId:'b',startFrame:0,endFrame:60}]}];
 const measured=(sceneId:string,samples:number)=>({sceneId,samples,generationTaskId:'a'.repeat(64),receiptFingerprint:'b'.repeat(64),generation:false,import:false});
-afterEach(()=>vi.resetAllMocks());
+beforeEach(()=>vi.stubEnv('GVE_NARRATION_VOICE','windows-huihui'));
+afterEach(()=>{vi.resetAllMocks();vi.unstubAllEnvs();});
+it('does not invoke the replacement voice when the preferred default is unavailable',async()=>{
+ vi.stubEnv('GVE_NARRATION_VOICE',undefined);
+ await expect(measureNarrativeSpeech('state',{scenes:[]},{selection:[],speech:[]},new AbortController().signal)).rejects.toMatchObject({code:'CHEN_LOCAL_UNAVAILABLE'});
+ expect(mocks.generate).not.toHaveBeenCalled();expect(mocks.import).not.toHaveBeenCalled();
+});
 it('reports exact whole-recording spill including fractional frames without editing selection or padding other scenes',()=>{
  const before=JSON.stringify(selection),report=narrativeSpeechTiming(selection,[measured('first',48001),measured('last',48000)]);
  expect(report).toMatchObject({allRecordingsFit:false,totalFrames:210,minimumFramesIfOnlyExtending:211,extensionFitsBudget:true});
