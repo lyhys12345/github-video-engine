@@ -1,5 +1,6 @@
 import {mkdir,writeFile} from 'node:fs/promises';
 import {resolve,join,dirname,basename} from 'node:path';
+import {randomUUID} from 'node:crypto';
 import {z} from 'zod';
 import {EngineError} from '../core/errors.js';
 import {canonical,sha256} from '../core/util.js';
@@ -11,6 +12,7 @@ import {NarrativeRunStory,prepareNarrativeRunStory} from './narrative-scene-evid
 import {NarrativeRunAnimation,prepareNarrativeSceneAnimations} from './narrative-scene-animations.js';
 import {NarrativeRunAuthor,runNarrativeWorkspace,validateCompleteRunInputs} from './narrative-run.js';
 import {parseByoConfig,callByoAuthor} from '../providers/byo-llm.js';
+import {statusNarrativeWorkspace} from './narrative-workspace.js';
 
 const fail=(code:string,message:string):never=>{throw new EngineError(code,message);};
 const read=async(p:string)=>JSON.parse((await boundedFile(p,1_000_000)).toString('utf8').replace(/^\uFEFF/,''));
@@ -52,7 +54,29 @@ export async function authorNarrativeViaApi(workspace:string,configValue:unknown
   throw new EngineError(code,'API authorship failed; inspect the non-secret report. No automatic retry.');
  }
 }
+/** Resume only the exact current API-authored candidate; never reads config/key or calls a provider. */
+export async function continueApiNarrative(workspace:string,out:string,through:'speech'|'preview',signal:AbortSignal){
+ if(!['speech','preview'].includes(through))fail('API_CONTINUATION','Select an explicit local speech or preview checkpoint.');
+ workspace=resolve(workspace);out=resolve(out);await ancestors(out);
+ if(dirname(out)!==workspace||!/^api-author-[a-z0-9-]{1,60}$/.test(basename(out)))fail('API_CONTINUATION','Candidate must be an owned api-author-NAME child.');
+ const receiptBytes=await boundedFile(join(out,'api-report.json'),1_000_000),receipt=JSON.parse(receiptBytes.toString('utf8'));
+ const author=join(out,'author');
+ if(receipt.schemaVersion!=='byo-api-author-report/1.0'||receipt.status!=='api-authored-planning-complete'||receipt.providerRequests!==1||receipt.authorship!=='api-model'||receipt.authorDirectory!==author||!Array.isArray(receipt.authorFiles)||receipt.authorFiles.length!==files.length||canonical(receipt.authorFiles.map((f:any)=>f.name).sort())!==canonical([...files].sort()))fail('API_CONTINUATION','A completed original API planning receipt is required.');
+ for(const f of receipt.authorFiles)if(!/^[a-f0-9]{64}$/.test(f.sha256)||sha256(await boundedFile(join(author,f.name),1_000_000))!==f.sha256)fail('API_CONTINUATION','API author bytes changed; preserve this candidate and inspect the owning revision workflow.');
+ const current=await statusNarrativeWorkspace(workspace,signal);
+ if(current.authorState!=='unchanged'||current.authorDirectory!==author||receipt.source?.taskId!==current.source.taskId||receipt.source?.bindingSha256!==current.source.bindingSha256)fail('API_CONTINUATION','Current author/source differs from this API candidate; no stale candidate switch is performed.');
+ const result=await read(current.currentResult),report=join(out,'api-continuation-'+randomUUID()+'.json');
+ const base={schemaVersion:'byo-api-continuation/1.0',workspace,candidate:out,through,apiReportSha256:sha256(receiptBytes),source:current.source,authorSha256:result.authorSha256,previousResultSha256:current.currentResultSha256,providerRequests:0,modelCalls:0,configRead:false,keyRead:false,approval:'none',facts:'pending',listening:'pending',ownerAcceptance:'pending'};
+ try{
+  const run=await runNarrativeWorkspace(current.repository,workspace,author,through,signal,undefined,{}, {currentResultSha256:current.currentResultSha256,authorSha256:result.authorSha256});
+  const value={...base,status:run.status,run,report};await writeFile(report,canonical(value),{flag:'wx'});return value;
+ }catch(error){await writeFile(report,canonical({...base,status:'failed',errorCode:error instanceof EngineError?error.code:'LOCAL_CONTINUATION_FAILED'}),{flag:'wx'});throw error;}
+}
 export async function narrativeApiAuthorCommand(pos:string[],values:Record<string,unknown>,signal:AbortSignal){
+ if(pos[1]==='api-continue'){
+  if(pos.length!==2||['workspace','out','through'].some(k=>typeof values[k]!=='string')||!['speech','preview'].includes(String(values.through))||Object.entries(values).some(([k,v])=>v!==undefined&&!['workspace','out','through'].includes(k)))fail('USAGE','explanation api-continue --workspace OWNED --out OWNED/api-author-NAME --through speech|preview');
+  return continueApiNarrative(String(values.workspace),String(values.out),values.through as 'speech'|'preview',signal);
+ }
  const allowed=['workspace','spec','out','enable-api'];
  if(pos.length!==2||pos[1]!=='api-author'||['workspace','spec','out'].some(k=>typeof values[k]!=='string')||Object.entries(values).some(([k,v])=>v!==undefined&&!allowed.includes(k)))fail('USAGE','explanation api-author --workspace OWNED --spec NON_SECRET_CONFIG --out OWNED/api-author-NAME --enable-api');
  // Gate before reading user config or workspace; ordinary run never calls this adapter.

@@ -1,0 +1,253 @@
+{
+  "schemaVersion": "open-reference-local-preview/1.0",
+  "date": "2026-11-05",
+  "baseCommit": "c009663",
+  "references": [
+    {
+      "repository": "anthropics/skills",
+      "commit": "ca45fc496a3436251f191354091d557da31c15b5",
+      "path": "template/SKILL.md",
+      "url": "https://github.com/anthropics/skills/blob/ca45fc496a3436251f191354091d557da31c15b5/template/SKILL.md",
+      "rawUrl": "https://raw.githubusercontent.com/anthropics/skills/ca45fc496a3436251f191354091d557da31c15b5/template/SKILL.md",
+      "sha256": "eb685d91de039ed864fbd790cddf31684b017fd4a34ee1a55760d8d7cdbadefa",
+      "bytes": 140
+    },
+    {
+      "repository": "openai/openai-node",
+      "commit": "a523d74b7c82fc4379259eb2352a13ee400d8b4b",
+      "path": "examples/responses/structured-outputs.ts",
+      "url": "https://github.com/openai/openai-node/blob/a523d74b7c82fc4379259eb2352a13ee400d8b4b/examples/responses/structured-outputs.ts",
+      "rawUrl": "https://raw.githubusercontent.com/openai/openai-node/a523d74b7c82fc4379259eb2352a13ee400d8b4b/examples/responses/structured-outputs.ts",
+      "sha256": "adb5e53d4833de4ad772273a0bb664fa1882a415691547e1cb2ec53ea5766ed5",
+      "bytes": 830
+    },
+    {
+      "repository": "openai/openai-node",
+      "commit": "a523d74b7c82fc4379259eb2352a13ee400d8b4b",
+      "path": "src/lib/ResponsesParser.ts",
+      "url": "https://github.com/openai/openai-node/blob/a523d74b7c82fc4379259eb2352a13ee400d8b4b/src/lib/ResponsesParser.ts",
+      "rawUrl": "https://raw.githubusercontent.com/openai/openai-node/a523d74b7c82fc4379259eb2352a13ee400d8b4b/src/lib/ResponsesParser.ts",
+      "sha256": "c43f79d5f1abefe80f0cffae90e81bf651debf9c4b29e334254bb49e546240db",
+      "bytes": 18066
+    }
+  ],
+  "referenceExecution": false,
+  "officialDocs": [
+    "https://code.claude.com/docs/en/skills",
+    "https://code.claude.com/docs/en/memory#import-additional-files"
+  ],
+  "verified": {
+    "focusedUnitTests": 9,
+    "unitStatus": "passed",
+    "realLocalMediaSmoke": "passed",
+    "typecheck": "passed",
+    "staticClaudeEntryCheck": "passed",
+    "localProviderRequests": 1,
+    "providerServerClosedBeforeContinuation": true,
+    "realProviderRequests": 0,
+    "realClaudeExecuted": false,
+    "paidApi": false,
+    "targetCodeExecuted": false,
+    "Judge": false,
+    "formalFilm": false
+  },
+  "media": {
+    "apiReceiptUnchanged": true,
+    "candidate": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-open-reference\\test-output\\workflow-byo-G8z3hp\\api-author-media",
+    "claims": "synthetic test fixture; not semantic evidence",
+    "credentialPersisted": false,
+    "fullDecodeExit": 0,
+    "keylessContinuations": [
+      "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-open-reference\\test-output\\workflow-byo-G8z3hp\\api-author-media\\api-continuation-36009042-7046-4dac-97bb-6f26b2803bb0.json",
+      "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-open-reference\\test-output\\workflow-byo-G8z3hp\\api-author-media\\api-continuation-7c513a36-7e00-4801-9eba-f0cbef54fe2c.json",
+      "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-open-reference\\test-output\\workflow-byo-G8z3hp\\api-author-media\\api-continuation-0fdcd3e6-92fd-4ff0-a979-bb08d9f2ef9b.json"
+    ],
+    "movie": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-open-reference\\test-output\\workflow-byo-G8z3hp\\runs\\330a2bce9a4d3fdd-c7047a868ddb\\editable-preview\\.s-c8ad819961da-CTQoYI\\excerpt.mp4",
+    "movieSha256": "7a8c25af5a17ecf9d1fa0ceaf789ca4de23cfe9bea0a9038b1adbcb3c33a3828",
+    "preview": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-open-reference\\test-output\\workflow-byo-G8z3hp\\workspace-preview.html",
+    "probe": {
+      "format": {
+        "duration": "18.000000"
+      },
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "nb_frames": "540"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "nb_frames": "845",
+          "sample_rate": "48000"
+        }
+      ]
+    },
+    "provider": "closed localhost mock, no real model",
+    "providerRequests": 1,
+    "realClaude": "not run",
+    "realProvider": "not run",
+    "repeatCache": {
+      "narratedPreview": true,
+      "narrative": true,
+      "sceneStories": [
+        {
+          "cached": true,
+          "sceneId": "send-request"
+        },
+        {
+          "cached": true,
+          "sceneId": "match-route"
+        },
+        {
+          "cached": true,
+          "sceneId": "return-body"
+        }
+      ],
+      "scenes": [
+        {
+          "assets": true,
+          "sceneId": "send-request",
+          "sourcePreview": true,
+          "story": true
+        },
+        {
+          "assets": true,
+          "sceneId": "match-route",
+          "sourcePreview": true,
+          "story": true
+        },
+        {
+          "assets": true,
+          "sceneId": "return-body",
+          "sourcePreview": true,
+          "story": true
+        }
+      ],
+      "speech": [
+        {
+          "generation": true,
+          "import": true,
+          "sceneId": "send-request"
+        },
+        {
+          "generation": true,
+          "import": true,
+          "sceneId": "match-route"
+        },
+        {
+          "generation": true,
+          "import": true,
+          "sceneId": "return-body"
+        }
+      ],
+      "voice": [
+        {
+          "generation": true,
+          "generationTaskId": "2bf6fde8182e081dbf2e51004cfb5a289eb9fd67270794ffc06d5add50fcaa52",
+          "import": true,
+          "receiptFingerprint": "11b85f722702b2d0deb824baec0b7c71a1e1b2092c42121f3aff07898c86b781",
+          "samples": 90480,
+          "sceneId": "send-request"
+        },
+        {
+          "generation": true,
+          "generationTaskId": "2bf6fde8182e081dbf2e51004cfb5a289eb9fd67270794ffc06d5add50fcaa52",
+          "import": true,
+          "receiptFingerprint": "11b85f722702b2d0deb824baec0b7c71a1e1b2092c42121f3aff07898c86b781",
+          "samples": 90480,
+          "sceneId": "match-route"
+        },
+        {
+          "generation": true,
+          "generationTaskId": "2bf6fde8182e081dbf2e51004cfb5a289eb9fd67270794ffc06d5add50fcaa52",
+          "import": true,
+          "receiptFingerprint": "11b85f722702b2d0deb824baec0b7c71a1e1b2092c42121f3aff07898c86b781",
+          "samples": 90480,
+          "sceneId": "return-body"
+        }
+      ]
+    },
+    "review": "pending",
+    "schemaVersion": "byo-local-preview-check/1.0",
+    "seconds": 18,
+    "sourceUnchanged": true,
+    "taskId": "59aa607963955796586640d4da936ace3b13386a90a5b7192fbb490f9bc7a032",
+    "workspace": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-open-reference\\test-output\\workflow-byo-G8z3hp"
+  },
+  "actualCliRepeat": {
+    "status": "editable-preview-complete",
+    "providerRequests": 0,
+    "keyRead": false,
+    "configRead": false,
+    "cache": true,
+    "taskId": "59aa607963955796586640d4da936ace3b13386a90a5b7192fbb490f9bc7a032",
+    "report": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-open-reference\\test-output\\workflow-byo-G8z3hp\\api-author-media\\api-continuation-ca54d548-1d08-4cba-99cd-9cb3fd97138e.json"
+  },
+  "limitations": [
+    "Predetermined localhost mock author JSON and synthetic source capture; no actual LLM inference or reference-repository execution",
+    "Positive public TLS/provider compatibility not tested",
+    "Semantic facts, listening, continuous AV and final acceptance remain pending",
+    "No automatic timing repair or API feedback generation"
+  ],
+  "checks": [
+    "API candidate author/source and current checkpoint fenced before local continuation",
+    "Original API report unchanged; append-only continuation reports",
+    "No API config or key accepted by continuation CLI",
+    "Actual local media measured and fully decoded; repeat caches verified"
+  ],
+  "localEvidence": [
+    {
+      "path": "work/reference-check/sources.json",
+      "sha256": "3df2b577540fd0acd25cfc0ae110325fd640223c8ca35d527eddba3aa225fdd2"
+    },
+    {
+      "path": "work/reference-check/unit-tests.log",
+      "sha256": "ecabd7c5ddf22c345ffad660ad142845a91741f8d4e4c131bd0f5ae8c69d087f"
+    },
+    {
+      "path": "work/reference-check/media-test.log",
+      "sha256": "d8fb1c27a78211ba8d5b809942a5264da2976c5017b40a2c702f7ad66eccba58"
+    },
+    {
+      "path": "work/reference-check/media-check.json",
+      "sha256": "bcda3fe73842a1472de19c0296163ea6248d346b50644ee3fdfa051d3f24d701"
+    },
+    {
+      "path": "work/reference-check/cli-repeat.json",
+      "sha256": "0644acd120f483a190893ed2a1e084506c27d7279ccda4da9bc92f8ad9323bd6"
+    },
+    {
+      "path": "work/reference-check/entry-check.json",
+      "sha256": "050b59083ce7caafdb711ea4609a7e8461c633796c67dbcdda66c310a985f516"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "src/workflow/narrative-api-author.ts",
+      "sha256": "643b77299e902e2097c4d08b2e61345e486bbee383de8992a32e8d655b7159a0"
+    },
+    {
+      "path": "src/workflow/explanation-cli.ts",
+      "sha256": "5669a154b422941dc66713267c9e6ee87d943a92f56f5255b1030ad2f147a285"
+    },
+    {
+      "path": "tests/byo-api-support.ts",
+      "sha256": "68b36a0db6834bb4a30df3aecba6c1c2dc908bc935af319033c01d07960266f0"
+    },
+    {
+      "path": "tests/byo-api-preview.node.ts",
+      "sha256": "44d38098f0ec5d2ade1ab57bdf6db0023ff863ec93ed73a8593d18239afe14d9"
+    },
+    {
+      "path": "tests/byo-llm.test.ts",
+      "sha256": "6fdf016f66fc1e9214d38ef5875deabde0acdd148d57f63ef678de8b29f420db"
+    },
+    {
+      "path": ".claude/skills/github-explainer/SKILL.md",
+      "sha256": "05beaa1a207555d24a65e68f59dbb816dd12baf74d113ddd87aeb06552a1e59b"
+    }
+  ]
+}

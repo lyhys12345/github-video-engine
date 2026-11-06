@@ -22,7 +22,7 @@ const usage = 'explanation start --spec <request> --data <state> --out <packet> 
 
 export async function explanationCommand(positionals: string[], values: Record<string, unknown>, signal: AbortSignal) {
   const action = positionals[1];
-  if(action==='api-author')return narrativeApiAuthorCommand(positionals,values,signal);
+  if(action==='api-author'||action==='api-continue')return narrativeApiAuthorCommand(positionals,values,signal);
   if(action==='feedback-context'||action==='feedback-apply')return narrativeFeedbackCommand(positionals,values,signal);
   if(action==='edit-narration')return narrationQuoteEditCommand(positionals,values,signal);
   if(action==='source-expand')return narrativeSourceExpandCommand(positionals,values,signal);
