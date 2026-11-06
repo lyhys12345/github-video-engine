@@ -10,6 +10,8 @@ For the Codex user path, open this trusted engine checkout as the Codex project 
 
 The lower-level operator path remains `project intake`, `project evidence`, and `project story`; see [URL intake](docs/url-intake-v1.md).
 
+An opt-in [bring-your-own OpenAI-compatible API author adapter](docs/byo-api-author-v1.md) connects one structured provider response to source-bound planning. It defaults off, reads keys only from the process environment and requires explicit per-call activation/budget. Local HTTP mock/CLI tests pass; real providers and API-authored media remain unverified.
+
 Claude Code has a shared-workflow project entry via `CLAUDE.md` and `.claude/skills`; see [Claude Code setup and current verification limits](docs/claude-code-user-path-v1.md). Local entry checks passed; real Claude model execution remains unverified because its CLI was unavailable in the tested environment.
 
 The `explain` path is an explicitly experimental **18-second mechanism-plan compiler**. It consumes agent-curated semantic evidence graphs; it is not automatic URL understanding or the approved approximately three-minute REA story. An additive experimental story contract now supports content-led timing up to five minutes, persisted asset packs, continuous segment rendering and a bounded TTS adapter; see HANDOFF.md and docs/story-planning-v1.md for the current checkpoint. See [planning runtime](docs/planning-runtime-v1.md), [current engineering result](reviews/planning-runtime-v1/RESULT.md), and [repository scope](docs/repository-setup.md).

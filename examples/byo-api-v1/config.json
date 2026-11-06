@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "byo-llm-config/1.0",
+  "enabled": false,
+  "endpoint": "https://provider.example/v1/chat/completions",
+  "model": "YOUR_MODEL",
+  "apiKeyEnv": "GVE_LLM_API_KEY",
+  "allowLocalHttp": false,
+  "maxOutputTokens": 8000,
+  "timeoutMs": 60000,
+  "inputMicrosPerMillionTokens": 1000000,
+  "outputMicrosPerMillionTokens": 3000000,
+  "maxEstimatedCostMicros": 1000000
+}

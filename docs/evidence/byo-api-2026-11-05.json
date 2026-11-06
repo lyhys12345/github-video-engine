@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "byo-api-local-validation/1.0",
+  "date": "2026-11-05",
+  "baseCommit": "bede6c7",
+  "scope": "Actual localhost HTTP and CLI integration with synthetic captured-source fixtures, not real model/provider verification",
+  "executed": {
+    "apiTests": 8,
+    "apiTestsPassed": 8,
+    "affectedLegacyNarrativeTests": 35,
+    "affectedRunTests": 8,
+    "allAffectedRegressionsPassed": true,
+    "typecheck": "tsc --noEmit passed",
+    "diffCheck": "git diff --check passed",
+    "actualCliSubprocess": true,
+    "sourceBoundPlanning": true
+  },
+  "sample": {
+    "report": "test-output\\workflow-byo-2Aho6T\\api-author-cli\\api-report.json",
+    "reportSha256": "0fe76ad35cab2f279ce524dc6b675ca6459ae8694aa5bd7bfefb1763ea6bb9fc",
+    "status": "api-authored-planning-complete",
+    "providerRequests": 1,
+    "endpoint": "literal 127.0.0.1 random local test port",
+    "model": "mock-test-only",
+    "authorship": "api-model",
+    "planningStatus": "checkpoint-complete",
+    "source": {
+      "bindingSha256": "559d49376758353d5dad05e3f89a09a28c535cd48908953a3d8b63dc3246900e",
+      "taskId": "48eb30df409dd280421a8277e2746008320d6318e45af71cf46ae91df80fa926"
+    },
+    "authorFiles": [
+      {
+        "name": "story.json",
+        "sha256": "cc5d6919a512677ec5f4b7ab568313053bba41711a9e162e00f32fe70a69b5a3"
+      },
+      {
+        "name": "narrative.json",
+        "sha256": "b383479e78942090c5706fa8d3ae975138cdcbae47e3ed619a18d8597e066a55"
+      },
+      {
+        "name": "animation.json",
+        "sha256": "36eec8caeb32658eb0f2072b68aa1fe672f67dcc0d1cc82c33857c7abfad3e09"
+      },
+      {
+        "name": "run.json",
+        "sha256": "a108703a6e1e15967417e3d3feb19c585ba95cbef5097a5d91f4aaf26fd07f3a"
+      }
+    ]
+  },
+  "securityChecks": [
+    "Both explicit enable gates; unknown key config rejected; key env only",
+    "Private/reserved endpoint, non-loopback HTTP, URL credentials/query rejected",
+    "Validated public IPv4 pinned for connect; explicit TLS certificate verification; no redirects",
+    "Declared budget checked before request; output token/request/response/time boundaries",
+    "No retry; existing output refuses a second request",
+    "Credential echo and credential-containing prompt rejected; reports contain no test credential",
+    "Malformed/truncated/tool/extra-file responses rejected; no target code execution",
+    "Stale source binding and falsely labelled authorship rejected"
+  ],
+  "preservedFailures": [
+    {
+      "stage": "initial restricted-shell run",
+      "observation": "Hard-link EPERM and restricted local transport prevented four tests; repeated via normal authorized host execution, not a policy bypass"
+    },
+    {
+      "stage": "first legacy regression",
+      "observation": "Frozen v1.0 narrative schema hash changed when API authorship was added in place; fixed with explicit v1.1 API authorship and version-specific bound schema export; original hash expectation unchanged"
+    }
+  ],
+  "unverified": [
+    "Real provider authentication/compatibility/TLS/DNS positive path",
+    "Actual model reasoning, factual quality and API output repair",
+    "API-authored narration, animation/video or feedback",
+    "Provider billing/tokenizer equivalence; local estimate is not provider-enforced cap"
+  ],
+  "restrictions": {
+    "realProviderCalls": 0,
+    "realUserKeysUsed": false,
+    "paidApiCalls": 0,
+    "targetCodeExecuted": false,
+    "Judge": false,
+    "formalFilm": false,
+    "segmentedCaptionModuleChanged": false
+  },
+  "logs": [
+    {
+      "path": "work/byo-api-check/mock-tests-attempt1.log",
+      "sha256": "47d3757d0015b75eb0fda30bd80606e6ed8e3928deaecd4268658a9bcaf459cd"
+    },
+    {
+      "path": "work/byo-api-check/targeted-tests.log",
+      "sha256": "cd444c3ada7da5f5e6b072f14c52be5df4fbe0d419188bebc261064ea28e5f73"
+    },
+    {
+      "path": "work/byo-api-check/targeted-tests-versioned.log",
+      "sha256": "490449c7afe608df440cd1178a6ac7d923e45f27d0f8ae9f6cf10e1aa514278b"
+    },
+    {
+      "path": "work/byo-api-check/mock-tests-delivery.log",
+      "sha256": "17c4eab530d0b46c1d00d4c99df7d81c54c300c0617bc50531fa10f132010fc3"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "src/providers/byo-llm.ts",
+      "sha256": "8100f4cab3ced0c36895502033615ca691eddb5f6592fd277b7135b1c8e90aa5"
+    },
+    {
+      "path": "src/workflow/narrative-api-author.ts",
+      "sha256": "2d8a31d9035fcbf9f2be7c43f2af6c4d3f39aef589ce9967fa0d3e4e83c2e33d"
+    },
+    {
+      "path": "src/contracts/narrative.ts",
+      "sha256": "b7348697a19890ea3177aeecd3fd1177bdf8fb62720bb70eaae9e2238f8bf143"
+    },
+    {
+      "path": "src/workflow/narrative.ts",
+      "sha256": "ddd58220b7f11b4dcd25079b82869ab36f45e186031d53005e53a573b2905c3c"
+    },
+    {
+      "path": "src/workflow/narrative-run.ts",
+      "sha256": "0d3fa834d2a9fb2fddab242540b40e6d6719f83f3bdf25ab11bd8c2f40f2ca43"
+    },
+    {
+      "path": "src/workflow/explanation-cli.ts",
+      "sha256": "d0a521c1ee7086cb5fc2f42325e7d2747a1edf175c9f287804a13449988d9888"
+    },
+    {
+      "path": "src/cli.ts",
+      "sha256": "c777bbf82e18d0577d7e11f2ea79c12c9ca66f43783b107bddc53ef8e07bc377"
+    },
+    {
+      "path": "tests/byo-llm.test.ts",
+      "sha256": "2e1585c2614cd6e5120837c21941b58d5a794502f20de1bf342e105ba489e8f3"
+    }
+  ]
+}
