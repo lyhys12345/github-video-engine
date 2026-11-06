@@ -2,6 +2,7 @@ import {narrationQuoteEditCommand} from './narrative-prose-edit.js';
 import {narrativeAuthorRevisionCommand} from './narrative-author-revision.js';
 import {narrativeFeedbackCommand} from './narrative-feedback.js';
 import {narrativeApiAuthorCommand} from './narrative-api-author.js';
+import {narrativeApiFeedbackCommand} from './narrative-api-feedback.js';
 import {narrativeSourceExpandCommand} from './narrative-source-expand.js';
 import {narrativeWorkspaceCommand} from './narrative-workspace.js';
 import {narrativeRunCommand} from './narrative-run.js';
@@ -22,6 +23,7 @@ const usage = 'explanation start --spec <request> --data <state> --out <packet> 
 
 export async function explanationCommand(positionals: string[], values: Record<string, unknown>, signal: AbortSignal) {
   const action = positionals[1];
+  if(action==='api-feedback'||action==='api-feedback-continue')return narrativeApiFeedbackCommand(positionals,values,signal);
   if(action==='api-author'||action==='api-continue')return narrativeApiAuthorCommand(positionals,values,signal);
   if(action==='feedback-context'||action==='feedback-apply')return narrativeFeedbackCommand(positionals,values,signal);
   if(action==='edit-narration')return narrationQuoteEditCommand(positionals,values,signal);

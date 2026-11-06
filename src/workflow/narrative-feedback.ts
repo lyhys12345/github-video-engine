@@ -18,7 +18,7 @@ const decode=(b:Buffer)=>JSON.parse(b.toString('utf8').replace(/^\uFEFF/,''));
 const json=(v:unknown)=>Buffer.from(canonical(v));
 const text=(n:number)=>z.string().min(1).max(n).regex(/\S/);
 const SceneAnimation=NarrativeSceneAnimations.shape.scenes.element;
-export const NarrativeFeedbackPlan=z.strictObject({
+export const LegacyNarrativeFeedbackPlan=z.strictObject({
  schemaVersion:z.literal('narrative-feedback-plan/1.0'),expectedCurrentResultSha256:Hash,expectedAuthorSha256:Hash,
  source:z.strictObject({captureTaskId:Hash,bindingSha256:Hash}),
  feedback:z.strictObject({text:text(4000),origin:z.enum(['user','session-agent-validation']),interpretedBy:z.literal('current-session-agent'),interpretation:text(4000)}),
@@ -28,6 +28,8 @@ export const NarrativeFeedbackPlan=z.strictObject({
   timing:z.strictObject({visualSeconds:z.number().min(0).max(120),holdSeconds:z.number().min(0).max(120).optional(),transitionSeconds:z.number().min(0).max(30).optional()}).optional(),
  }).refine(c=>!!(c.narration||c.visual||c.timing),'Supply an explicit narration, renderable visual or authored timing change.')).min(1).max(40),
 });
+export const ApiNarrativeFeedbackPlan=LegacyNarrativeFeedbackPlan.extend({schemaVersion:z.literal('narrative-feedback-plan/1.1'),feedback:LegacyNarrativeFeedbackPlan.shape.feedback.extend({interpretedBy:z.literal('api-model')})});
+export const NarrativeFeedbackPlan=z.discriminatedUnion('schemaVersion',[LegacyNarrativeFeedbackPlan,ApiNarrativeFeedbackPlan]);
 type Feedback=z.infer<typeof NarrativeFeedbackPlan>;
 const authorJson=(files:Map<string,Buffer>,name:string)=>decode(files.get(name)!);
 const normalized=(story:any,plan:any,animation:any,overrides:any)=>[...prepareNarrativeSceneAnimations(story,plan,animation,overrides)].map(([sceneId,x])=>({sceneId,...x}));
@@ -92,7 +94,7 @@ export async function applyNarrativeFeedbackPlan(workspace:string,path:string,ou
  const original=status.currentResultSha256===context.originalCurrentResultSha256&&status.authorDirectory===context.originalAuthorDirectory,own=status.authorDirectory===context.authorDirectory;if(!original&&!own)fail('Workspace advanced to another candidate; retained feedback is not executed.');
  if(own&&(through==='speech'||status.status==='editable-preview-complete'))return{status:'existing-feedback-checkpoint',reusedCandidate:true,context,current:status,actionsExecuted:0,modelCalls:0,approval:'none'};
  const currentAuthor=await readNarrativeAuthorData(status.authorDirectory);let run:any;try{run=await runNarrativeWorkspace(status.repository,workspace,context.authorDirectory,through,signal,undefined,{},{currentResultSha256:status.currentResultSha256,authorSha256:currentAuthor.hash!});}catch(error){await writeFile(join(out,'failure-'+randomUUID()+'.json'),json({context,error:String(error),recovery:'Rerun the exact plan/out if workspace context is still valid. Never overwrite old authors, facts or media.'}),{flag:'wx'});throw error;}
- const result={schemaVersion:'narrative-feedback-result/1.0',status:run.status,reusedCandidate,context,run,actionsExecuted:1,modelCalls:0,approval:'none',facts:'pending',ownerListening:'pending',ownerAcceptance:'pending',scope:'Session-Agent-authored interpretation and deterministic guarded execution; no automatic natural-language model.'};await writeFile(join(out,'result-'+randomUUID()+'.json'),json(result),{flag:'wx'});return result;
+ const result={schemaVersion:'narrative-feedback-result/1.0',status:run.status,reusedCandidate,context,run,actionsExecuted:1,modelCalls:0,approval:'none',facts:'pending',ownerListening:'pending',ownerAcceptance:'pending',scope:spec.feedback.interpretedBy==='api-model'?'Explicit API-model interpretation; deterministic guarded executor makes no model request.':'Session-Agent-authored interpretation and deterministic guarded execution; no automatic natural-language model.'};await writeFile(join(out,'result-'+randomUUID()+'.json'),json(result),{flag:'wx'});return result;
 }
 export async function narrativeFeedbackCommand(pos:string[],values:Record<string,unknown>,signal:AbortSignal){
  const action=pos[1],keys=action==='feedback-context'?['workspace','out']:['workspace','out','spec','through'];if(pos.length!==2||!['feedback-context','feedback-apply'].includes(action??'')||['workspace','out',...(action==='feedback-apply'?['spec']:[])].some(k=>typeof values[k]!=='string'||!String(values[k]).trim())||values.through!==undefined&&!['speech','preview'].includes(String(values.through))||Object.entries(values).some(([k,v])=>v!==undefined&&!keys.includes(k)))throw new EngineError('USAGE','explanation feedback-context --workspace <owned> --out <new-context.json> | feedback-apply --workspace <owned> --spec <Agent-authored-plan.json> --out <new-child-candidate> [--through speech|preview]');

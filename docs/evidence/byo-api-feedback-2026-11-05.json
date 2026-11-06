@@ -1,0 +1,234 @@
+{
+  "schemaVersion": "byo-api-feedback-local-validation/1.0",
+  "date": "2026-11-05",
+  "baseCommit": "d9e80da",
+  "scope": "Synthetic source capture and predetermined localhost HTTP plans, with actual local TTS/render/decode",
+  "executed": {
+    "targetedTests": 18,
+    "testsPassed": 18,
+    "typecheck": "passed",
+    "localMediaTest": "passed",
+    "actualKeylessCli": "passed",
+    "realProviderRequests": 0,
+    "realClaudeRun": false,
+    "paidApi": false,
+    "targetRepositoryExecuted": false,
+    "Judge": false,
+    "formalFilm": false
+  },
+  "workflow": {
+    "explicitRequestGates": "config enabled plus invocation --enable-api",
+    "transport": "same budgeted, size/time/SSRF/redirect/key-safe transport as API author",
+    "plan": "narrative-feedback-plan/1.1 interpretedBy api-model",
+    "untrustedPlanChecks": [
+      "exact original feedback",
+      "source/checkpoint/author/scene/narration/animation hashes",
+      "schema and supported renderable operations",
+      "existing deterministic apply preflight, then feedback-apply"
+    ],
+    "providerRequestsPerFeedback": 1,
+    "automaticRetry": false,
+    "continuationProviderRequests": 0,
+    "continuationKeyRead": false
+  },
+  "media": {
+    "baselineMockAuthorRequests": 1,
+    "cache": {
+      "narratedPreview": false,
+      "narrative": true,
+      "sceneStories": [
+        {
+          "cached": true,
+          "sceneId": "send-request"
+        },
+        {
+          "cached": true,
+          "sceneId": "match-route"
+        },
+        {
+          "cached": true,
+          "sceneId": "return-body"
+        }
+      ],
+      "scenes": [
+        {
+          "animationProfile": "legacy-animation/1.0",
+          "assets": false,
+          "sceneId": "send-request",
+          "sourcePreview": false,
+          "story": true
+        },
+        {
+          "animationProfile": "legacy-animation/1.0",
+          "assets": true,
+          "sceneId": "match-route",
+          "sourcePreview": true,
+          "story": true
+        },
+        {
+          "animationProfile": "legacy-animation/1.0",
+          "assets": true,
+          "sceneId": "return-body",
+          "sourcePreview": true,
+          "story": true
+        }
+      ],
+      "speech": [
+        {
+          "generation": true,
+          "import": true,
+          "sceneId": "send-request"
+        },
+        {
+          "generation": true,
+          "import": true,
+          "sceneId": "match-route"
+        },
+        {
+          "generation": true,
+          "import": true,
+          "sceneId": "return-body"
+        }
+      ],
+      "voice": [
+        {
+          "generation": true,
+          "generationTaskId": "701a6911c25fedfb1fb3129213a602c4928c6432f3dcc1e250ba7fedc4c1bdc9",
+          "import": true,
+          "receiptFingerprint": "117e438833ff9f06f618fdd4bd2d8f5657aa3a2a409eb47a87f738fa6b6aad26",
+          "samples": 124080,
+          "sceneId": "send-request"
+        },
+        {
+          "generation": true,
+          "generationTaskId": "2bf6fde8182e081dbf2e51004cfb5a289eb9fd67270794ffc06d5add50fcaa52",
+          "import": true,
+          "receiptFingerprint": "11b85f722702b2d0deb824baec0b7c71a1e1b2092c42121f3aff07898c86b781",
+          "samples": 90480,
+          "sceneId": "match-route"
+        },
+        {
+          "generation": true,
+          "generationTaskId": "2bf6fde8182e081dbf2e51004cfb5a289eb9fd67270794ffc06d5add50fcaa52",
+          "import": true,
+          "receiptFingerprint": "11b85f722702b2d0deb824baec0b7c71a1e1b2092c42121f3aff07898c86b781",
+          "samples": 90480,
+          "sceneId": "return-body"
+        }
+      ]
+    },
+    "changedScene": "send-request",
+    "claimsUnchanged": true,
+    "feedbackRequests": 1,
+    "fixture": "synthetic sources and predetermined localhost response; not an LLM",
+    "fullDecodeExit": 0,
+    "localProviderRequests": 0,
+    "newMovie": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-api-feedback\\test-output\\workflow-byo-tntGBD\\runs\\801d56e88331c7d3-fd967bae32ed\\editable-preview\\.s-5f3c2231d15f-5ZP7Vu\\excerpt.mp4",
+    "newMovieSha256": "17e678e16f68e3cf3889a578e3040106282de828e254f14dd726a87b68a99680",
+    "oldAuthorUnchanged": true,
+    "oldMovie": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-api-feedback\\test-output\\workflow-byo-tntGBD\\runs\\330a2bce9a4d3fdd-fd967bae32ed\\editable-preview\\.s-398d7d0e93fb-BMi5K8\\excerpt.mp4",
+    "oldMovieSha256": "7a8c25af5a17ecf9d1fa0ceaf789ca4de23cfe9bea0a9038b1adbcb3c33a3828",
+    "out": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-api-feedback\\test-output\\workflow-byo-tntGBD\\api-feedback-one",
+    "preview": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-api-feedback\\test-output\\workflow-byo-tntGBD\\workspace-preview.html",
+    "probe": {
+      "format": {
+        "duration": "18.000000"
+      },
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "nb_frames": "540"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "nb_frames": "845"
+        }
+      ]
+    },
+    "realClaude": "not run",
+    "realProvider": "not run",
+    "repeatActions": 0,
+    "review": "pending",
+    "sourceUnchanged": true,
+    "workspace": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-api-feedback\\test-output\\workflow-byo-tntGBD"
+  },
+  "actualCli": {
+    "status": "existing-feedback-checkpoint",
+    "providerRequests": 0,
+    "keyRead": false,
+    "configRead": false,
+    "actionsExecuted": 0,
+    "report": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\gve-api-feedback\\test-output\\workflow-byo-tntGBD\\api-feedback-one\\continuation-71e3dca2-b7cd-4b9d-b8c0-e402916fd02e.json"
+  },
+  "securityVerified": [
+    "Disabled calls make no request",
+    "Foreign/stale/hash/text/provenance/claim/command plans refused before edit execution",
+    "Feedback containing test credential is not transmitted or persisted",
+    "Existing output refuses another model request",
+    "Local continuation does not accept API flags",
+    "Only changed scene rerender/new generation identity; old source/claims/author/movie retained"
+  ],
+  "limitations": [
+    "No real model reasoning, provider compatibility or billing validation",
+    "Only produced single-shot scenes and existing supported animations",
+    "No automatic caption alignment, source expansion or timing repair",
+    "Facts/listening/continuous AV/final owner acceptance pending",
+    "The mock is predetermined data, not a substitute LLM"
+  ],
+  "logs": [
+    {
+      "path": "work/api-feedback-check/targeted.log",
+      "sha256": "ea9ad561d1b845a2da3c7009bc94e114fa261b5da806cb496c210fc2d2e95f63"
+    },
+    {
+      "path": "work/api-feedback-check/media.log",
+      "sha256": "16fb980526ee51aa20dd7fb008c517569bfb3bec8bf4e6f4a27620562b4d2f9e"
+    },
+    {
+      "path": "work/api-feedback-check/media.json",
+      "sha256": "1eb0a95c6ab2d6af8bd7d8f7fbf90f43c2e446bab956035a458bac390b6b0283"
+    },
+    {
+      "path": "work/api-feedback-check/cli-repeat.json",
+      "sha256": "0d970ca5009a55f587d61f2bf0abb6138dac9a8deaeea9ace8bf617882ba77f4"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "src/providers/byo-llm.ts",
+      "sha256": "176f0e702b2ee34bf4521eab906fa05e79339856d4e25bb48cf11cf1c2bf08c2"
+    },
+    {
+      "path": "src/workflow/narrative-api-feedback.ts",
+      "sha256": "d914d107ff861596d2eebc0ad42514df2b7568511fe82ffdc648d4bb52274cbc"
+    },
+    {
+      "path": "src/workflow/narrative-feedback.ts",
+      "sha256": "d7b6d1f424148c8204c7099ca3b1f517fad2fce6904cf91f0d438e17639d9184"
+    },
+    {
+      "path": "src/workflow/explanation-cli.ts",
+      "sha256": "b735a44f37e7c2d4f88f63f1e87243bbf6bb58c617fbfb2e91e464319ec6e84a"
+    },
+    {
+      "path": "src/cli.ts",
+      "sha256": "da5ee77be263a162b2f597b06f3828370436c2e761bc42f8de1ff41f77258142"
+    },
+    {
+      "path": "tests/byo-api-feedback.test.ts",
+      "sha256": "6ba9fcd9366aa316d8431085ea213349655ef60cd8d373205bbdd7d7f8e80ecd"
+    },
+    {
+      "path": "tests/byo-api-feedback-media.node.ts",
+      "sha256": "3d11181a0b9a8f176070a055b97704416a6baa1550cca0f83a1026bddb70667c"
+    },
+    {
+      "path": "tests/byo-feedback-support.ts",
+      "sha256": "907510e02713c98f050eccb60f56491ff4321677d6ee8682b7d67ccbde2e037f"
+    }
+  ]
+}
