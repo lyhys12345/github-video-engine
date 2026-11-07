@@ -6,3 +6,21 @@ it('constructs a separate mask while the original image remains unchanged',async
 
 
 it('keeps Latin code tokens intact in actual rendered label spans',async()=>{const{story,animation,op}=await f();story.evidence.objects.find((o:any)=>o.id===op.input).label='示例GET /hello';const svg=renderFramePreview(compileAnimation(story,animation),150),spans=[...svg.matchAll(/<tspan[^>]*>([^<]*)<\/tspan>/g)].map(m=>m[1]);expect(spans).toContain('示例GET /hello');});
+
+it('keeps the original value visible while an illustrated copy reaches a derived document', async () => {
+ const {story, animation, op} = await f();
+ Object.assign(animation.shots[0]!, {valueTrace: 'demo-value'});
+ expect(() => compileAnimation(story, animation)).toThrow('document transformation');
+ story.evidence.schemaVersion = '1.1';
+ story.evidence.operations = [{...op, kind: 'document-transform', dependsOn: []}];
+ story.evidence.objects = story.evidence.objects.filter((o: any) => [op.input, op.output].includes(o.id));
+ for (const object of story.evidence.objects) object.kind = 'code';
+ const plan = compileAnimation(story, animation);
+ const early = renderFramePreview(plan, 0), late = renderFramePreview(plan, 285);
+ const visibleTags = (svg: string) => [...svg.matchAll(/>值 demo-value<\/text>/g)].length;
+ expect(early).toContain('图解示意 · 未执行');
+ expect(early).toContain('<g opacity="0">');
+ expect(late).toContain('<g opacity="1">');
+ expect(visibleTags(late)).toBe(2);
+ expect(sampleAnimation(plan, 285).causal!.input).toEqual(sampleAnimation(plan, 0).causal!.input);
+});

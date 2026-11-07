@@ -1,7 +1,8 @@
 import {expect,it} from 'vitest';
 import {sha256} from '../src/core/util.js';
 import {NarrativeSceneContext,NarrativePlan} from '../src/contracts/narrative.js';
-import {sceneContextLayout} from '../src/workflow/narrative-preview.js';
+import {fontBytes,sceneContextLayout,sceneGapLines} from '../src/workflow/narrative-preview.js';
+import {PORTRAIT_CAPTION,PORTRAIT_DISCLOSURE,PORTRAIT_SOURCE,portraitCaptionLines,portraitSceneText} from '../src/workflow/narrative-portrait.js';
 import {narrativeFactReview} from '../src/workflow/fact-review.js';
 const context={schemaVersion:'narrative-scene-context/1.0',title:'示意标题',question:'这一步解释什么？',explanation:'这是作者依据来源编写的解释',boundary:'并未运行目标程序',claimIds:['claim']};
 function plan(){const hash='a'.repeat(64),claim={id:'claim',statement:'TEST ONLY statement',basis:{kind:'documented'},citations:[{sourceId:'source',sourceSha256:sha256(Buffer.from('TEST ONLY')),startLine:1,endLine:1,quote:'TEST ONLY'}]};return{schemaVersion:'repository-narrative-plan/1.0',binding:{projectId:'test',repository:'https://github.com/example/test',commit:'a'.repeat(40),snapshotHash:hash,evidenceFingerprint:hash},authoringRequestId:hash,authorship:{kind:'session-agent'},interpretation:'human-or-session-agent-authored-not-automatic-repository-understanding',brief:{title:'test',audience:'test',question:'test',thesis:'test',scope:'test',exclusions:[],claimIds:['claim']},claims:[claim],scenes:['hook','mechanism','example','limitation','closing'].map((role,i)=>({id:'scene-'+i,role,title:'test',narration:'test',visual:'test',onScreenText:[],claimIds:['claim'],estimatedSeconds:3,transitionToNext:i===4?'':'next',execution:i<3?{kind:'supported-story',adapter:'http',storyTaskId:hash,expectedGraphHash:hash,shotIds:['shot']}:{kind:'needs-evidence',reason:'test',missingEvidence:'test'}})),openQuestions:[]};}
@@ -13,4 +14,25 @@ it('makes the audience context explicitly versioned with larger viewport and ret
  const layout=sceneContextLayout(newer);expect(layout.profile).toBe('narrative-scene-context/1.1');
  expect(layout.source).toMatchObject({x:72,y:96,width:576,height:1024,completeFrame:false});
  expect(layout.lines).toEqual([newer.title,newer.explanation,newer.boundary]);
+});
+it('gives the portrait audience a larger source diagram and high-contrast authored context',async()=>{
+ const font=await fontBytes();
+ const text=portraitSceneText(font,'dotenv 读取配置',context.explanation,context.boundary);
+ expect(text.map(line=>line.text)).toEqual([PORTRAIT_DISCLOSURE,'dotenv 读取配置',context.explanation,context.boundary]);
+ expect(text[1]!.fontSize).toBeGreaterThan(text[2]!.fontSize);
+ expect(text.at(-1)!.y+text.at(-1)!.fontSize).toBeLessThan(PORTRAIT_SOURCE.maskedTopEnd);
+ expect(PORTRAIT_SOURCE.width).toBeGreaterThan(576);
+ expect(sceneGapLines({sceneIndex:2,state:'needs-evidence',visualContext:{...context,nextStep:'补充来源'}}).slice(0,2))
+  .toEqual(['第2段｜暂未制作','需要补充证据']);
+});
+it('wraps portrait captions without cutting Latin identifiers, changing text, or leaving the bottom band',async()=>{
+ const font=await fontBytes();
+ const text='路由树找到路径却没找到对应方法，因此会把 methodNotAllowed 设为真。';
+ const [caption]=portraitCaptionLines(font,[text]);
+ expect(caption!.lines.join('')).toBe(text);
+ expect(caption!.lines).toHaveLength(2);
+ expect(caption!.lines.filter(line=>line.includes('methodNotAllowed'))).toHaveLength(1);
+ expect(caption!.lineYs[0]).toBeGreaterThan(PORTRAIT_CAPTION.y);
+ expect(caption!.lineYs.at(-1)!+PORTRAIT_CAPTION.fontSize).toBeLessThan(PORTRAIT_CAPTION.y+PORTRAIT_CAPTION.height);
+ expect(()=>portraitCaptionLines(font,['W'.repeat(80)])).toThrow('without splitting a token');
 });

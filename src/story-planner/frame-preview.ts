@@ -1,3 +1,4 @@
+import {renderValueTraceFrame} from './value-trace-frame.js';
 import {sampleAnimation, type compileAnimation} from './animation.js';
 import type {Story} from '../contracts/story.js';
 
@@ -33,7 +34,7 @@ function wrapPreviewText(value:string):string[]{
 export function renderFramePreview(plan: ReturnType<typeof compileAnimation>, frame: number, context?:PreviewEvidenceContext, format:PreviewFormat='3'): string {
  const state=sampleAnimation(plan,frame);
  if(state.confluence)return renderMultiInputFrame(state.confluence,frame,context);
- if(state.causal)return renderCausalFrame(state.causal,frame,context);
+ if(state.causal)return state.causal.operation.valueTrace ? renderValueTraceFrame(state.causal,frame,context) : renderCausalFrame(state.causal,frame,context);
  if(state.independentFlows)return renderIndependentFrame(state,frame,context);
  const destinations=new Map<string,number>();
  if(format==='3'){

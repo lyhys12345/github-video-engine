@@ -1,6 +1,8 @@
 import {z} from 'zod';
 import {AuthoringBinding,LegacyStoryProposal} from './authoring.js';
 import {Hash,Id} from './video.js';
+export const NARRATIVE_DEFAULT_LEAD_FRAMES=60;
+export const NarrativeLeadFrames=z.number().int().min(0).max(NARRATIVE_DEFAULT_LEAD_FRAMES);
 const text=(max:number)=>z.string().min(1).max(max).regex(/\S/);
 // Authored explanation, never automatic source interpretation or semantic approval.
 const screenText=z.string().min(1).max(24).regex(/^[\p{Script=Han}\p{Script=Latin}\p{N}\p{P}\p{Zs}]+$/u).regex(/\S/);

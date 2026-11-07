@@ -54,7 +54,10 @@ export function fontMetrics(font: Buffer, invalid = reject) {
   };
 }
 
-export function layoutCaptions(font: Buffer, transcripts: readonly string[]): CaptionLine[][] {
+export function layoutCaptions(font: Buffer, transcripts: readonly string[], options: {
+  fontSize: number;
+  width: number;
+} = {fontSize: CAPTION_FONT_SIZE, width: CAPTION_TEXT_WIDTH}): CaptionLine[][] {
   const advance = fontMetrics(font);
   return transcripts.map((text, index) => {
     const width = [0];
@@ -63,7 +66,7 @@ export function layoutCaptions(font: Buffer, transcripts: readonly string[]): Ca
       const composed = segment.normalize('NFC');
       if (!supported.test(composed)) reject('Cue ' + (index + 1) + ' contains a grapheme outside the supported caption repertoire.');
       // Keep 1px per grapheme plus outer slack for variation/ink differences.
-      width.push(width.at(-1)! + advance(composed.codePointAt(0)!) + 1);
+      width.push(width.at(-1)! + advance(composed.codePointAt(0)!) * options.fontSize / CAPTION_FONT_SIZE + 1);
     }
     const end = pieces.length;
     const positions = [...pieces.map(piece => piece.index), text.length];
@@ -78,7 +81,7 @@ export function layoutCaptions(font: Buffer, transcripts: readonly string[]): Ca
     }
     breaks.push(end);
     const line = (start: number, stop: number) => width[stop]! - width[start]!;
-    const valid = (start: number, stop: number) => start < stop && line(start, stop) <= CAPTION_TEXT_WIDTH - 8 &&
+    const valid = (start: number, stop: number) => start < stop && line(start, stop) <= options.width - 8 &&
       !!text.slice(positions[start], positions[stop]).trim() &&
       (stop === end || !opening.test(text.slice(positions[start], positions[stop]).trimEnd().at(-1)!));
     if (valid(0, end)) return [{startChar: 0, endChar: text.length}];
@@ -107,6 +110,6 @@ export function layoutCaptions(font: Buffer, transcripts: readonly string[]): Ca
       }
       if (best) return best.cuts.slice(1).map((stop, i) => ({startChar: positions[best.cuts[i]!]!, endChar: positions[stop]!}));
     }
-    return reject('Cue ' + (index + 1) + ' cannot fit in three 28px lines without splitting a token.');
+    return reject('Cue ' + (index + 1) + ' cannot fit in three ' + options.fontSize + 'px lines without splitting a token.');
   });
 }
