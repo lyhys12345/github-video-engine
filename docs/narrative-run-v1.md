@@ -1,6 +1,6 @@
 # Reusable URL-to-narrated-preview entry
 
-**Current owner voice preference (2026-11-06):** local Chen-style approximation is the default, without paid voice services. It is not yet integrated into this runtime; speech and narrated previews stop rather than silently use Huihui. Historical Huihui test results below remain accurate for their original runs. An explicitly user-requested alternative may select `GVE_NARRATION_VOICE=windows-huihui` for that run; see [voice preference](narration-voice-preference.md).
+**Current owner voice preference:** local Chen-style approximation is the default, without paid voice services. The unified path uses a configured local Windows CUDA profile, and stops rather than silently use Huihui when unavailable. Historical Huihui results below remain accurate for their original runs. An explicitly user-requested alternative may select `GVE_NARRATION_VOICE=windows-huihui` for that run; see [voice preference](narration-voice-preference.md).
 
 For the user-facing Codex route, give the GitHub URL and ask for an editable explanation preview. The repository skill [.agents/skills/github-explainer/SKILL.md](../.agents/skills/github-explainer/SKILL.md), also routed by AGENTS.md, instructs the actual current session Agent to read pinned sources, create the author data and continue the existing executor. The user does not hand-write JSON. The skill adds no model API or background dispatcher; metadata makes it eligible for skill selection, while an independent fresh-session auto-trigger has not been observed in this experiment.
 

@@ -8,7 +8,7 @@ A local TypeScript engine for evidence-backed GitHub project explainer videos. T
 
 For the Codex user path, open this trusted engine checkout as the Codex project and ask: `请把 https://github.com/OWNER/REPO 做成可编辑的中文有声技术预览。` The project instructions select its repository skill; the session Agent reads the captured sources and authors the plan. You do not write JSON. Continue in the same chat with ordinary feedback. See [Codex user workflow and observed execution limits](docs/codex-user-path-v1.md).
 
-The owner's default narration is the previously accepted **local Chen-style approximation**, without paid voice services. That voice is not yet integrated into the unified runtime on this Windows machine, so new narration stops with a clear error rather than silently switching voices. The old Windows Huihui voice is available only as an explicitly requested per-run alternative. See [narration voice preference](docs/narration-voice-preference.md).
+The owner's default narration is the previously accepted **local Chen-style approximation**, without paid voice services. The unified runtime can use a separately configured Windows CUDA model and reference audio; if unavailable it stops rather than silently switching voices. The old Windows Huihui voice is available only as an explicitly requested per-run alternative. See [narration voice preference](docs/narration-voice-preference.md).
 
 The lower-level operator path remains `project intake`, `project evidence`, and `project story`; see [URL intake](docs/url-intake-v1.md).
 
