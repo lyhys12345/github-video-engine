@@ -1,0 +1,56 @@
+{
+  "scriptSha256": "da6bb1a7af0aef52ac7c6a1128cec8563cce8bedd7b4dbd91f8931692d5a50c7",
+  "checks": [
+    {
+      "id": "intro",
+      "sha256": "3b8fbc5811e0d3cdb9c4577b5582c080b2f67625de7b5ff38cbe3d1d4cf9b018",
+      "sampleRate": 16000,
+      "samples": 152320,
+      "seconds": 9.52,
+      "probeDuration": 9.52,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening",
+      "taskId": "5b8d3c88686cd6f1ad6f1c280cdd361e84c479a9fe381031c7533383d54cc9f4"
+    },
+    {
+      "id": "structure",
+      "sha256": "0ae6af8439b952b02147d6bf00a8870d7b6a370b4c9245c9ca02a3cb60594b7a",
+      "sampleRate": 16000,
+      "samples": 119040,
+      "seconds": 7.44,
+      "probeDuration": 7.44,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening",
+      "taskId": "e473f1d823f15a4dbb1ee1a35423e17f95f6ffc019d81f328d3dd29ae12dc38e"
+    },
+    {
+      "id": "model",
+      "sha256": "3bc0d30c1339042109abb7119546d344a499bc8f76210ac2ecced7398c057a0d",
+      "sampleRate": 16000,
+      "samples": 119040,
+      "seconds": 7.44,
+      "probeDuration": 7.44,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening",
+      "taskId": "0d138cc282d16ece7a4fcdde37f6806749e1ae327b07af03bbbf71e0f3642249"
+    },
+    {
+      "id": "use",
+      "sha256": "55a1aaa0b4eb6ec184f2ece4054c179ddfedd7ef62a18c6d2b95817df3fda7cb",
+      "sampleRate": 16000,
+      "samples": 157440,
+      "seconds": 9.84,
+      "probeDuration": 9.84,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening",
+      "taskId": "efb026c33d2c941f821691977e41b280c8e93ad57f92e622cb4d2cd1a661f7c8"
+    },
+    {
+      "id": "close",
+      "sha256": "8c5c294a36fd337a031b7011088b02384d01d3a06e294ad1c0b2728c35d3b67b",
+      "sampleRate": 16000,
+      "samples": 84480,
+      "seconds": 5.28,
+      "probeDuration": 5.28,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening",
+      "taskId": "ff44a61f7564d1c6ca0299add03a4ae913ed79580fc6457ae08b2df501931a30"
+    }
+  ],
+  "status": "PASS technical original WAV binding; not listening or movie preservation"
+}
