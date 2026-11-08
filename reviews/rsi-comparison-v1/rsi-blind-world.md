@@ -1,0 +1,16 @@
+# Blind world review
+
+```json
+{"experimentSha256":"bdff8ed56ac23eb47ff3c2e957eb87f73ed08131b18d1d2055a3a7d6a4df84c5","reviewer":"blind_scripts","verdict":"PASS","coverage":["script"],"findings":["Preferred A for concrete year/viewpoint interactions, a supplied causal storyboard and a clear historical-map takeaway.","Both versions have the same specific curiosity hook and then reveal the giraffe before explaining the product.","A's repeated wording 看历史地图/是谁眼里的世界 turns the product interaction into a useful takeaway; B's ending is also relevant.","B's 因为 risks implying that delayed message transmission fully explains China/Europe viewpoint differences. Replace with 另外 or introduce transmission as one factor.","B includes no storyboard in its packet, so its visual execution design is UNVERIFIED rather than assumed inferior in a finished film.","Historical giraffe/Aden/gift details and product capabilities are UNVERIFIED; no common historical script or primary evidence is present. B additionally specifies 国王, a detail absent from A that needs support.","No actual visual, audio, duration or movie PASS is claimed."],"preferred":"A"}
+```
+
+PASS is limited to the preferred script/storyboard's editorial design. It is not factual certification or production approval. A: PASS for this editorial scope. B: REVISE the causal transition; storyboard coverage UNVERIFIED.
+
+- Hook: both open with a concrete, surprising animal on Zheng He's route and promptly answer the curiosity. The three-second spoken duration has not been measured; actual placement of the giraffe matters.
+- Usefulness: both explain changing year and viewpoint. A's wording “拖动年份” and “切一下视角” maps cleanly to visible actions and state changes. Viewers can understand how to explore the map.
+- Oral naturalness and concision: A's “还真有它” pays off the hook naturally. B's “更有意思的是” and “背后” are mild scaffolding that could be removed. A's grid-record sentence is the weakest retention beat: shorten or merge it with the viewpoint interaction if narration feels crowded, since year, viewpoint and transmission already provide useful detail.
+- Causal visuals: A specifies keeping the year control visible, holding year constant while switching perspective, and labeling the two-time mechanism without inventing dates. This makes the comparison inspectable. The shots are plans, not observed footage. B provides no shots; missing material does not establish a bad finished result.
+- Factual boundaries: verify the actual Aden popup before narrating the gift as history. Neither packet supplies the common historical script needed to judge support. B's additional “国王” needs independent support. Verify fog changes, viewpoint selection, dual timestamps and per-cell records against actual product evidence. A avoids B's stronger “因为” causal linkage; for B use “另外，船队到了一个地方，消息也未必传回去了。”
+- Ending: A makes the general lesson explicit: historical maps depend on whose knowledge they represent. B also closes with a useful perspective question. A's ending is slightly more memorable without depending on link availability.
+
+Reviewed only the frozen assignment and A/B text files. Source truth and historical accuracy: UNVERIFIED. Audio, rendered interaction fidelity and actual pace: UNVERIFIED.
