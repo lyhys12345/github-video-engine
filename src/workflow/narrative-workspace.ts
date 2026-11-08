@@ -10,7 +10,7 @@ import {captureNarrativeStart} from './explanation-session.js';
 import {RepositoryUrl} from '../contracts/planning.js';
 const Hash=z.string().regex(/^[a-f0-9]{64}$/);
 const Pointer=z.strictObject({schemaVersion:z.literal('repository-narrative-current-run/1.0'),result:z.string().min(1),resultSha256:Hash,authorDirectory:z.string().min(1)});
-const AuthorManifest=z.object({authorSha256:Hash,source:z.unknown(),files:z.array(z.strictObject({name:z.enum(['story.json','narrative.json','animation.json','document-card.json','run.json','silent-voice.json','local-tts.json','narrated-excerpt.json','README.txt']),sha256:Hash,bytes:z.number().int().positive().max(1_000_000)})).min(4).max(9)});
+const AuthorManifest=z.object({authorSha256:Hash,source:z.unknown(),files:z.array(z.strictObject({name:z.enum(['story.json','narrative.json','animation.json','document-card.json','run.json','silent-voice.json','local-tts.json','narrated-excerpt.json','README.txt','creative-brief.json']),sha256:Hash,bytes:z.number().int().positive().max(1_000_000)})).min(4).max(10)});
 const marker='<!doctype html>\n<!-- github-video-engine workspace-preview/1.0 -->\n';
 const fail=(message:string):never=>{throw new EngineError('NARRATIVE_WORKSPACE',message);};
 const json=async(path:string)=>JSON.parse((await boundedFile(path,4_000_000)).toString('utf8').replace(/^\uFEFF/,''));

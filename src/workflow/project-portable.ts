@@ -24,7 +24,7 @@ import {statusNarrativeCaptionSafe,inspectNarrativeCaptionSafe} from './narrativ
 const fail=(s:string):never=>{throw new EngineError('PROJECT_PORTABLE',s);};
 const bytes=(x:unknown)=>Buffer.from(canonical(x));
 const MAX=2_000_000_000,FILE_MAX=512_000_000,ROW_MAX=32_000_000;
-const AuthorNames=new Set(['story.json','narrative.json','animation.json','run.json','document-card.json','silent-voice.json','local-tts.json','narrated-excerpt.json','README.txt']);
+const AuthorNames=new Set(['story.json','narrative.json','animation.json','run.json','document-card.json','silent-voice.json','local-tts.json','narrated-excerpt.json','README.txt','creative-brief.json']);
 const safePath=(p:string)=>/^(workspace|request|source)\.json$/.test(p)||/^state\/(tasks|tts)-rows\.json$/.test(p)||p.startsWith('author/')&&AuthorNames.has(p.slice(7))||/^state\/artifacts\/([a-f0-9]{2})\/([a-f0-9]{64})\.(json|mp4|png|wav|flac|mp3|vtt|txt|zip|ttf)$/.test(p)&&p.split('/')[2]===p.split('/')[3]!.slice(0,2);
 const Entry=z.strictObject({path:z.string().min(1).max(180).refine(safePath),sha256:Hash,bytes:z.number().int().positive().max(FILE_MAX)}).refine(e=>!e.path.startsWith('state/artifacts/')||e.path.split('/')[3]!.split('.')[0]===e.sha256,'CAS filename must equal its content hash');
 export const PortableProjectManifest=z.strictObject({schemaVersion:z.literal('portable-narrative-project/1.0'),trust:z.literal('controlled-engine-export-only; hashes are integrity, not publisher authentication'),repository:z.string().url(),sourceTaskId:Hash,bindingSha256:Hash,previewTaskId:Hash,authorSha256:Hash,profile:z.literal('complete-technical-preview/1.0'),facts:z.literal('pending'),files:z.array(Entry).min(9).max(20000)});
