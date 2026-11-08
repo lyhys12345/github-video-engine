@@ -6,6 +6,7 @@ import {narrativeApiFeedbackCommand} from './narrative-api-feedback.js';
 import {narrativeSourceExpandCommand} from './narrative-source-expand.js';
 import {narrativeWorkspaceCommand} from './narrative-workspace.js';
 import {narrativeRunCommand} from './narrative-run.js';
+import {videoReviewCommand} from './candidate-review.js';
 import {projectPortableCommand} from './project-portable.js';
 import {explanationNextCommand} from './narrative-next-actions.js';
 import {documentCardCommand} from './narrative-document-card.js';
@@ -31,6 +32,7 @@ export async function explanationCommand(positionals: string[], values: Record<s
   if(action==='workspace-status')return narrativeWorkspaceCommand(positionals,values,signal);
   if(action==='run-revise')return narrativeAuthorRevisionCommand(positionals,values,signal);
   if(action==='run')return narrativeRunCommand(positionals,values,signal);
+  if(action==='video-review')return videoReviewCommand(positionals,values,signal);
   if(action==='project-export'||action==='project-import')return projectPortableCommand(positionals,values,signal);
   if(action==='next')return explanationNextCommand(positionals,values,signal);
   if(action==='narrative-card'||action?.startsWith('narrative-card-'))return documentCardCommand(positionals,values,signal);
