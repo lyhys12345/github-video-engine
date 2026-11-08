@@ -52,6 +52,8 @@ id_ed25519*
 *.jpeg
 *.webp
 *.gif
+!docs/media/engine-workflow.mp4
+!docs/media/engine-workflow-poster.png
 *.zip
 *.7z
 *.tar

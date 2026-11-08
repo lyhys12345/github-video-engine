@@ -2,6 +2,18 @@
 
 # GitHub Video Engine
 
+## Watch the workflow
+
+[![GitHub Video Engine workflow video](docs/media/engine-workflow-poster.png)](docs/media/engine-workflow.mp4)
+
+[Watch or download the 70-second video](docs/media/engine-workflow.mp4) · 中文旁白 / Chinese narration
+
+Using **The World We Know / 山海所知**, this walkthrough shows repository research, script and storyboard approval, feedback-driven revision, and delivery of a narrated MP4 with editable project files. Product footage comes from the actual map. Workflow screens are labelled reconstructions, and scene reordering was demonstrated using an exported project copy.
+
+Run the skill in a configured Codex engine checkout with the local media dependencies installed. The session agent authors the story and project-specific visuals. Local narration requires separately configured model files and an authorized reference recording. See [setup and usage](docs/codex-user-path-v1.md) and [voice configuration](docs/narration-voice-preference.md). Sampled-frame review and full-file decoding passed; continuous audiovisual acceptance remains pending.
+
+Map and repository shown in the case study: [Greenere/the-world-we-know](https://github.com/Greenere/the-world-we-know).
+
 A local TypeScript engine for evidence-backed GitHub project explainer videos. The long-term workflow is repository research → grounded story and storyboard → editable motion design → evaluation → human review.
 
 **Current state:** durable jobs, immutable artifacts, read-only research, versioned planning contracts, local Remotion/FFmpeg rendering, and the public evidence-planning CLI are implemented. M0–M4 engineering records are historical; final creative/continuous audiovisual acceptance remains separate. The latest development regression ran **233 tests across 23 files**, including 16 planning-runtime tests. Counts are tied to their recorded source versions, not a claim that a fresh checkout has already been tested.
