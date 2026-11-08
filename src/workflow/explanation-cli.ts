@@ -1,3 +1,4 @@
+import {scriptFactCommand} from './script-facts.js';
 import {creativeBriefCommand} from './creative-brief.js';
 import {narrationQuoteEditCommand} from './narrative-prose-edit.js';
 import {narrativeAuthorRevisionCommand} from './narrative-author-revision.js';
@@ -25,6 +26,7 @@ const usage = 'explanation start --spec <request> --data <state> --out <packet> 
 
 export async function explanationCommand(positionals: string[], values: Record<string, unknown>, signal: AbortSignal) {
   const action = positionals[1];
+  if(action==='script-facts')return scriptFactCommand(positionals,values);
   if(action==='brief-check')return creativeBriefCommand(positionals,values);
   if(action==='api-feedback'||action==='api-feedback-continue')return narrativeApiFeedbackCommand(positionals,values,signal);
   if(action==='api-author'||action==='api-continue')return narrativeApiAuthorCommand(positionals,values,signal);

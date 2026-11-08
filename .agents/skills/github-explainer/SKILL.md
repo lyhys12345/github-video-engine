@@ -33,3 +33,5 @@ For narration feedback on a scene with segmented captions, explicitly author `na
 
 For brief-bound feedback candidates, `feedback-apply` may stop at `awaiting-script-review` because it cannot carry a receipt. Obtain review and owner approval for the revised author hash, then resume the child author using `explanation run --repo URL --workspace ORIGINAL_WORKSPACE --author CHILD/author --through preview --review RECEIPT`. Do not remove the brief to bypass this checkpoint.
 
+
+For independently reviewing a complete prose script before renderer authoring, use [script fact packets](../../../docs/script-facts-v1.md). Prepare exact script/brief/source hashes and line citations with `explanation script-facts`; the existing fact receipt checks every claim plus the complete script. Source receipt support does not replace owner approval or audiovisual review.

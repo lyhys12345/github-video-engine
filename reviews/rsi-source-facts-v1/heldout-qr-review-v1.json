@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "fact-review-receipt/1.0",
+  "candidateHash": "6a746fe233b1d5282950984895cee6889c33708a758ce465a0ad7b3689043961",
+  "packetHash": "41be7ab25018f96aa3c3603a5dd50ddb9dd279b2b4297787c26110d141af86ae",
+  "reviewer": {
+    "kind": "session-agent",
+    "identity": "/root/blind_scripts independent held-out source reviewer"
+  },
+  "items": [
+    {
+      "id": "claim:terminal",
+      "verdict": "supported",
+      "reason": "README 21-23 documents terminal QR generation from text; lib 33-35 and 81-93 support encoded terminal output.",
+      "limitations": "Frozen source-text and editorial script support only; target package not executed, QR not scanned, example image not viewed, no audio/video/duration or owner approval."
+    },
+    {
+      "id": "claim:url",
+      "verdict": "supported",
+      "reason": "README 52-54 explicitly shows URL arguments and piped URL input for CLI.",
+      "limitations": "Frozen source-text and editorial script support only; target package not executed, QR not scanned, example image not viewed, no audio/video/duration or owner approval."
+    },
+    {
+      "id": "claim:encode",
+      "verdict": "supported",
+      "reason": "lib 1 imports QRCode, 33-35 constructs encoder, adds input and makes encoded modules.",
+      "limitations": "Frozen source-text and editorial script support only; target package not executed, QR not scanned, example image not viewed, no audio/video/duration or owner approval."
+    },
+    {
+      "id": "claim:cells",
+      "verdict": "supported",
+      "reason": "lib 3-6 maps module booleans to ANSI background-colored spaces; 84-86 maps each row and 93 logs output. Black/white characters is a fair viewer simplification of colored terminal cells.",
+      "limitations": "Frozen source-text and editorial script support only; target package not executed, QR not scanned, example image not viewed, no audio/video/duration or owner approval."
+    },
+    {
+      "id": "claim:small",
+      "verdict": "supported",
+      "reason": "lib 48-70 provides full/upper/lower block and space palette, advances rows by 2 and combines adjacent module rows. README 36-41 exposes small mode. No device-specific scaling asserted.",
+      "limitations": "Frozen source-text and editorial script support only; target package not executed, QR not scanned, example image not viewed, no audio/video/duration or owner approval."
+    },
+    {
+      "id": "complete-script",
+      "verdict": "supported",
+      "reason": "Whole script and shots inspected. All product assertions follow README/lib. Sharing is a suggested use, not measured scanning success; scanner efficacy explicitly remains untested. Planned README example exists at line 5 with image reference line 80; no viewed-image claim. Future shots, link posting, 42-second estimate and limits are plans, not executed results.",
+      "limitations": "Frozen source-text and editorial script support only; target package not executed, QR not scanned, example image not viewed, no audio/video/duration or owner approval."
+    },
+    {
+      "id": "creative-brief",
+      "verdict": "supported",
+      "reason": "Clear terminal-familiar ordinary audience, Chinese language and source-first mechanism explanation. Narration fits that audience and gives one concrete use plus two understandable mechanisms. Timing is an unmeasured target.",
+      "limitations": "Frozen source-text and editorial script support only; target package not executed, QR not scanned, example image not viewed, no audio/video/duration or owner approval."
+    }
+  ]
+}

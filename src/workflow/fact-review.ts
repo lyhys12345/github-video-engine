@@ -75,3 +75,7 @@ export function narrativePreviewFactReview(plan:NarrativeReviewPlan,sources:Sour
  const next={...content,candidateHash:sha256(canonical({plan,execution})),units:[...base.units,{id:'technical-preview-execution',kind:'full-child-visual-animation-timeline-and-omission-closure',text:canonical(execution),claimIds:[]}],requiredItems:[...base.requiredItems,'technical-preview-execution']};
  return {...next,packetHash:sha256(canonical(next))};
 }
+/** Script review reuses exact source/quote verification and the same receipt contract as narrative review. */
+export function scriptFactReview(script:string,brief:unknown,sources:Source[],claims:Claim[]){
+ return packet({schemaVersion:'script-fact-subject/1.0',scriptSha256:sha256(script),brief},sources,claims,[{id:'complete-script',kind:'complete-script-and-storyboard',text:script,claimIds:[]},{id:'creative-brief',kind:'requirements',text:canonical(brief),claimIds:[]}]);
+}
