@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "candidate-review/1.0",
+  "candidateSha256": "1aa5d67a7e22356a87848da530a571ddd073de633c12943280c1341bb14b7250",
+  "stage": "video",
+  "reviewer": "/root/blind_scripts independent decoded-frame reviewer",
+  "verdict": "UNVERIFIED",
+  "coverage": "partial-av",
+  "findings": [
+    "Complete listening and continuous-motion review remain unavailable. Review full candidate audio, narration/subtitle synchronization, sample joins and temporal rhythm before complete-AV approval."
+  ]
+}
