@@ -1,0 +1,16 @@
+# Durable RSI repair chain
+
+This local session-agent workflow preserves review findings and candidates across restarts. It does not dispatch models, authenticate reviewer identity, authorize paid services or replace exact owner script approval.
+
+1. Freeze baseline/candidate and fixed requirements/rubric with `scripts/rsi-experiment.ts freeze INPUT.json`.
+2. `node --import tsx scripts/rsi-repair.ts start CHAIN OPERATOR.json` creates immutable attempt one. Repeating identical initialization resumes the existing chain.
+3. Give only the current attempt reviewer directory to the independent reviewer. Preserve raw review separately. Submit its exact structured report with `node --import tsx scripts/rsi-repair.ts record-review CHAIN CURRENT_RECORD_SHA REPORT.json`.
+4. `node --import tsx scripts/rsi-repair.ts status CHAIN` revalidates the full chain, candidates, rubric, mappings, predecessor/review hashes and saved current verdict. PASS is a declared scoped review, not evidence of paid access, listening, owner approval or general quality improvement.
+5. For a covered REVISE only, the session agent fixes the responsible layer and saves a new candidate. `node --import tsx scripts/rsi-repair.ts apply CHAIN CURRENT_RECORD_SHA REPORT.json NEW_CANDIDATE.txt` atomically publishes the next attempt. Baseline, requirements, rubric, modalities and reviewer are fixed. Repeating identical apply reuses the committed attempt, including after restart. UNVERIFIED stops for missing evidence. PASS does not request another repair. Attempt three cannot create attempt four.
+6. Compare the final scoped result with baseline. Obtain owner approval of exact script/storyboard before new video. A changed substantive script invalidates approval. Continue with existing run/review gates, not this text experiment as video approval.
+
+Committed attempts are never overwritten by these tools. Staging directories and stale locks are preserved. A process crash before final directory rename leaves an ignored `.pending-*` directory; the prior attempt remains current. Active process locks refuse a second writer. Dead-PID locks are renamed and reacquired. There is no fsync/power-loss guarantee or distributed lease; use trusted local storage and do not share concurrently writable folders with hostile processes. All hashes provide integrity, not authentication against an actor able to rewrite an entire chain. A deliberate new chain can reset the attempt budget, so the limit is not a spending policy.
+
+A recorded report is immutable. If it is malformed/inconsistent, ingestion rejects it before storing. If a reviewer needs to amend a previously accepted report, preserve the original and create a separately documented experiment rather than overwrite history. No terminal PASS should be manufactured to unblock work.
+
+Validation: directed tests exercise real filesystem publication, cross-process CLI status, stale/fake predecessor/review rejection, saved terminal PASS, conflicting review refusal, exact retry reuse, three-attempt bound, and an intentionally incomplete staging directory. These do not simulate actual power loss or prove voice/video quality. No full regression required for this bounded engineering module.
