@@ -9,7 +9,7 @@ RSI here means bounded, session-agent-led improvement of the reusable Skill and 
 3. Convert review findings into structured, bounded repairs at the responsible layer: evidence, content selection, media acquisition, shot plan, narration, renderer or assembly. Preserve failed candidates and raw dissent.
 4. Validate natural-language edits and fresh-session use across projects. Save each completed module separately with commands run, observed results, unresolved limitations and a Git checkpoint.
 
-Module 1 is engineering groundwork. Modules 2–4 require additional execution and are not completed merely because this document exists. No whole video is generated until the owner approves its particular script/storyboard.
+Current engineering checkpoints: module 1 configuration plus real runtime/portable checks are implemented; module 2 anonymous packet integrity and two-project script comparison are exercised; module 3 durable review/repair/resume is implemented and exercised using actual independent source-review findings; module 4 explicit feedback mapping is tested with existing fixtures. These are bounded engineering outcomes, not full creative or media acceptance. Fresh installation by a new external owner, held-out repository generalization, new rendered candidate comparison and continuous audiovisual review remain pending. No whole video is generated until the owner approves its particular script/storyboard. See [durable lifecycle](rsi-repair-v1.md), [comparison tool](rsi-experiment-v1.md) and preserved reports under reviews/rsi-repair-v1 and reviews/rsi-source-facts-v1.
 
 ## Experiment contract
 
