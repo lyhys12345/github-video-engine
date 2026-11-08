@@ -40,3 +40,18 @@ Current narrated-run capabilities remain zh-CN plus configured local voices. Ref
 ## Validation scope
 
 Directed tests cover schema/limits, clarification and capability decisions, real CLI persistence/overwrite refusal, approval invalidation from brief changes, and portable manifest acceptance. Existing narrative run/source/review tests cover compatibility. No new full video, listening test or end-to-end creative quality improvement is claimed by this intake module.
+
+## Runtime and portability follow-up (2026-11-08)
+
+Executed `tests/creative-brief-runtime.test.ts`: two passing tests drive real source capture, durable planning and candidate snapshots using a mocked GitHub transport (no external calls). They verify duration refusal, unsupported voice stopping before synthesis, missing script receipt, and rejection of a previous candidate receipt after the brief changes. The receipt is explicitly synthetic test data, not an independent review or owner approval.
+
+Executed `tests/creative-brief-portable.integration.test.ts`: one passing real export/import using an isolated copy of the existing completed dotenv technical preview. It preserved exact brief bytes, author hash and selected preview task; the original workspace pointer stayed unchanged. Export/import validated existing media/state; no new movie or speech was generated. This is a portability check, not an assertion that the newly proposed test brief was fulfilled by the old movie.
+
+Reproduce the local-media test with an existing complete narrated workspace:
+
+```powershell
+$env:GVE_PORTABLE_FIXTURE = 'C:/path/to/completed/workspace'
+pnpm run test:creative-brief-portable
+```
+
+The test is explicitly skipped if no fixture is configured, because repository clones do not contain local video/state. The default focused suite includes the runtime tests; it does not pretend to execute this opt-in media roundtrip.
