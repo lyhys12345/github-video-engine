@@ -13,6 +13,17 @@ const script = {
   findings: [],
 };
 
+it('does not release script or video with unresolved findings even when labelled PASS', () => {
+  for (const stage of ['script', 'video'] as const) {
+    const report = {...script, stage, coverage: stage === 'script' ? 'script' : 'complete-av',
+      ownerApprovedSha256: original, findings: ['The claimed input/output pair has no supporting evidence.']};
+    expect(candidateReviewDecision(report, original, stage)).toEqual({
+      status: 'revise-and-resubmit', findings: report.findings,
+    });
+  }
+  expect(candidateReviewDecision({...script, coverage: 'partial-av', findings: ['Cannot hear audio']}, original, 'script').status).toBe('unverified');
+});
+
 it('requires both review and owner approval of the same script bytes', () => {
   expect(candidateReviewDecision(script, original, 'script').status).toBe('awaiting-owner-approval');
   const approved = {...script, ownerApprovedSha256: original};

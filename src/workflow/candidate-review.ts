@@ -29,6 +29,10 @@ export function candidateReviewDecision(raw: unknown, candidateSha256: string, s
   if (report.verdict === 'UNVERIFIED' || report.coverage !== requiredCoverage) {
     return {status: 'unverified', findings: report.findings} as const;
   }
+  // A PASS label cannot waive unresolved findings. Keep the raw report intact.
+  if (report.findings.length) {
+    return {status: 'revise-and-resubmit', findings: report.findings} as const;
+  }
   if (stage === 'script' && report.ownerApprovedSha256 !== candidateSha256) {
     return {status: 'awaiting-owner-approval', findings: report.findings} as const;
   }
