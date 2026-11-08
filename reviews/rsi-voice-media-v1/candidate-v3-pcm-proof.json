@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "sequenceSha256": "7bc6b277153fa0bad231dbc57058e59a52ab48d2828afe1527038f95b988f9fc",
+  "seconds": 47,
+  "checks": [
+    {
+      "id": "demo_voice.wav",
+      "startSeconds": 0,
+      "endSeconds": 3.033333333333333,
+      "fullNarration": false,
+      "samples": 70320,
+      "padSeconds": 0.10333333333333333,
+      "sourceSha256": "9ff69da0155e6a402bdfb8f9bbeb3b256c3f7cda1b13bfd00d1b71a6972ca2b8"
+    },
+    {
+      "id": "demo_clone_output.wav",
+      "startSeconds": 3.033333333333333,
+      "endSeconds": 6.866666666666666,
+      "fullNarration": false,
+      "samples": 89280,
+      "padSeconds": 0.11333333333333333,
+      "sourceSha256": "1645977a7304210d0847786b6f68132f77f15a629afc9154d07b164aa53d3ff8"
+    },
+    {
+      "id": "intro",
+      "startSeconds": 6.866666666666666,
+      "endSeconds": 16.5,
+      "fullNarration": true,
+      "samples": 228480,
+      "padSeconds": 0.11333333333333333,
+      "sourceSha256": "3b8fbc5811e0d3cdb9c4577b5582c080b2f67625de7b5ff38cbe3d1d4cf9b018"
+    },
+    {
+      "id": "structure",
+      "startSeconds": 16.5,
+      "endSeconds": 24.066666666666666,
+      "fullNarration": true,
+      "samples": 178560,
+      "padSeconds": 0.12666666666666668,
+      "sourceSha256": "0ae6af8439b952b02147d6bf00a8870d7b6a370b4c9245c9ca02a3cb60594b7a"
+    },
+    {
+      "id": "model",
+      "startSeconds": 24.066666666666666,
+      "endSeconds": 31.633333333333333,
+      "fullNarration": true,
+      "samples": 178560,
+      "padSeconds": 0.12666666666666668,
+      "sourceSha256": "3bc0d30c1339042109abb7119546d344a499bc8f76210ac2ecced7398c057a0d"
+    },
+    {
+      "id": "use",
+      "startSeconds": 31.633333333333333,
+      "endSeconds": 41.6,
+      "fullNarration": true,
+      "samples": 236160,
+      "padSeconds": 0.12666666666666668,
+      "sourceSha256": "55a1aaa0b4eb6ec184f2ece4054c179ddfedd7ef62a18c6d2b95817df3fda7cb"
+    },
+    {
+      "id": "close",
+      "startSeconds": 41.6,
+      "endSeconds": 47,
+      "fullNarration": true,
+      "samples": 126720,
+      "padSeconds": 0.12,
+      "sourceSha256": "8c5c294a36fd337a031b7011088b02384d01d3a06e294ad1c0b2728c35d3b67b"
+    }
+  ],
+  "scope": "Exact intermediate PCM retains source narration after ordinary 16k-to-24k resampling; AAC output is lossy, not byte equal; no subjective listening"
+}
