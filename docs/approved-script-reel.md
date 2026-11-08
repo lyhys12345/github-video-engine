@@ -9,3 +9,5 @@ Every narration line must match the approved script in order and bind its audio,
 The renderer copies hashed source assets, receipts and approved script into its new output, saves an editable manifest/timeline/props, renders PNG preflight frames and a 720x1280/30 H264/AAC MP4, checks FFprobe properties and decodes the entire file. Listening, continuous motion review and final owner acceptance remain separate requirements.
 
 Directed validation: `pnpm exec vitest run tests/approved-reel.test.ts` and `pnpm exec tsc --noEmit`. No complete regression claimed. Private voice references/models and generated media stay local and ignored. The project uses its existing pinned Remotion/license policy.
+
+The copied output manifest retains input-relative paths: it is provenance, not a self-contained portable export. Rerun the original manifest in its original workspace; no portable artifact claim is made.
