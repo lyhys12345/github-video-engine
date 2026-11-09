@@ -11,3 +11,9 @@ The renderer copies hashed source assets, receipts and approved script into its 
 Directed validation: `pnpm exec vitest run tests/approved-reel.test.ts` and `pnpm exec tsc --noEmit`. No complete regression claimed. Private voice references/models and generated media stay local and ignored. The project uses its existing pinned Remotion/license policy.
 
 The copied output manifest retains input-relative paths: it is provenance, not a self-contained portable export. Rerun the original manifest in its original workspace; no portable artifact claim is made.
+
+## Narrative styles with shared assets
+
+Optional `samplesAfterLine` inserts the complete sample group after an exact approved narration id (omission retains opening samples). Unknown ids are rejected; narration order/text remain unchanged. Active samples take precedence, and narration ends at its segment boundary, so middle samples cannot inherit a preceding caption. `timelineMode: missing|pending` distinguishes a missing line from a hypothetical yet-to-be-generated replacement; the generic illustration labels old reference material and pending output. A timeline with a supplied image can close onto that real repository screenshot.
+
+A/B VoiceStudio validation used identical sample excerpts and local voice profile with exact approved variant text. Planned approximately two-second samples were retained at the existing2.93/3.72-second cuts, explicitly a planning-estimate deviation; both versions share the same cuts. No new natural-cut/listening verification is claimed. Official engine-manager screenshot was captured read-only at the pinned commit to satisfy the actual selected-engine shot, preserving the visible license badge. No target execution or commercial-use assurance.
