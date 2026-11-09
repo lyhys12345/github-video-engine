@@ -1,0 +1,11 @@
+# Showcase renderer implementation record
+
+The approved three-project/six-script pilot uses `showcase-reel/1.0`, not an autonomous planning claim. Source and local Chen audio stay unchanged; each narration waveform is retained at original speed with only frame-boundary padding. Captions are exact approved text with estimated display timing, not forced alignment.
+
+Reusable implementation: hash-bound script approval and narration receipts, verified media metadata, normalized masked crops, synchronized context/detail panels, exact source-frame intervals with one playback then explicit hold, three project palettes, real PNG preflight and H264/AAC output verification/full decoding. Project-specific shot decisions live in `examples/xhs-pilot/showcase-plans.ts`; these remain authored editorial choices.
+
+Repairs driven by actual images: strict inner crop masking stopped neighbouring source content leaking into contain margins; Hallmark phone/map/source excerpts and repository CTA replaced repeated static-map sections; ArtCraft arm/knee shots were synchronized with approved narration, comparison preserves full limbs, and final repository is visible; OpenMAIC tracks the right-side current messages and holds the real initial Join card before proceeding into discussion. Previous failed candidates and review reports remain preserved locally.
+
+Actual directed validation on 2026-11-08: `pnpm exec vitest run tests/showcase-reel.test.ts tests/approved-reel.test.ts` passed 13 tests (4 + 9); `pnpm exec tsc --noEmit` passed with no diagnostics. These are not a full regression. Local execution excerpt: `work/xhs-pilot-v1/validation/directed-checks.txt`.
+
+Limitations: source footage is short and explicitly held/revisited rather than generated anew; source UI can remain small in context panels; official footage is not a fresh target-project run. This adapter is not integrated into durable jobs or portable project export. Technical decoding and sampled image reviews do not establish natural listening, continuous pacing, or user acceptance. No upstream repository was installed/executed; no paid model/API or social publication was used. Media/voice assets remain local and subject to their individual provenance and rights.
