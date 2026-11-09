@@ -1,0 +1,63 @@
+{
+  "variant": "B",
+  "approvedDocumentSha256": "2a2b284bd616dfc186df50b6424d8358e2737d3562b6d868c0f23bd38219dbde",
+  "scriptSha256": "c71d44d66b03d88f6f9c76d3eb19612667c1d8157a60d787b4af2d6979e2329b",
+  "audio": [
+    {
+      "id": "line1",
+      "sha256": "72b85fb0988f1a15b281cc827a1188da6977f1f3306e27f8a311a76edf6a6358",
+      "seconds": 7.68,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening"
+    },
+    {
+      "id": "line2",
+      "sha256": "27f32224eb95453b4ab218a698f8ffb9abe1a1928816e60082dc4d4df3c719a6",
+      "seconds": 7.76,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening"
+    },
+    {
+      "id": "line3",
+      "sha256": "3e1ce8e8dbf7d94428159d1187525c8b7d6fa3bef33a429afad02711a8edb5f4",
+      "seconds": 8,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening"
+    },
+    {
+      "id": "line4",
+      "sha256": "8d1cdae1d9730da221ead1b6fe695e12f707c6031a32acafbc7183fc542142ca",
+      "seconds": 7.92,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening"
+    },
+    {
+      "id": "line5",
+      "sha256": "8b421ada27060b5b3e3c13b7e3d0285a0792063d3994980a71ba1b3a2b167b13",
+      "seconds": 8.16,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening"
+    }
+  ],
+  "seconds": 46.93333333333333,
+  "frames": 1408,
+  "sequenceSha256": "3b8f1213e0efe2ebe3f2184d7a9404fa37a4545b4d02e73889353bc651d6b7c3",
+  "order": [
+    "sample",
+    "sample",
+    "line1",
+    "line2",
+    "line3",
+    "line4",
+    "line5"
+  ],
+  "samples": [
+    {
+      "label": "demo_voice.wav",
+      "startSample": 0,
+      "endSample": 70320,
+      "sha256": "9ff69da0155e6a402bdfb8f9bbeb3b256c3f7cda1b13bfd00d1b71a6972ca2b8"
+    },
+    {
+      "label": "demo_clone_output.wav",
+      "startSample": 6720,
+      "endSample": 96000,
+      "sha256": "1645977a7304210d0847786b6f68132f77f15a629afc9154d07b164aa53d3ff8"
+    }
+  ]
+}

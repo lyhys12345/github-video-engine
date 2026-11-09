@@ -1,0 +1,63 @@
+{
+  "variant": "A",
+  "approvedDocumentSha256": "2a2b284bd616dfc186df50b6424d8358e2737d3562b6d868c0f23bd38219dbde",
+  "scriptSha256": "a783b58b548f00588e34040e7aef0b22e77301de33f09653ca9e35e1524eb8cd",
+  "audio": [
+    {
+      "id": "line1",
+      "sha256": "9148d4e21d288ab9b4d2246db1af311f058bd746a2616caab30781e1761e3951",
+      "seconds": 8.56,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening"
+    },
+    {
+      "id": "line2",
+      "sha256": "d84cb01b6715a65a4941ff0955b6dcbee0583c943cbcab68c008993a4520392f",
+      "seconds": 7.68,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening"
+    },
+    {
+      "id": "line3",
+      "sha256": "960edd95a674d3b1ce9fc07704aaef1e4509dbe98eade0184aaf6b5588dfb087",
+      "seconds": 5.12,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening"
+    },
+    {
+      "id": "line4",
+      "sha256": "c9bac37a03798beacc89cae42cfb36480a63e233d0edf7009c32bbc6d731f71c",
+      "seconds": 8.8,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening"
+    },
+    {
+      "id": "line5",
+      "sha256": "c44d07e89ac1e1d32f3eb576d5777eca9472b2e9b2416f1a385f27fda4c7f93d",
+      "seconds": 7.36,
+      "voiceLabel": "Local Chen-style approximation / Qwen3-TTS 0.6B / pending listening"
+    }
+  ],
+  "seconds": 44.93333333333333,
+  "frames": 1348,
+  "sequenceSha256": "b26e9d6201caa4b44110fe0819b2061319f65ea089574be11f7bd75b7bce56b3",
+  "order": [
+    "line1",
+    "line2",
+    "sample",
+    "sample",
+    "line3",
+    "line4",
+    "line5"
+  ],
+  "samples": [
+    {
+      "label": "demo_voice.wav",
+      "startSample": 0,
+      "endSample": 70320,
+      "sha256": "9ff69da0155e6a402bdfb8f9bbeb3b256c3f7cda1b13bfd00d1b71a6972ca2b8"
+    },
+    {
+      "label": "demo_clone_output.wav",
+      "startSample": 6720,
+      "endSample": 96000,
+      "sha256": "1645977a7304210d0847786b6f68132f77f15a629afc9154d07b164aa53d3ff8"
+    }
+  ]
+}
