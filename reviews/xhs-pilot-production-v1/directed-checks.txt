@@ -1,0 +1,9 @@
+Actual execution transcript excerpt (session19097; copied after execution, not a fresh run)
+2026-11-08 17:36:31 local
+pnpm exec vitest run tests/showcase-reel.test.ts tests/approved-reel.test.ts
+Test Files 2 passed (2)
+Tests 13 passed (13)
+Duration 1.09s
+pnpm exec tsc --noEmit
+No diagnostics; process exit 0.
+No complete regression run.

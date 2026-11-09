@@ -1,0 +1,70 @@
+{
+  "scope": "six approved short-video candidates; not posted; final owner review pending",
+  "approvedDocumentSha256": "c331ded9e0b11bc2d7cc46d902df9778747b4d3967a5e7c0201fc81fa1bf1799",
+  "independentDecodedReports": [
+    {
+      "path": "reviews/xhs-pilot-production-v1/H-AB-final-decoded-review.md",
+      "sha256": "256e7f5a58a015ce7d50779dcf900bb86bce67e2b9940967bb1687d1cf1ed965"
+    },
+    {
+      "path": "reviews/xhs-pilot-production-v1/A-AB-final-decoded-review.md",
+      "sha256": "a42fa7900a3795fb4a608d55ac3263828ae484e50ab8fa8e2b24b68327f89975"
+    },
+    {
+      "path": "reviews/xhs-pilot-production-v1/O-AB-final-decoded-review.md",
+      "sha256": "56e24f763fde1fe80d62b13c3277a00a6ba190d9ab7923180310a333c2f7fcf3"
+    }
+  ],
+  "technicalResultsSha256": "479a3cb48d23aa136e4636f4f291a72df731414c3c8e55937fd3bea705c22065",
+  "movies": [
+    {
+      "id": "H-A",
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\xhs-pilot-v1\\render-plans\\H-A\\candidate-v1\\review.mp4",
+      "sha256": "34f31a1c58b39ac6501e57fa73b18f62e4c14f6105dbd94c2ce6181bb31ec92c",
+      "seconds": 45,
+      "frames": 1350,
+      "decodedManifestSha256": "c19cffe0b152a0bb7caeeeae479f88909445e332802189b77bab817476cb00ef"
+    },
+    {
+      "id": "H-B",
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\xhs-pilot-v1\\render-plans\\H-B\\candidate-v1\\review.mp4",
+      "sha256": "f623e7b356b1586816e624c392cabd313919421454245ddf236b5a03bec53826",
+      "seconds": 39.733333,
+      "frames": 1192,
+      "decodedManifestSha256": "32f573ad1ca2837b53e210c6af2b65586963442815e7e2d37683f879fc753df6"
+    },
+    {
+      "id": "A-A",
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\xhs-pilot-v1\\render-plans\\A-A\\candidate-v2\\review.mp4",
+      "sha256": "0921e13362670318f2b85025c0cd10325cdae304254b7fea72395a5a9d1e18e9",
+      "seconds": 41.067,
+      "frames": 1232,
+      "decodedManifestSha256": "7c99a77dc880ac0013e55f46bffb7969f2f328576cba5f2a6d68a3e3223cdca6"
+    },
+    {
+      "id": "A-B",
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\xhs-pilot-v1\\render-plans\\A-B\\candidate-v1\\review.mp4",
+      "sha256": "a22e9199b052897e7d74c71c5dc8e5613bfa3c6a37b509939a66e3f00b438ad3",
+      "seconds": 37.067,
+      "frames": 1112,
+      "decodedManifestSha256": "065feb7eddbe9e4a417c37e67cdd1a742487565d0efd2c4dab6c11baa0213273"
+    },
+    {
+      "id": "O-A",
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\xhs-pilot-v1\\render-plans\\O-A\\candidate-v1\\review.mp4",
+      "sha256": "76b02001e4d741ba00b97542ea025672f5714f1bb0edc8f22fe359e3243e4c32",
+      "seconds": 37.9,
+      "frames": 1137,
+      "decodedManifestSha256": "48ea7680ea8032c2b3f45694f24676ab48623402aa9903ad67ba46534c8a4275"
+    },
+    {
+      "id": "O-B",
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\xhs-pilot-v1\\render-plans\\O-B\\candidate-v1\\review.mp4",
+      "sha256": "5e7e52d3360117b12ff70433a1bc6f5b54576153fdd60ed14eceb18454b5bc5e",
+      "seconds": 45.833333,
+      "frames": 1375,
+      "decodedManifestSha256": "7ef81027c794abcf9bd005c5d1ad8de02463c156a3c5d27058bd6af81f484e11"
+    }
+  ],
+  "perceptualScope": "sampled visual checks only; continuous audiovisual quality and listening UNVERIFIED; owner acceptance pending"
+}

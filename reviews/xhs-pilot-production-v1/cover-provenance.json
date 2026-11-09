@@ -1,0 +1,62 @@
+[
+  {
+    "id": "H-A",
+    "source": "work/xhs-pilot-v1/render-plans/H-A/candidate-v1/review.mp4",
+    "sourceSha256": "34f31a1c58b39ac6501e57fa73b18f62e4c14f6105dbd94c2ce6181bb31ec92c",
+    "frame": 341,
+    "fps": 30,
+    "path": "work/xhs-pilot-v1/covers/H-A-cover.png",
+    "sha256": "162976ce85dc8ee66676bea1dfaf272b57e858a146c0136041cbed901889a36b",
+    "method": "Exact final MP4 frame decode; no added visuals or typography"
+  },
+  {
+    "id": "H-B",
+    "source": "work/xhs-pilot-v1/render-plans/H-B/candidate-v1/review.mp4",
+    "sourceSha256": "f623e7b356b1586816e624c392cabd313919421454245ddf236b5a03bec53826",
+    "frame": 277,
+    "fps": 30,
+    "path": "work/xhs-pilot-v1/covers/H-B-cover.png",
+    "sha256": "dbe583ab2143c80e15bd5afdf8cff14a3d647a4f252e6e9df2fe8db508113a18",
+    "method": "Exact final MP4 frame decode; no added visuals or typography"
+  },
+  {
+    "id": "A-A",
+    "source": "work/xhs-pilot-v1/render-plans/A-A/candidate-v2/review.mp4",
+    "sourceSha256": "0921e13362670318f2b85025c0cd10325cdae304254b7fea72395a5a9d1e18e9",
+    "frame": 587,
+    "fps": 30,
+    "path": "work/xhs-pilot-v1/covers/A-A-cover.png",
+    "sha256": "7b93bdd1055157e58ed6a55d3db6d8dd0cfa3c97e21fc62901b4eef964a1295c",
+    "method": "Exact final MP4 frame decode; no added visuals or typography"
+  },
+  {
+    "id": "A-B",
+    "source": "work/xhs-pilot-v1/render-plans/A-B/candidate-v1/review.mp4",
+    "sourceSha256": "a22e9199b052897e7d74c71c5dc8e5613bfa3c6a37b509939a66e3f00b438ad3",
+    "frame": 30,
+    "fps": 30,
+    "path": "work/xhs-pilot-v1/covers/A-B-cover.png",
+    "sha256": "1963a49da603724139d28590278b2aacc2e21598a2ee863b571d8de1a5898414",
+    "method": "Exact final MP4 frame decode; no added visuals or typography"
+  },
+  {
+    "id": "O-A",
+    "source": "work/xhs-pilot-v1/render-plans/O-A/candidate-v1/review.mp4",
+    "sourceSha256": "76b02001e4d741ba00b97542ea025672f5714f1bb0edc8f22fe359e3243e4c32",
+    "frame": 359,
+    "fps": 30,
+    "path": "work/xhs-pilot-v1/covers/O-A-cover.png",
+    "sha256": "43f1a4a8da0afb29d6554b2c8e2a4e194e20bb9a026c0fe4a9fa9b1b739992b2",
+    "method": "Exact final MP4 frame decode; no added visuals or typography"
+  },
+  {
+    "id": "O-B",
+    "source": "work/xhs-pilot-v1/render-plans/O-B/candidate-v1/review.mp4",
+    "sourceSha256": "5e7e52d3360117b12ff70433a1bc6f5b54576153fdd60ed14eceb18454b5bc5e",
+    "frame": 338,
+    "fps": 30,
+    "path": "work/xhs-pilot-v1/covers/O-B-cover.png",
+    "sha256": "ab49205448d9a59fe5a2483760dd41470b120dacc19ff17a657291f34b542b18",
+    "method": "Exact final MP4 frame decode; no added visuals or typography"
+  }
+]
