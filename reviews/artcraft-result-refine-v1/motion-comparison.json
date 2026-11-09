@@ -1,0 +1,1845 @@
+{
+  "scope": "Actual crop decode excludes main captions and progress bar. Near-static threshold is not identical pixels or a quality/retention measure. Source holds may carry deliberate semantic animation; independent visual assessment is still required. Audio not auditioned.",
+  "results": [
+    {
+      "name": "previous",
+      "movie": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\xhs-pilot-v1\\render-plans\\A-B\\candidate-v1\\review.mp4",
+      "sha256": "a22e9199b052897e7d74c71c5dc8e5613bfa3c6a37b509939a66e3f00b438ad3",
+      "seconds": 37.06666666666667,
+      "actualDecodedFreeze": {
+        "filter": "crop=1080:1450:0:135,freezedetect=n=-50dB:d=0.75",
+        "intervals": [
+          {
+            "start": 0.633333,
+            "end": 2.633333,
+            "seconds": 2
+          },
+          {
+            "start": 2.633333,
+            "end": 4.4,
+            "seconds": 1.7666670000000004
+          },
+          {
+            "start": 5.366667,
+            "end": 8.3,
+            "seconds": 2.933333000000001
+          },
+          {
+            "start": 8.866667,
+            "end": 9.666667,
+            "seconds": 0.8000000000000007
+          },
+          {
+            "start": 9.666667,
+            "end": 13.766667,
+            "seconds": 4.1
+          },
+          {
+            "start": 13.766667,
+            "end": 17.266667,
+            "seconds": 3.5000000000000018
+          },
+          {
+            "start": 19.733333,
+            "end": 22.5,
+            "seconds": 2.7666670000000018
+          },
+          {
+            "start": 23.166667,
+            "end": 26.1,
+            "seconds": 2.933333000000001
+          },
+          {
+            "start": 26.1,
+            "end": 27.3,
+            "seconds": 1.1999999999999993
+          },
+          {
+            "start": 29.766667,
+            "end": 30.9,
+            "seconds": 1.1333329999999968
+          },
+          {
+            "start": 32.833333,
+            "end": 35.833333,
+            "seconds": 3
+          },
+          {
+            "start": 35.833333,
+            "end": 37.06666666666667,
+            "seconds": 1.2333336666666668,
+            "eofClosed": true
+          }
+        ],
+        "totalNearStaticSeconds": 27.36666666666667,
+        "longest": {
+          "start": 9.666667,
+          "end": 13.766667,
+          "seconds": 4.1
+        }
+      },
+      "sourceTailHolds": [
+        {
+          "shotStart": 0,
+          "shotEnd": 2.6333333333333333,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 125,
+          "sourceEnd": 145,
+          "sourceTailHoldSeconds": 1.9666666666666666,
+          "sourceTailHoldStart": 0.6666666666666666,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 2.6333333333333333,
+          "shotEnd": 4.4,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 100,
+          "sourceTailHoldSeconds": 1.7,
+          "sourceTailHoldStart": 2.7,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 4.4,
+          "shotEnd": 8.3,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 20,
+          "sourceEnd": 50,
+          "sourceTailHoldSeconds": 2.9,
+          "sourceTailHoldStart": 5.4,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 8.3,
+          "shotEnd": 9.666666666666666,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 60,
+          "sourceEnd": 78,
+          "sourceTailHoldSeconds": 0.7666666666666667,
+          "sourceTailHoldStart": 8.9,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 9.666666666666666,
+          "shotEnd": 13.766666666666667,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 100,
+          "sourceTailHoldSeconds": 4.033333333333333,
+          "sourceTailHoldStart": 9.733333333333333,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 13.766666666666667,
+          "shotEnd": 17.266666666666666,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 100,
+          "sourceTailHoldSeconds": 3.433333333333333,
+          "sourceTailHoldStart": 13.833333333333334,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 17.266666666666666,
+          "shotEnd": 22.5,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 125,
+          "sourceEnd": 200,
+          "sourceTailHoldSeconds": 2.7333333333333334,
+          "sourceTailHoldStart": 19.766666666666666,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 22.5,
+          "shotEnd": 26.1,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 80,
+          "sourceEnd": 101,
+          "sourceTailHoldSeconds": 2.9,
+          "sourceTailHoldStart": 23.2,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 27.3,
+          "shotEnd": 30.9,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 125,
+          "sourceEnd": 200,
+          "sourceTailHoldSeconds": 1.1,
+          "sourceTailHoldStart": 29.8,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 30.9,
+          "shotEnd": 35.833333333333336,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 200,
+          "sourceEnd": 260,
+          "sourceTailHoldSeconds": 2.933333333333333,
+          "sourceTailHoldStart": 32.9,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        }
+      ],
+      "shots": [
+        {
+          "start": 0,
+          "end": 2.6333333333333333,
+          "seconds": 2.6333333333333333,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 125,
+              "sourceEnd": 145,
+              "sourceTailHoldSeconds": 1.9666666666666666,
+              "sourceTailHoldStart": 0.6666666666666666,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 2.6333333333333333,
+          "end": 4.4,
+          "seconds": 1.7666666666666666,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 100,
+              "sourceTailHoldSeconds": 1.7,
+              "sourceTailHoldStart": 2.7,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 4.4,
+          "end": 8.3,
+          "seconds": 3.9,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 20,
+              "sourceEnd": 50,
+              "sourceTailHoldSeconds": 2.9,
+              "sourceTailHoldStart": 5.4,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 8.3,
+          "end": 9.666666666666666,
+          "seconds": 1.3666666666666667,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 60,
+              "sourceEnd": 78,
+              "sourceTailHoldSeconds": 0.7666666666666667,
+              "sourceTailHoldStart": 8.9,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 9.666666666666666,
+          "end": 13.766666666666667,
+          "seconds": 4.1,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 100,
+              "sourceTailHoldSeconds": 4.033333333333333,
+              "sourceTailHoldStart": 9.733333333333333,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 13.766666666666667,
+          "end": 17.266666666666666,
+          "seconds": 3.5,
+          "annotation": "提示词译意：金属机器人，火星背景",
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 100,
+              "sourceTailHoldSeconds": 3.433333333333333,
+              "sourceTailHoldStart": 13.833333333333334,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 17.266666666666666,
+          "end": 22.5,
+          "seconds": 5.233333333333333,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 125,
+              "sourceEnd": 200,
+              "sourceTailHoldSeconds": 2.7333333333333334,
+              "sourceTailHoldStart": 19.766666666666666,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 22.5,
+          "end": 26.1,
+          "seconds": 3.6,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 80,
+              "sourceEnd": 101,
+              "sourceTailHoldSeconds": 2.9,
+              "sourceTailHoldStart": 23.2,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 26.1,
+          "end": 27.3,
+          "seconds": 1.2,
+          "annotation": "storytold / artcraft",
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "github-artcraft.png",
+              "type": "image",
+              "sourceStart": 0,
+              "sourceTailHoldSeconds": 0,
+              "sourceTailHoldStart": 26.1,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 27.3,
+          "end": 30.9,
+          "seconds": 3.6,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 125,
+              "sourceEnd": 200,
+              "sourceTailHoldSeconds": 1.1,
+              "sourceTailHoldStart": 29.8,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 30.9,
+          "end": 35.833333333333336,
+          "seconds": 4.933333333333334,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 200,
+              "sourceEnd": 260,
+              "sourceTailHoldSeconds": 2.933333333333333,
+              "sourceTailHoldStart": 32.9,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 35.833333333333336,
+          "end": 37.06666666666667,
+          "seconds": 1.2333333333333334,
+          "annotation": "storytold / artcraft",
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "github-artcraft.png",
+              "type": "image",
+              "sourceStart": 0,
+              "sourceTailHoldSeconds": 0,
+              "sourceTailHoldStart": 35.833333333333336,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        }
+      ]
+    },
+    {
+      "name": "revised",
+      "movie": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\review.mp4",
+      "sha256": "bfba63b87a5744de2e14d589adf8c70cd3c95b480605b8d234ed4aa44cb8b1a5",
+      "seconds": 24.5,
+      "actualDecodedFreeze": {
+        "filter": "crop=1080:1450:0:135,freezedetect=n=-50dB:d=0.75",
+        "intervals": [
+          {
+            "start": 0.8,
+            "end": 1.733333,
+            "seconds": 0.933333
+          },
+          {
+            "start": 2.366667,
+            "end": 4.233333,
+            "seconds": 1.866666
+          },
+          {
+            "start": 6.566667,
+            "end": 7.466667,
+            "seconds": 0.9000000000000004
+          },
+          {
+            "start": 7.466667,
+            "end": 8.5,
+            "seconds": 1.0333329999999998
+          },
+          {
+            "start": 9.533333,
+            "end": 10.6,
+            "seconds": 1.066666999999999
+          },
+          {
+            "start": 10.6,
+            "end": 11.8,
+            "seconds": 1.200000000000001
+          },
+          {
+            "start": 14.366667,
+            "end": 15.266667,
+            "seconds": 0.9000000000000004
+          },
+          {
+            "start": 23,
+            "end": 24.5,
+            "seconds": 1.5,
+            "eofClosed": true
+          }
+        ],
+        "totalNearStaticSeconds": 9.399999000000001,
+        "longest": {
+          "start": 2.366667,
+          "end": 4.233333,
+          "seconds": 1.866666
+        }
+      },
+      "sourceTailHolds": [
+        {
+          "shotStart": 0.8,
+          "shotEnd": 1.7333333333333334,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 0,
+          "sourceEnd": 1,
+          "sourceTailHoldSeconds": 0.9,
+          "sourceTailHoldStart": 0.8333333333333334,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 2.4,
+          "shotEnd": 3.1333333333333333,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 19,
+          "sourceEnd": 20,
+          "sourceTailHoldSeconds": 0.7,
+          "sourceTailHoldStart": 2.433333333333333,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 3.1333333333333333,
+          "shotEnd": 4.233333333333333,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 19,
+          "sourceEnd": 20,
+          "sourceTailHoldSeconds": 1.0666666666666667,
+          "sourceTailHoldStart": 3.1666666666666665,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 6.566666666666666,
+          "shotEnd": 7.466666666666667,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 0.8666666666666667,
+          "sourceTailHoldStart": 6.6,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 7.466666666666667,
+          "shotEnd": 8.5,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1,
+          "sourceTailHoldStart": 7.5,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 8.5,
+          "shotEnd": 9.533333333333333,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1,
+          "sourceTailHoldStart": 8.533333333333333,
+          "cropPan": false,
+          "layoutMotion": {
+            "end": 0.75,
+            "from": {
+              "height": 0.72,
+              "width": 0.6,
+              "x": 0.2,
+              "y": 0.03
+            },
+            "start": 0
+          },
+          "reveal": 0
+        },
+        {
+          "shotStart": 8.5,
+          "shotEnd": 9.533333333333333,
+          "panel": 1,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1,
+          "sourceTailHoldStart": 8.533333333333333,
+          "cropPan": false,
+          "layoutMotion": {
+            "end": 0.7,
+            "from": {
+              "height": 0.13,
+              "width": 0.9,
+              "x": 0.05,
+              "y": 0.8
+            },
+            "start": 0
+          },
+          "reveal": 0
+        },
+        {
+          "shotStart": 9.533333333333333,
+          "shotEnd": 10.6,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1.0333333333333334,
+          "sourceTailHoldStart": 9.566666666666666,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 9.533333333333333,
+          "shotEnd": 10.6,
+          "panel": 1,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1.0333333333333334,
+          "sourceTailHoldStart": 9.566666666666666,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 10.6,
+          "shotEnd": 11.8,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1.1666666666666667,
+          "sourceTailHoldStart": 10.633333333333333,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 10.6,
+          "shotEnd": 11.8,
+          "panel": 1,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1.1666666666666667,
+          "sourceTailHoldStart": 10.633333333333333,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 10.6,
+          "shotEnd": 11.8,
+          "panel": 2,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 125,
+          "sourceEnd": 126,
+          "sourceTailHoldSeconds": 1.1666666666666667,
+          "sourceTailHoldStart": 10.633333333333333,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 14.066666666666666,
+          "shotEnd": 15.266666666666667,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1.1666666666666667,
+          "sourceTailHoldStart": 14.1,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 14.066666666666666,
+          "shotEnd": 15.266666666666667,
+          "panel": 1,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 125,
+          "sourceEnd": 126,
+          "sourceTailHoldSeconds": 1.1666666666666667,
+          "sourceTailHoldStart": 14.1,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 15.266666666666667,
+          "shotEnd": 17,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1.7,
+          "sourceTailHoldStart": 15.3,
+          "cropPan": false,
+          "layoutMotion": {
+            "end": 0.6,
+            "from": {
+              "height": 0.65,
+              "width": 0.44,
+              "x": 0.03,
+              "y": 0.15
+            },
+            "start": 0
+          },
+          "reveal": 0
+        },
+        {
+          "shotStart": 15.266666666666667,
+          "shotEnd": 17,
+          "panel": 1,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 125,
+          "sourceEnd": 126,
+          "sourceTailHoldSeconds": 1.7,
+          "sourceTailHoldStart": 15.3,
+          "cropPan": false,
+          "layoutMotion": {
+            "end": 0.6,
+            "from": {
+              "height": 0.65,
+              "width": 0.44,
+              "x": 0.53,
+              "y": 0.15
+            },
+            "start": 0
+          },
+          "reveal": 0
+        },
+        {
+          "shotStart": 17,
+          "shotEnd": 18.733333333333334,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1.7,
+          "sourceTailHoldStart": 17.033333333333335,
+          "cropPan": false,
+          "layoutMotion": {
+            "end": 0.65,
+            "from": {
+              "height": 0.76,
+              "width": 0.64,
+              "x": 0.02,
+              "y": 0.07
+            },
+            "start": 0
+          },
+          "reveal": 0
+        },
+        {
+          "shotStart": 17,
+          "shotEnd": 18.733333333333334,
+          "panel": 1,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 125,
+          "sourceEnd": 126,
+          "sourceTailHoldSeconds": 1.7,
+          "sourceTailHoldStart": 17.033333333333335,
+          "cropPan": false,
+          "layoutMotion": {
+            "end": 0.65,
+            "from": {
+              "height": 0.46,
+              "width": 0.28,
+              "x": 0.7,
+              "y": 0.22
+            },
+            "start": 0
+          },
+          "reveal": 0
+        },
+        {
+          "shotStart": 18.733333333333334,
+          "shotEnd": 20.333333333333332,
+          "panel": 0,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 98,
+          "sourceEnd": 99,
+          "sourceTailHoldSeconds": 1.5666666666666667,
+          "sourceTailHoldStart": 18.766666666666666,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        },
+        {
+          "shotStart": 18.733333333333334,
+          "shotEnd": 20.333333333333332,
+          "panel": 1,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 179,
+          "sourceEnd": 180,
+          "sourceTailHoldSeconds": 1.5666666666666667,
+          "sourceTailHoldStart": 18.766666666666666,
+          "cropPan": false,
+          "layoutMotion": {
+            "end": 0.65,
+            "from": {
+              "height": 0.76,
+              "width": 0.64,
+              "x": 0.34,
+              "y": 0.07
+            },
+            "start": 0
+          },
+          "reveal": 0
+        },
+        {
+          "shotStart": 23,
+          "shotEnd": 24.5,
+          "panel": 1,
+          "file": "artcraft.mp4",
+          "type": "video",
+          "sourceStart": 259,
+          "sourceEnd": 260,
+          "sourceTailHoldSeconds": 1.4666666666666666,
+          "sourceTailHoldStart": 23.033333333333335,
+          "cropPan": false,
+          "layoutMotion": null,
+          "reveal": 0
+        }
+      ],
+      "shots": [
+        {
+          "start": 0,
+          "end": 0.8,
+          "seconds": 0.8,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 125,
+              "sourceEnd": 149,
+              "sourceTailHoldSeconds": 0,
+              "sourceTailHoldStart": 0.8,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 0.8,
+          "end": 1.7333333333333334,
+          "seconds": 0.9333333333333333,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 0,
+              "sourceEnd": 1,
+              "sourceTailHoldSeconds": 0.9,
+              "sourceTailHoldStart": 0.8333333333333334,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.2,
+              "fontSize": 37,
+              "height": 0.06,
+              "kind": "label",
+              "start": 0,
+              "text": "先摆这个小人",
+              "tone": "ink",
+              "width": 0.84,
+              "x": 0.08,
+              "y": 0.02
+            }
+          ],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 1.7333333333333334,
+          "end": 2.4,
+          "seconds": 0.6666666666666666,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 0,
+              "sourceEnd": 20,
+              "sourceTailHoldSeconds": 0,
+              "sourceTailHoldStart": 2.4,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 2.4,
+          "end": 3.1333333333333333,
+          "seconds": 0.7333333333333333,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 19,
+              "sourceEnd": 20,
+              "sourceTailHoldSeconds": 0.7,
+              "sourceTailHoldStart": 2.433333333333333,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.3,
+              "fontSize": 40,
+              "height": 0.07,
+              "kind": "label",
+              "start": 0,
+              "text": "姿势输入",
+              "tone": "ink",
+              "width": 0.84,
+              "x": 0.08,
+              "y": 0.01
+            }
+          ],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 3.1333333333333333,
+          "end": 4.233333333333333,
+          "seconds": 1.1,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 19,
+              "sourceEnd": 20,
+              "sourceTailHoldSeconds": 1.0666666666666667,
+              "sourceTailHoldStart": 3.1666666666666665,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.25,
+              "fontSize": 38,
+              "height": 0.07,
+              "kind": "label",
+              "start": 0,
+              "text": "ArtCraft · 姿势编辑",
+              "tone": "ink",
+              "width": 0.9,
+              "x": 0.05,
+              "y": 0.01
+            }
+          ],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 4.233333333333333,
+          "end": 5.233333333333333,
+          "seconds": 1,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 20,
+              "sourceEnd": 50,
+              "sourceTailHoldSeconds": 0,
+              "sourceTailHoldStart": 5.233333333333333,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.15,
+              "fontSize": 40,
+              "height": 0.07,
+              "kind": "label",
+              "start": 0,
+              "text": "抬手",
+              "tone": "ink",
+              "width": 0.84,
+              "x": 0.08,
+              "y": 0.01
+            }
+          ],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 5.233333333333333,
+          "end": 5.833333333333333,
+          "seconds": 0.6,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 60,
+              "sourceEnd": 78,
+              "sourceTailHoldSeconds": 0,
+              "sourceTailHoldStart": 5.833333333333333,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.15,
+              "fontSize": 40,
+              "height": 0.07,
+              "kind": "label",
+              "start": 0,
+              "text": "弯腿",
+              "tone": "ink",
+              "width": 0.84,
+              "x": 0.08,
+              "y": 0.01
+            }
+          ],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 5.833333333333333,
+          "end": 6.566666666666666,
+          "seconds": 0.7333333333333333,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 78,
+              "sourceEnd": 100,
+              "sourceTailHoldSeconds": 0,
+              "sourceTailHoldStart": 6.566666666666666,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 6.566666666666666,
+          "end": 7.466666666666667,
+          "seconds": 0.9,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 0.8666666666666667,
+              "sourceTailHoldStart": 6.6,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.25,
+              "fontSize": 40,
+              "height": 0.07,
+              "kind": "label",
+              "start": 0,
+              "text": "姿势调好",
+              "tone": "ink",
+              "width": 0.84,
+              "x": 0.08,
+              "y": 0.01
+            }
+          ],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 7.466666666666667,
+          "end": 8.5,
+          "seconds": 1.0333333333333334,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1,
+              "sourceTailHoldStart": 7.5,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.2,
+              "fontSize": 35,
+              "height": 0.06,
+              "kind": "label",
+              "start": 0,
+              "text": "原界面的提示词",
+              "tone": "ink",
+              "width": 0.84,
+              "x": 0.08,
+              "y": 0.01
+            }
+          ],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 8.5,
+          "end": 9.533333333333333,
+          "seconds": 1.0333333333333334,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1,
+              "sourceTailHoldStart": 8.533333333333333,
+              "cropPan": false,
+              "layoutMotion": {
+                "end": 0.75,
+                "from": {
+                  "height": 0.72,
+                  "width": 0.6,
+                  "x": 0.2,
+                  "y": 0.03
+                },
+                "start": 0
+              },
+              "reveal": 0
+            },
+            {
+              "panel": 1,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1,
+              "sourceTailHoldStart": 8.533333333333333,
+              "cropPan": false,
+              "layoutMotion": {
+                "end": 0.7,
+                "from": {
+                  "height": 0.13,
+                  "width": 0.9,
+                  "x": 0.05,
+                  "y": 0.8
+                },
+                "start": 0
+              },
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.12,
+              "fontSize": 28,
+              "height": 0.06,
+              "kind": "label",
+              "start": 0,
+              "text": "提示词译意",
+              "tone": "soft",
+              "width": 0.4,
+              "x": 0.53,
+              "y": 0.09
+            },
+            {
+              "end": 0.35,
+              "fontSize": 43,
+              "height": 0.09,
+              "kind": "label",
+              "start": 0,
+              "text": "金属机器人",
+              "tone": "ink",
+              "width": 0.44,
+              "x": 0.51,
+              "y": 0.22
+            }
+          ],
+          "hasLayoutMotion": true,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 9.533333333333333,
+          "end": 10.6,
+          "seconds": 1.0666666666666667,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1.0333333333333334,
+              "sourceTailHoldStart": 9.566666666666666,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            },
+            {
+              "panel": 1,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1.0333333333333334,
+              "sourceTailHoldStart": 9.566666666666666,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.12,
+              "fontSize": 28,
+              "height": 0.06,
+              "kind": "label",
+              "start": 0,
+              "text": "提示词译意",
+              "tone": "soft",
+              "width": 0.4,
+              "x": 0.53,
+              "y": 0.09
+            },
+            {
+              "end": 0.35,
+              "fontSize": 43,
+              "height": 0.09,
+              "kind": "label",
+              "start": 0,
+              "text": "金属机器人",
+              "tone": "ink",
+              "width": 0.44,
+              "x": 0.51,
+              "y": 0.22
+            },
+            {
+              "end": 0.45,
+              "fontSize": 49,
+              "height": 0.1,
+              "kind": "label",
+              "start": 0,
+              "text": "火星",
+              "tone": "ink",
+              "width": 0.44,
+              "x": 0.51,
+              "y": 0.38
+            }
+          ],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 10.6,
+          "end": 11.8,
+          "seconds": 1.2,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1.1666666666666667,
+              "sourceTailHoldStart": 10.633333333333333,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            },
+            {
+              "panel": 1,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1.1666666666666667,
+              "sourceTailHoldStart": 10.633333333333333,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            },
+            {
+              "panel": 2,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 125,
+              "sourceEnd": 126,
+              "sourceTailHoldSeconds": 1.1666666666666667,
+              "sourceTailHoldStart": 10.633333333333333,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.12,
+              "fontSize": 30,
+              "height": 0.05,
+              "kind": "label",
+              "start": 0,
+              "text": "姿势",
+              "tone": "ink",
+              "width": 0.36,
+              "x": 0.05,
+              "y": 0.385
+            },
+            {
+              "end": 0.15,
+              "fontSize": 27,
+              "height": 0.06,
+              "kind": "label",
+              "start": 0,
+              "text": "金属机器人 / 火星",
+              "tone": "ink",
+              "width": 0.5,
+              "x": 0.45,
+              "y": 0.22
+            },
+            {
+              "end": 0.22,
+              "fontSize": 25,
+              "height": 0.04,
+              "kind": "label",
+              "start": 0,
+              "text": "模型参考",
+              "tone": "accent",
+              "width": 0.36,
+              "x": 0.32,
+              "y": 0.445
+            },
+            {
+              "end": 0.28,
+              "height": 0.14,
+              "kind": "arrow",
+              "start": 0,
+              "width": 0.23,
+              "x": 0.21,
+              "y": 0.38
+            },
+            {
+              "end": 0.28,
+              "height": 0.22,
+              "kind": "arrow",
+              "start": 0,
+              "width": 0.19,
+              "x": 0.54,
+              "y": 0.3
+            }
+          ],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 11.8,
+          "end": 14.066666666666666,
+          "seconds": 2.2666666666666666,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 112,
+              "sourceEnd": 180,
+              "sourceTailHoldSeconds": 0,
+              "sourceTailHoldStart": 14.066666666666666,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 14.066666666666666,
+          "end": 15.266666666666667,
+          "seconds": 1.2,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1.1666666666666667,
+              "sourceTailHoldStart": 14.1,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            },
+            {
+              "panel": 1,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 125,
+              "sourceEnd": 126,
+              "sourceTailHoldSeconds": 1.1666666666666667,
+              "sourceTailHoldStart": 14.1,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.15,
+              "fontSize": 34,
+              "height": 0.06,
+              "kind": "label",
+              "start": 0,
+              "text": "姿势输入",
+              "tone": "ink",
+              "width": 0.44,
+              "x": 0.03,
+              "y": 0.06
+            },
+            {
+              "end": 0.15,
+              "fontSize": 34,
+              "height": 0.06,
+              "kind": "label",
+              "start": 0,
+              "text": "模型结果",
+              "tone": "ink",
+              "width": 0.44,
+              "x": 0.53,
+              "y": 0.06
+            },
+            {
+              "end": 0.25,
+              "fontSize": 32,
+              "height": 0.06,
+              "kind": "label",
+              "start": 0,
+              "text": "参考姿势，不是完全复刻",
+              "tone": "soft",
+              "width": 0.88,
+              "x": 0.06,
+              "y": 0.86
+            }
+          ],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 15.266666666666667,
+          "end": 17,
+          "seconds": 1.7333333333333334,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1.7,
+              "sourceTailHoldStart": 15.3,
+              "cropPan": false,
+              "layoutMotion": {
+                "end": 0.6,
+                "from": {
+                  "height": 0.65,
+                  "width": 0.44,
+                  "x": 0.03,
+                  "y": 0.15
+                },
+                "start": 0
+              },
+              "reveal": 0
+            },
+            {
+              "panel": 1,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 125,
+              "sourceEnd": 126,
+              "sourceTailHoldSeconds": 1.7,
+              "sourceTailHoldStart": 15.3,
+              "cropPan": false,
+              "layoutMotion": {
+                "end": 0.6,
+                "from": {
+                  "height": 0.65,
+                  "width": 0.44,
+                  "x": 0.53,
+                  "y": 0.15
+                },
+                "start": 0
+              },
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.6,
+              "fontSize": 42,
+              "height": 0.07,
+              "kind": "label",
+              "start": 0.15,
+              "text": "编辑器开源",
+              "tone": "accent",
+              "width": 0.64,
+              "x": 0.02,
+              "y": 0.84
+            },
+            {
+              "end": 0.6,
+              "fontSize": 29,
+              "height": 0.06,
+              "kind": "label",
+              "start": 0.2,
+              "text": "生成结果",
+              "tone": "soft",
+              "width": 0.3,
+              "x": 0.68,
+              "y": 0.7
+            }
+          ],
+          "hasLayoutMotion": true,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 17,
+          "end": 18.733333333333334,
+          "seconds": 1.7333333333333334,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1.7,
+              "sourceTailHoldStart": 17.033333333333335,
+              "cropPan": false,
+              "layoutMotion": {
+                "end": 0.65,
+                "from": {
+                  "height": 0.76,
+                  "width": 0.64,
+                  "x": 0.02,
+                  "y": 0.07
+                },
+                "start": 0
+              },
+              "reveal": 0
+            },
+            {
+              "panel": 1,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 125,
+              "sourceEnd": 126,
+              "sourceTailHoldSeconds": 1.7,
+              "sourceTailHoldStart": 17.033333333333335,
+              "cropPan": false,
+              "layoutMotion": {
+                "end": 0.65,
+                "from": {
+                  "height": 0.46,
+                  "width": 0.28,
+                  "x": 0.7,
+                  "y": 0.22
+                },
+                "start": 0
+              },
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "end": 0.6,
+              "fontSize": 29,
+              "height": 0.06,
+              "kind": "label",
+              "start": 0.15,
+              "text": "编辑输入",
+              "tone": "soft",
+              "width": 0.3,
+              "x": 0.01,
+              "y": 0.7
+            },
+            {
+              "end": 0.7,
+              "fontSize": 39,
+              "height": 0.14,
+              "kind": "label",
+              "start": 0.1,
+              "text": "接入模型\n可能另外收费",
+              "tone": "accent",
+              "width": 0.64,
+              "x": 0.34,
+              "y": 0.83
+            }
+          ],
+          "hasLayoutMotion": true,
+          "hasEditorialOverlays": true
+        },
+        {
+          "start": 18.733333333333334,
+          "end": 20.333333333333332,
+          "seconds": 1.6,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 98,
+              "sourceEnd": 99,
+              "sourceTailHoldSeconds": 1.5666666666666667,
+              "sourceTailHoldStart": 18.766666666666666,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            },
+            {
+              "panel": 1,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 179,
+              "sourceEnd": 180,
+              "sourceTailHoldSeconds": 1.5666666666666667,
+              "sourceTailHoldStart": 18.766666666666666,
+              "cropPan": false,
+              "layoutMotion": {
+                "end": 0.65,
+                "from": {
+                  "height": 0.76,
+                  "width": 0.64,
+                  "x": 0.34,
+                  "y": 0.07
+                },
+                "start": 0
+              },
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": true,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 20.333333333333332,
+          "end": 23,
+          "seconds": 2.6666666666666665,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 180,
+              "sourceEnd": 260,
+              "sourceTailHoldSeconds": 0,
+              "sourceTailHoldStart": 23,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        },
+        {
+          "start": 23,
+          "end": 24.5,
+          "seconds": 1.5,
+          "annotation": null,
+          "tracks": [
+            {
+              "panel": 0,
+              "file": "github-artcraft.png",
+              "type": "image",
+              "sourceStart": 0,
+              "sourceTailHoldSeconds": 0,
+              "sourceTailHoldStart": 23,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            },
+            {
+              "panel": 1,
+              "file": "artcraft.mp4",
+              "type": "video",
+              "sourceStart": 259,
+              "sourceEnd": 260,
+              "sourceTailHoldSeconds": 1.4666666666666666,
+              "sourceTailHoldStart": 23.033333333333335,
+              "cropPan": false,
+              "layoutMotion": null,
+              "reveal": 0
+            }
+          ],
+          "overlays": [],
+          "hasLayoutMotion": false,
+          "hasEditorialOverlays": false
+        }
+      ]
+    }
+  ]
+}

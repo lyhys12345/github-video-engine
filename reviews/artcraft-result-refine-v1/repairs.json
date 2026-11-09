@@ -1,0 +1,23 @@
+{
+  "source": "preflight-v1b",
+  "repairs": [
+    {
+      "finding": "Additional horizontal crop on real arm/knee clips",
+      "change": "Restore x0,width1 for source20–49 and60–77."
+    },
+    {
+      "finding": "source100–111 still shows input UI under output label",
+      "change": "Actual result begins source112; allocate recovered12 frames to flow. Flow now36frames and complete relation shown for26 frames."
+    },
+    {
+      "finding": "SVG normalized dashes fractured under non-scaling stroke",
+      "change": "Remove non-scaling-stroke; pathLength-normalized line now draws continuously."
+    },
+    {
+      "finding": "Internal README pricing caveat leaked into viewer footer",
+      "change": "Replace footer with official-image/provider conditional reminder; internal audit wording stays only in notes."
+    }
+  ],
+  "narration": "unchanged; all six original-speed WAVs",
+  "frames": 735
+}

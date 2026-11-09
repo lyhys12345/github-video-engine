@@ -1,0 +1,86 @@
+{
+  "movie": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\review.mp4",
+  "sha256": "bfba63b87a5744de2e14d589adf8c70cd3c95b480605b8d234ed4aa44cb8b1a5",
+  "approvedDocumentSha256": "ff54b9567dba47a3d36ecef4d8d6038815f19ee78c109a808226613dcb61ed7a",
+  "scriptSha256": "e26cdbe83c05f6b64f3282584ca00225fcee0451b938dc3819b89e8ea166a893",
+  "frames": 735,
+  "seconds": 24.5,
+  "width": 1080,
+  "height": 1920,
+  "fps": "30/1",
+  "codec": "h264",
+  "audio": "aac",
+  "fullDecodePassed": true,
+  "allSixApprovedLinesPreserved": true,
+  "allOriginalSpeedVoicePcmPreserved": true,
+  "segments": [
+    {
+      "id": "line1",
+      "text": "这张图，先从摆这个小人开始。",
+      "start": 0,
+      "end": 3.1333333333333333,
+      "sourceSha256": "811ad75ad90b94f0988ba45f68e87b0a55570a6e75961867738ecaad8f908529",
+      "originalSpeedPcmPreserved": true,
+      "paddingSamples": 320,
+      "leadingBelowMinus40DbSeconds": 0.34,
+      "trailingBelowMinus40DbSeconds": 0.26000000000000023
+    },
+    {
+      "id": "line2",
+      "text": "用 ArtCraft，抬手、弯腿，把动作调好。",
+      "start": 3.1333333333333333,
+      "end": 7.466666666666667,
+      "sourceSha256": "7e0418dd4afd47bb3c9efbb56f14d9895dc3e18bf365cb72edb1691272c3c0dd",
+      "originalSpeedPcmPreserved": true,
+      "paddingSamples": 320,
+      "leadingBelowMinus40DbSeconds": 0.02,
+      "trailingBelowMinus40DbSeconds": 0.0600000000000005
+    },
+    {
+      "id": "line3",
+      "text": "再写上：火星上的金属机器人。",
+      "start": 7.466666666666667,
+      "end": 10.6,
+      "sourceSha256": "4846a1a33909e56bca3f96388539c9bc4ec46aa848a50efa665c4f1ff630a8e5",
+      "originalSpeedPcmPreserved": true,
+      "paddingSamples": 320,
+      "leadingBelowMinus40DbSeconds": 0.02,
+      "trailingBelowMinus40DbSeconds": 0.06000000000000005
+    },
+    {
+      "id": "line4",
+      "text": "模型参考姿势和文字，生成画面。",
+      "start": 10.6,
+      "end": 14.066666666666666,
+      "sourceSha256": "7798cc07fb310082e4f8565e0335ebf85ea87d588cd753287abb8be5a555601f",
+      "originalSpeedPcmPreserved": true,
+      "paddingSamples": 640,
+      "leadingBelowMinus40DbSeconds": 0.24,
+      "trailingBelowMinus40DbSeconds": 0.11999999999999966
+    },
+    {
+      "id": "line5",
+      "text": "编辑器是开源的，接入的模型可能另外收费。",
+      "start": 14.066666666666666,
+      "end": 18.733333333333334,
+      "sourceSha256": "8c02193db63bd2abf98f3b8a6a61aab80d1b5a50fa3970e7a8061a611ec77c69",
+      "originalSpeedPcmPreserved": true,
+      "paddingSamples": 640,
+      "leadingBelowMinus40DbSeconds": 0.38,
+      "trailingBelowMinus40DbSeconds": 0.05999999999999961
+    },
+    {
+      "id": "line6",
+      "text": "想画自己的角色，可以看看。ArtCraft 仓库链接放评论区。",
+      "start": 18.733333333333334,
+      "end": 24.5,
+      "sourceSha256": "f2dbe3d8c5738592632e46a4224052f11672a86322d806c46e9fb8bd40c550be",
+      "originalSpeedPcmPreserved": true,
+      "paddingSamples": 160,
+      "leadingBelowMinus40DbSeconds": 0.3,
+      "trailingBelowMinus40DbSeconds": 0.2599999999999998
+    }
+  ],
+  "captionAlignment": "renderer-declared estimates, not independently word-aligned",
+  "scope": "independent technical verification and actual final MP4 frame extraction; not a listening or continuous perceptual review"
+}

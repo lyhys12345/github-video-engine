@@ -1,0 +1,1277 @@
+{
+  "schemaVersion": "showcase-reel/1.0",
+  "theme": "copper",
+  "layout": "immersive",
+  "projectLabel": "ArtCraft",
+  "script": {
+    "path": "../production/script.json",
+    "sha256": "e26cdbe83c05f6b64f3282584ca00225fcee0451b938dc3819b89e8ea166a893"
+  },
+  "approval": {
+    "path": "../production/owner-approval.json",
+    "sha256": "f3866af819dd8b557341e550cafd16396a352fe119a72801ffa15b2e6c6b45c3"
+  },
+  "font": {
+    "path": "../../../assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf",
+    "sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da"
+  },
+  "media": [
+    {
+      "id": "artcraft",
+      "type": "video",
+      "path": "../../xhs-pilot-v1/production/assets/artcraft.mp4",
+      "sha256": "7bbebd14ceee855fbcdbe870d044bf2dfd9f3e8abadb147577ce64c51aa08888",
+      "width": 800,
+      "height": 674,
+      "frames": 260,
+      "fps": 30
+    },
+    {
+      "id": "github-artcraft",
+      "type": "image",
+      "path": "../../xhs-pilot-v1/production/assets/github-artcraft.png",
+      "sha256": "780c4cdf8964f41c37a4b6929b850b797fe31e8cf16d5ed72681dac75204465f",
+      "width": 1440,
+      "height": 1400
+    }
+  ],
+  "narration": [
+    {
+      "id": "line1",
+      "path": "../production/line1.wav",
+      "sha256": "811ad75ad90b94f0988ba45f68e87b0a55570a6e75961867738ecaad8f908529",
+      "transcriptSha256": "cc8d63989c071f3bcc9458821754bb1b25d99a94c5972332da0a4e13333b525d",
+      "receipt": {
+        "path": "../production/line1-receipt.json",
+        "sha256": "4f34b20adaed25e80d607aad73a7ba9fd8bddc0b057970490cc5301c9b9d8e09"
+      },
+      "captionChunks": [
+        "这张图，",
+        "先从摆这个小人开始。"
+      ]
+    },
+    {
+      "id": "line2",
+      "path": "../production/line2.wav",
+      "sha256": "7e0418dd4afd47bb3c9efbb56f14d9895dc3e18bf365cb72edb1691272c3c0dd",
+      "transcriptSha256": "abd826573517b87867bee8ce65416ddfa90ca888edbf1ba5df63a0b7471fea92",
+      "receipt": {
+        "path": "../production/line2-receipt.json",
+        "sha256": "4f4ec96c3ceea283f1d00a9c3b006eb483ea7a3e53522ce1e6c6af1ccd1bb8e9"
+      },
+      "captionCues": [
+        {
+          "text": "用 ArtCraft，",
+          "startFrame": 0,
+          "endFrame": 42
+        },
+        {
+          "text": "抬手、",
+          "startFrame": 42,
+          "endFrame": 64
+        },
+        {
+          "text": "弯腿，",
+          "startFrame": 64,
+          "endFrame": 84
+        },
+        {
+          "text": "把动作调好。",
+          "startFrame": 84,
+          "endFrame": 130
+        }
+      ]
+    },
+    {
+      "id": "line3",
+      "path": "../production/line3.wav",
+      "sha256": "4846a1a33909e56bca3f96388539c9bc4ec46aa848a50efa665c4f1ff630a8e5",
+      "transcriptSha256": "1da055c58a1252edecb2d3da35ebdbb3f3a4a231ba3c10ee78967263d6b2769c",
+      "receipt": {
+        "path": "../production/line3-receipt.json",
+        "sha256": "40b720263e2a7f921448faaa320126cf42ab9a3022456cfe21092fa89510aa71"
+      },
+      "captionChunks": [
+        "再写上：",
+        "火星上的金属机器人。"
+      ]
+    },
+    {
+      "id": "line4",
+      "path": "../production/line4.wav",
+      "sha256": "7798cc07fb310082e4f8565e0335ebf85ea87d588cd753287abb8be5a555601f",
+      "transcriptSha256": "d50dd51a2f08984fda7233223f1c0a780f73f8ad62a0d733d2d6ea439117cdac",
+      "receipt": {
+        "path": "../production/line4-receipt.json",
+        "sha256": "bff60650fec67722e99c6e60c967c0637f50ed6ad97186777d50377f0d1ae292"
+      },
+      "captionChunks": [
+        "模型参考姿势和文字，",
+        "生成画面。"
+      ]
+    },
+    {
+      "id": "line5",
+      "path": "../production/line5.wav",
+      "sha256": "8c02193db63bd2abf98f3b8a6a61aab80d1b5a50fa3970e7a8061a611ec77c69",
+      "transcriptSha256": "1fed02b9a2f3dc1868c5df1cbc81bf539be755ab93fe20215bed3f61126c83ad",
+      "receipt": {
+        "path": "../production/line5-receipt.json",
+        "sha256": "7c36ed82978d6dbb3db59b946de00b179c38c8c2db234a11580fcc48fb46809e"
+      },
+      "captionChunks": [
+        "编辑器是开源的，",
+        "接入的模型可能另外收费。"
+      ]
+    },
+    {
+      "id": "line6",
+      "path": "../production/line6.wav",
+      "sha256": "f2dbe3d8c5738592632e46a4224052f11672a86322d806c46e9fb8bd40c550be",
+      "transcriptSha256": "1a868139d9e7cc0d373d2ba8dfb503f7d5aee7cf642719c02d267169bce4ec89",
+      "receipt": {
+        "path": "../production/line6-receipt.json",
+        "sha256": "6beb4e2abdded1f813750aadd931815d4e704acfd1ac17e162d8d1c9cdf37641"
+      },
+      "captionChunks": [
+        "想画自己的角色，可以看看。",
+        "ArtCraft 仓库链接放评论区。"
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "id": "line1",
+      "shots": [
+        {
+          "mediaId": "artcraft",
+          "weight": 24,
+          "crop": {
+            "x": 0.17,
+            "y": 0.015,
+            "width": 0.66,
+            "height": 0.97
+          },
+          "startFrame": 125,
+          "endFrame": 149,
+          "label": "官方演示 · 过程回看",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.17,
+                "y": 0.015,
+                "width": 0.66,
+                "height": 0.97
+              },
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1,
+              "fit": "contain"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 28,
+          "crop": {
+            "x": 0.32,
+            "y": 0.28,
+            "width": 0.32,
+            "height": 0.53
+          },
+          "startFrame": 0,
+          "endFrame": 1,
+          "label": "官方演示 · 过程回看",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.32,
+                "y": 0.28,
+                "width": 0.32,
+                "height": 0.53
+              },
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1,
+              "fit": "contain"
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "先摆这个小人",
+              "x": 0.08,
+              "y": 0.02,
+              "width": 0.84,
+              "height": 0.06,
+              "start": 0,
+              "end": 0.2,
+              "fontSize": 37,
+              "tone": "ink"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 20,
+          "crop": {
+            "x": 0.08,
+            "y": 0,
+            "width": 0.84,
+            "height": 1
+          },
+          "startFrame": 0,
+          "endFrame": 20,
+          "label": "官方演示 · 已剪辑 · 非本次运行",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.08,
+                "y": 0,
+                "width": 0.84,
+                "height": 1
+              },
+              "x": 0,
+              "y": 0.08,
+              "width": 1,
+              "height": 0.8,
+              "fit": "contain"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 22,
+          "crop": {
+            "x": 0.08,
+            "y": 0,
+            "width": 0.84,
+            "height": 1
+          },
+          "startFrame": 19,
+          "endFrame": 20,
+          "label": "官方演示 · 已剪辑 · 非本次运行",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.08,
+                "y": 0,
+                "width": 0.84,
+                "height": 1
+              },
+              "x": 0,
+              "y": 0.08,
+              "width": 1,
+              "height": 0.8,
+              "fit": "contain"
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "姿势输入",
+              "x": 0.08,
+              "y": 0.01,
+              "width": 0.84,
+              "height": 0.07,
+              "start": 0,
+              "end": 0.3,
+              "fontSize": 40,
+              "tone": "ink"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "line2",
+      "shots": [
+        {
+          "mediaId": "artcraft",
+          "weight": 33,
+          "crop": {
+            "x": 0.08,
+            "y": 0,
+            "width": 0.84,
+            "height": 1
+          },
+          "startFrame": 19,
+          "endFrame": 20,
+          "label": "官方演示 · 已剪辑 · 非本次运行",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.08,
+                "y": 0,
+                "width": 0.84,
+                "height": 1
+              },
+              "x": 0,
+              "y": 0.08,
+              "width": 1,
+              "height": 0.8,
+              "fit": "contain"
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "ArtCraft · 姿势编辑",
+              "x": 0.05,
+              "y": 0.01,
+              "width": 0.9,
+              "height": 0.07,
+              "start": 0,
+              "end": 0.25,
+              "fontSize": 38,
+              "tone": "ink"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 30,
+          "crop": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "startFrame": 20,
+          "endFrame": 50,
+          "label": "官方演示 · 已剪辑 · 非本次运行",
+          "panels": [
+            {
+              "crop": {
+                "x": 0,
+                "y": 0,
+                "width": 1,
+                "height": 1
+              },
+              "x": 0,
+              "y": 0.08,
+              "width": 1,
+              "height": 0.8,
+              "fit": "contain"
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "抬手",
+              "x": 0.08,
+              "y": 0.01,
+              "width": 0.84,
+              "height": 0.07,
+              "start": 0,
+              "end": 0.15,
+              "fontSize": 40,
+              "tone": "ink"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 18,
+          "crop": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "startFrame": 60,
+          "endFrame": 78,
+          "label": "官方演示 · 已剪辑 · 非本次运行",
+          "panels": [
+            {
+              "crop": {
+                "x": 0,
+                "y": 0,
+                "width": 1,
+                "height": 1
+              },
+              "x": 0,
+              "y": 0.08,
+              "width": 1,
+              "height": 0.8,
+              "fit": "contain"
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "弯腿",
+              "x": 0.08,
+              "y": 0.01,
+              "width": 0.84,
+              "height": 0.07,
+              "start": 0,
+              "end": 0.15,
+              "fontSize": 40,
+              "tone": "ink"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 22,
+          "crop": {
+            "x": 0.08,
+            "y": 0,
+            "width": 0.84,
+            "height": 1
+          },
+          "startFrame": 78,
+          "endFrame": 100,
+          "label": "官方演示 · 已剪辑 · 非本次运行",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.08,
+                "y": 0,
+                "width": 0.84,
+                "height": 1
+              },
+              "x": 0,
+              "y": 0.08,
+              "width": 1,
+              "height": 0.8,
+              "fit": "contain"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 27,
+          "crop": {
+            "x": 0.3,
+            "y": 0.27,
+            "width": 0.36,
+            "height": 0.53
+          },
+          "startFrame": 98,
+          "endFrame": 99,
+          "label": "官方演示 · 已剪辑 · 非本次运行",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.3,
+                "y": 0.27,
+                "width": 0.36,
+                "height": 0.53
+              },
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1,
+              "fit": "contain"
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "姿势调好",
+              "x": 0.08,
+              "y": 0.01,
+              "width": 0.84,
+              "height": 0.07,
+              "start": 0,
+              "end": 0.25,
+              "fontSize": 40,
+              "tone": "ink"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "line3",
+      "shots": [
+        {
+          "mediaId": "artcraft",
+          "weight": 31,
+          "crop": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          },
+          "startFrame": 98,
+          "endFrame": 99,
+          "label": "官方演示 · 已剪辑 · 非本次运行",
+          "panels": [
+            {
+              "crop": {
+                "x": 0,
+                "y": 0,
+                "width": 1,
+                "height": 1
+              },
+              "x": 0,
+              "y": 0.06,
+              "width": 1,
+              "height": 0.82,
+              "fit": "contain"
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "原界面的提示词",
+              "x": 0.08,
+              "y": 0.01,
+              "width": 0.84,
+              "height": 0.06,
+              "start": 0,
+              "end": 0.2,
+              "fontSize": 35,
+              "tone": "ink"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 31,
+          "crop": {
+            "x": 0.3,
+            "y": 0.27,
+            "width": 0.36,
+            "height": 0.53
+          },
+          "startFrame": 98,
+          "endFrame": 99,
+          "label": "官方输入 · 提示词译意 · 编辑示意",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.3,
+                "y": 0.27,
+                "width": 0.36,
+                "height": 0.53
+              },
+              "x": 0.06,
+              "y": 0.07,
+              "width": 0.42,
+              "height": 0.49,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 98,
+              "endFrame": 99,
+              "motion": {
+                "from": {
+                  "x": 0.2,
+                  "y": 0.03,
+                  "width": 0.6,
+                  "height": 0.72
+                },
+                "start": 0,
+                "end": 0.75
+              }
+            },
+            {
+              "crop": {
+                "x": 0.118,
+                "y": 0.842,
+                "width": 0.763,
+                "height": 0.154
+              },
+              "x": 0.05,
+              "y": 0.68,
+              "width": 0.9,
+              "height": 0.13,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 98,
+              "endFrame": 99,
+              "motion": {
+                "from": {
+                  "x": 0.05,
+                  "y": 0.8,
+                  "width": 0.9,
+                  "height": 0.13
+                },
+                "start": 0,
+                "end": 0.7
+              }
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "提示词译意",
+              "x": 0.53,
+              "y": 0.09,
+              "width": 0.4,
+              "height": 0.06,
+              "start": 0,
+              "end": 0.12,
+              "fontSize": 28,
+              "tone": "soft"
+            },
+            {
+              "kind": "label",
+              "text": "金属机器人",
+              "x": 0.51,
+              "y": 0.22,
+              "width": 0.44,
+              "height": 0.09,
+              "start": 0,
+              "end": 0.35,
+              "fontSize": 43,
+              "tone": "ink"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 32,
+          "crop": {
+            "x": 0.3,
+            "y": 0.27,
+            "width": 0.36,
+            "height": 0.53
+          },
+          "startFrame": 98,
+          "endFrame": 99,
+          "label": "官方输入 · 提示词译意 · 编辑示意",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.3,
+                "y": 0.27,
+                "width": 0.36,
+                "height": 0.53
+              },
+              "x": 0.06,
+              "y": 0.07,
+              "width": 0.42,
+              "height": 0.49,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 98,
+              "endFrame": 99
+            },
+            {
+              "crop": {
+                "x": 0.118,
+                "y": 0.842,
+                "width": 0.763,
+                "height": 0.154
+              },
+              "x": 0.05,
+              "y": 0.68,
+              "width": 0.9,
+              "height": 0.13,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 98,
+              "endFrame": 99
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "提示词译意",
+              "x": 0.53,
+              "y": 0.09,
+              "width": 0.4,
+              "height": 0.06,
+              "start": 0,
+              "end": 0.12,
+              "fontSize": 28,
+              "tone": "soft"
+            },
+            {
+              "kind": "label",
+              "text": "金属机器人",
+              "x": 0.51,
+              "y": 0.22,
+              "width": 0.44,
+              "height": 0.09,
+              "start": 0,
+              "end": 0.35,
+              "fontSize": 43,
+              "tone": "ink"
+            },
+            {
+              "kind": "label",
+              "text": "火星",
+              "x": 0.51,
+              "y": 0.38,
+              "width": 0.44,
+              "height": 0.1,
+              "start": 0,
+              "end": 0.45,
+              "fontSize": 49,
+              "tone": "ink"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "line4",
+      "shots": [
+        {
+          "mediaId": "artcraft",
+          "weight": 36,
+          "crop": {
+            "x": 0.3,
+            "y": 0.27,
+            "width": 0.36,
+            "height": 0.53
+          },
+          "startFrame": 98,
+          "endFrame": 99,
+          "label": "流程示意 · 姿势与文字供模型参考",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.3,
+                "y": 0.27,
+                "width": 0.36,
+                "height": 0.53
+              },
+              "x": 0.06,
+              "y": 0.03,
+              "width": 0.34,
+              "height": 0.36,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 98,
+              "endFrame": 99
+            },
+            {
+              "crop": {
+                "x": 0.118,
+                "y": 0.842,
+                "width": 0.763,
+                "height": 0.154
+              },
+              "x": 0.46,
+              "y": 0.08,
+              "width": 0.49,
+              "height": 0.1,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 98,
+              "endFrame": 99
+            },
+            {
+              "crop": {
+                "x": 0.17,
+                "y": 0.015,
+                "width": 0.66,
+                "height": 0.97
+              },
+              "x": 0.18,
+              "y": 0.48,
+              "width": 0.64,
+              "height": 0.48,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 125,
+              "endFrame": 126,
+              "reveal": 0
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "姿势",
+              "x": 0.05,
+              "y": 0.385,
+              "width": 0.36,
+              "height": 0.05,
+              "start": 0,
+              "end": 0.12,
+              "fontSize": 30,
+              "tone": "ink"
+            },
+            {
+              "kind": "label",
+              "text": "金属机器人 / 火星",
+              "x": 0.45,
+              "y": 0.22,
+              "width": 0.5,
+              "height": 0.06,
+              "start": 0,
+              "end": 0.15,
+              "fontSize": 27,
+              "tone": "ink"
+            },
+            {
+              "kind": "label",
+              "text": "模型参考",
+              "x": 0.32,
+              "y": 0.445,
+              "width": 0.36,
+              "height": 0.04,
+              "start": 0,
+              "end": 0.22,
+              "fontSize": 25,
+              "tone": "accent"
+            },
+            {
+              "kind": "arrow",
+              "x": 0.21,
+              "y": 0.38,
+              "width": 0.23,
+              "height": 0.14,
+              "start": 0,
+              "end": 0.28
+            },
+            {
+              "kind": "arrow",
+              "x": 0.54,
+              "y": 0.3,
+              "width": 0.19,
+              "height": 0.22,
+              "start": 0,
+              "end": 0.28
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 68,
+          "crop": {
+            "x": 0.17,
+            "y": 0.015,
+            "width": 0.66,
+            "height": 0.97
+          },
+          "startFrame": 112,
+          "endFrame": 180,
+          "label": "官方生成结果 · 姿势参考，非完全复刻",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.17,
+                "y": 0.015,
+                "width": 0.66,
+                "height": 0.97
+              },
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1,
+              "fit": "contain"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "line5",
+      "shots": [
+        {
+          "mediaId": "artcraft",
+          "weight": 36,
+          "crop": {
+            "x": 0.3,
+            "y": 0.27,
+            "width": 0.36,
+            "height": 0.53
+          },
+          "startFrame": 98,
+          "endFrame": 99,
+          "label": "同一官方示例 · 完整身体对照",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.3,
+                "y": 0.27,
+                "width": 0.36,
+                "height": 0.53
+              },
+              "x": 0.03,
+              "y": 0.15,
+              "width": 0.44,
+              "height": 0.65,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 98,
+              "endFrame": 99
+            },
+            {
+              "crop": {
+                "x": 0.17,
+                "y": 0.015,
+                "width": 0.66,
+                "height": 0.97
+              },
+              "x": 0.53,
+              "y": 0.15,
+              "width": 0.44,
+              "height": 0.65,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 125,
+              "endFrame": 126
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "姿势输入",
+              "x": 0.03,
+              "y": 0.06,
+              "width": 0.44,
+              "height": 0.06,
+              "start": 0,
+              "end": 0.15,
+              "fontSize": 34,
+              "tone": "ink"
+            },
+            {
+              "kind": "label",
+              "text": "模型结果",
+              "x": 0.53,
+              "y": 0.06,
+              "width": 0.44,
+              "height": 0.06,
+              "start": 0,
+              "end": 0.15,
+              "fontSize": 34,
+              "tone": "ink"
+            },
+            {
+              "kind": "label",
+              "text": "参考姿势，不是完全复刻",
+              "x": 0.06,
+              "y": 0.86,
+              "width": 0.88,
+              "height": 0.06,
+              "start": 0,
+              "end": 0.25,
+              "fontSize": 32,
+              "tone": "soft"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 52,
+          "crop": {
+            "x": 0.3,
+            "y": 0.27,
+            "width": 0.36,
+            "height": 0.53
+          },
+          "startFrame": 98,
+          "endFrame": 99,
+          "label": "职责示意 · 真实输入与对应结果",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.3,
+                "y": 0.27,
+                "width": 0.36,
+                "height": 0.53
+              },
+              "x": 0.02,
+              "y": 0.07,
+              "width": 0.64,
+              "height": 0.76,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 98,
+              "endFrame": 99,
+              "motion": {
+                "from": {
+                  "x": 0.03,
+                  "y": 0.15,
+                  "width": 0.44,
+                  "height": 0.65
+                },
+                "start": 0,
+                "end": 0.6
+              }
+            },
+            {
+              "crop": {
+                "x": 0.17,
+                "y": 0.015,
+                "width": 0.66,
+                "height": 0.97
+              },
+              "x": 0.7,
+              "y": 0.22,
+              "width": 0.28,
+              "height": 0.46,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 125,
+              "endFrame": 126,
+              "motion": {
+                "from": {
+                  "x": 0.53,
+                  "y": 0.15,
+                  "width": 0.44,
+                  "height": 0.65
+                },
+                "start": 0,
+                "end": 0.6
+              }
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "编辑器开源",
+              "x": 0.02,
+              "y": 0.84,
+              "width": 0.64,
+              "height": 0.07,
+              "start": 0.15,
+              "end": 0.6,
+              "fontSize": 42,
+              "tone": "accent"
+            },
+            {
+              "kind": "label",
+              "text": "生成结果",
+              "x": 0.68,
+              "y": 0.7,
+              "width": 0.3,
+              "height": 0.06,
+              "start": 0.2,
+              "end": 0.6,
+              "fontSize": 29,
+              "tone": "soft"
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 52,
+          "crop": {
+            "x": 0.17,
+            "y": 0.015,
+            "width": 0.66,
+            "height": 0.97
+          },
+          "startFrame": 125,
+          "endFrame": 126,
+          "label": "官方图像 · 模型可能另收费",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.3,
+                "y": 0.27,
+                "width": 0.36,
+                "height": 0.53
+              },
+              "x": 0.02,
+              "y": 0.22,
+              "width": 0.28,
+              "height": 0.46,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 98,
+              "endFrame": 99,
+              "motion": {
+                "from": {
+                  "x": 0.02,
+                  "y": 0.07,
+                  "width": 0.64,
+                  "height": 0.76
+                },
+                "start": 0,
+                "end": 0.65
+              }
+            },
+            {
+              "crop": {
+                "x": 0.17,
+                "y": 0.015,
+                "width": 0.66,
+                "height": 0.97
+              },
+              "x": 0.34,
+              "y": 0.07,
+              "width": 0.64,
+              "height": 0.76,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 125,
+              "endFrame": 126,
+              "motion": {
+                "from": {
+                  "x": 0.7,
+                  "y": 0.22,
+                  "width": 0.28,
+                  "height": 0.46
+                },
+                "start": 0,
+                "end": 0.65
+              }
+            }
+          ],
+          "overlays": [
+            {
+              "kind": "label",
+              "text": "编辑输入",
+              "x": 0.01,
+              "y": 0.7,
+              "width": 0.3,
+              "height": 0.06,
+              "start": 0.15,
+              "end": 0.6,
+              "fontSize": 29,
+              "tone": "soft"
+            },
+            {
+              "kind": "label",
+              "text": "接入模型\n可能另外收费",
+              "x": 0.34,
+              "y": 0.83,
+              "width": 0.64,
+              "height": 0.14,
+              "start": 0.1,
+              "end": 0.7,
+              "fontSize": 39,
+              "tone": "accent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "line6",
+      "shots": [
+        {
+          "mediaId": "artcraft",
+          "weight": 48,
+          "crop": {
+            "x": 0.17,
+            "y": 0.015,
+            "width": 0.66,
+            "height": 0.97
+          },
+          "startFrame": 179,
+          "endFrame": 180,
+          "label": "官方结果 · 角色创作参考",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.3,
+                "y": 0.27,
+                "width": 0.36,
+                "height": 0.53
+              },
+              "x": 0.02,
+              "y": 0.22,
+              "width": 0.28,
+              "height": 0.46,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 98,
+              "endFrame": 99
+            },
+            {
+              "crop": {
+                "x": 0.17,
+                "y": 0.015,
+                "width": 0.66,
+                "height": 0.97
+              },
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 179,
+              "endFrame": 180,
+              "motion": {
+                "from": {
+                  "x": 0.34,
+                  "y": 0.07,
+                  "width": 0.64,
+                  "height": 0.76
+                },
+                "start": 0,
+                "end": 0.65
+              }
+            }
+          ]
+        },
+        {
+          "mediaId": "artcraft",
+          "weight": 80,
+          "crop": {
+            "x": 0.08,
+            "y": 0,
+            "width": 0.84,
+            "height": 1
+          },
+          "startFrame": 180,
+          "endFrame": 260,
+          "label": "官方演示 · 已剪辑 · 非本次运行",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.08,
+                "y": 0,
+                "width": 0.84,
+                "height": 1
+              },
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1,
+              "fit": "contain"
+            }
+          ]
+        },
+        {
+          "mediaId": "github-artcraft",
+          "weight": 45,
+          "crop": {
+            "x": 0.008,
+            "y": 0.052,
+            "width": 0.205,
+            "height": 0.115
+          },
+          "label": "真实 GitHub 仓库标题 · 官方角色画面",
+          "panels": [
+            {
+              "crop": {
+                "x": 0.008,
+                "y": 0.052,
+                "width": 0.205,
+                "height": 0.115
+              },
+              "x": 0.05,
+              "y": 0.045,
+              "width": 0.9,
+              "height": 0.31,
+              "fit": "contain"
+            },
+            {
+              "crop": {
+                "x": 0.08,
+                "y": 0,
+                "width": 0.84,
+                "height": 1
+              },
+              "x": 0,
+              "y": 0.38,
+              "width": 1,
+              "height": 0.61,
+              "fit": "contain",
+              "mediaId": "artcraft",
+              "startFrame": 259,
+              "endFrame": 260
+            }
+          ],
+          "overlays": []
+        }
+      ]
+    }
+  ]
+}

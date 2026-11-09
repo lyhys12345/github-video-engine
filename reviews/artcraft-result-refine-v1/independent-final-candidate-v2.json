@@ -1,0 +1,312 @@
+{
+  "schemaVersion": "artcraft-independent-visual-review/1.0",
+  "reviewer": "/root/artcraft_final_judge",
+  "createdAtUtc": "2026-11-09T02:53:16.5260672Z",
+  "candidate": "candidate-v2",
+  "movie": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\review.mp4",
+  "movieSha256": "bfba63b87a5744de2e14d589adf8c70cd3c95b480605b8d234ed4aa44cb8b1a5",
+  "report": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\reviews\\independent-final-candidate-v2.md",
+  "reportSha256": "752e86e1924035160fe52cd8e94b59f1b123a33134f24bc97f71bd0727f6bd5b",
+  "visualEvidenceDecision": "PASS_WITH_LIMITATIONS",
+  "readyForOwnerReview": true,
+  "unresolvedBlockerOrMajor": [],
+  "mandatoryFindingsClosed": [
+    "Extra horizontal crop on actual arm/knee segments",
+    "Too-short completed input-to-output relation and subsequent return to input UI mislabeled as generated result",
+    "Broken arrow drawing associated with the workflow relation"
+  ],
+  "remainingLimitations": [
+    {
+      "severity": "minor",
+      "startSeconds": 2.366667,
+      "endSeconds": 4.233333,
+      "finding": "1.867-second near-static shoulder state with only changing explanatory labels; not real action progress"
+    },
+    {
+      "severity": "minor",
+      "startSeconds": 18.733333,
+      "endSeconds": 20.333333,
+      "finding": "1.6-second static source179 layout transition; not real result motion"
+    },
+    {
+      "severity": "unverified",
+      "finding": "Caption timing is estimated, not independently word-aligned"
+    }
+  ],
+  "audioListening": "UNVERIFIED",
+  "continuousPlayback": "UNVERIFIED",
+  "overallAV": "UNVERIFIED",
+  "ownerAcceptance": "pending",
+  "publication": "not performed",
+  "actualFinalMp4FramesViewed": 30,
+  "viewedFrames": [
+    {
+      "frame": 0,
+      "time": 0,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-001.png",
+      "sha256": "22f206b9a639c78340b34ae9c59071f5c88fc8e6be11edb3662183d26ec7b9dd",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 30,
+      "time": 1,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-006.png",
+      "sha256": "aed5030cadbea1e4d6fe1737967e5e07c3ef9a2d57506256390f4b59e7ce70eb",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 60,
+      "time": 2,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-010.png",
+      "sha256": "4cf754a2b4b98005ffcab21eb510c87acfae8acdd0f3d06fad3fd5858bf8923e",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 71,
+      "time": 2.3666666666666667,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-012.png",
+      "sha256": "8a3afa7ddca3c368fdd0847064c5a36f4b98cf41fa932142d9d81e493eebb81c",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 90,
+      "time": 3,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-016.png",
+      "sha256": "29044f4f61df983d564c4678b11f91720fa17fec7331f340653f41161db98090",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 110,
+      "time": 3.6666666666666665,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-019.png",
+      "sha256": "6e1762fa5eb29761566950277140a8f715e1219fe482f09092d5566df37ab0df",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 126,
+      "time": 4.2,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-020.png",
+      "sha256": "0ad00e51d9aa3d09a8e0adb4e463d84068d04f5f45b7a609675d0a1d5427e319",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 142,
+      "time": 4.733333333333333,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-022.png",
+      "sha256": "bc8c45b407da7058bb0aa4c52d4a0b11bb8086be3ea156419ed9fcee3ecf4ffe",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 156,
+      "time": 5.2,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-023.png",
+      "sha256": "11eae217a5ced1976876c2646a6838d10ed837cb0256ad3664596b9d9d1efb5f",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 166,
+      "time": 5.533333333333333,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-025.png",
+      "sha256": "872c14e6a536b9a1ddf58235e8f536059fdbcfee3eb58beb3fb0cd0044225bbc",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 174,
+      "time": 5.8,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-026.png",
+      "sha256": "0bebe47120e7126400ed11e4fb4d4c0c4dc879fe26e25d79b8cbe49e04de4fc7",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 210,
+      "time": 7,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-031.png",
+      "sha256": "2c5afc590e59718bbbb1b0833870b584c02e2bc46947647c4083ca2ef1787bf9",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 239,
+      "time": 7.966666666666667,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-034.png",
+      "sha256": "921db6c39c152574cf4e929bdfd7b751586a8b56b7bfbf3b2e793fba74384fcc",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 270,
+      "time": 9,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-037.png",
+      "sha256": "88f28c72b3950d9fde09435bb8b4a82f15a3d9135cb380629978721cf372e206",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 302,
+      "time": 10.066666666666666,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-040.png",
+      "sha256": "37267b6d8a6d260598dd295904cc11a41d83c2d38dd631d92f1034062879177e",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 318,
+      "time": 10.6,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-042.png",
+      "sha256": "b26708949e5efb6578dcb1437080ab70f2cc1968f569340d7848f0b472487e88",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 336,
+      "time": 11.2,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-043.png",
+      "sha256": "841eeafac04c331ddc0fc72d1b28a3407f03d74c3ff4ea2d4a3add48194a9798",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 353,
+      "time": 11.766666666666667,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-044.png",
+      "sha256": "884193060739955b0014841d4e16bdc0dd56d270c52cc965bd2ec61c8453f4b1",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 354,
+      "time": 11.8,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-045.png",
+      "sha256": "b623152f3ed27dcf69211ef4e6e61dce7568a2d23268705c6e0fd9646f08cc2b",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 388,
+      "time": 12.933333333333334,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-046.png",
+      "sha256": "cc6724c6dc6b5747b99f3a126ee3a40a1de3779af8343a697bf9b82c2dd7ca40",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 440,
+      "time": 14.666666666666666,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-049.png",
+      "sha256": "3e2f94d0e0b798f61126ca624d70c86fe73aa83574ce7f76e817ed65aa5891d5",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 484,
+      "time": 16.133333333333333,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-052.png",
+      "sha256": "74985db635d1623ddc5dc683ff4af43aebc3693a894f07aa0fa949e51d46e9b8",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 536,
+      "time": 17.866666666666667,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-055.png",
+      "sha256": "07c60b148a8856abb85833c920901c6c4e588d7c1e6c955749f02b1c83b9dc84",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 562,
+      "time": 18.733333333333334,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-057.png",
+      "sha256": "5d92390ce5b54a7b913c2629f3fbc4064918c63ff7cab69f56846bfd981083d8",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 586,
+      "time": 19.533333333333335,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-058.png",
+      "sha256": "5733f1f49f0c12c167d3fd8309f7736f63a25a27988bc68347f71872218fe72c",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 609,
+      "time": 20.3,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-059.png",
+      "sha256": "04820af4ff54b9684443bce3b26b32ce9e053ed84230dc0660e75b4cb9cf3dcf",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 610,
+      "time": 20.333333333333332,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-060.png",
+      "sha256": "d1aff521d8e5c74aa433479a04deef593e43b57a5a9315dff133a78e82b8abea",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 650,
+      "time": 21.666666666666668,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-061.png",
+      "sha256": "c08606b032cab4326a5e636622436cd98b9fa0c377109552c65c15222f11a6af",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 712,
+      "time": 23.733333333333334,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-064.png",
+      "sha256": "5bd1fd094cf24235e1a2b8b1520fc425f96bcf0644e1f44fa37bcf7c26f93106",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    },
+    {
+      "frame": 734,
+      "time": 24.466666666666665,
+      "file": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-065.png",
+      "sha256": "72bd6fe7a1b63a6c5457e744182d44326d19b5481e60a200e9bb423979293ef2",
+      "hashMatchesManifest": true,
+      "viewedIndividually": true
+    }
+  ],
+  "boundArtifacts": [
+    {
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\props.json",
+      "sha256": "df648e91e0ae103cc72c6dd769f9831ab499815d51ad3d8f293507ccf1fae14b"
+    },
+    {
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\timeline.json",
+      "sha256": "9452d1aecb7b4468fd2c864886eda5340e3c7d35713b690bd1b364f8f64e54c5"
+    },
+    {
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\manifest.json",
+      "sha256": "3cdceeefc9a850abeda3289a912c6bd0c51b79fddd8c14fc66e3dd1dc206e0f1"
+    },
+    {
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\decoded-manifest.json",
+      "sha256": "20a6a6b7e46a8916c5d5b130fed228c5cc57e13e79beed33ce9c4993297e00c2"
+    },
+    {
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\motion-comparison.json",
+      "sha256": "fae9c5ffda24c46cb8b80ab1d8291e81e4dc0b32c261d376ce83a920ab4ff7ae"
+    },
+    {
+      "path": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\independent-qa\\technical.json",
+      "sha256": "b36530786086e4fdc31e727da3b71cd91ba51a0a820710fa5f54dd49e2b80a5f"
+    }
+  ],
+  "technicalEvidenceProvenance": "Full decode and byte-exact original-speed PCM checks performed by root; raw technical evidence read by this Judge. This Judge independently checked MP4/config/evidence/inspected-image hashes and performed visual phase comparisons.",
+  "mutations": "Only independent review files written; no implementation, script or media edits"
+}

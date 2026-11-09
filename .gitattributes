@@ -4,4 +4,5 @@
 /assets/fonts/** -text -whitespace
 # Frozen pilot review receipts are bound by raw-byte SHA256, including line endings.
 /reviews/xhs-pilot-production-v1/** -text -whitespace
+/reviews/artcraft-result-refine-v1/** -text -whitespace
 *.ttf binary

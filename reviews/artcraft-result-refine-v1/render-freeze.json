@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "showcase-candidate-freeze/1.0",
+  "candidateDirectory": "work/artcraft-result-refine-v1/render-plan/candidate-v2",
+  "approvedMarkdownSha256": "ff54b9567dba47a3d36ecef4d8d6038815f19ee78c109a808226613dcb61ed7a",
+  "implementationAndManifest": [
+    {
+      "path": "scripts/render-showcase-reel.ts",
+      "sha256": "89307a4c7f5e574e0cbe45e2dff48e537e47b865931d50b03db57c471da64a9b",
+      "bytes": 6832
+    },
+    {
+      "path": "src/renderer/showcase-reel.tsx",
+      "sha256": "8fbf86760478b5690c9f09836706bbcad491506ab1233c80ca8ef31d2493d23d",
+      "bytes": 5853
+    },
+    {
+      "path": "src/renderer/showcase-reel-contract.ts",
+      "sha256": "e4633b5f6eb2b0fea0485d3b2a91e42fa7a966c872f41a8bc553b33c8e599a4d",
+      "bytes": 6232
+    },
+    {
+      "path": "src/renderer/showcase-geometry.ts",
+      "sha256": "d81e1714dd7abb6bf19241cf6fa21ffe4af1b685dea87aacbd539186f0b29a61",
+      "bytes": 1001
+    },
+    {
+      "path": "src/renderer/approved-reel.ts",
+      "sha256": "261602bb14aa634419156e4969ac6a4011fd6fd9f270a9bad8d6cda809323bbd",
+      "bytes": 6178
+    },
+    {
+      "path": "work/artcraft-result-refine-v1/render-plan/manifest-v2.json",
+      "sha256": "ae61184a28218ba88abe1fa38bfc7a6932912eb72349f793f5aeb27a4271ab82",
+      "bytes": 32992
+    }
+  ],
+  "frames": 735,
+  "seconds": 24.5,
+  "narrationOriginalSeconds": 24.4,
+  "frameRoundingPaddingSeconds": 0.1,
+  "preflight": "preflight-v2",
+  "tests": {
+    "narrow": "16 passed; tests/showcase-reel.test.ts and tests/approved-reel.test.ts",
+    "typecheck": "passed",
+    "fullRegression": "not run"
+  },
+  "perceptualReview": "pending; rendered PNGs are not complete AV coverage",
+  "finalOwnerAcceptance": "pending"
+}

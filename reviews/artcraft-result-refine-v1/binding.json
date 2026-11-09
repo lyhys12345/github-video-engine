@@ -1,0 +1,97 @@
+{
+  "movie": "C:\\Users\\luyuh\\Documents\\Codex\\2026-10-25\\referenced-chatgpt-conversation-this-is-an\\outputs\\github-video-engine\\work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\review.mp4",
+  "movieSha256": "bfba63b87a5744de2e14d589adf8c70cd3c95b480605b8d234ed4aa44cb8b1a5",
+  "files": [
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\approved-script.md",
+      "sha256": "ff54b9567dba47a3d36ecef4d8d6038815f19ee78c109a808226613dcb61ed7a"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\script-review.md",
+      "sha256": "a278f19daddb4a928a7e6fbbfc29f450486c9ae6886a062011ab57bf31060c27"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\owner-approval.json",
+      "sha256": "f3866af819dd8b557341e550cafd16396a352fe119a72801ffa15b2e6c6b45c3"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\script.json",
+      "sha256": "e26cdbe83c05f6b64f3282584ca00225fcee0451b938dc3819b89e8ea166a893"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\render-freeze.json",
+      "sha256": "9363d3924e24ea9e34978e1c3b69587c9d73fba4fd78c0daf4a17c26880be21f"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\repairs.json",
+      "sha256": "07e34d6e424f118fb3defe519ece3ba8cf438b11a5e33a98fa459735b1f006d2"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\narrow-tests.log",
+      "sha256": "951242ae2858235d97a4a1f420a396e3cf057a0151b20569171fcef5d96eef1d"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\typecheck.log",
+      "sha256": "5a3973f79ed9becd5f23c4feff467513814de7ea381d75a4d2e339aa8b8edca9"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\editing.md",
+      "sha256": "265f59efff7adf53cd25cac0ff886970dbfa4c31919c617eb2cea629e376bed3"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\verification.json",
+      "sha256": "a279f088ddbe7d156e38df3499ac5a52e7ec0e8d71fc4d45f7a41039babf475a"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\technical.json",
+      "sha256": "b36530786086e4fdc31e727da3b71cd91ba51a0a820710fa5f54dd49e2b80a5f"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\motion-comparison.json",
+      "sha256": "fae9c5ffda24c46cb8b80ab1d8291e81e4dc0b32c261d376ce83a920ab4ff7ae"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\independent-preflight-v1b.md",
+      "sha256": "a6a2de42d7381adc8bfb04536974b8812098fd80eabf991dd800c82fb15ffc2f"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\independent-preflight-v2.md",
+      "sha256": "c3dbc338ed7c1340e959271f58bcfc62abc8a1b87fbb86fc12b088916a940e4f"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\independent-final-candidate-v2.md",
+      "sha256": "752e86e1924035160fe52cd8e94b59f1b123a33134f24bc97f71bd0727f6bd5b"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\independent-final-candidate-v2.json",
+      "sha256": "b174bd2e1a9e7e347d2f7672f9d0cf8923b2731a3fca6038f17491e6febf4c46"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\render-source-snapshot\\scripts\\render-showcase-reel.ts",
+      "sha256": "89307a4c7f5e574e0cbe45e2dff48e537e47b865931d50b03db57c471da64a9b"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\render-source-snapshot\\src\\renderer\\showcase-reel.tsx",
+      "sha256": "8fbf86760478b5690c9f09836706bbcad491506ab1233c80ca8ef31d2493d23d"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\render-source-snapshot\\src\\renderer\\showcase-reel-contract.ts",
+      "sha256": "e4633b5f6eb2b0fea0485d3b2a91e42fa7a966c872f41a8bc553b33c8e599a4d"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\render-source-snapshot\\src\\renderer\\showcase-geometry.ts",
+      "sha256": "d81e1714dd7abb6bf19241cf6fa21ffe4af1b685dea87aacbd539186f0b29a61"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\render-source-snapshot\\src\\renderer\\approved-reel.ts",
+      "sha256": "261602bb14aa634419156e4969ac6a4011fd6fd9f270a9bad8d6cda809323bbd"
+    },
+    {
+      "path": "reviews\\artcraft-result-refine-v1\\render-source-snapshot\\work\\artcraft-result-refine-v1\\render-plan\\manifest-v2.json",
+      "sha256": "ae61184a28218ba88abe1fa38bfc7a6932912eb72349f793f5aeb27a4271ab82"
+    }
+  ],
+  "visualEvidenceDecision": "PASS_WITH_LIMITATIONS",
+  "overallAV": "UNVERIFIED",
+  "ownerAcceptance": "pending"
+}
