@@ -1,0 +1,36 @@
+{
+  "capturedLocalDate": "2026-11-08",
+  "sources": [
+    {
+      "repo": "Nutlope/hallmark",
+      "commit": "407fa689f4a276f2fd389208d271d0fef08f5058",
+      "capturedOnLocalDate": "2026-11-08",
+      "stars": 50968,
+      "pushedAt": "2026-11-05T13:16:31Z",
+      "defaultBranch": "main",
+      "license": "MIT",
+      "readmeSha256": "327bcc97ed6c6e12ddacc661af049236ff97fe100dadda383f675d0054ce0888"
+    },
+    {
+      "repo": "storytold/artcraft",
+      "commit": "79d87b2b54b5b27223fa428bd0acd06bdd7abaf5",
+      "capturedOnLocalDate": "2026-11-08",
+      "stars": 39909,
+      "pushedAt": "2026-11-07T03:48:03Z",
+      "defaultBranch": "main",
+      "license": "Apache-2.0",
+      "readmeSha256": "3a5862d093cd15cc44f5d2fbd1e752209bc146f8dd4da6d0a14bc09d003805c1"
+    },
+    {
+      "repo": "THU-MAIC/OpenMAIC",
+      "commit": "10da906f992ff4fd88d57f69e39b5064bee350c7",
+      "capturedOnLocalDate": "2026-11-08",
+      "stars": 43039,
+      "pushedAt": "2026-11-08T17:11:46Z",
+      "defaultBranch": "main",
+      "license": "MIT",
+      "readmeSha256": "e03b40130741e62288ad9a5cdbe271b06b203ca55c472ce514d2e62fbe8e8959"
+    }
+  ],
+  "productionStatus": "awaiting-specific-script-approval"
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "creative-brief/1.0",
+  "duration": {
+    "mode": "auto",
+    "maxSeconds": 90
+  },
+  "style": "好奇揭晓：AI老师与同学讨论",
+  "audience": "对AI好奇但不了解项目的小红书普通观众",
+  "platforms": [
+    "小红书"
+  ],
+  "language": "zh-CN",
+  "voice": {
+    "mode": "local",
+    "profile": "chen-local"
+  },
+  "decision": "delegated",
+  "notes": [
+    "用户委托选择三个项目及两种风格；沿用本机已认可声音。",
+    "90秒是本批自主策划上限，用户历史硬上限5分钟；通常40–60秒，不凑时长。",
+    "仅脚本候选，不代表该版脚本/视频已获批准。",
+    "官方演示不是我们独立复现；发布由用户决定。"
+  ]
+}
