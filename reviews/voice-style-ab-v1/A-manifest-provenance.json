@@ -1,0 +1,224 @@
+{
+  "schemaVersion": "approved-script-reel/1.0",
+  "projectLabel": "GITHUB / debpalash / VoiceStudio",
+  "snapshotLabel": "真实仓库截图 · 固定版本 2e195d7",
+  "script": {
+    "path": "script.json",
+    "sha256": "a783b58b548f00588e34040e7aef0b22e77301de33f09653ca9e35e1524eb8cd"
+  },
+  "approval": {
+    "path": "owner-approval.json",
+    "sha256": "61d018bb51b9440e39895732c00930773b97462cd5c8b0914923cdc2706473a0"
+  },
+  "font": {
+    "path": "../../../assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf",
+    "sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da"
+  },
+  "narration": [
+    {
+      "id": "line1",
+      "path": "line1.wav",
+      "sha256": "9148d4e21d288ab9b4d2246db1af311f058bd746a2616caab30781e1761e3951",
+      "transcriptSha256": "8f3b36d929b870d71f29b537a208a97a268e6021262de09a9693b81730d12edb",
+      "receipt": {
+        "path": "line1-receipt.json",
+        "sha256": "7c43c700280357139790cf686e54e8d30b1cc145bf6cbc349144a60186f72b4b"
+      },
+      "captionChunks": [
+        "游戏多了一段剧情，",
+        "角色却少了一句配音。",
+        "手里有获准使用的旧录音，",
+        "能不能拿来补新台词？"
+      ]
+    },
+    {
+      "id": "line2",
+      "path": "line2.wav",
+      "sha256": "d84cb01b6715a65a4941ff0955b6dcbee0583c943cbcab68c008993a4520392f",
+      "transcriptSha256": "266e4da15e2b4432144eda64b4c08fc6e80d1057330f3cf2a72cbfdd70cd748e",
+      "receipt": {
+        "path": "line2-receipt.json",
+        "sha256": "60f22a9bbb0c969a6a3153c8e2b6a0e7921d24beb17d4c7fe115af18105e2d8b"
+      },
+      "captionChunks": [
+        "可以用 VoiceStudio 来尝试。",
+        "它支持参考录音生成语音，",
+        "仓库里也放了声音样例。"
+      ]
+    },
+    {
+      "id": "line3",
+      "path": "line3.wav",
+      "sha256": "960edd95a674d3b1ce9fc07704aaef1e4509dbe98eade0184aaf6b5588dfb087",
+      "transcriptSha256": "480cbe17ea79c3c59e4a827119409619a8b495140cd06f425301fd9cac2bd73a",
+      "receipt": {
+        "path": "line3-receipt.json",
+        "sha256": "e76113deae5d1abbadb55fd7824ef6dd2cfd09ff7a687e7ca89f9b13929e80bc"
+      },
+      "captionChunks": [
+        "它把不同的语音引擎",
+        "放进一个界面，",
+        "也支持在本机运行。"
+      ]
+    },
+    {
+      "id": "line4",
+      "path": "line4.wav",
+      "sha256": "c9bac37a03798beacc89cae42cfb36480a63e233d0edf7009c32bbc6d731f71c",
+      "transcriptSha256": "fd6f29cf2d03b61b10c8d6f4c89d77f15db701379905a1c0f96cd41771fb557f",
+      "receipt": {
+        "path": "line4-receipt.json",
+        "sha256": "3c91a21b474b72593ff32aa2cf276ee1252465e702a7151d8ee39d2cc2d95d27"
+      },
+      "captionChunks": [
+        "默认引擎是 OmniVoice。",
+        "参考录音、对应文字，",
+        "再加上要说的新台词，",
+        "交给模型生成声音。"
+      ]
+    },
+    {
+      "id": "line5",
+      "path": "line5.wav",
+      "sha256": "c44d07e89ac1e1d32f3eb576d5777eca9472b2e9b2416f1a385f27fda4c7f93d",
+      "transcriptSha256": "fa974ed709d7d962b362a2c179ebe1c3c0f7c7cc6b38b1275533c6734236d1af",
+      "receipt": {
+        "path": "line5-receipt.json",
+        "sha256": "ab3aa6dddf1d9b62fc4cdb942a346c71e9198cc745505a274a97316706c52b78"
+      },
+      "captionChunks": [
+        "补的是新台词，",
+        "参考的是已有的声音。",
+        "VoiceStudio 仓库链接放评论区。"
+      ]
+    }
+  ],
+  "samples": [
+    {
+      "path": "../../voice-reel/official-ab/demo_voice.wav",
+      "sha256": "9ff69da0155e6a402bdfb8f9bbeb3b256c3f7cda1b13bfd00d1b71a6972ca2b8",
+      "label": "demo_voice.wav",
+      "startSample": 0,
+      "endSample": 70320
+    },
+    {
+      "path": "../../voice-reel/official-ab/demo_clone_output.wav",
+      "sha256": "1645977a7304210d0847786b6f68132f77f15a629afc9154d07b164aa53d3ff8",
+      "label": "demo_clone_output.wav",
+      "startSample": 6720,
+      "endSample": 96000
+    }
+  ],
+  "images": [
+    {
+      "path": "../../voice-reel/official-ab/owner-review-v4/github.png",
+      "sha256": "5fd288bedc08372cc5b2e3a570dfd6414b12325c62d9ac792612b430747a2174",
+      "id": "github"
+    },
+    {
+      "path": "../../voice-reel/official-ab/owner-review-v4/readme.png",
+      "sha256": "abe8c3240e040368b2d23df11127e2590652f93de1ca47f80cc8d256015397fe",
+      "id": "readme"
+    },
+    {
+      "path": "../../voice-reel/official-ab/owner-review-v4/backend.png",
+      "sha256": "5f74a8cfa20e33975f82ef7534d4fce25d4f47bff4822c2febc65814f7fd5a5d",
+      "id": "backend"
+    },
+    {
+      "path": "../../voice-reel/official-ab/official-ui.webp",
+      "sha256": "fc88539366a684a609e3e6f50b10bff06bfb965c59ffe92b59decea0b18ff266",
+      "id": "ui"
+    },
+    {
+      "id": "models",
+      "path": "../official-models.webp",
+      "sha256": "cfbbfbfa4b20b2b3f35243880bf5fb15b59ad1ad97b11aae944cee812f2eac0d",
+      "source": "https://raw.githubusercontent.com/debpalash/VoiceStudio/2e195d72d3794a88b7cb37f87a3e92a20193574e/docs/media/electron/models.webp"
+    }
+  ],
+  "visuals": [
+    {
+      "id": "line1",
+      "kind": "timeline",
+      "images": [],
+      "title": "剧情加了，配音少一句",
+      "disclosure": "用途示意 · 新台词待生成，非实测游戏集成",
+      "timelineMode": "missing"
+    },
+    {
+      "id": "line2",
+      "kind": "screenshots",
+      "title": "用参考录音，尝试补新台词",
+      "images": [
+        "ui"
+      ],
+      "crops": [
+        {
+          "x": 25,
+          "y": 255,
+          "width": 680,
+          "height": 565
+        }
+      ],
+      "disclosure": "真实官方界面 / 固定仓库截图"
+    },
+    {
+      "id": "line3",
+      "kind": "screenshots",
+      "title": "同一个界面，选择不同引擎",
+      "images": [
+        "models",
+        "github"
+      ],
+      "crops": [
+        {
+          "x": -470,
+          "y": 20,
+          "width": 1800,
+          "height": 1250
+        },
+        {
+          "x": -38,
+          "y": 210,
+          "width": 1070,
+          "height": 892
+        }
+      ],
+      "disclosure": "真实官方界面 / 固定仓库截图"
+    },
+    {
+      "id": "line4",
+      "kind": "flow",
+      "images": [],
+      "title": "已有声音 + 新台词 → 模型",
+      "disclosure": "源码机制示意 · 不是本轮运行目标仓库",
+      "inputs": [
+        "参考录音",
+        "对应文字",
+        "新台词"
+      ],
+      "engine": "OmniVoice",
+      "output": "生成的新台词声音"
+    },
+    {
+      "id": "line5",
+      "kind": "timeline",
+      "images": [
+        "github"
+      ],
+      "title": "补的是新台词，参考的是声音",
+      "disclosure": "用途示意 · 新台词待生成，非实测游戏集成",
+      "timelineMode": "pending",
+      "crops": [
+        {
+          "x": -38,
+          "y": 210,
+          "width": 1070,
+          "height": 892
+        }
+      ]
+    }
+  ],
+  "samplesAfterLine": "line2"
+}

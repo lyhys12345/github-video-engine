@@ -1,0 +1,237 @@
+{
+  "schemaVersion": "approved-script-reel/1.0",
+  "projectLabel": "GITHUB / debpalash / VoiceStudio",
+  "snapshotLabel": "真实仓库截图 · 固定版本 2e195d7",
+  "script": {
+    "path": "script.json",
+    "sha256": "c71d44d66b03d88f6f9c76d3eb19612667c1d8157a60d787b4af2d6979e2329b"
+  },
+  "approval": {
+    "path": "owner-approval.json",
+    "sha256": "574e082c3a321651e6efa35c32ca5d0f0131dc1835407fbe4dee09d12b626a99"
+  },
+  "font": {
+    "path": "../../../assets/fonts/noto-sans-sc/NotoSansSC-Variable.ttf",
+    "sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da"
+  },
+  "narration": [
+    {
+      "id": "line1",
+      "path": "line1.wav",
+      "sha256": "72b85fb0988f1a15b281cc827a1188da6977f1f3306e27f8a311a76edf6a6358",
+      "transcriptSha256": "f4a874878257c4fa4974ae0c1ee232621247767162fe6acfdf48617492a4cbb5",
+      "receipt": {
+        "path": "line1-receipt.json",
+        "sha256": "aaae531f6af2af997be207be853cc4a1f672c078d5ca11f410ed91377e188ec9"
+      },
+      "captionChunks": [
+        "刚才是 VoiceStudio 仓库里的",
+        "声音样例。",
+        "它能用参考录音生成新台词，",
+        "也能在本机运行。"
+      ]
+    },
+    {
+      "id": "line2",
+      "path": "line2.wav",
+      "sha256": "27f32224eb95453b4ab218a698f8ffb9abe1a1928816e60082dc4d4df3c719a6",
+      "transcriptSha256": "49c85f6267765741c8aefb7b2d7c117e670db6b769982f5ef437ba8e6b23ffca",
+      "receipt": {
+        "path": "line2-receipt.json",
+        "sha256": "9c9ea836b5da5e3630ee82c1202d4fd2b9a5dbd405a0beb06b4e7a7d5c806f19"
+      },
+      "captionChunks": [
+        "界面负责选择引擎，",
+        "真正生成声音的是背后的模型。",
+        "默认用的是 OmniVoice。"
+      ]
+    },
+    {
+      "id": "line3",
+      "path": "line3.wav",
+      "sha256": "3e1ce8e8dbf7d94428159d1187525c8b7d6fa3bef33a429afad02711a8edb5f4",
+      "transcriptSha256": "0a803693d3db1c54a6d95a5df4b9a37348b362f48d37135fb8e4cf3184d03203",
+      "receipt": {
+        "path": "line3-receipt.json",
+        "sha256": "05bc83dcc39b707fbfb6b316d1197f51be463dd9f70d1113f7df71fba7c656a5"
+      },
+      "captionChunks": [
+        "这条生成路径里，",
+        "参考录音和对应文字",
+        "告诉模型参考什么，",
+        "新台词告诉它这次说什么。"
+      ]
+    },
+    {
+      "id": "line4",
+      "path": "line4.wav",
+      "sha256": "8d1cdae1d9730da221ead1b6fe695e12f707c6031a32acafbc7183fc542142ca",
+      "transcriptSha256": "4ca69d62c746eece30f04ee0a88d85520c8871c9744ba2b94bb519524627b813",
+      "receipt": {
+        "path": "line4-receipt.json",
+        "sha256": "47b4662ee8c3ecf450beb6fb498b98faac974dbb9a60dbc6ad48b2f4216b97f3"
+      },
+      "captionChunks": [
+        "比如游戏加了新剧情，",
+        "角色需要多说一句。",
+        "用有权使用的录音，",
+        "就可以先试一版配音。"
+      ]
+    },
+    {
+      "id": "line5",
+      "path": "line5.wav",
+      "sha256": "8b421ada27060b5b3e3c13b7e3d0285a0792063d3994980a71ba1b3a2b167b13",
+      "transcriptSha256": "7621d76929aa79bd2da96fce3c5b4d1f608c45c1e8390495eafe988791eb4c44",
+      "receipt": {
+        "path": "line5-receipt.json",
+        "sha256": "b79a8eaa0afe9d6db31ea9847b8510ad1c31fd94a50bea6db324aab5634de9d6"
+      },
+      "captionChunks": [
+        "参考录音提供声音参考，",
+        "新台词决定这次说什么。",
+        "VoiceStudio 仓库链接放评论区。"
+      ]
+    }
+  ],
+  "samples": [
+    {
+      "path": "../../voice-reel/official-ab/demo_voice.wav",
+      "sha256": "9ff69da0155e6a402bdfb8f9bbeb3b256c3f7cda1b13bfd00d1b71a6972ca2b8",
+      "label": "demo_voice.wav",
+      "startSample": 0,
+      "endSample": 70320
+    },
+    {
+      "path": "../../voice-reel/official-ab/demo_clone_output.wav",
+      "sha256": "1645977a7304210d0847786b6f68132f77f15a629afc9154d07b164aa53d3ff8",
+      "label": "demo_clone_output.wav",
+      "startSample": 6720,
+      "endSample": 96000
+    }
+  ],
+  "images": [
+    {
+      "path": "../../voice-reel/official-ab/owner-review-v4/github.png",
+      "sha256": "5fd288bedc08372cc5b2e3a570dfd6414b12325c62d9ac792612b430747a2174",
+      "id": "github"
+    },
+    {
+      "path": "../../voice-reel/official-ab/owner-review-v4/readme.png",
+      "sha256": "abe8c3240e040368b2d23df11127e2590652f93de1ca47f80cc8d256015397fe",
+      "id": "readme"
+    },
+    {
+      "path": "../../voice-reel/official-ab/owner-review-v4/backend.png",
+      "sha256": "5f74a8cfa20e33975f82ef7534d4fce25d4f47bff4822c2febc65814f7fd5a5d",
+      "id": "backend"
+    },
+    {
+      "path": "../../voice-reel/official-ab/official-ui.webp",
+      "sha256": "fc88539366a684a609e3e6f50b10bff06bfb965c59ffe92b59decea0b18ff266",
+      "id": "ui"
+    },
+    {
+      "id": "models",
+      "path": "../official-models.webp",
+      "sha256": "cfbbfbfa4b20b2b3f35243880bf5fb15b59ad1ad97b11aae944cee812f2eac0d",
+      "source": "https://raw.githubusercontent.com/debpalash/VoiceStudio/2e195d72d3794a88b7cb37f87a3e92a20193574e/docs/media/electron/models.webp"
+    }
+  ],
+  "visuals": [
+    {
+      "id": "line1",
+      "kind": "screenshots",
+      "title": "声音样例背后的工作台",
+      "images": [
+        "ui",
+        "github"
+      ],
+      "crops": [
+        {
+          "x": 25,
+          "y": 255,
+          "width": 680,
+          "height": 565
+        },
+        {
+          "x": -38,
+          "y": 210,
+          "width": 1070,
+          "height": 892
+        }
+      ],
+      "disclosure": "真实官方界面 / 固定仓库截图"
+    },
+    {
+      "id": "line2",
+      "kind": "screenshots",
+      "title": "界面选引擎，模型生成声音",
+      "images": [
+        "models",
+        "backend"
+      ],
+      "crops": [
+        {
+          "x": -470,
+          "y": 20,
+          "width": 1800,
+          "height": 1250
+        },
+        {
+          "x": -100,
+          "y": -310,
+          "width": 2160,
+          "height": 1800
+        }
+      ],
+      "disclosure": "真实官方界面 / 固定仓库截图"
+    },
+    {
+      "id": "line3",
+      "kind": "flow",
+      "images": [],
+      "title": "已有声音 + 新台词 → 模型",
+      "disclosure": "源码机制示意 · 不是本轮运行目标仓库",
+      "inputs": [
+        "参考录音",
+        "对应文字",
+        "新台词"
+      ],
+      "engine": "OmniVoice",
+      "output": "生成的新台词声音"
+    },
+    {
+      "id": "line4",
+      "kind": "timeline",
+      "images": [],
+      "title": "新剧情，少了一句角色配音",
+      "disclosure": "用途示意 · 新台词待生成，非实测游戏集成",
+      "timelineMode": "pending"
+    },
+    {
+      "id": "line5",
+      "kind": "screenshots",
+      "title": "参考什么声音，说什么新台词",
+      "images": [
+        "ui",
+        "github"
+      ],
+      "crops": [
+        {
+          "x": 25,
+          "y": 255,
+          "width": 680,
+          "height": 565
+        },
+        {
+          "x": -38,
+          "y": 210,
+          "width": 1070,
+          "height": 892
+        }
+      ],
+      "disclosure": "真实官方界面 / 固定仓库截图"
+    }
+  ]
+}
