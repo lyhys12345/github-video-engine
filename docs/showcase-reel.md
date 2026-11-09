@@ -9,3 +9,5 @@ Exact script hash/owner approval, ordered narration hashes and local TTS receipt
 `--frames-only` creates real preview PNGs without an MP4. Final encode checks1080x1920/H264/AAC/frame count/duration with FFprobe and full FFmpeg decode. A successful decode is not a visual/listening PASS. Script approval and independent media review remain separate gates. Do not infer consent to publish.
 
 Directed tests: `pnpm exec vitest run tests/showcase-reel.test.ts tests/approved-reel.test.ts`; `pnpm exec tsc --noEmit`. No full regression claimed. Private voice references, model weights and large media remain local.
+
+Contain layouts first clip the exact declared source crop into an inner box, then center that box; adjacent source content cannot leak into margins. Before rendering, FFprobe verifies actual source dimensions and video frame count/rate against each declaration. This catches mismatched cropped/source metadata before creating a candidate.
