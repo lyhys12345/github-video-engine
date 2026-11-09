@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "candidate-review/1.0",
+  "candidateSha256": "1fdebd2b2760bd14bae167b367fe3d180248893062eb61cb11ea3dfaf47e6658",
+  "stage": "video",
+  "reviewer": "/root/blind_scripts independent same-judge A/B decoded-frame reviewer",
+  "verdict": "UNVERIFIED",
+  "coverage": "partial-av",
+  "findings": [
+    "Sampled visual review found no remaining mandatory visual repair. Full audio listening, subtitle/audio synchronization and continuous-motion rhythm remain unreviewed; complete-AV approval is unavailable."
+  ]
+}
