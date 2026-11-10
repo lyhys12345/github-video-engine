@@ -1,118 +1,90 @@
-> New computer / continuation: read the project handoff in Google Drive: https://drive.google.com/file/d/1YtEYD-TT-qk87WjYjGPi05OIQpTespxd/view .
-
 # GitHub Video Engine
 
-## Watch the workflow
+**把你的 GitHub 仓库，做成一条看得懂、愿意看下去的短视频。**
 
-[![GitHub Video Engine workflow video](docs/media/engine-workflow-poster.png)](docs/media/engine-workflow.mp4)
+README 能解释项目。短视频可以先让人看到它解决了什么，再带观众看懂原理。把 GitHub 链接交给 Codex，告诉它你想讲给谁听。你先审核旁白和分镜，再决定是否生成带旁白、字幕的竖屏视频和可编辑项目文件。
 
-[Watch or download the 70-second video](docs/media/engine-workflow.mp4) · 中文旁白 / Chinese narration
+[看产品 Demo](#产品-demo) · [用自己的仓库试一次](#用自己的仓库试一次) · [工程文档](#工程文档)
 
-Using **The World We Know / 山海所知**, this walkthrough shows repository research, script and storyboard approval, feedback-driven revision, and delivery of a narrated MP4 with editable project files. Product footage comes from the actual map. Workflow screens are labelled reconstructions, and scene reordering was demonstrated using an exported project copy.
+## 产品 Demo
 
-Run the skill in a configured Codex engine checkout with the local media dependencies installed. The session agent authors the story and project-specific visuals. Local narration requires separately configured model files and an authorized reference recording. See [setup and usage](docs/codex-user-path-v1.md) and [voice configuration](docs/narration-voice-preference.md). Sampled-frame review and full-file decoding passed; continuous audiovisual acceptance remains pending.
+点击封面或下方的 MP4 链接查看。四个案例均为中文竖屏预览。
 
-Map and repository shown in the case study: [Greenere/the-world-we-know](https://github.com/Greenere/the-world-we-know).
+| 山海所知 | VoiceStudio |
+| :---: | :---: |
+| <a href="docs/media/worldknow-demo.mp4"><img src="docs/media/worldknow-demo.jpg" width="165" alt="山海所知：地图里的长颈鹿故事"></a> | <a href="docs/media/voicestudio-demo.mp4"><img src="docs/media/voicestudio-demo.jpg" width="165" alt="VoiceStudio：同一参考音色换一句台词"></a> |
+| **一只长颈鹿，怎么走进明朝？**<br>从故事切进真实地图，展示时间和视角如何改变画面。 | **同一个声音，换一句台词。**<br>先听官方样音对比，再看参考音频和新台词各自起什么作用。 |
+| [查看 MP4 · 43 秒](docs/media/worldknow-demo.mp4) | [查看 MP4 · 41 秒](docs/media/voicestudio-demo.mp4) |
 
-A local TypeScript engine for evidence-backed GitHub project explainer videos. The long-term workflow is repository research → grounded story and storyboard → editable motion design → evaluation → human review.
+| ArtCraft | OpenMAIC |
+| :---: | :---: |
+| <a href="docs/media/artcraft-demo.mp4"><img src="docs/media/artcraft-demo.jpg" width="165" alt="ArtCraft：火星上的机器人"></a> | <a href="docs/media/openmaic-b-demo.mp4"><img src="docs/media/openmaic-b-demo.jpg" width="165" alt="OpenMAIC：AI 老师和同学参与讨论"></a> |
+| **动作说不清？先摆给 AI 看。**<br>用官方演示串起人偶姿势、文字描述和机器人结果。 | **老师和同学都是 AI，你可以加入讨论。**<br>先看官方课堂演示，再讲一个主题或一份资料如何变成课程。 |
+| [查看 MP4 · 25 秒](docs/media/artcraft-demo.mp4) | [查看 MP4 · 46 秒](docs/media/openmaic-b-demo.mp4) |
 
-**Current state:** durable jobs, immutable artifacts, read-only research, versioned planning contracts, local Remotion/FFmpeg rendering, and the public evidence-planning CLI are implemented. M0–M4 engineering records are historical; final creative/continuous audiovisual acceptance remains separate. The latest development regression ran **233 tests across 23 files**, including 16 planning-runtime tests. Counts are tied to their recorded source versions, not a claim that a fresh checkout has already been tested.
+想看制作流程？[70 秒工作流演示](docs/media/engine-workflow.mp4)以《山海所知》为例，展示如何从项目证据写出脚本、按反馈改稿并交付可编辑项目。
 
-For the Codex user path, open this trusted engine checkout as the Codex project and ask: `请把 https://github.com/OWNER/REPO 做成可编辑的中文有声技术预览。` The project instructions select its repository skill; the session Agent reads the captured sources and authors the plan. You do not write JSON. Continue in the same chat with ordinary feedback. See [Codex user workflow and observed execution limits](docs/codex-user-path-v1.md).
+## 用自己的仓库试一次
 
-The GitHub explainer skill presents a source-backed script and shot-by-shot storyboard for user review before generating video. The user can request changes and explicitly approve the resulting version. The normal `explanation run` CLI checks a script review receipt bound to the author files and requires approval of that same revision before media stages. The session agent obtains independent reviews and applies revisions. `explanation video-review` checks the receipt against the rendered MP4 and reports whether to revise, obtain missing evidence or proceed to owner review. Lower-level operator commands have their own review policies. Final output quality and source semantics still require review.
+1. 在 Codex 中打开已配置的 **GitHub Video Engine 仓库**。首次使用先看[安装与使用指南](docs/codex-user-path-v1.md)。
+2. 贴上 GitHub 链接，说明观众和发布平台。时长、风格和声音可以一起指定。
+3. 审核完整旁白和逐镜头分镜。确认后生成视频，拿到 MP4 和可编辑项目文件。后续可以直接用自然语言指出要改的地方。
 
-The owner's default narration is the previously accepted **local Chen-style approximation**, without paid voice services. The unified runtime can use a separately configured Windows CUDA model and reference audio; if unavailable it stops rather than silently switching voices. The old Windows Huihui voice is available only as an explicitly requested per-run alternative. See [narration voice preference](docs/narration-voice-preference.md).
+可以直接在 Codex 里这样说：
 
-The lower-level operator path remains `project intake`, `project evidence`, and `project story`; see [URL intake](docs/url-intake-v1.md).
+```text
+把 https://github.com/OWNER/REPO 做成一条面向小红书普通观众的竖屏短视频。
+用一个具体例子开场，讲清楚它解决什么问题、如何实现。先给我完整旁白和分镜审核。
+```
 
-An opt-in [bring-your-own OpenAI-compatible API author adapter](docs/byo-api-author-v1.md) connects one structured provider response to source-bound planning. It defaults off, reads keys only from the process environment and requires explicit per-call activation/budget. Local HTTP mock/CLI tests pass; real providers and API-authored media remain unverified.
+**目前适合在配置好的 Codex 环境里试用。** Codex 会话负责理解仓库、写稿和策划画面，引擎负责保存证据、审批、任务与渲染产物。内置流程只读研究目标仓库。本地有声制作需要额外配置语音运行时、模型和有权使用的参考音频。[语音配置](docs/narration-voice-preference.md)
 
-[Explicit BYO API feedback](docs/byo-api-feedback-v1.md) connects one ordinary feedback request to a validated narration/visual plan, guarded application and keyless local preview continuation. Local mock plus real short-media/history/cache checks pass; real model interpretation remains unverified.
+## 工程文档
 
-Claude Code has a shared-workflow project entry via `CLAUDE.md` and `.claude/skills`; see [Claude Code setup and current verification limits](docs/claude-code-user-path-v1.md). Local entry checks passed; real Claude model execution remains unverified because its CLI was unavailable in the tested environment.
+| 想了解什么 | 从这里开始 |
+| --- | --- |
+| 用 Codex 从链接做有声预览 | [使用指南](docs/codex-user-path-v1.md) · [统一运行入口](docs/narrative-run-v1.md) |
+| 审阅事实、处理返修、导出可编辑项目 | [事实审阅](docs/script-facts-v1.md) · [返修流程](docs/rsi-repair-v1.md) · [跨机交付](docs/long-preview-portability-v1.md) |
+| 使用 Claude Code 或自己的 API | [Claude Code](docs/claude-code-user-path-v1.md) · [自备 API](docs/byo-api-author-v1.md)。已有入口，实际模型端到端出片尚待验证。 |
+| 看渲染实现、架构与许可 | [素材剪辑适配器](docs/showcase-reel.md) · [操作手册](docs/operator-runbook.md) · [架构与许可](docs/decisions.md) |
 
-The `explain` path is an explicitly experimental **18-second mechanism-plan compiler**. It consumes agent-curated semantic evidence graphs; it is not automatic URL understanding or the approved approximately three-minute REA story. An additive experimental story contract now supports content-led timing up to five minutes, persisted asset packs, continuous segment rendering and a bounded TTS adapter; see HANDOFF.md and docs/story-planning-v1.md for the current checkpoint. See [planning runtime](docs/planning-runtime-v1.md), [current engineering result](reviews/planning-runtime-v1/RESULT.md), and [repository scope](docs/repository-setup.md).
+<details>
+<summary>本地安装、测试与 CLI</summary>
 
-## Requirements
-
-- Node.js **24.x** and pnpm **11.25.0**.
-- A local filesystem supporting atomic same-volume hard links; Windows x64/NTFS is the tested environment.
-- Rendering and media integration tests additionally require local Chrome/Chromium and FFmpeg/FFprobe. The engine does not automatically download a browser.
-- No paid API key is required. Research does not install or execute target repositories.
-
-On Windows use a short checkout and state directory. `explain plan` conservatively limits the resolved `--data` path to 167 UTF-16 units and fails before writes if it is too deep. Other native renderer path limits remain documented in [decisions](docs/decisions.md).
-
-## Install and verify
+已验证环境为 Windows x64/NTFS。需要 Node.js 24.x、pnpm 11.25.0、支持同卷硬链接的文件系统。渲染还需要本地 Chrome/Chromium、FFmpeg 与 FFprobe。
 
 ```sh
 pnpm install --frozen-lockfile
+pnpm run doctor
 pnpm run typecheck
 pnpm test
 ```
 
-`pnpm test` includes real SQLite, filesystem/process and FFmpeg fixture checks, alongside clearly labeled mocked-media/approval tests. Some Windows tests require ordinary local permissions for hard links and junctions; restricted sandboxes can reject those operations. Test fixtures are generated locally and ignored by Git.
-
-To verify the media runtime separately:
+`pnpm run test:smoke` 和 `pnpm run test:acceptance` 会生成本地媒体。部分 Windows 测试需要硬链接和目录联接权限。建议使用较短的 checkout 和状态目录。常用环境变量为 `GVE_DATA`、`GVE_BROWSER`、`GVE_FFMPEG`、`GVE_FFPROBE`。
 
 ```sh
-pnpm run doctor
-pnpm run test:smoke
-pnpm run test:acceptance
-```
-
-Use `pnpm run doctor`, not pnpm's unrelated built-in `pnpm doctor`. Smoke/acceptance generate fresh local media and can take several minutes; they are not required for read-only review or planning-only work.
-
-## Evidence planning without generating media
-
-```sh
-pnpm gve explain plan --spec examples/evidence-planner-v1/rea-evidence.json --root . --data .gve/explain --out work/rea-plan
-pnpm gve explain plan --spec examples/evidence-planner-v1/rembg-evidence.json --root . --data .gve/explain --out work/rembg-plan
-pnpm gve explain status --task <task-id> --data .gve/explain
-pnpm gve explain export --task <task-id> --data .gve/explain --out work/re-export
-pnpm gve explain diff --before <old-task-id> --after <new-task-id> --data .gve/explain
-```
-
-The output's `bundle/` contains immutable source snapshots, exact citations, the semantic graph, compiled plan, portable graph, review packet and hash manifest. Source/semantic changes invalidate affected plans; duplicate valid inputs reuse a verified durable task. Status/export use a copied stable SQLite/WAL snapshot and do not create missing state. Diff reports semantic dependency guidance, not rendered-media reuse. Claims still need human/Judge semantic review: matching quotes prove provenance, not truth.
-
-## Other implemented commands
-
-```sh
-pnpm gve research --repo https://github.com/owner/repository --out work/snapshot.json
+pnpm gve research --repo https://github.com/OWNER/REPO --out work/snapshot.json
 pnpm gve render --spec examples/demo.v1.json
 pnpm gve jobs status
 pnpm gve jobs resume <job-id>
-pnpm gve jobs cancel <job-id>
 ```
 
-The historical operator workflow also exposes `project`, `production`, `final`, `diff` and `audit`. See [operator runbook](docs/operator-runbook.md) for contracts, approvals, recovery, usage accounting and immutable delivery. No command grants final human approval automatically.
+[证据规划与导出](docs/planning-runtime-v1.md) · [设计决策](docs/decisions.md) · [仓库范围](docs/repository-setup.md)
 
-Environment overrides: `GVE_DATA`, `GVE_BROWSER`, `GVE_FFMPEG`, `GVE_FFPROBE`. They are local paths/settings, not shell commands or credentials.
+</details>
 
-## Source layout
+<details>
+<summary>案例来源与验证范围</summary>
 
-| Path | Purpose |
-|---|---|
-| `src/contracts`, `schemas` | Versioned Zod/JSON Schema contracts |
-| `src/orchestrator`, `src/assets` | SQLite task ownership, retries, recovery and content-addressed artifacts |
-| `src/providers`, `src/workflow` | Read-only inputs, production workflow and review gates |
-| `src/evidence-planner` | Provenance checks, mechanism compiler and public planning runtime |
-| `src/renderer`, `src/final-renderer`, `src/evaluation` | Trusted local Remotion rendering, finishing and media checks |
-| `tests` | Unit, real filesystem/process/CLI and explicit media integration tests |
-| `fixtures/sources` | Portable, hash-bound, read-only REA/rembg text fixtures and licenses |
-| `examples` | Editable input contracts, story drafts and historical composition source |
-| `docs`, `reviews` | Architecture, decisions, policies and concise review results |
+- 山海所知使用真实产品操作，机制示意在片中标明。[源仓库](https://github.com/Greenere/the-world-we-know)
+- VoiceStudio 的音色对比使用官方预生成样音。片中的应用画面属于示意。
+- ArtCraft 使用官方姿势编辑示例，保留姿势参考和模型费用提示。[源仓库](https://github.com/storytold/artcraft) · [复审记录](reviews/artcraft-result-refine-v1/README.md)
+- OpenMAIC 选用课堂讨论版（试片 O-B），使用官方课堂片段，课程生成过程以示意呈现。[试片记录](reviews/xhs-pilot-production-v1/final-binding.json)
+- Demo 是制作案例。抽帧审阅、媒体解码、完整听看和最终用户验收各有独立记录。工作目录里的原始产物和本地语音模型另行保存。
+- Remotion、字体及各项目素材的授权分别适用。[架构与许可](docs/decisions.md)
 
-This is one pnpm workspace package with logical module boundaries. No cloud services, database server, web application or distributed queue is required.
+</details>
 
-## Repository and licensing boundaries
+**English** · Turn a GitHub repository into an editable, narrated explainer. Start with a repo URL and an audience brief, review a source-backed script, then render locally. [Getting started](docs/codex-user-path-v1.md)
 
-The repository contains maintained source, documentation, tests, contracts, licensed font assets and selected policy/result records. Runtime databases, caches, source-research scratch, frozen candidate archives, media exports and copied standalone delivery projects remain local and are ignored. No local file is deleted by `.gitignore`. Historical reports may link to those local-only evidence paths; absence from Git is not a rewritten historical PASS. Legacy example render scripts may retain author-machine paths and are not advertised as portable public entry points.
-
-The bundled Noto Sans SC font retains its SIL Open Font License. Remotion has its own license; review [licensing and platform decisions](docs/decisions.md) before commercial use. Upstream REA/rembg fixture notices are retained in `fixtures/sources`; model weights are not included. Derived motion code retains attribution under `src/final-renderer/ATTRIBUTION.md` and `src/final-renderer/upstream/LICENSE`. No new license for this project's original code is inferred by this private repository preparation.
-
-Known limits include agent-curated semantics, a bounded visual vocabulary, incomplete production narrative automation, Windows path constraints, and pending final perceptual review. Code generation, successful decoding and test counts do not establish audience retention or cinematic quality.
-
-完整叙事的 Agent 入口与机器可读 next actions：[操作说明](docs/agent-narrative-workflow.md)。从 GitHub URL 开始，按当前已提交检查点执行 explanation next；内容解释和创作仍需真实 Agent/人工输入，事实和视听保持待审。
-
-统一 URL→作者等待→检查点恢复→完整有声可编辑预览入口：[explanation run](docs/narrative-run-v1.md)。已用全新 Marked 工作目录实跑，并验证离线缓存、跨场景编辑及原目录不可见时的可移植重导出。
+维护者换机续作：[Google Drive 交接记录](https://drive.google.com/file/d/1YtEYD-TT-qk87WjYjGPi05OIQpTespxd/view)

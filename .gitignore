@@ -54,6 +54,14 @@ id_ed25519*
 *.gif
 !docs/media/engine-workflow.mp4
 !docs/media/engine-workflow-poster.png
+!docs/media/worldknow-demo.mp4
+!docs/media/worldknow-demo.jpg
+!docs/media/voicestudio-demo.mp4
+!docs/media/voicestudio-demo.jpg
+!docs/media/artcraft-demo.mp4
+!docs/media/artcraft-demo.jpg
+!docs/media/openmaic-b-demo.mp4
+!docs/media/openmaic-b-demo.jpg
 *.zip
 *.7z
 *.tar
