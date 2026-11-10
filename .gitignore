@@ -145,3 +145,7 @@ id_ed25519*
 # Generated Python caches
 __pycache__/
 *.py[cod]
+
+# Owner-approved flagship video for the README.
+!docs/media/engine-flagship.mp4
+!docs/media/engine-flagship.jpg

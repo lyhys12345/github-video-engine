@@ -2,6 +2,13 @@
 
 **把你的 GitHub 仓库，做成一条看得懂、愿意看下去的短视频。**
 
+<p align="center">
+  <a href="docs/media/engine-flagship.mp4"><img src="docs/media/engine-flagship.jpg" width="280" alt="GitHub Video Engine 产品视频：你把项目做好，我们把它讲清楚"></a>
+</p>
+<p align="center"><a href="docs/media/engine-flagship.mp4"><strong>▶ 看看你的仓库如何变成视频 · 54 秒</strong></a></p>
+
+以 OpenMAIC 为例，看一次从仓库链接、脚本审核到成片与可编辑项目的制作过程。[制作与审阅记录](docs/flagship-video/README.md)
+
 README 能解释项目。短视频可以先让人看到它解决了什么，再带观众看懂原理。把 GitHub 链接交给 Codex，告诉它你想讲给谁听。你先审核旁白和分镜，再决定是否生成带旁白、字幕的竖屏视频和可编辑项目文件。
 
 [看产品 Demo](#产品-demo) · [用自己的仓库试一次](#用自己的仓库试一次) · [工程文档](#工程文档)
