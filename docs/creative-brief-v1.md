@@ -10,7 +10,7 @@ The session Agent asks one compact question covering missing duration, style, vo
   "audience": "Curious nontechnical viewers",
   "platforms": ["TikTok", "小红书"],
   "language": "zh-CN",
-  "voice": {"mode": "local", "profile": "chen-local"},
+  "voice": {"mode": "local", "profile": "anna-local"},
   "decision": "proposed",
   "notes": []
 }
@@ -22,7 +22,7 @@ This example's voice is the existing owner's local preference, not a bundled sou
 
 `decision: proposed` stays pending until choices are confirmed. `user-specified` means the user supplied or confirmed the complete choices; do not label unconfirmed defaults this way. `delegated` requires actual permission to choose. Mixed supplied/default choices remain proposed until remaining choices are confirmed or delegated. Brief confirmation never substitutes for exact script/storyboard approval.
 
-Voice modes: local (`chen-local` or explicitly requested `windows-huihui`), reference (`reference`, `rightsConfirmed`), none, byo-api (`provider`, `paidAuthorized`), undecided. Store no secrets. Reference permission and paid authorization are user declarations, not independently authenticated receipts. Merely selecting an API or providing a key does not authorize spending.
+Voice modes: local (`anna-local`, `chen-local`, or `windows-huihui`), reference (`reference`, `rightsConfirmed`), none, byo-api (`provider`, `paidAuthorized`), undecided. Store no secrets. Reference permission and paid authorization are user declarations, not independently authenticated receipts. Merely selecting an API or providing a key does not authorize spending.
 
 ## Commands and enforcement
 

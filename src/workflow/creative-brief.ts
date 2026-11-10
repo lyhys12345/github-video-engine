@@ -14,7 +14,7 @@ export const CreativeBrief=z.strictObject({
  ]).refine(d=>d.mode!=='range'||d.minSeconds<=d.maxSeconds,'Minimum exceeds maximum'),
  style:Text, audience:Text, platforms:z.array(Text).min(1).max(5), language:Text,
  voice:z.discriminatedUnion('mode',[
-  z.strictObject({mode:z.literal('local'),profile:z.enum(['chen-local','windows-huihui'])}),
+  z.strictObject({mode:z.literal('local'),profile:z.enum(['anna-local','chen-local','windows-huihui'])}),
   z.strictObject({mode:z.literal('reference'),reference:Text,rightsConfirmed:z.boolean()}),
   z.strictObject({mode:z.literal('none')}),
   z.strictObject({mode:z.literal('byo-api'),provider:Text,paidAuthorized:z.boolean()}),
