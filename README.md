@@ -5,7 +5,7 @@
 <p align="center">
   <a href="docs/media/engine-flagship.mp4"><img src="docs/media/engine-flagship.jpg" width="280" alt="GitHub Video Engine 产品视频：你把项目做好，我们把它讲清楚"></a>
 </p>
-<p align="center"><a href="docs/media/engine-flagship.mp4"><strong>▶ 看看你的仓库如何变成视频 · 54 秒</strong></a></p>
+<p align="center"><a href="docs/media/engine-flagship.mp4"><strong>▶ 看看你的仓库如何变成视频 · 57 秒</strong></a></p>
 
 以 OpenMAIC 为例，看一次从仓库链接、脚本审核到成片与可编辑项目的制作过程。[制作与审阅记录](docs/flagship-video/README.md)
 
