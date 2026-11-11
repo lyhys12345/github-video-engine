@@ -19,3 +19,15 @@ Optional `layout: immersive` removes the standard progress display and uses more
 Optional narration `captionCues` specify contiguous recording-relative frame intervals instead of proportional `captionChunks`. Their complete text must equal the approved line, and their final frame must equal the measured, frame-rounded recording length. These authored cues remain display estimates, not forced alignment or a perceptual synchronization guarantee. Do not supply both caption modes.
 
 For pacing review, inspect the real encoded frames as well as the manifest. Distinguish a frozen source frame, an editorial transition that carries new meaning, and actual source motion. Pixel freeze detection is supporting evidence only: overlays and camera movement can reduce its score without improving comprehension. Keep each failed preflight and each revised candidate separate, and bind the final independent review to the exact MP4 hash.
+
+
+## Cue-based cuts, cinematic layout and preview frames
+
+Author optional narration `captionCues` against the actual recording at 30 fps. They must partition the approved text and cover the measured recording from frame zero. For example, a cue starts on the first spoken syllable after a pause. Cue indices are zero-based within a beat.
+
+- Set `startCue` on every shot in a beat to cut at the start of each named cue. The first shot starts at cue zero. Without these fields the existing weight-based schedule applies.
+- Set a video shot's `actions` to entries such as `{"cue":2,"sourceFrame":165}`. At that cue start, the main video and panels inheriting its range show source frame 165. The engine interpolates between source anchors and shot endpoints, adjusting the source video speed while keeping speech at its original speed. Explicit panel ranges remain independent. Source frames must be nondecreasing and lie within the shot's source range.
+- Set `layout: "cinematic"` and optionally `cinematic: {"safeInset":76,"captionSize":42,"accent":"#D4BD95"}`. Sizes use pixels at 1080×1920. The existing font and panel crop/fit settings apply.
+- Set `preview: {"frames":[75,400],"shotMidpoints":false,"actionFrames":true}` to export selected absolute timeline frames and the action anchors. `--frames-only` stops after preview generation. `--still-frames` overrides the list and `--skip-stills` disables output.
+
+The renderer uses authored phrase boundaries. Verify speech timing by listening when exact perceptual sync is required.

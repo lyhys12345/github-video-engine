@@ -17,21 +17,13 @@ A README can explain your project. A short video can first show what it does, th
 
 ## Product demos
 
-Click a cover or an MP4 link to watch. These four examples are Chinese-language vertical videos.
+Click a cover or an MP4 link to watch. Both examples are Chinese-language vertical videos.
 
-| The World We Know | VoiceStudio |
+| The World We Know | Oneira |
 | :---: | :---: |
-| <a href="docs/media/worldknow-demo.mp4"><img src="docs/media/worldknow-demo.jpg" width="165" alt="The World We Know: a giraffe story on a historical map"></a> | <a href="docs/media/voicestudio-demo.mp4"><img src="docs/media/voicestudio-demo.jpg" width="165" alt="VoiceStudio: a new line in a reference voice"></a> |
-| **How did a giraffe reach Ming China?**<br>A story leads into the real map, showing how time and perspective change the view. | **The same voice, a new line.**<br>Hear the official sample comparison, then see the roles of reference audio and new text. |
-| [Watch MP4 · 43 seconds](docs/media/worldknow-demo.mp4) | [Watch MP4 · 41 seconds](docs/media/voicestudio-demo.mp4) |
-
-| ArtCraft | OpenMAIC |
-| :---: | :---: |
-| <a href="docs/media/artcraft-demo.mp4"><img src="docs/media/artcraft-demo.jpg" width="165" alt="ArtCraft: a robot on Mars"></a> | <a href="docs/media/openmaic-b-demo.mp4"><img src="docs/media/openmaic-b-demo.jpg" width="165" alt="OpenMAIC: AI teachers and classmates in a discussion"></a> |
-| **Hard to describe a pose? Show it to AI.**<br>An official demo connects a character pose, a text prompt and the resulting robot. | **The teacher and classmates are AI—and you can join the discussion.**<br>See the official classroom demo, then learn how a topic or source material becomes a course. |
-| [Watch MP4 · 25 seconds](docs/media/artcraft-demo.mp4) | [Watch MP4 · 46 seconds](docs/media/openmaic-b-demo.mp4) |
-
-Curious about the process? The [70-second workflow demo](docs/media/engine-workflow.mp4) uses The World We Know to show how project evidence informs a script, how feedback leads to revisions, and how an editable project is delivered.
+| <a href="docs/media/worldknow-demo.mp4"><img src="docs/media/worldknow-demo.jpg" width="165" alt="The World We Know: a giraffe story on a historical map"></a> | <a href="docs/media/oneira-demo.mp4"><img src="docs/media/oneira-demo.jpg" width="165" alt="Oneira: an interactive world that remembers"></a> |
+| **How did a giraffe reach Ming China?**<br>A story leads into the real map, showing how time and perspective change the view. | **What if a generated world remembered what you did?**<br>A cinematic introduction to Oneira and its interactive video worlds. |
+| [Watch MP4 · 43 seconds](docs/media/worldknow-demo.mp4) | [Watch MP4 · 91 seconds](docs/media/oneira-demo.mp4) |
 
 ## Try your own repository
 

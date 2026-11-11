@@ -31,3 +31,21 @@ it('keeps authored display estimates bound to exact text and measured original a
  expect(()=>showcaseCaptions(text,20,94,candidate.narration[0]!)).toThrow('measured');
  expect(()=>validateShowcase(bytes,approval,{...candidate,narration:[{...candidate.narration[0],captionCues:[{text:'篡改',startFrame:0,endFrame:93}]}]})).toThrow('partition');
 });
+
+import {scheduleShowcaseShots} from '../src/renderer/showcase-reel-contract.js';
+import {resolveSourceAnchors,sourceFrameAt} from '../src/renderer/showcase-timing.js';
+
+it('locks cuts and source action frames to the same measured narration cues',()=>{
+ const cues=[
+   {text:'Open.',start:30,end:48},
+   {text:'Pick up.',start:48,end:75},
+   {text:'Use.',start:75,end:100},
+ ];
+ const shots=scheduleShowcaseShots([{weight:1,startCue:0},{weight:1,startCue:1}],30,70,cues);
+ expect(shots.map(({start,end})=>[start,end])).toEqual([[30,48],[48,100]]);
+ const anchors=resolveSourceAnchors([{cue:2,sourceFrame:91}],cues,{...shots[1]!,startFrame:50},120);
+ expect([48,75,99].map(frame=>sourceFrameAt(frame,anchors))).toEqual([50,91,119]);
+ expect(sourceFrameAt(74,anchors)).toBeLessThan(91);
+ expect(()=>resolveSourceAnchors([{cue:0,sourceFrame:91}],cues,shots[1]!,120)).toThrow('outside');
+ expect(()=>scheduleShowcaseShots([{weight:1,startCue:0},{weight:1}],30,70,cues)).toThrow('every shot');
+});
