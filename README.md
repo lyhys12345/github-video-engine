@@ -1,5 +1,7 @@
 # GitHub Video Engine
 
+[简体中文](README.md) · [English](README.en.md)
+
 **把你的 GitHub 仓库，做成一条看得懂、愿意看下去的短视频。**
 
 <p align="center">
@@ -91,7 +93,5 @@ pnpm gve jobs resume <job-id>
 - Remotion、字体及各项目素材的授权分别适用。[架构与许可](docs/decisions.md)
 
 </details>
-
-**English** · Turn a GitHub repository into an editable, narrated explainer. Start with a repo URL and an audience brief, review a source-backed script, then render locally. [Getting started](docs/codex-user-path-v1.md)
 
 维护者换机续作：[Google Drive 交接记录](https://drive.google.com/file/d/1YtEYD-TT-qk87WjYjGPi05OIQpTespxd/view)
