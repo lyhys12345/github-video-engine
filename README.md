@@ -1,66 +1,67 @@
 # GitHub Video Engine
 
-[简体中文](README.md) · [English](README.en.md)
+**Turn your GitHub repository into a short video people want to watch and can understand.**
 
-**把你的 GitHub 仓库，做成一条看得懂、愿意看下去的短视频。**
+English | [简体中文](README.zh-CN.md)
 
 <p align="center">
-  <a href="docs/media/engine-flagship.mp4"><img src="docs/media/engine-flagship.jpg" width="280" alt="GitHub Video Engine 产品视频：你把项目做好，我们把它讲清楚"></a>
+  <a href="docs/media/engine-flagship.mp4"><img src="docs/media/engine-flagship.jpg" width="280" alt="GitHub Video Engine product video: you build the project, we help explain it"></a>
 </p>
-<p align="center"><a href="docs/media/engine-flagship.mp4"><strong>▶ 看看你的仓库如何变成视频 · 57 秒</strong></a></p>
+<p align="center"><a href="docs/media/engine-flagship.mp4"><strong>▶ See how a repository becomes a video · 57 seconds</strong></a></p>
 
-以 OpenMAIC 为例，看一次从仓库链接、脚本审核到成片与可编辑项目的制作过程。[制作与审阅记录](docs/flagship-video/README.md)
+Using OpenMAIC as an example, see the journey from a repository link and script review to a finished video and editable project. [Production and review notes](docs/flagship-video/README.md)
 
-README 能解释项目。短视频可以先让人看到它解决了什么，再带观众看懂原理。把 GitHub 链接交给 Codex，告诉它你想讲给谁听。你先审核旁白和分镜，再决定是否生成带旁白、字幕的竖屏视频和可编辑项目文件。
+A README can explain your project. A short video can first show what it does, then help viewers understand how it works. Give Codex a GitHub link and describe your audience. Review the narration and storyboard before deciding whether to generate a narrated vertical video and editable project files.
 
-[看产品 Demo](#产品-demo) · [用自己的仓库试一次](#用自己的仓库试一次) · [工程文档](#工程文档)
+[Watch the demos](#product-demos) · [Try your own repository](#try-your-own-repository) · [Engineering docs](#engineering-docs)
 
-## 产品 Demo
+## Product demos
 
-点击封面或下方的 MP4 链接查看。四个案例均为中文竖屏预览。
+Click a cover or an MP4 link to watch. These four examples are Chinese-language vertical videos.
 
-| 山海所知 | VoiceStudio |
+| The World We Know | VoiceStudio |
 | :---: | :---: |
-| <a href="docs/media/worldknow-demo.mp4"><img src="docs/media/worldknow-demo.jpg" width="165" alt="山海所知：地图里的长颈鹿故事"></a> | <a href="docs/media/voicestudio-demo.mp4"><img src="docs/media/voicestudio-demo.jpg" width="165" alt="VoiceStudio：同一参考音色换一句台词"></a> |
-| **一只长颈鹿，怎么走进明朝？**<br>从故事切进真实地图，展示时间和视角如何改变画面。 | **同一个声音，换一句台词。**<br>先听官方样音对比，再看参考音频和新台词各自起什么作用。 |
-| [查看 MP4 · 43 秒](docs/media/worldknow-demo.mp4) | [查看 MP4 · 41 秒](docs/media/voicestudio-demo.mp4) |
+| <a href="docs/media/worldknow-demo.mp4"><img src="docs/media/worldknow-demo.jpg" width="165" alt="The World We Know: a giraffe story on a historical map"></a> | <a href="docs/media/voicestudio-demo.mp4"><img src="docs/media/voicestudio-demo.jpg" width="165" alt="VoiceStudio: a new line in a reference voice"></a> |
+| **How did a giraffe reach Ming China?**<br>A story leads into the real map, showing how time and perspective change the view. | **The same voice, a new line.**<br>Hear the official sample comparison, then see the roles of reference audio and new text. |
+| [Watch MP4 · 43 seconds](docs/media/worldknow-demo.mp4) | [Watch MP4 · 41 seconds](docs/media/voicestudio-demo.mp4) |
 
 | ArtCraft | OpenMAIC |
 | :---: | :---: |
-| <a href="docs/media/artcraft-demo.mp4"><img src="docs/media/artcraft-demo.jpg" width="165" alt="ArtCraft：火星上的机器人"></a> | <a href="docs/media/openmaic-b-demo.mp4"><img src="docs/media/openmaic-b-demo.jpg" width="165" alt="OpenMAIC：AI 老师和同学参与讨论"></a> |
-| **动作说不清？先摆给 AI 看。**<br>用官方演示串起人偶姿势、文字描述和机器人结果。 | **老师和同学都是 AI，你可以加入讨论。**<br>先看官方课堂演示，再讲一个主题或一份资料如何变成课程。 |
-| [查看 MP4 · 25 秒](docs/media/artcraft-demo.mp4) | [查看 MP4 · 46 秒](docs/media/openmaic-b-demo.mp4) |
+| <a href="docs/media/artcraft-demo.mp4"><img src="docs/media/artcraft-demo.jpg" width="165" alt="ArtCraft: a robot on Mars"></a> | <a href="docs/media/openmaic-b-demo.mp4"><img src="docs/media/openmaic-b-demo.jpg" width="165" alt="OpenMAIC: AI teachers and classmates in a discussion"></a> |
+| **Hard to describe a pose? Show it to AI.**<br>An official demo connects a character pose, a text prompt and the resulting robot. | **The teacher and classmates are AI—and you can join the discussion.**<br>See the official classroom demo, then learn how a topic or source material becomes a course. |
+| [Watch MP4 · 25 seconds](docs/media/artcraft-demo.mp4) | [Watch MP4 · 46 seconds](docs/media/openmaic-b-demo.mp4) |
 
-想看制作流程？[70 秒工作流演示](docs/media/engine-workflow.mp4)以《山海所知》为例，展示如何从项目证据写出脚本、按反馈改稿并交付可编辑项目。
+Curious about the process? The [70-second workflow demo](docs/media/engine-workflow.mp4) uses The World We Know to show how project evidence informs a script, how feedback leads to revisions, and how an editable project is delivered.
 
-## 用自己的仓库试一次
+## Try your own repository
 
-1. 在 Codex 中打开已配置的 **GitHub Video Engine 仓库**。首次使用先看[安装与使用指南](docs/codex-user-path-v1.md)。
-2. 贴上 GitHub 链接，说明观众和发布平台。时长、风格和声音可以一起指定。
-3. 审核完整旁白和逐镜头分镜。确认后生成视频，拿到 MP4 和可编辑项目文件。后续可以直接用自然语言指出要改的地方。
+1. Open a configured **GitHub Video Engine repository** in Codex. For first-time setup, see the [installation and usage guide](docs/codex-user-path-v1.md).
+2. Share a GitHub URL and describe your audience and publishing platform. You can also specify the duration, style and voice.
+3. Review the complete narration and shot-by-shot storyboard. Once you approve, generate a video and receive an MP4 and editable project files. You can request later changes in plain language.
 
-可以直接在 Codex 里这样说：
+For example, ask Codex:
 
 ```text
-把 https://github.com/OWNER/REPO 做成一条面向小红书普通观众的竖屏短视频。
-用一个具体例子开场，讲清楚它解决什么问题、如何实现。先给我完整旁白和分镜审核。
+Turn https://github.com/OWNER/REPO into a vertical short video for a general TikTok audience.
+Open with a concrete example and explain the problem it solves and how it works.
+Show me the full narration and storyboard for review before generating the video.
 ```
 
-**目前适合在配置好的 Codex 环境里试用。** Codex 会话负责理解仓库、写稿和策划画面，引擎负责保存证据、审批、任务与渲染产物。内置流程只读研究目标仓库。本地有声制作需要额外配置语音运行时、模型和有权使用的参考音频。[语音配置](docs/narration-voice-preference.md)
+**Currently intended for use in a configured Codex environment.** The Codex session researches the repository and develops the script and visuals; the engine persists evidence, approvals, jobs and rendering artifacts. The built-in research flow reads the target repository without executing it. Local narration requires a separately configured voice runtime, model and reference audio you have the right to use. [Voice configuration](docs/narration-voice-preference.md)
 
-## 工程文档
+## Engineering docs
 
-| 想了解什么 | 从这里开始 |
+| What you want to do | Start here |
 | --- | --- |
-| 用 Codex 从链接做有声预览 | [使用指南](docs/codex-user-path-v1.md) · [统一运行入口](docs/narrative-run-v1.md) |
-| 审阅事实、处理返修、导出可编辑项目 | [事实审阅](docs/script-facts-v1.md) · [返修流程](docs/rsi-repair-v1.md) · [跨机交付](docs/long-preview-portability-v1.md) |
-| 使用 Claude Code 或自己的 API | [Claude Code](docs/claude-code-user-path-v1.md) · [自备 API](docs/byo-api-author-v1.md)。已有入口，实际模型端到端出片尚待验证。 |
-| 看渲染实现、架构与许可 | [素材剪辑适配器](docs/showcase-reel.md) · [操作手册](docs/operator-runbook.md) · [架构与许可](docs/decisions.md) |
+| Create a narrated preview from a URL with Codex | [User guide](docs/codex-user-path-v1.md) · [Unified run entry point](docs/narrative-run-v1.md) |
+| Review facts, handle revisions and export an editable project | [Fact review](docs/script-facts-v1.md) · [Revision workflow](docs/rsi-repair-v1.md) · [Cross-machine portability](docs/long-preview-portability-v1.md) |
+| Use Claude Code or your own API | [Claude Code](docs/claude-code-user-path-v1.md) · [Bring your own API](docs/byo-api-author-v1.md). Entry points exist; full end-to-end video production with a real model remains unverified. |
+| Explore rendering, architecture and licensing | [Showcase editing adapter](docs/showcase-reel.md) · [Operator runbook](docs/operator-runbook.md) · [Architecture and licensing](docs/decisions.md) |
 
 <details>
-<summary>本地安装、测试与 CLI</summary>
+<summary>Local installation, tests and CLI</summary>
 
-已验证环境为 Windows x64/NTFS。需要 Node.js 24.x、pnpm 11.25.0、支持同卷硬链接的文件系统。渲染还需要本地 Chrome/Chromium、FFmpeg 与 FFprobe。
+The verified environment is Windows x64/NTFS. You need Node.js 24.x, pnpm 11.25.0 and a filesystem that supports same-volume hard links. Rendering also requires local Chrome/Chromium, FFmpeg and FFprobe.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -69,7 +70,7 @@ pnpm run typecheck
 pnpm test
 ```
 
-`pnpm run test:smoke` 和 `pnpm run test:acceptance` 会生成本地媒体。部分 Windows 测试需要硬链接和目录联接权限。建议使用较短的 checkout 和状态目录。常用环境变量为 `GVE_DATA`、`GVE_BROWSER`、`GVE_FFMPEG`、`GVE_FFPROBE`。
+`pnpm run test:smoke` and `pnpm run test:acceptance` generate local media. Some Windows tests require hard-link and directory-junction permissions. Short checkout and state paths are recommended. Common environment variables include `GVE_DATA`, `GVE_BROWSER`, `GVE_FFMPEG` and `GVE_FFPROBE`.
 
 ```sh
 pnpm gve research --repo https://github.com/OWNER/REPO --out work/snapshot.json
@@ -78,20 +79,20 @@ pnpm gve jobs status
 pnpm gve jobs resume <job-id>
 ```
 
-[证据规划与导出](docs/planning-runtime-v1.md) · [设计决策](docs/decisions.md) · [仓库范围](docs/repository-setup.md)
+[Evidence planning and export](docs/planning-runtime-v1.md) · [Design decisions](docs/decisions.md) · [Repository scope](docs/repository-setup.md)
 
 </details>
 
 <details>
-<summary>案例来源与验证范围</summary>
+<summary>Sources and review scope</summary>
 
-- 山海所知使用真实产品操作，机制示意在片中标明。[源仓库](https://github.com/Greenere/the-world-we-know)
-- VoiceStudio 的音色对比使用官方预生成样音。片中的应用画面属于示意。
-- ArtCraft 使用官方姿势编辑示例，保留姿势参考和模型费用提示。[源仓库](https://github.com/storytold/artcraft) · [复审记录](reviews/artcraft-result-refine-v1/README.md)
-- OpenMAIC 选用课堂讨论版（试片 O-B），使用官方课堂片段，课程生成过程以示意呈现。[试片记录](reviews/xhs-pilot-production-v1/final-binding.json)
-- Demo 是制作案例。抽帧审阅、媒体解码、完整听看和最终用户验收各有独立记录。工作目录里的原始产物和本地语音模型另行保存。
-- Remotion、字体及各项目素材的授权分别适用。[架构与许可](docs/decisions.md)
+- The World We Know uses real product interaction; mechanism illustrations are labeled in the video. [Source repository](https://github.com/Greenere/the-world-we-know)
+- VoiceStudio's voice comparison uses official pregenerated audio samples. The application footage in the video is an illustration.
+- ArtCraft uses an official pose-editing example and retains the pose-reference and model-cost disclosures. [Source repository](https://github.com/storytold/artcraft) · [Review notes](reviews/artcraft-result-refine-v1/README.md)
+- OpenMAIC uses the classroom-discussion version (pilot O-B) and official classroom footage; course generation is illustrated. [Pilot record](reviews/xhs-pilot-production-v1/final-binding.json)
+- Demos are production examples. Sampled-frame reviews, media decoding, continuous audiovisual reviews and final owner acceptance are recorded separately. Original working artifacts and local voice models are stored separately.
+- Remotion, fonts and project assets have separate licensing terms. [Architecture and licensing](docs/decisions.md)
 
 </details>
 
-维护者换机续作：[Google Drive 交接记录](https://drive.google.com/file/d/1YtEYD-TT-qk87WjYjGPi05OIQpTespxd/view)
+Maintainer handoff for continuing on another machine: [Google Drive handoff](https://drive.google.com/file/d/1YtEYD-TT-qk87WjYjGPi05OIQpTespxd/view).

@@ -1,6 +1,6 @@
 # GitHub Video Engine
 
-[简体中文](README.md) · [English](README.en.md)
+[简体中文](README.zh-CN.md) · [English](README.md)
 
 **Turn your GitHub repo into a short video people can understand and want to watch.**
 
