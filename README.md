@@ -25,6 +25,13 @@ Click a cover or an MP4 link to watch. Both examples are Chinese-language vertic
 | **How did a giraffe reach Ming China?**<br>A story leads into the real map, showing how time and perspective change the view. | **What if a generated world remembered what you did?**<br>A cinematic introduction to Oneira and its interactive video worlds. |
 | [Watch MP4 · 43 seconds](docs/media/worldknow-demo.mp4) | [Watch MP4 · 91 seconds](docs/media/oneira-demo.mp4) |
 
+## Use as a Codex or Claude Code skill
+
+This repository includes a project-level `github-explainer` skill for [Codex](.agents/skills/github-explainer/SKILL.md) and a [Claude Code entry point](.claude/skills/github-explainer/SKILL.md). Open this engine checkout as the working project, install its dependencies, and ask the agent to turn a GitHub URL into a video. The session agent researches and authors the story; this engine provides the local workflow and rendering tools. The skill is not a standalone voice model or a hosted video service.
+
+The agent should clarify any missing audience, platform, duration, style and voice preferences, then present a complete script and storyboard for your approval before generating a video. Local media tools and an authorized, configured voice are needed for narrated output. [Codex setup](docs/codex-user-path-v1.md) · [Claude Code setup](docs/claude-code-user-path-v1.md) · [Voice setup](docs/narration-voice-preference.md)
+
+The Claude entry point has been checked for repository routing, but a real Claude Code session and end-to-end media generation have not been verified. A skill file alone does not install the engine or guarantee a finished video.
 ## Try your own repository
 
 1. Open a configured **GitHub Video Engine repository** in Codex. For first-time setup, see the [installation and usage guide](docs/codex-user-path-v1.md).

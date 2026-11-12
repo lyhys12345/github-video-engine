@@ -33,6 +33,13 @@ README 能解释项目。短视频可以先让人看到它解决了什么，再�
 
 想看制作流程？[70 秒工作流演示](docs/media/engine-workflow.mp4)以《山海所知》为例，展示如何从项目证据写出脚本、按反馈改稿并交付可编辑项目。
 
+## 作为 Codex 或 Claude Code 技能使用
+
+仓库已经提供项目级 `github-explainer` 技能：[Codex 入口](.agents/skills/github-explainer/SKILL.md)和 [Claude Code 入口](.claude/skills/github-explainer/SKILL.md)。将本引擎仓库作为工作项目打开，安装依赖后，直接让当前 Agent 根据 GitHub 链接制作视频。Agent 负责研究和策划，引擎负责本地工作流和渲染；技能文件本身不是独立的语音模型或托管服务。
+
+Agent 应先了解缺少的观众、平台、时长、风格和声音偏好，提供完整旁白及逐镜头分镜，获得用户同意后再生成视频。有声视频需要本地媒体工具，以及已配置且有权使用的声音。[Codex 配置](docs/codex-user-path-v1.md) · [Claude Code 配置](docs/claude-code-user-path-v1.md) · [语音配置](docs/narration-voice-preference.md)
+
+Claude Code 入口已检查仓库内的路由，但尚未验证真实 Claude Code 会话的端到端出片。单独复制技能文件不会自动安装引擎，也不保证可以直接出片。
 ## 用自己的仓库试一次
 
 1. 在 Codex 中打开已配置的 **GitHub Video Engine 仓库**。首次使用先看[安装与使用指南](docs/codex-user-path-v1.md)。
