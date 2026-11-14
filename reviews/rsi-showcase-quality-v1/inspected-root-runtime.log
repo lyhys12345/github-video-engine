@@ -1,0 +1,35 @@
+
+ RUN  v3.2.4 D:/gve-flagship-publish
+
+ ✓ tests/usage.test.ts (11 tests) 10608ms
+   ✓ real SQLite/CAS: explicit offline charges, generic unknown, cache hits/failure are distinct (simulated callbacks)  797ms
+   ✓ policies and forged costs fail strict validation before simulated work  416ms
+   ✓ real SQLite claims and terminal receipts roll back atomically on accounting failure  818ms
+   ✓ real two-connection ownership, retries, timeout/cancel preserve separate receipts (simulated callbacks)  824ms
+   ✓ known legacy migration preserves exact task/events and attempts; legacy cache cannot backfill fees  582ms
+   ✓ future and unknown legacy schemas fail without silently rewriting version/data  525ms
+   ✓ unknown/partial legacy stores and version 1 missing preservation constraints are rejected before work  1221ms
+   ✓ append-only, unique attempt boundaries, forged references/owners and SQL/JSON conflicts are rejected  441ms
+   ✓ coverage bounds fail explicitly before huge attempt traversal or receipt loading  3005ms
+   ✓ immutable success cannot precede a later attempt in persisted usage history (simulated callbacks)  591ms
+   ✓ real Node process crash/resume preserves prior receipt and records unknown crash wall duration  1387ms
+ ✓ tests/tasks.test.ts (11 tests) 15481ms
+   ✓ CAS permission EPERM preserves a resumable task and atomic publication  816ms
+   ✓ CAS permission EACCES preserves a resumable task and atomic publication  689ms
+   ✓ real CAS outputs persist, are reused and detect tampering; success cannot be edited  525ms
+   ✓ real two-connection ownership prevents duplicate async execution  428ms
+   ✓ task database startup waits for a real lock, reports exhausted SQLite busy as retryable, and recovers  9369ms
+   ✓ retries bounded active WAL growth without relaxing ordinary file integrity  824ms
+   ✓ failed work cleans temporary output, retains committed inputs and resumes within bounded attempts  461ms
+   ✓ timeouts and cancellation stop real sleeping children and leave recoverable persistent failure  946ms
+   ✓ stale lease can be fenced and resumed; exhausted attempts and changed inputs remain distinct  616ms
+   ✓ durable scope budget counts attempts across environment fingerprints, cache reuse spends zero  577ms
+ ✓ tests/showcase-durable.test.ts (4 tests) 4300ms
+   ✓ captures exact files once and keeps portable input independent of mutable original paths  1363ms
+   ✓ binds exact approved script bytes and review to the verified owner workspace snapshot  2812ms
+
+ Test Files  3 passed (3)
+      Tests  26 passed (26)
+   Start at  21:08:35
+   Duration  32.55s (transform 747ms, setup 0ms, collect 1.49s, tests 30.39s, environment 0ms, prepare 240ms)
+

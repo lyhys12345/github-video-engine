@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "oracleCases": 240,
+  "visiblePanelsChecked": 583,
+  "visibleFramesChecked": 14621,
+  "readOnlyChecks": [
+    "missing path not created",
+    "live WAL row visible",
+    "write rejected",
+    "schema and version unchanged",
+    "event count unchanged",
+    "legacy read-only rejected unchanged",
+    "default legacy migration succeeds"
+  ],
+  "scratch": "C:\\Users\\luyuh\\Documents\\Codex\\quality-independent\\gve-quality-independent-49Yiws"
+}

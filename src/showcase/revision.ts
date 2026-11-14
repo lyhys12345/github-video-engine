@@ -23,18 +23,18 @@ const revisionError = (message: string) => fail(message, 'SHOWCASE_REVISION');
 const scope = {sourceFacts: 'unverified', perceptualReview: 'pending', ownerAcceptance: 'pending',
   modelCalls: 0, renderTasksStarted: 0} as const;
 
-async function withRevision<T>(
+export async function withRevision<T>(
   data: string,
   baselineId: string,
   workspace: string | undefined,
   signal: AbortSignal,
   use: (runner: Awaited<ReturnType<typeof openShowcase>>, revision: Revision) => Promise<T>,
-  lock = false,
+  {lock = false, readOnly = false}: {lock?: boolean; readOnly?: boolean} = {},
 ) {
   Hash.parse(baselineId);
   const release = workspace && lock ? await lockShowcaseWorkspace(resolve(workspace)) : undefined;
   try {
-    const runner = await openShowcase(data);
+    const runner = await openShowcase(data, false, readOnly);
     try {
       const revision = await loadRevisionBaseline(runner, baselineId, signal);
       if (workspace) {
@@ -90,7 +90,7 @@ export async function showcaseFeedbackContext(
   });
 }
 
-function buildRevision(revision: Revision, planBytes: Buffer) {
+export function evaluateShowcaseRevision(revision: Revision, planBytes: Buffer) {
   const plan = ShowcaseRevisionPlan.parse(json(planBytes));
   if (canonical(plan.baseline) !== canonical(revision.baseline)) revisionError('Stale or different revision baseline hashes.');
   const reviewHash = plan.feedback.videoReviewSha256;
@@ -118,6 +118,12 @@ function buildRevision(revision: Revision, planBytes: Buffer) {
   }));
   const reusable = shots.filter(shot => shot.cacheEligibleWithSavedEnvironment).length;
   if (reusable === shots.length) revisionError('The proposed changes do not alter any renderer shot input.');
+  return {plan, manifest, changes, nextScript, scriptBytes, storyboardSha256, after, shots, reusable};
+}
+
+function buildRevision(revision: Revision, planBytes: Buffer) {
+  const {plan, manifest, changes, nextScript, scriptBytes, storyboardSha256, after, shots, reusable} =
+    evaluateShowcaseRevision(revision, planBytes);
   const planSha256 = sha256(planBytes);
   const impact = {
     schemaVersion: 'showcase-revision-impact/1.0',
@@ -220,7 +226,7 @@ export async function prepareShowcaseRevision(
       reviewDocument: join(output.bundle, 'review.md'), impact: join(output.bundle, 'impact.json'),
       approval: 'pending', ...scope,
     };
-  }, true);
+  }, {lock: true});
 }
 
 async function verifyDraft(
@@ -323,5 +329,5 @@ export async function finalizeShowcaseRevision(
       manifest: join(output.bundle, 'manifest.json'), scriptReview: join(output.bundle, ...workspaceReviewName.split('/')),
       approval: 'exact script authorized', ...scope,
     };
-  }, true);
+  }, {lock: true});
 }

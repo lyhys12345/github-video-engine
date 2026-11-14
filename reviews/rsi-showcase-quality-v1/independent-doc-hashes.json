@@ -1,0 +1,18 @@
+[
+  {
+    "path": ".agents/skills/github-explainer/SKILL.md",
+    "sha256": "ab017a8cfd30e63ed0e2b22a7ccb235767f1943597923eba8d34a964b1d33d84"
+  },
+  {
+    "path": "docs/showcase-quality-v1.md",
+    "sha256": "9e0c0fca5341a510c89822077d2cd1359c653ac2e7177234e96b7864f38a7dfa"
+  },
+  {
+    "path": "docs/showcase-revisions-v1.md",
+    "sha256": "260a33fe3ea20d1b2b4ed6bb4998e82e68bced0eff3d4acef4a56c35ed4f15a4"
+  },
+  {
+    "path": "tests/catalog.json",
+    "sha256": "c41f3c268f771f7d6586925366b46e9ed58292eb15efaab780bb7602c84980ec"
+  }
+]

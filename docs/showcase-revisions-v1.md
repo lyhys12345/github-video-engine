@@ -20,7 +20,7 @@ Write a `showcase-revision-plan/1.0` using the exact `baseline` object from the 
 
 The plan keeps the narration text, audio, receipts, media inventory, font, beat order and measured beat durations. Changed weights or cue boundaries can retime shots within a beat. The impact report recomputes the actual shot payloads using the saved audio timing and renderer fingerprint. A matching task ID is eligible for reuse in the saved environment. The renderer verifies cache hits during the later run. Impact and preparation require the existing local state and files. They make no model or media tool calls.
 
-The immutable draft contains `review.md`, the exact revised script, the draft storyboard manifest, the plan, the before/after report and eligible inputs. Give the owner the readable review document and exact script digest. The draft contains no previously approved receipt and cannot render. The review document shows every line, resulting shot, rationale and affected interval. Revised labels and visuals require factual review against the pinned evidence.
+The immutable draft contains `review.md`, the exact revised script, the draft storyboard manifest, the plan, the before/after report and eligible inputs. Give the owner the readable review document and exact script digest. The draft has no active owner or script approval and cannot render; the original narration receipts are retained. The review document shows every line, resulting shot, rationale and affected interval. Revised labels and visuals require factual review against the pinned evidence.
 
 ## Finalize an authorized draft
 
@@ -39,6 +39,6 @@ Preparation and finalization leave the current movie pointer unchanged. Normal r
 
 Finalized revision manifests carry optional `scriptReview` and scripts carry `reviewPolicy`. Older strict readers may reject these additions. Use an engine version supporting this workflow; removing review fields to force an older path is not a supported downgrade.
 
-This module does not automatically assess source resolution or crop aesthetics. A valid crop can magnify compression or clip useful context. Inspect representative frames at phone scale and resolve those visual findings before accepting a production candidate.
+Use the separate [pixel-budget preflight](showcase-quality-v1.md) to inspect enlargement and fit-induced clipping for the baseline and proposed plan. It preserves existing draft bytes and does not judge crop aesthetics, compression or useful context. Inspect representative frames at phone scale and resolve those visual findings before accepting a production candidate.
 
 [Executed checks and independent reports](rsi-showcase-revisions-results-2026-11-13.md).

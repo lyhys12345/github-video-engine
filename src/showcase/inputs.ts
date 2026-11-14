@@ -204,7 +204,7 @@ function expectedAudioStorage(hash: string, mediaType: string) {
   return hash.slice(0, 2) + '/' + hash + extension;
 }
 
-export async function openShowcase(data: string, create = false) {
+export async function openShowcase(data: string, create = false, readOnly = false) {
   data = resolve(data);
   preflightStatePath(data);
   await ancestors(data, create);
@@ -217,7 +217,7 @@ export async function openShowcase(data: string, create = false) {
       if (!create && name === 'tasks.sqlite') fail('Existing showcase task state was not found.');
     }
   }
-  return new TaskRunner(data);
+  return new TaskRunner(data, {readOnly});
 }
 
 export async function readShowcaseSpec(path: string, signal: AbortSignal) {

@@ -1,0 +1,17 @@
+# RSI contract: showcase pixel-budget preflight
+
+Baseline: ec44382eec4b16ea9e8c44c3b614f40b6a142f1b. User authorized autonomous improvements; no paid services, target repository execution, or new production movie. Preserve existing work and immutable revision publications.
+
+## Scope and required evidence
+
+Q1. New read-only `showcase quality (--workspace W | --data S) --task BASELINE [--spec REVISION_PLAN]` returns a versioned deterministic advisory report bound to the verified completed movie, current source bytes and optional exact revision plan. Reuse stale-baseline/review/plan validation. No new tasks, publication, workspace-pointer changes or media subprocesses.
+Q2. Share actual viewport/crop geometry with renderer without changing rendered behavior. Evaluate every visible integer frame, panels and overrides, contain/cover, cropEnd, panel motion and reveal. Correctly report never-visible panels and exclude unattainable progress=1. Report worst enlargement/frame, destination and visible source pixel extent, additional cover clipping and contain fill. No guessed OCR or perceptual scores.
+Q3. Distinguish 1080x1920 output from explicit assumed 360x640 CSS-pixel / DPR1 phone presentation. Warning threshold is a documented pixel-budget heuristic, not proof of blur or readability. Include concrete corrective choices without mutating edits. Dimension basis is hash-bound declarations verified by the completed baseline render; freshMediaProbe=false. Current geometry contract/version is separate from saved renderer fingerprint.
+Q4. Do not alter existing immutable revision draft payloads, receipt identities or review document interpretation. Verify a retained pre-change draft/finalized source still retries identically. Shared renderer helper extraction intentionally changes current renderer fingerprint; document one-time cache invalidation, preserve historical candidates.
+Q5. Actually run directed unit/CLI tests and real synthetic image + 30fps video tests. Test hand-calculated scale/fit, each layout/inset, internal motion maximum, reveal, media overrides, final displayed frame, stale/tampered bindings, unavailable media tools, no tasks/pointer mutation, false source dimensions, deterministic repeat.
+Q6. Independently inspect actual rendered PNGs at output and 360px phone scale and compare geometry claims with visible frames. Preserve dissent. Do not claim continuous AV, natural voice, retention or production aesthetics from synthetic fixtures.
+Q7. Integrate into canonical Skill as an optional relevant revision check; document commands, exact results and limitations. Save source/tests/raw reviews to GitHub and update Drive handoff preserving history. Do not upload private audio/config/model/media.
+
+## Roles and review
+
+Astra: design, final independent product/usefulness, reliability/compatibility, evidence and security review (Q1-Q5,Q7); read-only candidate, isolated evidence. Terra: actual-frame specialist (Q2,Q3,Q6), blind independent first observation. Root: integration, historical compatibility and release verification. Sol: implementation; cannot approve own work. Content-fact specialty N/A (no factual project claims or new narrative); voice/continuous AV remains unverified and outside this bounded arithmetic contract. Freeze source hashes before review, preserve original findings, fix then recheck affected criteria. No unresolved blocker/major for scoped completion; no claim of overall industry readiness.

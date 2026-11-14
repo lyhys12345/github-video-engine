@@ -28,6 +28,7 @@
         "tests/rsi-repair.test.ts",
         "tests/short-segment.test.ts",
         "tests/showcase-draft-contract.test.ts",
+        "tests/showcase-quality.test.ts",
         "tests/showcase-reel.test.ts",
         "tests/showcase-revision.test.ts",
         "tests/test-catalog.test.ts"
@@ -106,6 +107,7 @@
         "tests/editable-snapshot.test.ts",
         "tests/final-finishing.test.ts",
         "tests/showcase-durable.media.test.ts",
+        "tests/showcase-quality.media.test.ts",
         "tests/showcase-revision.media.test.ts",
         "tests/smoke.test.ts",
         "tests/story-preview.test.ts"

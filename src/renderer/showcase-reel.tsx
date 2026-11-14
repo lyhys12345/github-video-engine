@@ -1,5 +1,5 @@
 import {sourceFrameAt, type SourceAnchor} from './showcase-timing';
-import {sourceCropLayout,panelPosition,unitProgress} from './showcase-geometry';
+import {showcaseOutputSize,showcasePanelLayout,showcasePanels,showcasePanelVisible,showcaseShotProgress,showcaseViewport,unitProgress} from './showcase-geometry';
 import type {ShowcasePanel,ShowcaseOverlay} from './showcase-reel-contract';
 import React from 'react';
 import {AbsoluteFill,Composition,registerRoot,useCurrentFrame,staticFile,delayRender,continueRender,cancelRender,OffthreadVideo,Freeze,Img} from 'remotion';
@@ -15,17 +15,17 @@ const Reel:React.FC<ShowcaseProps>=p=>{
  const f=useCurrentFrame(),c=cinema?{bg:'#0b1211',ink:'#f5efe4',soft:'#b8beb3',accent:p.cinematic?.accent??'#d4bd95'}:palettes[p.theme],[handle]=React.useState(()=>delayRender('font'));
  React.useEffect(()=>{const font=new FontFace('showcase',`url(${staticFile('font.ttf')})`);void font.load().then(a=>{document.fonts.add(a);continueRender(handle)}).catch(cancelRender)},[handle]);
  const shot=p.shots.find(s=>f>=s.start&&f<s.end),caption=p.captions.find(c=>f>=c.start&&f<c.end),immersive=p.layout==='immersive';
- const progress=shot?unitProgress((f-shot.start)/(shot.end-shot.start)):0,t=progress*progress*(3-2*progress),mix=(a:number,b:number)=>a+(b-a)*t;
- const viewport=cinema?{x:inset,y:236,w:1080-2*inset,h:1240}:immersive?{x:0,y:125,w:1080,h:1460}:{x:0,y:135,w:1080,h:1450};
+ const progress=shot?showcaseShotProgress(f,shot):0;
+ const viewport=showcaseViewport(p.layout,inset);
  const label=shot?.label??'官方资料 · 非本次运行';
  return <AbsoluteFill style={{background:cinema?'radial-gradient(ellipse at 80% 35%, #29332b, '+c.bg+' 65%)':c.bg,color:c.ink,fontFamily:'showcase,sans-serif'}}>
   <div style={{position:'absolute',left:cinema?inset:38,right:cinema?inset:38,top:cinema?92:immersive?44:48,fontSize:cinema?34:27,fontWeight:cinema?500:750,color:cinema?c.accent:c.ink,letterSpacing:cinema?5:0,borderBottom:cinema?'1px solid '+c.accent:undefined,paddingBottom:cinema?28:0}}>{p.projectLabel}</div>
   {shot&&<>
-   {(shot.panels??[{crop:shot.crop,cropEnd:shot.cropEnd,x:0,y:0,width:1,height:1}]).map((panel:Panel,i)=>{
-    if(progress<(panel.reveal??0))return null;
-    const media=panel.media??shot,rect=panelPosition(panel,progress),r={x:mix(panel.crop.x,panel.cropEnd?.x??panel.crop.x),y:mix(panel.crop.y,panel.cropEnd?.y??panel.crop.y),width:mix(panel.crop.width,panel.cropEnd?.width??panel.crop.width),height:mix(panel.crop.height,panel.cropEnd?.height??panel.crop.height)},w=viewport.w*rect.width,h=viewport.h*rect.height,geometry=sourceCropLayout(media.width,media.height,r,w,h,panel.fit),style:React.CSSProperties={position:'absolute',maxWidth:'none',...geometry.source};
+   {showcasePanels(shot).map((panel:Panel,i)=>{
+    if(!showcasePanelVisible(panel,progress))return null;
+    const media=panel.media??shot,geometry=showcasePanelLayout(panel,progress,media,viewport),style:React.CSSProperties={position:'absolute',maxWidth:'none',...geometry.source};
     const sourceStart=panel.startFrame??(panel.media?0:shot.startFrame??0),sourceEnd=panel.endFrame??(panel.media?media.frames:shot.endFrame??shot.frames);
-    return <div key={i} style={{position:'absolute',left:viewport.x+viewport.w*rect.x,top:viewport.y+viewport.h*rect.y,width:w,height:h,overflow:'hidden',background:c.bg}}><div style={{position:'absolute',overflow:'hidden',...geometry.crop}}>{media.type==='image'?<Img src={staticFile(media.file)} style={style}/>:<Freeze frame={shot.sourceAnchors && !panel.media && panel.startFrame===undefined && panel.endFrame===undefined ? sourceFrameAt(f,shot.sourceAnchors) : Math.min(sourceStart+f-shot.start,sourceEnd!-1)}><OffthreadVideo src={staticFile(media.file)} muted style={style}/></Freeze>}</div></div>;
+    return <div key={i} style={{position:'absolute',...geometry.destination,overflow:'hidden',background:c.bg}}><div style={{position:'absolute',overflow:'hidden',...geometry.crop}}>{media.type==='image'?<Img src={staticFile(media.file)} style={style}/>:<Freeze frame={shot.sourceAnchors && !panel.media && panel.startFrame===undefined && panel.endFrame===undefined ? sourceFrameAt(f,shot.sourceAnchors) : Math.min(sourceStart+f-shot.start,sourceEnd!-1)}><OffthreadVideo src={staticFile(media.file)} muted style={style}/></Freeze>}</div></div>;
    })}
    {(shot.overlays??[]).map((o,i)=>{
     const u=unitProgress(progress,o.start,o.end);if(u===0)return null;const color=c[o.tone??'accent'],left=viewport.x+o.x*viewport.w,top=viewport.y+o.y*viewport.h,width=o.width*viewport.w,height=o.height*viewport.h;
@@ -39,6 +39,6 @@ const Reel:React.FC<ShowcaseProps>=p=>{
   {!immersive&&!cinema&&<><div style={{position:'absolute',bottom:80,left:44,right:44,height:2,background:c.soft,opacity:.22}}/><div style={{position:'absolute',bottom:80,left:44,width:992*f/p.frames,height:3,background:c.accent}}/></>}
  </AbsoluteFill>;
 };
-registerRoot(()=> <Composition id="ShowcaseReel" component={Reel} fps={30} width={1080} height={1920} durationInFrames={30} defaultProps={{frames:30,theme:'paper',projectLabel:'',shots:[],captions:[]}} calculateMetadata={({props})=>({durationInFrames:props.frames})}/>);
+registerRoot(()=> <Composition id="ShowcaseReel" component={Reel} fps={30} width={showcaseOutputSize.width} height={showcaseOutputSize.height} durationInFrames={30} defaultProps={{frames:30,theme:'paper',projectLabel:'',shots:[],captions:[]}} calculateMetadata={({props})=>({durationInFrames:props.frames})}/>);
 
 

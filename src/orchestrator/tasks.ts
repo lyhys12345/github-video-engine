@@ -12,13 +12,13 @@ export type TaskRecord={id:string;kind:string;input:unknown;scopeKey?:string|nul
 // One durable operation per fingerprint. Separate from M0's fixed five-stage pipeline.
 export class TaskRunner{
   readonly db:DatabaseSync;readonly root:string;readonly artifacts:ArtifactStore;
-  constructor(root:string){this.root=resolve(root);mkdirSync(this.root,{recursive:true});this.artifacts=new ArtifactStore(this.root);
+  constructor(root:string,{readOnly=false}:{readOnly?:boolean}={}){this.root=resolve(root);if(!readOnly)mkdirSync(this.root,{recursive:true});this.artifacts=new ArtifactStore(this.root);
     let opened:DatabaseSync|undefined;
     try{
-    this.db=opened=new DatabaseSync(join(this.root,'tasks.sqlite'));
+    this.db=opened=new DatabaseSync(join(this.root,'tasks.sqlite'),{readOnly});
     this.db.exec('PRAGMA busy_timeout=5000;PRAGMA foreign_keys=ON');
     const version=this.db.prepare('PRAGMA user_version').get()!.user_version as number;
-    if(version!==0&&version!==TASKS_DB_VERSION)throw new EngineError('USAGE_DB_VERSION',`Usage accounting: unsupported tasks database version ${version}`);
+    if(version!==TASKS_DB_VERSION&&(readOnly||version!==0))throw new EngineError('USAGE_DB_VERSION',`Usage accounting: unsupported tasks database version ${version}`);
     if(version===0)this.tx(()=>{
       // Another process may have completed the additive migration while this
       // connection waited for the write lock.
@@ -36,7 +36,7 @@ export class TaskRunner{
       PRAGMA user_version=1;`);
     });
     this.validateSchema(1);
-    this.db.exec('PRAGMA journal_mode=WAL;PRAGMA synchronous=FULL');
+    if(!readOnly)this.db.exec('PRAGMA journal_mode=WAL;PRAGMA synchronous=FULL');
     }catch(error){
       opened?.close();
       if(error && typeof error==='object' && 'errcode' in error && typeof error.errcode==='number' &&

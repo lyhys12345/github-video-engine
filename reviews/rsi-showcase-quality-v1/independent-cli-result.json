@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "fixture": "D:\\gve-anna-render-temp\\gvsquality-AvhG1o",
+  "candidateSha256": "532ebd3048e1943ab4600810fe84dfefd1bbca83fe7602fb7d3bf80b21f0b295",
+  "checks": [
+    "deterministic repeat",
+    "workspace equals standalone branch",
+    "saved final media composition agrees",
+    "exact plan digest",
+    "valid proposed composition",
+    "stale baseline rejected",
+    "unbound review rejected",
+    "stale shot rejected",
+    "forbidden output option rejected",
+    "media and voice tools unavailable",
+    "task events usage schema version and pointer unchanged"
+  ],
+  "scratch": "C:\\Users\\luyuh\\Documents\\Codex\\quality-independent\\gve-quality-cli-independent-flsZXJ"
+}
