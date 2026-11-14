@@ -34,3 +34,5 @@ Keep accepted media and their original reports unchanged. Local references curre
 
 Handoff notes stay outside the code repository, per owner preference. This document is the reusable engineering protocol, not a session handoff.
 
+
+2026-11-13 code audit and first reliability repairs: [readiness audit and ordered modules](rsi-readiness-audit-2026-11-13.md). This is scoped engineering evidence, not media acceptance or industry certification.

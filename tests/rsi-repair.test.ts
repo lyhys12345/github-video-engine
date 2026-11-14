@@ -14,3 +14,36 @@ it('persists repairs, rejects stale/fake reviews, resumes, reuses exact retries 
 
 
 
+
+it('keeps the finding reviewer for terminal PASS and revalidates saved reviewer identity', async () => {
+ const root = await mkdtemp(join(tmpdir(), 'rsi-reviewer-'));
+ for (const [name, text] of Object.entries({base:'baseline', candidate:'first', requirements:'audience', rubric:'clarity', next:'second'})) {
+  await writeFile(join(root,name),text);
+ }
+ await freezeExperiment({id:'fixed-reviewer',baseline:join(root,'base'),candidate:join(root,'candidate'),requirements:join(root,'requirements'),rubric:join(root,'rubric'),out:join(root,'freeze'),requiredModalities:['script']});
+ const chain=join(root,'chain'),reportPath=join(root,'review.json');
+ let state=await startRepair(chain,join(root,'freeze','operator-manifest.json'));
+ const first={experimentSha256:sha256(canonical(state.current!.experiment)),reviewer:'finding-judge',verdict:'REVISE',coverage:['script'],findings:['Clarify the input'],preferred:'neither'};
+ await writeFile(reportPath,canonical(first));
+ await recordRepairReview(chain,state.current!.recordSha256,reportPath);
+ await applyRepair(chain,state.current!.recordSha256,reportPath,join(root,'next'));
+ state=await repairStatus(chain);
+ const terminal={...first,experimentSha256:sha256(canonical(state.current!.experiment)),verdict:'PASS',findings:[],preferred:'A'};
+ await writeFile(reportPath,canonical({...terminal,reviewer:'replacement-judge'}));
+ await expect(recordRepairReview(chain,state.current!.recordSha256,reportPath)).rejects.toThrow('Reviewer changed');
+ expect((await repairStatus(chain)).currentReview).toBeUndefined();
+ // A rejected replacement must not poison the chain or prevent the original reviewer from finishing.
+ await writeFile(reportPath,canonical(terminal));
+ await recordRepairReview(chain,state.current!.recordSha256,reportPath);
+ state=await repairStatus(chain);
+ expect(state.currentReview?.decision.status).toBe('PASS');
+ expect(state.currentReview?.report.reviewer).toBe('finding-judge');
+ // Even a recomputed report hash cannot disguise a different terminal reviewer.
+ const savedPath=join(state.current!.directory,'review.json');
+ const saved=JSON.parse(await readFile(savedPath,'utf8'));
+ saved.report.reviewer='replacement-judge';
+ saved.reviewSha256=sha256(canonical(saved.report));
+ await writeFile(savedPath,canonical(saved));
+ await expect(repairStatus(chain)).rejects.toThrow('Reviewer changed');
+ await expect(applyRepair(chain,state.current!.recordSha256,reportPath,join(root,'next'))).rejects.toThrow('Reviewer changed');
+});
