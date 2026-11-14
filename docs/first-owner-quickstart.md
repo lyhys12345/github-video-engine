@@ -27,13 +27,15 @@ Choose narration explicitly with the agent:
 | --- | --- | --- |
 | Silent technical preview | Explicitly choose no audio | Supported diagram rendering and editable project; no voice model needed |
 | Finished WAV recordings | Recordings you may use, one per approved scene, matching the exact approved words | Import, exact transcript/receipt binding, timing checks and composition; the agent handles the data |
-| Configured local synthesis | Your authorized local profile, runtime and required model/reference | Adapter and diagnostics; the owner's private Anna/Chen references are not distributed |
+| Public local synthesis | Install the [public model and runtime](public-local-voice-v1.md); explicitly choose `qwen-public` | Chinese Serena / English Ryan presets, no reference recording or paid TTS account; Windows NVIDIA CUDA is the bounded supported path |
+| Reference-conditioned local synthesis | Your authorized local profile, runtime and model/reference | Owner Anna/Chen remain optional and private; their references are not distributed |
 
 Example readiness checks after choosing:
 
 ```sh
 pnpm gve doctor --first-owner --phase preview --voice none --language en-US
 pnpm gve doctor --first-owner --phase preview --voice imported --language en-US
+pnpm gve doctor --first-owner --phase preview --voice qwen-public --language zh-CN
 ```
 
 Imported readiness means the tools are present, not that your recordings have been supplied or verified. A missing local voice stops with a clear reason; it does not silently substitute a different voice or silence. `reference` and `byo-api` preferences are not working adapters just because a brief can describe them.

@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\platform.py", line 910, in uname
+    system, node, release, version, machine = infos = os.uname()
+                                                      ^^^^^^^^
+AttributeError: module 'os' has no attribute 'uname'. Did you mean: 'name'?
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\gve-anna-render-temp\public-voice-20261113\probe-and-samples\worker.py", line 111, in <module>
+    main()
+  File "D:\gve-anna-render-temp\public-voice-20261113\probe-and-samples\worker.py", line 51, in main
+    if sys.platform != "win32" or platform.machine().upper() not in {"AMD64", "X86_64"} or sys.version_info[:2] != (3, 12):
+                                  ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\platform.py", line 1024, in machine
+    return uname().machine
+           ^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\platform.py", line 913, in uname
+    node = _node()
+           ^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\platform.py", line 631, in _node
+    return socket.gethostname()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "D:\gve-anna-render-temp\public-voice-20261113\probe-and-samples\worker.py", line 13, in deny_network
+    raise RuntimeError("Network access is disabled for the local voice worker.")
+RuntimeError: Network access is disabled for the local voice worker.

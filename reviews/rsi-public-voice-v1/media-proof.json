@@ -1,0 +1,418 @@
+{
+  "schemaVersion": "rsi-public-voice-media-proof/1.0",
+  "scope": "TEST ONLY synthetic GitHub source stub and exact synthetic review receipts; no formal owner project media",
+  "engineSourceCodeHash": "fa7b0c93322c2aba258d1775873f14a4824b63c2f019cbd4e579606e7af48890",
+  "host": {
+    "node": "v24.22.1",
+    "ffmpeg": "ffmpeg version 8.1-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "ffprobe": "ffprobe version 8.1-full_build-www.gyan.dev Copyright (c) 2007-2026 the FFmpeg developers",
+    "gpu": "NVIDIA GeForce RTX 3070",
+    "computeCapability": [
+      8,
+      6
+    ],
+    "cuda": "12.8",
+    "python": "3.12.14",
+    "driver": "595.95"
+  },
+  "model": {
+    "repository": "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
+    "revision": "85e237c12c027371202489a0ec509ded67b5e4b5",
+    "files": 11,
+    "modelInventory": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\model-hashes.json",
+      "sha256": "a1a6a4bf07f5ad5349e885d66b32bd2ec825405ee3d47e73c35e79482d8bf0fa"
+    },
+    "officialModelMetadata": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\official-model-metadata.json",
+      "sha256": "b8828c9f0d468070b19d4daea33accc5e7eb011bebe87a36c6a7aa9d0473ce6c"
+    }
+  },
+  "setup": {
+    "verifiedWheels": 89,
+    "install": "fresh isolated venv; exact lock verified against official artifacts, then installed offline",
+    "reusedWheelCache": false,
+    "packageCheck": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\pip-check.txt",
+      "sha256": "672aec65a45bed50e70229c70934a7eebf0462595c459b83023027645d57cccf"
+    },
+    "wheels": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\wheel-inventory.json",
+      "sha256": "596877f6e4d73fb74aa76d867944791ee148610c859f81d8d154e89858bcb502"
+    },
+    "requirements": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\requirements-windows.txt",
+      "sha256": "00f3bc66834e1162b14d398bc44e8213ef2c53e16d54d87029ea25d677bd9500"
+    },
+    "pipReport": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\pip-install-report.json",
+      "sha256": "cf3426d268eb1d19dd1d2fb3b6066eff99cb8c7261f2fb0dc034e913b1568707"
+    },
+    "installedMetadata": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\installed-distributions.json",
+      "sha256": "f97b9e73e89746f24b5322cb33ab0828b2c0a2e704232a20b82b9b7032ddaa82"
+    },
+    "profileSetup": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\probe-and-samples\\setup.txt",
+      "sha256": "ccb42e184636548eccbfe632eebd1732ddcbecab9e93e0648b3033f0e59778d3"
+    },
+    "gpuObservations": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\cli-gpu-observations.csv",
+      "sha256": "918cfaecc83b430f9d3daedce2e15360f2cd78ccd6a94744fbdee3f5eca0daef"
+    },
+    "directCUDAProbe": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\probe-and-samples-v2\\probe.json",
+      "sha256": "64c3ed42f3974f5e2fb967aa5babd8d5b47cc1a2ee1e86b296ac5132a66a6532"
+    },
+    "previewDoctor": [
+      {
+        "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\doctor-en-US.json",
+        "sha256": "efcfa078ff7ed7438dcf2c99e14bcb92a2ffcf770dc8529440d33fff168059f0"
+      },
+      {
+        "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\doctor-zh-CN.json",
+        "sha256": "7d9f8bf0346cf1687a450f0b379eb6efb701c917a5840f77d0b5d507b1b068db"
+      }
+    ]
+  },
+  "directSamples": [
+    {
+      "language": "en-US",
+      "preset": "Ryan",
+      "text": "A request arrives.",
+      "samples": 40960,
+      "sampleRate": 16000,
+      "seconds": 2.56,
+      "workerWallSeconds": 19.6760929,
+      "fullDecodeExit": 0,
+      "wav": {
+        "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\probe-and-samples-v2\\en-US\\speech.wav",
+        "sha256": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408"
+      },
+      "ffprobe": {
+        "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\probe-and-samples-v2\\en-US\\ffprobe.json",
+        "sha256": "fdaac0ca1ea8e3e363e58012720171d67b6edf9d489980a366081245244fe5e0"
+      },
+      "receipt": {
+        "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\probe-and-samples-v2\\en-US\\verification.json",
+        "sha256": "81b2a19dcb4b703ffbd92bb0a281ef0fbd30757a9b4933c13a933c8d5c73bf3b"
+      }
+    },
+    {
+      "language": "zh-CN",
+      "preset": "Serena",
+      "text": "请求已经到达。",
+      "samples": 26880,
+      "sampleRate": 16000,
+      "seconds": 1.68,
+      "workerWallSeconds": 12.985936,
+      "fullDecodeExit": 0,
+      "wav": {
+        "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\probe-and-samples-v2\\zh-CN\\speech.wav",
+        "sha256": "919935eaeeb8c51e930cfbea4340debfa0345d6129bf181c65cb6afce734bbe9"
+      },
+      "ffprobe": {
+        "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\probe-and-samples-v2\\zh-CN\\ffprobe.json",
+        "sha256": "ee4253bb08e34dcd6185e786a421df0160627fe466a9e51aabea96dac0a37a14"
+      },
+      "receipt": {
+        "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\probe-and-samples-v2\\zh-CN\\verification.json",
+        "sha256": "98ee026b08d9094aa5476b1d3405e2ee7531a58f30f964825face2c7beebf452"
+      }
+    }
+  ],
+  "registeredTest": {
+    "file": "tests/public-voice-workflow.media.test.ts",
+    "result": "pass",
+    "exitCode": 0,
+    "testWallMs": 523448,
+    "log": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\public-cli-media-v2.txt",
+      "sha256": "b428f8866fd9eb095b8e660f67cc2413f109d2d974167471c1ef687ebffcedbc"
+    },
+    "wrapper": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\media-wrapper-v2-environment.json",
+      "sha256": "5500e60d8184b5b4cc35b1eca542fccc8542686baeb5a55b394060a16b1994b8"
+    },
+    "rawVerification": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\tmp\\gve-pv-5t65Qw\\public-voice-media-verification.json",
+      "sha256": "b14a0bc83cb0ea7bb87027e342ca7b31ce582849d19bf57938ff3c1e918c9b35"
+    }
+  },
+  "baseline": {
+    "authorSha256": "ae75b1e1c822b3399296ffbfa52a530c29fd05af372d1e669f7d268616f9cec2",
+    "task": "7c339e21c860a018bbbc2228f9b2a5ee74975734e7e8166f54e09c89c16b88d4",
+    "movie": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\tmp\\gve-pv-5t65Qw\\w\\runs\\ae75b1e1c822b339-fa7b0c93322c\\editable-preview\\.asset-staging-9d047dd1-0092-485f-8884-51adaa239205-zwtGOa\\excerpt.mp4",
+      "sha256": "1edea3ffe86c1b1c619092ea7fa846defdc2a0b631eccb06b54049faca8fadc7"
+    },
+    "frame": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\tmp\\gve-pv-5t65Qw\\baseline-frame.png",
+      "sha256": "5626aeb53ac7df048a86edec7640586740a11b12e2fe541f75ff6f2531b60616"
+    },
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "duration": "18.000000",
+        "nb_read_frames": "540"
+      },
+      {
+        "channels": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "duration": "18.000000",
+        "nb_read_frames": "844",
+        "sample_rate": "48000"
+      }
+    ],
+    "fullDecodeExit": 0,
+    "recordings": [
+      {
+        "beatId": "send-request",
+        "transcript": "A request arrives.",
+        "sourceAudioSha256": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408",
+        "transcriptSha256": "620282cdc4bd389e874e4347b441f38801525edfae3a4f0b13d5dfe72d11d897",
+        "sampleCount": 122880,
+        "startSample": 96000,
+        "endSample": 218880,
+        "playbackRate": 1,
+        "generationManifestSha256": "83aca4afb1a9e9323a145f104e73cd64bb290c1d604236a3bc8a3dfd4dd8ed70",
+        "receiptFingerprint": "a9d086a2bb460c59162e60b573b5f42ccfacc4d9931155d778062d78e0882e60"
+      },
+      {
+        "beatId": "match-route",
+        "transcript": "A route matches.",
+        "sourceAudioSha256": "3d81f92d91950a31c419a0e36f68da0fe98dc4fceb070035c72bb1167da11d10",
+        "transcriptSha256": "547dbc8c9629e549a92c1a4928594437b767a48ccf07d5d109efc4128c9c105c",
+        "sampleCount": 157440,
+        "startSample": 288000,
+        "endSample": 445440,
+        "playbackRate": 1,
+        "generationManifestSha256": "92644087ad468d2d9a79f8ac37bb1103ad3e881eb3e782f52a914891fe2288ff",
+        "receiptFingerprint": "9065cc2246743fd5261ec0d1e1eed1ed295bda8f73a79c1b6cc21c6000ffaf9d"
+      },
+      {
+        "beatId": "return-body",
+        "transcript": "A reply returns.",
+        "sourceAudioSha256": "36195217fc3ce20fc41e03d8e8bbde6c745ef2d325acc56babe8f50913000b3e",
+        "transcriptSha256": "70afe23d22dab2ce5ed42df8c7a386031c8df95c89f9b5febb51f6b62e76dc42",
+        "sampleCount": 134400,
+        "startSample": 480000,
+        "endSample": 614400,
+        "playbackRate": 1,
+        "generationManifestSha256": "4a231feed4ee91b14d55275372a0d03cf5f08558115d0a7b02a4ed90eab4746b",
+        "receiptFingerprint": "9c25f07c85fdf8f996d277d87fe4fa4b3eff61deb03840a92849eb9bc6a4b6a2"
+      }
+    ],
+    "voiceCache": [
+      {
+        "sceneId": "send-request",
+        "generation": true,
+        "import": true,
+        "source": "generated",
+        "generationTaskId": "48f1df1174dc5b435703864f41a117d716503d84714ad7c1afc492a1561f304f",
+        "receiptFingerprint": "a9d086a2bb460c59162e60b573b5f42ccfacc4d9931155d778062d78e0882e60",
+        "samples": 122880
+      },
+      {
+        "sceneId": "match-route",
+        "generation": true,
+        "import": true,
+        "source": "generated",
+        "generationTaskId": "0f1036ff7a64d45c2376fab96e3545bb26f77bae43e31f85ceb05511cae21452",
+        "receiptFingerprint": "9065cc2246743fd5261ec0d1e1eed1ed295bda8f73a79c1b6cc21c6000ffaf9d",
+        "samples": 157440
+      },
+      {
+        "sceneId": "return-body",
+        "generation": true,
+        "import": true,
+        "source": "generated",
+        "generationTaskId": "0902e48fea0a5cf92d44e1a644cba2841c97380abcc7380641c3643d55d85f76",
+        "receiptFingerprint": "9c25f07c85fdf8f996d277d87fe4fa4b3eff61deb03840a92849eb9bc6a4b6a2",
+        "samples": 134400
+      }
+    ]
+  },
+  "portable": {
+    "digest": "cb3f474e4e2df435697227bab3f42c2d82b5f5a264d762ecde8f81b7514f776a",
+    "files": 105,
+    "localSpeech": 3,
+    "originalWorkspaceHidden": true,
+    "publicProfileUnavailable": true,
+    "replayedTask": "7c339e21c860a018bbbc2228f9b2a5ee74975734e7e8166f54e09c89c16b88d4",
+    "replayedMovie": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\tmp\\gve-pv-5t65Qw\\i\\runs\\ae75b1e1c822b339-fa7b0c93322c\\editable-preview\\.asset-staging-7f3f7ea7-c26f-44dc-89dc-dc1bd80b8c4c-u5pHes\\excerpt.mp4",
+      "sha256": "1edea3ffe86c1b1c619092ea7fa846defdc2a0b631eccb06b54049faca8fadc7"
+    },
+    "voiceCache": [
+      {
+        "sceneId": "send-request",
+        "generation": true,
+        "import": true,
+        "source": "generated",
+        "generationTaskId": "48f1df1174dc5b435703864f41a117d716503d84714ad7c1afc492a1561f304f",
+        "receiptFingerprint": "a9d086a2bb460c59162e60b573b5f42ccfacc4d9931155d778062d78e0882e60",
+        "samples": 122880
+      },
+      {
+        "sceneId": "match-route",
+        "generation": true,
+        "import": true,
+        "source": "generated",
+        "generationTaskId": "0f1036ff7a64d45c2376fab96e3545bb26f77bae43e31f85ceb05511cae21452",
+        "receiptFingerprint": "9065cc2246743fd5261ec0d1e1eed1ed295bda8f73a79c1b6cc21c6000ffaf9d",
+        "samples": 157440
+      },
+      {
+        "sceneId": "return-body",
+        "generation": true,
+        "import": true,
+        "source": "generated",
+        "generationTaskId": "0902e48fea0a5cf92d44e1a644cba2841c97380abcc7380641c3643d55d85f76",
+        "receiptFingerprint": "9c25f07c85fdf8f996d277d87fe4fa4b3eff61deb03840a92849eb9bc6a4b6a2",
+        "samples": 134400
+      }
+    ],
+    "cachePreview": true,
+    "allDeclaredPackageHashesVerified": true
+  },
+  "edited": {
+    "authorSha256": "77892c09090530b45bda41a6ada85f6c496de1b4b06ea3c17eebbd763753ee4b",
+    "task": "3ec186ca5b2f5a7f3fe01e936981aa3759c416a5aa43d49ea85cd158f46c01f3",
+    "staleReceiptRejected": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\tmp\\gve-pv-5t65Qw\\stale-receipt.error.txt",
+      "sha256": "40bc38f49ce89c355d6a00aa7275327cd5d7b74d6ab2c850028ce89bffbd92ca"
+    },
+    "movie": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\tmp\\gve-pv-5t65Qw\\i\\runs\\77892c09090530b4-fa7b0c93322c\\editable-preview\\.asset-staging-57371e67-dc54-424c-8244-ddbdb302e5f0-6t5N8t\\excerpt.mp4",
+      "sha256": "13bbf0affad2ea6119ab47c2a6c7295375cf744dc9880dd78de91f009e2c9863"
+    },
+    "frame": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\tmp\\gve-pv-5t65Qw\\edited-frame.png",
+      "sha256": "2db427cb56c05b7a804e8c4ca8b26cde1d0621d996c9a0c005128af61f651de2"
+    },
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "duration": "18.000000",
+        "nb_read_frames": "540"
+      },
+      {
+        "channels": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "duration": "18.000000",
+        "nb_read_frames": "844",
+        "sample_rate": "48000"
+      }
+    ],
+    "fullDecodeExit": 0,
+    "recordings": [
+      {
+        "beatId": "send-request",
+        "transcript": "A request arrives.",
+        "sourceAudioSha256": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408",
+        "transcriptSha256": "620282cdc4bd389e874e4347b441f38801525edfae3a4f0b13d5dfe72d11d897",
+        "sampleCount": 122880,
+        "startSample": 96000,
+        "endSample": 218880,
+        "playbackRate": 1,
+        "generationManifestSha256": "83aca4afb1a9e9323a145f104e73cd64bb290c1d604236a3bc8a3dfd4dd8ed70",
+        "receiptFingerprint": "a9d086a2bb460c59162e60b573b5f42ccfacc4d9931155d778062d78e0882e60"
+      },
+      {
+        "beatId": "match-route",
+        "transcript": "The handler runs.",
+        "sourceAudioSha256": "d371e0591b0f415994f479f820a4b7dfc3fe965fd7f45ce7100b0073c2fca618",
+        "transcriptSha256": "c247d08def7a1ce8896ae600f3582d8960f2afaadb31f2b09e784e003423e700",
+        "sampleCount": 122880,
+        "startSample": 288000,
+        "endSample": 410880,
+        "playbackRate": 1,
+        "generationManifestSha256": "13954fdc02883bf1f53126415ec1cecdcd6e6f6501d09b56de66d141a7a322e3",
+        "receiptFingerprint": "f9e88d152e274049a75108019ec79935dd932b0264a11a86955cdb533b629d17"
+      },
+      {
+        "beatId": "return-body",
+        "transcript": "A reply returns.",
+        "sourceAudioSha256": "36195217fc3ce20fc41e03d8e8bbde6c745ef2d325acc56babe8f50913000b3e",
+        "transcriptSha256": "70afe23d22dab2ce5ed42df8c7a386031c8df95c89f9b5febb51f6b62e76dc42",
+        "sampleCount": 134400,
+        "startSample": 480000,
+        "endSample": 614400,
+        "playbackRate": 1,
+        "generationManifestSha256": "4a231feed4ee91b14d55275372a0d03cf5f08558115d0a7b02a4ed90eab4746b",
+        "receiptFingerprint": "9c25f07c85fdf8f996d277d87fe4fa4b3eff61deb03840a92849eb9bc6a4b6a2"
+      }
+    ],
+    "voiceCache": [
+      {
+        "sceneId": "send-request",
+        "generation": true,
+        "import": true,
+        "source": "generated",
+        "generationTaskId": "48f1df1174dc5b435703864f41a117d716503d84714ad7c1afc492a1561f304f",
+        "receiptFingerprint": "a9d086a2bb460c59162e60b573b5f42ccfacc4d9931155d778062d78e0882e60",
+        "samples": 122880
+      },
+      {
+        "sceneId": "match-route",
+        "generation": false,
+        "import": false,
+        "source": "generated",
+        "generationTaskId": "f8dacffcbde9808825cae557bc41357ae9c0ea0ef31e6f84326ee7fdb5814a84",
+        "receiptFingerprint": "f9e88d152e274049a75108019ec79935dd932b0264a11a86955cdb533b629d17",
+        "samples": 122880
+      },
+      {
+        "sceneId": "return-body",
+        "generation": true,
+        "import": true,
+        "source": "generated",
+        "generationTaskId": "0902e48fea0a5cf92d44e1a644cba2841c97380abcc7380641c3643d55d85f76",
+        "receiptFingerprint": "9c25f07c85fdf8f996d277d87fe4fa4b3eff61deb03840a92849eb9bc6a4b6a2",
+        "samples": 134400
+      }
+    ],
+    "freshRecordings": 1,
+    "reusedRecordings": 2,
+    "baselineAndPackagePreserved": true
+  },
+  "failureRecovery": {
+    "workerAuditInitialFailure": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\probe-and-samples\\probe.stderr.txt",
+      "sha256": "3ff89df892dfec20c190f3edc1d5764170fdbb145c15ee25a72cc31d4d0402fd"
+    },
+    "modelWheelVerificationInitialFailure": "TLS connection reset while reading publisher metadata, retried verified through curl",
+    "chromeInitialFailure": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\public-cli-media-v1.txt",
+      "sha256": "2699bf63c3fdd810e953ac807c213ac614696cb931e7d5880ab54a3a7ab4379a"
+    },
+    "chromeClosedOnlyOwnedProfile": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\cli-browser-recovery.json",
+      "sha256": "f87fbad5d0c5d487237d4b0df47e7a47c124164da2c935dbaa6ddd2f88754b50"
+    },
+    "recoveredBaseline": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\recovered-baseline-independent-check.json",
+      "sha256": "8416160da9512d51396484cc9dfca2dd9cbf01849f185dde95eb2d940f978d1a"
+    },
+    "recoveredPortable": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\recovered-portable-validation.json",
+      "sha256": "4ca4396fc5041edc7366e95c4c70ae070e80486938780fa75551e211a360f57f"
+    },
+    "recoveredEdit": {
+      "path": "D:\\gve-anna-render-temp\\public-voice-20261113\\recovered-edited-verification.json",
+      "sha256": "1d0d2c489833f5fb53c7bd5c2095ac19ba8c5b42d4f42c13a6d5c1d54b8bb03a"
+    }
+  },
+  "review": {
+    "speechContent": "unverified",
+    "speechAlignment": "unverified",
+    "ownerListening": "pending",
+    "continuousPerceptualAv": "unverified",
+    "ownerAcceptance": "pending"
+  }
+}

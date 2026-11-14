@@ -10,6 +10,8 @@ Phone text/occlusion and narration-action audience audit: browser-derived editor
 
 First-owner integration has now been [exercised on a clean Windows source checkout](rsi-first-owner-results-2026-11-13.md): actual public URL to reviewed script/owner stop, plus a separate synthetic silent render/export/import/edit closure. Cross-host support, polished production quality and a real new film remain separate acceptance work.
 
+The next bounded speech module adds an explicit public preset path without owner-only voice material. See [public local speech](public-local-voice-v1.md) for setup and actual supported scope; keep synthesis, content/timing checks and subjective listening separate.
+
 ## Ordered modules and acceptance
 
 | Priority | User-facing capability | Existing foundation to reuse | Evidence required before calling it complete |

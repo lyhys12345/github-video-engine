@@ -6,8 +6,9 @@ import {DatabaseSync} from 'node:sqlite';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {ElevenLabsProvider,RemoteTtsSchema,ttsFingerprint,ttsInput,type TtsTransport} from '../src/providers/tts.js';
-import {dryRunTts,produceTts,statusTts,exportTts,importHuihuiTts,readLocalTts} from '../src/tts/runtime.js';
+import {dryRunTts,produceTts,statusTts,exportTts,importHuihuiTts,importPublicVoiceTts,readLocalTts} from '../src/tts/runtime.js';
 import {generateHuihui,measureHuihuiWav,HUIHUI_VOICE_LABEL} from '../src/tts/huihui.js';
+import {generatePublicVoice} from '../src/tts/qwen-public.js';
 import {ttsCommand} from '../src/tts/cli.js';
 import {ArtifactStore} from '../src/assets/store.js';
 import {sha256,canonical} from '../src/core/util.js';
@@ -152,3 +153,40 @@ test('tampered or missing audio and receipt cache fail closed without another pr
 test('local imported synthetic MP3 is distinct from remote synthesis, full lifecycle and exact-current-story handoff preserve pending listening',async()=>{const dir=await scratch(),bytes=await audio(),story=JSON.parse(await readFile('examples/story-planner-v1/rea.json','utf8')),shot=story.shots[0],s={schemaVersion:'1.0',provider:'local-import',text:shot.narration,voiceLabel:'Synthetic tone fixture: declared text is not recorded speech',sourceSha256:sha256(bytes),mediaType:'audio/mpeg'},path=join(dir,'original.mp3');await writeFile(path,bytes);const key=vi.fn(()=>{throw Error('must never read key')});const r=await produceTts(s,join(dir,'state'),signal(),{audioPath:path,key});expect(r.receipt.chargeBasis).toBe('local-import-no-provider-call');expect(r.receipt.input).toHaveProperty('provider','local-import');expect((await produceTts(s,join(dir,'state'),signal(),{key})).cached).toBe(true);const out=join(dir,'export'),exported=await exportTts(join(dir,'state'),r.fingerprint,out,signal(),{story,shotId:shot.id});expect(sha256(await readFile(exported.audioPath))).toBe(sha256(bytes));const handoff=JSON.parse(await readFile(join(out,'voice-handoff.json'),'utf8'));expect(handoff.review).toBe('pending');expect(handoff.transcriptVerification).toContain('not verified');expect(handoff.retiming).toContain('never stretch');expect(key).not.toHaveBeenCalled();await expect(exportTts(join(dir,'state'),r.fingerprint,out,signal(),{story,shotId:shot.id})).rejects.toBeDefined();shot.narration+=' changed';await expect(exportTts(join(dir,'state'),r.fingerprint,join(dir,'changed'),signal(),{story,shotId:shot.id})).rejects.toMatchObject({code:'TTS_TRANSCRIPT'});});
 test('imports reject hash mismatch and misleading WAV declaration for MP3 bytes',async()=>{const dir=await scratch(),bytes=await audio(),path=join(dir,'audio.bin');await writeFile(path,bytes);const s={schemaVersion:'1.0',provider:'local-import',text:'Caller declared narration',voiceLabel:'Test import',sourceSha256:sha256(bytes),mediaType:'audio/wav'};await expect(produceTts({...s,sourceSha256:'a'.repeat(64)},join(dir,'bad-hash'),signal(),{audioPath:path})).rejects.toMatchObject({code:'TTS_IMPORT'});await expect(produceTts(s,join(dir,'bad-mime'),signal(),{audioPath:path})).rejects.toMatchObject({code:'TTS_MEDIA'});});
 test('real CLI offline dry-run and generate default refuse network, secret config and unrelated flags',async()=>{const dir=await scratch(),path=join(dir,'spec.json');await writeFile(path,JSON.stringify({...spec(),entitlement:'unverified'}));const cli=(args:string[])=>spawnSync(process.execPath,['--import',pathToFileURL(resolve('node_modules/tsx/dist/loader.mjs')).href,resolve('src/cli.ts'),...args],{cwd:dir,encoding:'utf8',windowsHide:true,timeout:15000,env:{...process.env,ELEVENLABS_API_KEY:''}});const dry=cli(['tts','dry-run','--spec',path]);expect(dry.status,dry.stderr).toBe(0);expect(JSON.parse(dry.stdout)).toMatchObject({remoteDispatch:false,entitlement:'unverified'});const disabled=cli(['tts','generate','--spec',path,'--data',join(dir,'state')]);expect(disabled.status).toBe(1);expect(disabled.stderr).toContain('TTS_PAID_DISABLED');const bad=cli(['tts','dry-run','--spec',path,'--allow-paid']);expect(bad.status).toBe(1);expect(bad.stderr).toContain('USAGE');expect(await readdir(dir)).toEqual(['spec.json']);});
+
+test('binds the public voice receipt to its exact preset, generation manifest and odd-sample WAV without Python', async () => {
+  const data = await scratch();
+  const input = {text:'A request arrives.',language:'en-US',speaker:'Ryan',repository:'Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice',
+    revision:'85e237c12c027371202489a0ec509ded67b5e4b5',license:'Apache-2.0',
+    modelLockSha256:'a'.repeat(64),requirementsSha256:'b'.repeat(64),workerSha256:'c'.repeat(64),pythonSha256:'d'.repeat(64)};
+  const kind = 'qwen-public-generation-v1';
+  const id = sha256(canonical({version:'production-task-v1',kind,input}));
+  const wav = makeHuihuiWav(16_001);
+  const runner = new TaskRunner(data);
+  const manifest = {
+    schemaVersion:'qwen-public-generation/1.0',taskId:id,input,textSha256:sha256(input.text),
+    voiceLabel:'Qwen3-TTS 0.6B CustomVoice / Ryan / en-US',
+    audio:{mediaType:'audio/wav',sha256:sha256(wav),bytes:wav.length,...measureHuihuiWav(wav)},
+    origin:'built-in public speaker preset; no reference audio',engineRemoteDispatch:'none',
+    networkControls:'local model path, offline flags, Python socket audit hook',
+    review:{speechContent:'unverified',speechAlignment:'unverified',ownerListening:'pending'},
+  };
+  try {
+    await runner.run(kind,input,async()=>({value:manifest,
+      outputs:[await runner.artifacts.commit(wav,'audio/wav','RESOLVE_ASSETS',id)]}),
+    signal(),{accounting:{provider:'qwen-public',ratePolicy:'local-zero-v1'}});
+    const results = await Promise.all([importPublicVoiceTts(data,id,signal()),importPublicVoiceTts(data,id,signal())]);
+    expect(results.map(result=>result.cached).sort()).toEqual([false,true]);
+    expect(results[0]!.receiptArtifact).toEqual(results[1]!.receiptArtifact);
+    const source = await readLocalTts(data,results[0]!.fingerprint,signal());
+    expect(source).toMatchObject({input:{text:input.text},publicVoice:{samples:16_001,taskId:id,language:'en-US',speaker:'Ryan'}});
+    expect((await decodeClip(source,data,0,48,signal())).length/2).toBe(48_003);
+    const badInput = {...input,speaker:'Serena'};
+    await expect(generatePublicVoice('A request\narrives.','en-US',data,signal())).rejects.toMatchObject({code:'PUBLIC_VOICE_INPUT'});
+    const bad = await runner.run(kind,badInput,async()=>({value:{...manifest,input:badInput},outputs:[]}),signal());
+    await expect(importPublicVoiceTts(data,bad.id,signal())).rejects.toHaveProperty('name','ZodError');
+    const generation = runner.get(id)!;
+    await writeFile(runner.artifacts.path(generation.result!), 'forged-generation');
+    await expect(readLocalTts(data,results[0]!.fingerprint,signal())).rejects.toMatchObject({code:'PUBLIC_VOICE_INTEGRITY'});
+  } finally {runner.close();}
+});

@@ -1,0 +1,193 @@
+{
+  "schemaVersion": "rsi-candidate/1.0",
+  "baseline": "3e47abc547b307850f6577cc6939edb79987ac65",
+  "createdAt": "2026-11-14T06:42:23.118703+00:00",
+  "scope": "v3 adds public adapter failure-path coverage; production code same as v2; final media pending",
+  "files": [
+    {
+      "path": ".agents/skills/github-explainer/SKILL.md",
+      "bytes": 23931,
+      "sha256": "588ece37c5e942423f9853054a2fe4cb0ca81e2656483d61821591fbc6b2248d"
+    },
+    {
+      "path": "README.md",
+      "bytes": 8923,
+      "sha256": "91ca6210a23f0241da153a8593f0612b107f826d8e806a705ddc8b085fae947c"
+    },
+    {
+      "path": "config/public-voice-v1/build-requirements-windows.txt",
+      "bytes": 478,
+      "sha256": "f27193859723eb033cc2a37b1abe723a9bfd6005f1e9b17c166833a7e8807358"
+    },
+    {
+      "path": "config/public-voice-v1/model-lock.json",
+      "bytes": 1960,
+      "sha256": "4951f1df7f2581651052e740594dbabf8c1c20af0cec1c731db5909e173a572a"
+    },
+    {
+      "path": "config/public-voice-v1/requirements-windows.txt",
+      "bytes": 8764,
+      "sha256": "00f3bc66834e1162b14d398bc44e8213ef2c53e16d54d87029ea25d677bd9500"
+    },
+    {
+      "path": "docs/capability-onboarding.md",
+      "bytes": 5277,
+      "sha256": "0615a03ac355ec3282480d6c0b5b19d6d6a882f545aebff42ea118242c59be9a"
+    },
+    {
+      "path": "docs/first-owner-quickstart.md",
+      "bytes": 8349,
+      "sha256": "92dda195c9ba095c70fd472f670318c163619bf5aa53fcc76b86ebfcf442eef8"
+    },
+    {
+      "path": "docs/narration-voice-preference.md",
+      "bytes": 1925,
+      "sha256": "a534ca44bcdc2417c3fabc29a4781342677e1ef12dc3406c3f02132e217db71f"
+    },
+    {
+      "path": "docs/product-completion-roadmap.md",
+      "bytes": 7339,
+      "sha256": "176505918ddbac863137a88add63beffbddeab91bcd2b7cb14931f9ce0d427c8"
+    },
+    {
+      "path": "docs/public-local-voice-v1.md",
+      "bytes": 7880,
+      "sha256": "dd1d90c3b7f484469e220bb263848d1ba3d359873e7f9f2a46d8ee45ba2ec107"
+    },
+    {
+      "path": "docs/support-and-release.md",
+      "bytes": 5788,
+      "sha256": "ab54dbc3d63c3aa30343364896ad4264f512fb95b0fd6336d5085734a6cbb28d"
+    },
+    {
+      "path": "scripts/prepare-public-voice-deps.py",
+      "bytes": 6844,
+      "sha256": "184557b115ec8d539e6bfb350a9790634040781f91de85513ad5caaff648a378"
+    },
+    {
+      "path": "scripts/prepare-public-voice.py",
+      "bytes": 6652,
+      "sha256": "65ebbdde39d9a5afca92a32223e4ec5b2dd0317c3f4f3e079ac12131580f218a"
+    },
+    {
+      "path": "scripts/qwen-public-voice.py",
+      "bytes": 4588,
+      "sha256": "1ce1b69f8ed426a7814e159ff077d6d5594bce3593cc87ea396781164a08714c"
+    },
+    {
+      "path": "src/operations/usage.ts",
+      "bytes": 9724,
+      "sha256": "2728730a9649ac19a62fbd0f58a984b86c035693ca5d2cb5591ae3bfbfa42206"
+    },
+    {
+      "path": "src/orchestrator/tasks.ts",
+      "bytes": 14546,
+      "sha256": "aea1ccaa5550bb99cca96dcbc8742b5e0d12e0dc88a3e51f321007d9f0ab077d"
+    },
+    {
+      "path": "src/presentation/narration.ts",
+      "bytes": 12968,
+      "sha256": "affd2aba7379db5727a934ccaf48e11ee29276f95237ad006c0b98c72d8014c4"
+    },
+    {
+      "path": "src/providers/capabilities.ts",
+      "bytes": 12007,
+      "sha256": "3e36373ba531680161972193ac02b922bcd055f39a25b41e588474acff92fc9b"
+    },
+    {
+      "path": "src/providers/first-owner.ts",
+      "bytes": 7218,
+      "sha256": "9e067316788d421463140623f8027bf9c4709f07eb439320f9de0681ece45769"
+    },
+    {
+      "path": "src/tts/local-chen.ts",
+      "bytes": 9141,
+      "sha256": "c7ffe0939d1e2be38961c8166b7e8a3f763c5e1897170c1e3f1e4ceb7f3f3a2a"
+    },
+    {
+      "path": "src/tts/qwen-public.ts",
+      "bytes": 13699,
+      "sha256": "bfa8cadfdfddb967a324ac5a21f00201bc9421e939fb26e10fdc3fca9c146ebe"
+    },
+    {
+      "path": "src/tts/runtime.ts",
+      "bytes": 24677,
+      "sha256": "bc73d2ff01bf6a5b99c241364bbc9022f1807bd91e035e1438d199a5eb5285a7"
+    },
+    {
+      "path": "src/workflow/creative-brief.ts",
+      "bytes": 4354,
+      "sha256": "d49cb94c96c031a568613ebcac65b4c1db04e62b42ae92dd39a9abf50346ead2"
+    },
+    {
+      "path": "src/workflow/narration-voice-policy.ts",
+      "bytes": 2176,
+      "sha256": "2fd26c608774ce03c3dd6d6bbd09ab8cd08487d45420e6c96fca7721640dada4"
+    },
+    {
+      "path": "src/workflow/narration-voice.ts",
+      "bytes": 4623,
+      "sha256": "a988d11ac18a874b32f8a8bb6a435ede5dc083d432d070ef2d1159bcbfefe73d"
+    },
+    {
+      "path": "src/workflow/narrative-run.ts",
+      "bytes": 33965,
+      "sha256": "4d4fba41fb809d731c8ea70064143643425c9f014e9d8fc05077d5366110886e"
+    },
+    {
+      "path": "src/workflow/narrative-speech-checkpoint.ts",
+      "bytes": 7912,
+      "sha256": "2ba56a48fb80e0cf9729fb7b55116ff90d1defa7e3cb7d82840ed2131136fe02"
+    },
+    {
+      "path": "src/workflow/public-voice-replay.ts",
+      "bytes": 5050,
+      "sha256": "cc142a589e685933f36a56f8c43ff17eb72a7ba4e25fda0082f61f53ead82573"
+    },
+    {
+      "path": "tests/capabilities.test.ts",
+      "bytes": 7550,
+      "sha256": "1e419733eb7b6f581c24154fb60b8fef59a3f4117b71fecfa3ed0dd66c751796"
+    },
+    {
+      "path": "tests/catalog.json",
+      "bytes": 5527,
+      "sha256": "2bbc67912d43d21cc510a344f2e7f774ff4b7ba44f0204bab7f29b91086db556"
+    },
+    {
+      "path": "tests/creative-brief.test.ts",
+      "bytes": 5990,
+      "sha256": "cdbd898cbf1c7a8dcd2014773e1cc6bb3e3f4ca9b2d6371757b7ab09a5c30cb5"
+    },
+    {
+      "path": "tests/narration-voice-policy.test.ts",
+      "bytes": 1403,
+      "sha256": "7cdfbf2da4cd9317ff998d3b6fa406ba98d4f946ea997f542028dbddbdf58631"
+    },
+    {
+      "path": "tests/prepare_public_voice_deps_test.py",
+      "bytes": 2324,
+      "sha256": "3d7c2ddea1f3c4963cf6dc98f26f7fed9901f47bac5dc6b26bae6621891d0df7"
+    },
+    {
+      "path": "tests/public-voice-workflow.media.test.ts",
+      "bytes": 18169,
+      "sha256": "33d880fa94dc90a284f47708fc099cb25a5b104384a7631aedb4343354805637"
+    },
+    {
+      "path": "tests/qwen-public-adapter.test.ts",
+      "bytes": 10347,
+      "sha256": "76b46f6d307bbd927fc63a71e924beee085d7d795448992577b77d9c08c2be42"
+    },
+    {
+      "path": "tests/qwen_public_voice_worker_test.py",
+      "bytes": 1115,
+      "sha256": "6762fe13c1b1f846fc297a5264848688c4145f986547fc84c20a479dfcafc156"
+    },
+    {
+      "path": "tests/tts.test.ts",
+      "bytes": 24725,
+      "sha256": "8a9c2427aa7b411eeea01ad456201c19e224f6630dbfc92083cb31d339ac35f1"
+    }
+  ]
+}

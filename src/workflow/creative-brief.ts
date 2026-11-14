@@ -40,7 +40,7 @@ export function checkBriefDuration(brief:CreativeBriefValue,seconds:number){
 }
 export function creativeMediaBlockers(brief:CreativeBriefValue,selectedVoice?:string){
  const blockers=assessCreativeBrief(brief).clarifications;
- const adapter=narrationAdapterBlocker(brief.voice.mode,brief.language);
+ const adapter=narrationAdapterBlocker(brief.voice.mode,brief.language,brief.voice.mode==='local'?brief.voice.profile:undefined);
  if(adapter)blockers.push(adapter);
  if(brief.voice.mode==='local'&&selectedVoice!==undefined&&brief.voice.profile!==selectedVoice)blockers.push('Configured runtime voice differs from the approved brief. Explicitly configure the requested local voice.');
  return blockers;

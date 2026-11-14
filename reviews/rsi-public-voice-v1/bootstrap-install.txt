@@ -1,0 +1,6 @@
+Looking in links: d:/gve-anna-render-temp/public-voice-20261113/pypi-wheels
+Requirement already satisfied: pip==25.0.1 in d:\gve-anna-render-temp\public-voice-deps-check\lib\site-packages (from -r config/public-voice-v1/build-requirements-windows.txt (line 4)) (25.0.1)
+Processing d:\gve-anna-render-temp\public-voice-20261113\pypi-wheels\setuptools-80.9.0-py3-none-any.whl (from -r config/public-voice-v1/build-requirements-windows.txt (line 5))
+Processing d:\gve-anna-render-temp\public-voice-20261113\pypi-wheels\wheel-0.45.1-py3-none-any.whl (from -r config/public-voice-v1/build-requirements-windows.txt (line 6))
+Installing collected packages: wheel, setuptools
+Successfully installed setuptools-80.9.0 wheel-0.45.1

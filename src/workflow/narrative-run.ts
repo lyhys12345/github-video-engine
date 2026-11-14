@@ -17,6 +17,7 @@ import {ancestors,boundedFile,statusStory} from '../story-planner/runtime.js';im
 import type {ReadonlyTransport} from '../providers/github-readonly.js';
 import {Request} from './explanation-contract.js';
 import {startExplanation,captureNarrativeStart} from './explanation-session.js';import {narrativePacket,narrativeStory,submitNarrative} from './narrative.js';import {renderDocumentCard} from './narrative-document-card.js';import {renderNarrativeCaptionSafe} from './narrative-audio-safe.js';
+import {restorePortablePublicSpeech} from './public-voice-replay.js';
 const fail=(message:string):never=>{throw new EngineError('NARRATIVE_RUN',message);};
 const json=(v:unknown)=>Buffer.from(canonical(v));
 const parse=async(path:string)=>JSON.parse((await boundedFile(path,1_000_000)).toString('utf8').replace(/^\uFEFF/,''));
@@ -93,13 +94,20 @@ export async function runNarrativeWorkspace(repository:string,workspace:string,a
      voice={mode:'imported',voiceLabel:brief.voice.voiceLabel};
     }
     else{
-     const profile=requireNarrationVoice();
+     const profile=brief?.voice.mode==='local'&&brief.voice.profile==='qwen-public'&&!process.env.GVE_NARRATION_VOICE
+      ? 'qwen-public' : requireNarrationVoice();
      const blockers=brief?creativeMediaBlockers(brief,profile):[];
+     if(profile==='qwen-public'&&(!runApproval||brief?.voice.mode!=='local'||brief.voice.profile!=='qwen-public')){
+      blockers.push('Select the public voice in the creative brief and approve the exact authored candidate before synthesis.');
+     }
      if(blockers.length)return finish('awaiting-creative-requirements',{through:'planning',blockers});
-     voice={mode:'local',profile};
+     if(!isCompositionLanguage(language))return fail('A composition adapter is required for the requested language.');
+     voice={mode:'local',profile,language};
     }
    }
-   const recordings=new Map<string,Awaited<ReturnType<typeof prepareNarrativeRecording>>>();
+   const recordings=voice?.mode==='local'&&voice.profile==='qwen-public'&&runApproval&&complete
+    ? await restorePortablePublicSpeech(workspace,sourceRecord,runApproval,plan.scenes,language,signal)
+    : new Map<string,Awaited<ReturnType<typeof prepareNarrativeRecording>>>();
    if(voice&&complete&&(through==='speech'||through==='preview')){
     phase='speech';const timing=await measureNarrativeSpeech(data,plan,config,signal,voice,recordings);cache.speech=timing.scenes.map(s=>({sceneId:s.sceneId,generation:s.generation,import:s.import,source:s.source}));
     await immutable(join(attempt,'speech-timing.json'),json(timing));

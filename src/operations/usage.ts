@@ -6,7 +6,7 @@ import {ArtifactSchema,ErrorSchema} from '../contracts/runtime.js';
 
 export const TASKS_DB_VERSION=1;
 export const USAGE_LIMITS={rows:10_000,bytes:32*1024*1024,attempts:100_000} as const;
-export const AccountingPolicySchema=z.object({provider:z.enum(['windows-sapi-offline','windows-winrt-huihui','remotion-local']),ratePolicy:z.literal('local-zero-v1')}).strict();
+export const AccountingPolicySchema=z.object({provider:z.enum(['windows-sapi-offline','windows-winrt-huihui','remotion-local','qwen-public']),ratePolicy:z.literal('local-zero-v1')}).strict();
 export type AccountingPolicy=z.infer<typeof AccountingPolicySchema>;
 const Hash=z.string().regex(/^[a-f0-9]{64}$/);
 export const UsageTaskSchema=z.object({id:Hash,kind:z.string().min(1).max(100),input:z.unknown(),scopeKey:z.string().nullable().optional(),state:z.enum(['running','succeeded','failed','cancelled']),attempt:z.number().int().positive(),owner:z.string().min(1),leaseUntil:z.number().finite().nonnegative(),result:ArtifactSchema.nullable(),outputs:z.array(ArtifactSchema).max(10_000),error:ErrorSchema.nullable(),startedAt:z.iso.datetime(),finishedAt:z.iso.datetime().nullable()}).strict().superRefine((t,ctx)=>{

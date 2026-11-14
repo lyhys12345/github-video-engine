@@ -1,0 +1,106 @@
+$ tsc --noEmit
+$ node scripts/test-suite.mjs python
+........EEEE.....EEE
+======================================================================
+ERROR: test_audition_pcm_slice_exact (__main__.CliTests.test_audition_pcm_slice_exact)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\gve-flagship-publish\tests\local_alignment_test.py", line 203, in test_audition_pcm_slice_exact
+    with tempfile.TemporaryDirectory(dir='/private/tmp') as temporary:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 886, in __init__
+    self.name = mkdtemp(suffix, prefix, dir)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 384, in mkdtemp
+    _os.mkdir(file, 0o700)
+FileNotFoundError: [WinError 3] \u7cfb\u7edf\u627e\u4e0d\u5230\u6307\u5b9a\u7684\u8def\u5f84\u3002: '/private/tmp\\tmpqwicy98q'
+
+======================================================================
+ERROR: test_existing_output_preserved_without_preflight (__main__.CliTests.test_existing_output_preserved_without_preflight)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\gve-flagship-publish\tests\local_alignment_test.py", line 165, in test_existing_output_preserved_without_preflight
+    with tempfile.TemporaryDirectory(dir='/private/tmp') as temporary:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 886, in __init__
+    self.name = mkdtemp(suffix, prefix, dir)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 384, in mkdtemp
+    _os.mkdir(file, 0o700)
+FileNotFoundError: [WinError 3] \u7cfb\u7edf\u627e\u4e0d\u5230\u6307\u5b9a\u7684\u8def\u5f84\u3002: '/private/tmp\\tmpmg9qafmj'
+
+======================================================================
+ERROR: test_missing_model_retains_failure_and_never_runs (__main__.CliTests.test_missing_model_retains_failure_and_never_runs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\gve-flagship-publish\tests\local_alignment_test.py", line 174, in test_missing_model_retains_failure_and_never_runs
+    with tempfile.TemporaryDirectory(dir='/private/tmp') as temporary:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 886, in __init__
+    self.name = mkdtemp(suffix, prefix, dir)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 384, in mkdtemp
+    _os.mkdir(file, 0o700)
+FileNotFoundError: [WinError 3] \u7cfb\u7edf\u627e\u4e0d\u5230\u6307\u5b9a\u7684\u8def\u5f84\u3002: '/private/tmp\\tmps74uun0f'
+
+======================================================================
+ERROR: test_source_hash_rejected_before_model_runtime_or_process (__main__.CliTests.test_source_hash_rejected_before_model_runtime_or_process)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\gve-flagship-publish\tests\local_alignment_test.py", line 183, in test_source_hash_rejected_before_model_runtime_or_process
+    with tempfile.TemporaryDirectory(dir='/private/tmp') as temporary:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 886, in __init__
+    self.name = mkdtemp(suffix, prefix, dir)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 384, in mkdtemp
+    _os.mkdir(file, 0o700)
+FileNotFoundError: [WinError 3] \u7cfb\u7edf\u627e\u4e0d\u5230\u6307\u5b9a\u7684\u8def\u5f84\u3002: '/private/tmp\\tmpfoc2ivuc'
+
+======================================================================
+ERROR: test_missing_vocab_or_merges_rejected_even_with_matching_file_set (__main__.ModelLayoutTests.test_missing_vocab_or_merges_rejected_even_with_matching_file_set) (name='vocab.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\gve-flagship-publish\tests\local_alignment_test.py", line 150, in test_missing_vocab_or_merges_rejected_even_with_matching_file_set
+    with self.subTest(name=name), tempfile.TemporaryDirectory(dir='/private/tmp') as temporary:
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 886, in __init__
+    self.name = mkdtemp(suffix, prefix, dir)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 384, in mkdtemp
+    _os.mkdir(file, 0o700)
+FileNotFoundError: [WinError 3] \u7cfb\u7edf\u627e\u4e0d\u5230\u6307\u5b9a\u7684\u8def\u5f84\u3002: '/private/tmp\\tmp_x8_6l_x'
+
+======================================================================
+ERROR: test_missing_vocab_or_merges_rejected_even_with_matching_file_set (__main__.ModelLayoutTests.test_missing_vocab_or_merges_rejected_even_with_matching_file_set) (name='merges.txt')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\gve-flagship-publish\tests\local_alignment_test.py", line 150, in test_missing_vocab_or_merges_rejected_even_with_matching_file_set
+    with self.subTest(name=name), tempfile.TemporaryDirectory(dir='/private/tmp') as temporary:
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 886, in __init__
+    self.name = mkdtemp(suffix, prefix, dir)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 384, in mkdtemp
+    _os.mkdir(file, 0o700)
+FileNotFoundError: [WinError 3] \u7cfb\u7edf\u627e\u4e0d\u5230\u6307\u5b9a\u7684\u8def\u5f84\u3002: '/private/tmp\\tmplodhx4jz'
+
+======================================================================
+ERROR: test_pinned_ten_file_layout_without_tokenizer_json_accepted (__main__.ModelLayoutTests.test_pinned_ten_file_layout_without_tokenizer_json_accepted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\gve-flagship-publish\tests\local_alignment_test.py", line 141, in test_pinned_ten_file_layout_without_tokenizer_json_accepted
+    with tempfile.TemporaryDirectory(dir='/private/tmp') as temporary:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 886, in __init__
+    self.name = mkdtemp(suffix, prefix, dir)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\luyuh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\tempfile.py", line 384, in mkdtemp
+    _os.mkdir(file, 0o700)
+FileNotFoundError: [WinError 3] \u7cfb\u7edf\u627e\u4e0d\u5230\u6307\u5b9a\u7684\u8def\u5f84\u3002: '/private/tmp\\tmpwpz6wee6'
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.013s
+
+FAILED (errors=7)
+[ELIFECYCLE] Command failed with exit code 1.

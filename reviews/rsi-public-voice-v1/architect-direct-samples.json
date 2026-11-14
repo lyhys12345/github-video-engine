@@ -1,0 +1,22 @@
+[
+  {
+    "language": "en-US",
+    "sha256": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408",
+    "bytes": 81964,
+    "channels": 1,
+    "sampleRate": 16000,
+    "bits": 16,
+    "samples": 40960,
+    "nonzero": true
+  },
+  {
+    "language": "zh-CN",
+    "sha256": "919935eaeeb8c51e930cfbea4340debfa0345d6129bf181c65cb6afce734bbe9",
+    "bytes": 53804,
+    "channels": 1,
+    "sampleRate": 16000,
+    "bits": 16,
+    "samples": 26880,
+    "nonzero": true
+  }
+]

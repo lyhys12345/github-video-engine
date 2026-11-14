@@ -101,3 +101,23 @@ it('rejects unsupported first-owner options and non-repository URLs before makin
   await expect(invoke({voice: 'any-installed-voice'})).rejects.toMatchObject({code: 'USAGE'});
   await expect(invoke({repo: 'https://github.com/example/demo?query=1'})).rejects.toMatchObject({code: 'USAGE'});
 });
+
+it('reports public options without a private profile or unrequested synthesis', async () => {
+ const root=await workflowRoot('caps-public'),unavailable=join(root,'private-missing-profile');
+ for(const key of ['GVE_QWEN_PUBLIC_PROFILE','GVE_ANNA_PROFILE','GVE_CHEN_PROFILE'])vi.stubEnv(key,unavailable);
+ const options={workspace:root,voice:'qwen-public',signal} as const;
+ const planning=await firstOwnerReport({...options,language:'en-US'});
+ expect(planning).toMatchObject({ok:true,checks:{voice:{status:'not-checked'}},narration:{
+  local:{defaultProfile:'anna-local',publicPresets:{'zh-CN':'Serena','en-US':'Ryan'}}
+ }});
+ const expectedCode=process.platform==='win32'&&process.arch==='x64'?'PUBLIC_VOICE_PROFILE':'PUBLIC_VOICE_PLATFORM';
+ for(const language of ['zh-CN','en-US']){
+  const preview=await firstOwnerReport({...options,language,phase:'preview'});
+  expect(preview).toMatchObject({ok:false,selection:{voice:'qwen-public',requiredForPreview:[]},checks:{
+   voice:{status:'blocked',code:expectedCode}
+  }});
+  expect(JSON.stringify(preview)).not.toContain(unavailable);
+ }
+ const unsupported=await firstOwnerReport({...options,language:'ja-JP',phase:'preview'});
+ expect(unsupported.checks.voice).toMatchObject({status:'blocked',code:'VOICE_ADAPTER'});
+});

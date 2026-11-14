@@ -7,7 +7,8 @@ import {command} from '../core/process.js';
 import {ancestors, preflightStatePath} from '../story-planner/runtime.js';
 import {probeHuihuiVoice} from '../tts/huihui.js';
 import {probeLocalCudaVoice} from '../tts/local-chen.js';
-import {compositionLanguages, isLocalNarrationVoice, localNarrationVoices, narrationAdapterBlocker, requireNarrationVoice} from '../workflow/narration-voice-policy.js';
+import {probePublicVoice} from '../tts/qwen-public.js';
+import {compositionLanguages, isLocalNarrationVoice, localNarrationVoices, narrationAdapterBlocker, publicVoicePresets, requireNarrationVoice} from '../workflow/narration-voice-policy.js';
 import {browserPath, ffmpegPath, ffprobePath, requireNodeRuntime} from './local.js';
 
 export const capabilityPhases = ['planning', 'speech', 'animation', 'voice', 'preview'] as const;
@@ -54,8 +55,17 @@ async function storageProbe(data?: string) {
 
 function checkCode(error: unknown, fallback: string) {
   if (error instanceof EngineError && ['NODE_VERSION', 'BROWSER_MISSING', 'VOICE_PLATFORM', 'NARRATION_VOICE',
-    'CHEN_LOCAL_UNAVAILABLE', 'CHEN_PROFILE', 'VOICE_RUNTIME_TIMEOUT', 'HUIHUI_PLATFORM', 'HUIHUI_VOICE_UNAVAILABLE', 'EXPLAIN_STATE_PATH_TOO_LONG'].includes(error.code)) return error.code;
+    'CHEN_LOCAL_UNAVAILABLE', 'CHEN_PROFILE', 'VOICE_RUNTIME_TIMEOUT', 'HUIHUI_PLATFORM', 'HUIHUI_VOICE_UNAVAILABLE', 'PUBLIC_VOICE_PLATFORM', 'PUBLIC_VOICE_PROFILE', 'PUBLIC_VOICE_MODEL',
+    'PUBLIC_VOICE_RUNTIME', 'PUBLIC_VOICE_TIMEOUT', 'EXPLAIN_STATE_PATH_TOO_LONG'].includes(error.code)) return error.code;
   return fallback;
+}
+
+function publicVoiceBlocker(code: string) {
+  if (code === 'PUBLIC_VOICE_PLATFORM') return 'The public Qwen presets require Windows x64 and NVIDIA CUDA.';
+  if (code === 'PUBLIC_VOICE_PROFILE') return 'Run scripts/prepare-public-voice.py from the dedicated Python environment, then configure GVE_QWEN_PUBLIC_PROFILE for a custom profile path.';
+  if (code === 'PUBLIC_VOICE_MODEL') return 'Prepare a clean copy of the pinned model with scripts/prepare-public-voice.py --download.';
+  if (code === 'PUBLIC_VOICE_TIMEOUT') return 'The local public voice readiness probe exceeded 120 seconds.';
+  return 'Check config/public-voice-v1/requirements-windows.txt, Windows x64 Python 3.12 and an NVIDIA GPU with native bfloat16 support.';
 }
 
 export async function capabilityReport(options: Options = {}) {
@@ -66,7 +76,7 @@ export async function capabilityReport(options: Options = {}) {
   const imported = voice === 'imported';
   const silent = voice === 'none';
   const local = isLocalNarrationVoice(voice);
-  const adapter = local ? narrationAdapterBlocker('local', language) : narrationAdapterBlocker(voice, language);
+  const adapter = local ? narrationAdapterBlocker('local', language, voice) : narrationAdapterBlocker(voice, language);
   const audio: CheckId[] = silent ? ['voice'] : ['ffmpeg', 'ffprobe', 'voice'];
   const planning: CheckId[] = ['runtime', 'storage'];
   const visuals: CheckId[] = ['browser', 'ffmpeg', 'ffprobe', 'videoFilters'];
@@ -110,6 +120,7 @@ export async function capabilityReport(options: Options = {}) {
         if (silent || imported) return;
         if (!local) throw new EngineError('NARRATION_VOICE', 'Unknown narration mode.');
         if (voice === 'windows-huihui') await probeHuihuiVoice(signal);
+        else if (voice === 'qwen-public') await probePublicVoice(signal);
         else await probeLocalCudaVoice(voice, signal);
       }},
   };
@@ -122,7 +133,8 @@ export async function capabilityReport(options: Options = {}) {
       checkAbort(signal);
       const code = checkCode(error, p.code);
       const detail = id !== 'voice' ? p.error : adapter ?? (
-        code === 'NARRATION_VOICE' ? 'Choose anna-local, chen-local, windows-huihui, imported or none.' :
+        code === 'NARRATION_VOICE' ? `Choose ${localNarrationVoices.join(', ')}, imported or none.` :
+        voice === 'qwen-public' ? publicVoiceBlocker(code) :
         code === 'VOICE_RUNTIME_TIMEOUT' ? 'The configured local voice runtime did not finish its 120-second readiness probe.' :
         code === 'VOICE_PLATFORM' || code === 'HUIHUI_PLATFORM' ? 'The selected synthesis profile requires Windows.' :
         voice === 'windows-huihui' ? 'Install the exact local WinRT Huihui zh-CN voice and use Windows PowerShell.' :
@@ -149,7 +161,9 @@ export async function capabilityReport(options: Options = {}) {
     checks: Object.fromEntries((Object.keys(probes) as CheckId[]).map(id => [id, checks[id]])) as Record<CheckId, Check>,
     phases: phaseReports,
     narration: {
-      local: {profiles: localNarrationVoices, languages: ['zh-CN'], defaultProfile: 'anna-local', explicitAlternatives: true},
+      local: {profiles: localNarrationVoices, languages: compositionLanguages, defaultProfile: 'anna-local', explicitAlternatives: true,
+        profileLanguages: {'anna-local':['zh-CN'], 'chen-local':['zh-CN'], 'windows-huihui':['zh-CN'], 'qwen-public':compositionLanguages},
+        publicPresets: publicVoicePresets},
       imported: {languages: compositionLanguages, mediaType: 'audio/wav', authorization: 'rights confirmation and exact per-scene local receipts'},
       silent: {languages: compositionLanguages, audioTrack: false},
       unavailable: {reference: 'reference-audio voice cloning adapter missing', 'byo-api': 'custom narration API adapter missing'},

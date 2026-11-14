@@ -1,0 +1,123 @@
+$ tsc --noEmit
+
+ RUN  v3.2.4 D:/gve-flagship-publish
+
+ ❯ tests/qwen-public-adapter.test.ts (7 tests | 6 failed) 966ms
+   ✓ public Qwen adapter (mocked Python process) > rejects missing, altered and foreign model data before invoking Python or creating state  658ms
+   × public Qwen adapter (mocked Python process) > propagates the bounded process timeout and leaves only a retryable failed task 89ms
+     → expected Error: A public voice input is missing, l… { …(3) } to match object { code: 'PUBLIC_VOICE_TIMEOUT', …(1) }
+(1 matching property omitted from actual)
+   × public Qwen adapter (mocked Python process) > cancels in-flight synthesis, deletes partial audio, and records a cancelled task 26ms
+     → expected Error: A public voice input is missing, l… { …(3) } to be Error: Synthetic user cancellation { …(3) } // Object.is equality
+   × public Qwen adapter (mocked Python process) > rejects 'wrong speaker' before committing audio 51ms
+     → expected Error: A public voice input is missing, l… { …(3) } to match object { code: 'PUBLIC_VOICE_AUDIO' }
+(2 matching properties omitted from actual)
+   × public Qwen adapter (mocked Python process) > rejects 'wrong samples' before committing audio 67ms
+     → expected Error: A public voice input is missing, l… { …(3) } to match object { code: 'PUBLIC_VOICE_AUDIO' }
+(2 matching properties omitted from actual)
+   × public Qwen adapter (mocked Python process) > rejects 'silent WAV' before committing audio 40ms
+     → expected Error: A public voice input is missing, l… { …(3) } to match object { code: 'PUBLIC_VOICE_AUDIO' }
+(2 matching properties omitted from actual)
+   × public Qwen adapter (mocked Python process) > separates exact text and language/preset identities and reuses equal generations 34ms
+     → A public voice input is missing, linked, or has an unexpected byte length.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/qwen-public-adapter.test.ts > public Qwen adapter (mocked Python process) > propagates the bounded process timeout and leaves only a retryable failed task
+AssertionError: expected Error: A public voice input is missing, l… { …(3) } to match object { code: 'PUBLIC_VOICE_TIMEOUT', …(1) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "classification": "retryable",
+-   "code": "PUBLIC_VOICE_TIMEOUT",
++ EngineError {
++   "classification": "permanent",
++   "code": "PUBLIC_VOICE_MODEL",
+  }
+
+ ❯ tests/qwen-public-adapter.test.ts:138:5
+    136|     const fixture = await publicVoiceFixture();
+    137|     mockWorker(async () => {throw new EngineError('TIMEOUT', 'Syntheti…
+    138|     await expect(generatePublicVoice(english, 'en-US', fixture.data, f…
+       |     ^
+    139|       .rejects.toMatchObject({code: 'PUBLIC_VOICE_TIMEOUT', classifica…
+    140|     expect(mocks.worker).toHaveBeenCalledWith(fixture.pythonPath, ['-B…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/qwen-public-adapter.test.ts > public Qwen adapter (mocked Python process) > cancels in-flight synthesis, deletes partial audio, and records a cancelled task
+AssertionError: expected Error: A public voice input is missing, l… { …(3) } to be Error: Synthetic user cancellation { …(3) } // Object.is equality
+
+- Expected
++ Received
+
+  EngineError {
+-   "message": "Synthetic user cancellation",
+-   "code": "CANCELLED",
+-   "classification": "cancelled",
++   "message": "A public voice input is missing, linked, or has an unexpected byte length.",
++   "code": "PUBLIC_VOICE_MODEL",
++   "classification": "permanent",
+    "artifacts": [],
+  }
+
+ ❯ tests/qwen-public-adapter.test.ts:155:5
+    153|       throw options.signal.reason;
+    154|     });
+    155|     await expect(generatePublicVoice(english, 'en-US', fixture.data, c…
+       |     ^
+    156|     expect(await assertNoSpeech(fixture.data)).toMatchObject({state: '…
+    157|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/qwen-public-adapter.test.ts > public Qwen adapter (mocked Python process) > rejects 'wrong speaker' before committing audio
+ FAIL  tests/qwen-public-adapter.test.ts > public Qwen adapter (mocked Python process) > rejects 'wrong samples' before committing audio
+ FAIL  tests/qwen-public-adapter.test.ts > public Qwen adapter (mocked Python process) > rejects 'silent WAV' before committing audio
+AssertionError: expected Error: A public voice input is missing, l… { …(3) } to match object { code: 'PUBLIC_VOICE_AUDIO' }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "code": "PUBLIC_VOICE_AUDIO",
++ EngineError {
++   "code": "PUBLIC_VOICE_MODEL",
+  }
+
+ ❯ tests/qwen-public-adapter.test.ts:169:5
+    167|       return canonical({speaker, samples, sampleRate: 16000});
+    168|     });
+    169|     await expect(generatePublicVoice(english, 'en-US', fixture.data, f…
+       |     ^
+    170|       .rejects.toMatchObject({code: 'PUBLIC_VOICE_AUDIO'});
+    171|     expect(await assertNoSpeech(fixture.data)).toMatchObject({state: '…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/qwen-public-adapter.test.ts > public Qwen adapter (mocked Python process) > separates exact text and language/preset identities and reuses equal generations
+Error: A public voice input is missing, linked, or has an unexpected byte length.
+ ❯ fail src/tts/qwen-public.ts:53:63
+     51|   speaker: Speaker, sampleRate: z.literal(16_000), samples: z.number()…
+     52| });
+     53| const fail = (code: string, message: string): never => {throw new Engi…
+       |                                                               ^
+     54| 
+     55| function matchingEntries(actual: string[], expected: string[]) {
+ ❯ hashFile src/tts/qwen-public.ts:64:12
+ ❯ prepare src/tts/qwen-public.ts:109:11
+ ❯ Module.generatePublicVoice src/tts/qwen-public.ts:218:20
+ ❯ tests/qwen-public-adapter.test.ts:184:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 1 passed (7)
+   Start at  22:41:12
+   Duration  1.69s (transform 260ms, setup 0ms, collect 503ms, tests 966ms, environment 0ms, prepare 76ms)
+

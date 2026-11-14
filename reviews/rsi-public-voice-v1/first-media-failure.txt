@@ -1,0 +1,44 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mD:/gve-flagship-publish[39m
+
+[90mstdout[2m | tests/public-voice-workflow.media.test.ts[2m > [22m[2msynthesizes a public voiced CLI preview, replays a portable copy without voice setup, and revoices one approved edit
+[22m[39mTEST ONLY real public-voice CLI evidence: D:\gve-anna-render-temp\public-voice-20261113\tmp\gve-pv-D9qgan
+
+ [31m❯[39m tests/public-voice-workflow.media.test.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 365889[2mms[22m[39m
+[31m   [31m×[31m synthesizes a public voiced CLI preview, replays a portable copy without voice setup, and revoices one approved edit[39m[33m 365888[2mms[22m[39m
+[31m     → C:\Program Files\WindowsApps\OpenAI.CodexPrimaryRuntime.v26-1112-611-0_26.1112.611.0_x64__3k8sg7r9htsxt\dependencies\node\bin\node.exe exited 1: {
+  "error": {
+    "code": "PROCESS_FAILED",
+    "message": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1112-611-0_26.1112.611.0_x64__3k8sg7r9htsxt\\dependencies\\node\\bin\\node.exe exited 1: TimeoutError: Timed out after 25000 ms while trying to connect to the browser! Chrome logged the following: \r\nDevTools remote debugging requires a non-default data directory. Specify this using --user-data-dir.\r\nCreated TensorFlow Lite XNNPACK delegate for CPU.\r\n\n    at Timeout.onTimeout (file:///D:/gve-flagship-publish/node_modules/.pnpm/@remotion+renderer@4.0.538__bd20e3be18d725ef112a7a04964b2307/node_modules/@remotion/renderer/dist/esm/index.mjs:4176:14)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)\n",
+    "classification": "retryable"
+  }
+}
+[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/public-voice-workflow.media.test.ts > synthesizes a public voiced CLI preview, replays a portable copy without voice setup, and revoices one approved edit
+Error: C:\Program Files\WindowsApps\OpenAI.CodexPrimaryRuntime.v26-1112-611-0_26.1112.611.0_x64__3k8sg7r9htsxt\dependencies\node\bin\node.exe exited 1: {
+  "error": {
+    "code": "PROCESS_FAILED",
+    "message": "C:\\Program Files\\WindowsApps\\OpenAI.CodexPrimaryRuntime.v26-1112-611-0_26.1112.611.0_x64__3k8sg7r9htsxt\\dependencies\\node\\bin\\node.exe exited 1: TimeoutError: Timed out after 25000 ms while trying to connect to the browser! Chrome logged the following: \r\nDevTools remote debugging requires a non-default data directory. Specify this using --user-data-dir.\r\nCreated TensorFlow Lite XNNPACK delegate for CPU.\r\n\n    at Timeout.onTimeout (file:///D:/gve-flagship-publish/node_modules/.pnpm/@remotion+renderer@4.0.538__bd20e3be18d725ef112a7a04964b2307/node_modules/@remotion/renderer/dist/esm/index.mjs:4176:14)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)\n",
+    "classification": "retryable"
+  }
+}
+
+ ❯ ChildProcess.<anonymous> src/core/process.ts:32:19
+     30|       if (failure) reject(failure);
+     31|       else if (code === 0) resolve(options.capture==='stderr'?stderr:s…
+     32|       else reject(new EngineError('PROCESS_FAILED', `${exe} exited ${c…
+       |                   ^
+     33|     });
+     34|     if (options.signal?.aborted) abort();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 22:39:51
+[2m   Duration [22m 366.16s[2m (transform 50ms, setup 0ms, collect 68ms, tests 365.89s, environment 0ms, prepare 69ms)[22m
+

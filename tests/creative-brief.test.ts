@@ -43,3 +43,10 @@ it('portable manifests preserve the optional brief while rejecting arbitrary aut
  const files=paths.map(path=>({path,sha256:'e'.repeat(64),bytes:10}));expect(PortableProjectManifest.safeParse({...base,files}).success).toBe(true);
  expect(PortableProjectManifest.safeParse({...base,files:[...files,{path:'author/execute.js',sha256:'e'.repeat(64),bytes:10}]}).success).toBe(false);
 });
+
+it('binds the public multilingual voice to the explicit creative brief',()=>{
+ const publicBrief=CreativeBrief.parse({...brief,language:'en-US',voice:{mode:'local',profile:'qwen-public'}});
+ expect(creativeMediaBlockers(publicBrief,'qwen-public')).toEqual([]);
+ expect(creativeMediaBlockers(publicBrief,'anna-local')).toEqual([expect.stringContaining('differs')]);
+ expect(creativeMediaBlockers(CreativeBrief.parse({...publicBrief,language:'de-DE'}))).toEqual([expect.stringContaining('Ryan')]);
+});

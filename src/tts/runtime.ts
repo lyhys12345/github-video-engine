@@ -14,14 +14,20 @@ import {ancestors,boundedFile,preflightStatePath} from '../story-planner/runtime
 import {StorySchema} from '../contracts/story.js';
 import {buildVoiceHandoff} from '../story-planner/voice-handoff.js';
 import {HUIHUI_VOICE_LABEL,readHuihuiGeneration} from './huihui.js';
+import {readPublicVoiceGeneration} from './qwen-public.js';
 
 const hash=z.string().regex(/^[a-f0-9]{64}$/);
 const ReceiptSchema=z.object({schemaVersion:z.literal('tts-receipt/1.0'),fingerprint:hash,input:z.unknown(),voiceLabel:z.string().min(1).max(100),createdAt:z.iso.datetime(),artifact:ArtifactSchema,durationSeconds:z.number().finite().positive().max(600),requestId:z.string().nullable(),estimatedMaxChargeMicros:z.number().int().nonnegative(),actualChargeMicros:z.null(),chargeBasis:z.enum(['local-import-no-provider-call','provider-invoice-unverified']),transcriptVerification:z.literal('caller-declared; recorded speech not verified'),review:z.literal('pending-owner-listening')}).strict();
 export type TtsReceipt=z.infer<typeof ReceiptSchema>;
 const HUIHUI_IMPORT_V1 = 'local-import-huihui-v1';
 const HUIHUI_IMPORT = 'local-import-huihui-v2';
+const PUBLIC_VOICE_IMPORT = 'local-import-qwen-public-v1';
 const HuihuiImport = ImportTtsSchema.omit({schemaVersion:true}).extend({
  adapterVersion:z.enum([HUIHUI_IMPORT_V1,HUIHUI_IMPORT]), voiceLabel:z.literal(HUIHUI_VOICE_LABEL), mediaType:z.literal('audio/wav'),
+ generation:z.strictObject({taskId:hash,manifestSha256:hash}),
+});
+const PublicVoiceImport = ImportTtsSchema.omit({schemaVersion:true}).extend({
+ adapterVersion:z.literal(PUBLIC_VOICE_IMPORT),mediaType:z.literal('audio/wav'),
  generation:z.strictObject({taskId:hash,manifestSha256:hash}),
 });
 const json=(x:unknown)=>JSON.stringify(x,null,2)+'\n';
@@ -130,6 +136,26 @@ async function checkedHuihuiParent(data:string,receipt:TtsReceipt,signal:AbortSi
  return generation;
 }
 
+function publicVoiceImportInput(generation:Awaited<ReturnType<typeof readPublicVoiceGeneration>>){
+ return PublicVoiceImport.parse({provider:'local-import',adapterVersion:PUBLIC_VOICE_IMPORT,
+  text:generation.manifest.input.text,voiceLabel:generation.manifest.voiceLabel,sourceSha256:generation.manifest.audio.sha256,
+  mediaType:'audio/wav',generation:{taskId:generation.manifest.taskId,manifestSha256:generation.manifestSha256}});
+}
+
+async function checkedPublicVoiceParent(data:string,receipt:TtsReceipt,signal:AbortSignal){
+ const adapter=(receipt.input as {adapterVersion?:string}|null)?.adapterVersion;
+ if(adapter!==PUBLIC_VOICE_IMPORT)return undefined;
+ const input=PublicVoiceImport.parse(receipt.input);
+ const generation=await readPublicVoiceGeneration(data,input.generation.taskId,signal);
+ if(canonical(input)!==canonical(publicVoiceImportInput(generation))||receipt.voiceLabel!==input.voiceLabel||
+    receipt.artifact.mediaType!==input.mediaType||receipt.artifact.sha256!==input.sourceSha256||
+    receipt.durationSeconds!==generation.manifest.audio.durationSeconds||receipt.requestId!==null||
+    receipt.estimatedMaxChargeMicros!==0||receipt.chargeBasis!=='local-import-no-provider-call'){
+  return fail('TTS_INTEGRITY','Public voice import differs from its exact generation parent.');
+ }
+ return generation;
+}
+
 async function readTtsState(data:string,id:string,signal:AbortSignal){
  hash.parse(id);
  const db=await openState(data,false);
@@ -138,28 +164,40 @@ async function readTtsState(data:string,id:string,signal:AbortSignal){
   if(result?.state==='succeeded'){
    const checked=await verifiedReceipt(new ArtifactStore(data),db,id);
    const generation=await checkedHuihuiParent(data,checked.receipt,signal);
-   return {fingerprint:id,state:'succeeded',integrity:'verified',...checked,generation};
+   const publicGeneration=await checkedPublicVoiceParent(data,checked.receipt,signal);
+   return {fingerprint:id,state:'succeeded',integrity:'verified',...checked,generation,publicGeneration};
   }
-  return {fingerprint:id,state:'held',reservationMicros:request.estimate,actualChargeMicros:null,generation:undefined,
+  return {fingerprint:id,state:'held',reservationMicros:request.estimate,actualChargeMicros:null,generation:undefined,publicGeneration:undefined,
    code:result?.code??'TTS_INTERRUPTED_OR_RUNNING',replay:'forbidden; inspect provider usage manually',review:'pending-owner-listening'};
  }finally{db.close();}
 }
 
 export async function statusTts(data:string,id:string,signal=new AbortController().signal){
- const {generation:_generation,...status}=await readTtsState(data,id,signal);
+ const {generation:_generation,publicGeneration:_publicGeneration,...status}=await readTtsState(data,id,signal);
  return status;
 }
 
 export async function importHuihuiTts(data:string,taskId:string,signal:AbortSignal){
  const generation=await readHuihuiGeneration(data,taskId,signal);
- const input=huihuiImportInput(generation),id=sha256(canonical(input));
+ return importGeneratedVoice(data,huihuiImportInput(generation),generation,signal,checkedHuihuiParent);
+}
+
+export async function importPublicVoiceTts(data:string,taskId:string,signal:AbortSignal){
+ const generation=await readPublicVoiceGeneration(data,taskId,signal);
+ return importGeneratedVoice(data,publicVoiceImportInput(generation),generation,signal,checkedPublicVoiceParent);
+}
+
+async function importGeneratedVoice(data:string,input:z.infer<typeof HuihuiImport>|z.infer<typeof PublicVoiceImport>,
+ generation:{wav:Buffer;manifest:{audio:{durationSeconds:number}}},signal:AbortSignal,
+ checkParent:(data:string,receipt:TtsReceipt,signal:AbortSignal)=>Promise<unknown>){
+ const id=sha256(canonical(input));
  await ancestors(join(resolve(data),'artifacts'),true);
  // A writer can recover a rollback journal left by a killed first importer.
  const db=await openState(data,true,true),store=new ArtifactStore(data);
  try{
   if(ttsSchemaReady(db)&&db.prepare('SELECT id FROM tts_requests WHERE id=?').get(id)){
    const result=await verifiedReceipt(store,db,id);
-   await checkedHuihuiParent(data,result.receipt,signal);
+   await checkParent(data,result.receipt,signal);
    return {fingerprint:id,cached:true,...result};
   }
   const artifact=await store.commit(generation.wav,'audio/wav','RESOLVE_ASSETS',id);
@@ -184,7 +222,7 @@ export async function importHuihuiTts(data:string,taskId:string,signal:AbortSign
    throw error;
   }
   const result=await verifiedReceipt(store,db,id);
-  await checkedHuihuiParent(data,result.receipt,signal);
+  await checkParent(data,result.receipt,signal);
   return {fingerprint:id,cached,...result};
  }finally{db.close();}
 }
@@ -196,6 +234,14 @@ export async function readLocalTts(data: string, id: string, signal=new AbortCon
   }
   const {receipt, receiptArtifact} = status;
   const store = new ArtifactStore(data);
+  if(status.publicGeneration){
+    const {adapterVersion:_adapterVersion,generation:_generation,...raw}=PublicVoiceImport.parse(receipt.input);
+    const generation=status.publicGeneration;
+    return {input:ImportTtsSchema.parse({...raw,schemaVersion:'1.0'}),receipt,receiptArtifact,
+      receiptBytes:await verifiedBytes(store,receiptArtifact),audio:generation.wav,generationManifestBytes:generation.manifestBytes,
+      publicVoice:{samples:generation.manifest.audio.samples,language:generation.manifest.input.language,
+        speaker:generation.manifest.input.speaker,taskId:generation.manifest.taskId,manifestSha256:generation.manifestSha256}};
+  }
   if(status.generation){
     const {adapterVersion:_adapterVersion,generation:_generation,...raw}=HuihuiImport.parse(receipt.input);
     const input=ImportTtsSchema.parse({...raw,schemaVersion:'1.0'});

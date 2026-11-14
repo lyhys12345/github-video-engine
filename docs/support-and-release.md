@@ -2,7 +2,7 @@
 
 The engine is a local toolkit driven by the user's current Codex or Claude Code session. It is not a hosted model service. Capability, execution, perception and distribution permission are separate checks.
 
-Current executed evidence: [five-module RSI results, 2026-11-13](rsi-five-modules-results-2026-11-13.md).
+Current executed evidence: [public local speech and editable voiced export](rsi-public-voice-results-2026-11-13.md), [first-owner integration](rsi-first-owner-results-2026-11-13.md), and [earlier five-module RSI results](rsi-five-modules-results-2026-11-13.md).
 
 ## Check this computer first
 
@@ -16,13 +16,14 @@ For a new user, follow the [first-owner guide](first-owner-quickstart.md). The f
 
 Planning requires Node 24 and writable local storage with SQLite/hard links. It can run before a browser, FFmpeg or a voice runtime is installed. Media phases check their own dependencies. The capability report contains explicit ready, blocked and not-checked states and actionable reasons; it does not generate media or validate user content.
 
-Local synthesis uses the configured owner profile, currently Windows CUDA Anna/Chen or explicitly selected Windows Huihui. A clone does not include the owner's reference audio, Python environment or model. Imported finished WAV and intentionally silent output avoid that private GPU dependency; they still require the applicable local rendering tools. A reference-voice or paid narration API preference is not a working adapter merely because it is representable in a brief.
+Local synthesis offers a separately installed [public preset option](public-local-voice-v1.md), `qwen-public`, with no reference audio. Its current bounded path uses Windows NVIDIA CUDA. Existing owner Anna/Chen profiles and Windows Huihui remain explicit alternatives; a clone does not include private references, Python environments or model weights. Imported finished WAV and intentionally silent output avoid the GPU/model requirement; they still require the applicable local rendering tools. A reference-voice or paid narration API preference is not a working adapter merely because it is representable in a brief.
 
 ## Verification matrix
 
 | Surface | Evidence | Remaining boundary |
 | --- | --- | --- |
 | Windows x64, Node 24.22.1 | Current development/targeted integration environment. Detailed cycle results are recorded separately. | This is not a Windows-version or hardware certification. |
+| Windows CUDA public presets | Actual fresh public runtime/model, zh-CN and en-US WAVs, narrated export/import/edit; [results](rsi-public-voice-results-2026-11-13.md). | RTX 3070 exercised; no reference audio required. Naturalness, CPU and other platforms remain unverified. |
 | Windows CUDA owner voice | Existing owner-approved local outputs; capability probe checks configured runtime. | Reference/model not distributed; current probes are not a fresh subjective voice assessment. |
 | Imported WAV / silent preview | New explicit modes, with source/receipt binding and platform-aware preflight. | See real-media cycle results; do not infer macOS/Linux media support from TypeScript compilation. |
 | Windows offline speech recognition | Actual installed desktop recognizer produced timing/recognition diagnostics. | Low-confidence ASR is a review aid, not guaranteed forced alignment or naturalness validation. |

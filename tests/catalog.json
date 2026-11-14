@@ -79,6 +79,7 @@
         "tests/project-portable.test.ts",
         "tests/proposal-mapping.test.ts",
         "tests/publication-paths.test.ts",
+        "tests/qwen-public-adapter.test.ts",
         "tests/recovery.test.ts",
         "tests/repairs.test.ts",
         "tests/research-handoff.test.ts",
@@ -119,7 +120,8 @@
     "optional": {
       "runner": "vitest",
       "files": [
-        "tests/creative-brief-portable.integration.test.ts"
+        "tests/creative-brief-portable.integration.test.ts",
+        "tests/public-voice-workflow.media.test.ts"
       ]
     },
     "node": {
@@ -147,7 +149,9 @@
       "files": [
         "tests/local_alignment_test.py",
         "tests/local_voice_reference_test.py",
-        "tests/prepare_local_voice_test.py"
+        "tests/prepare_local_voice_test.py",
+        "tests/prepare_public_voice_deps_test.py",
+        "tests/qwen_public_voice_worker_test.py"
       ]
     }
   }

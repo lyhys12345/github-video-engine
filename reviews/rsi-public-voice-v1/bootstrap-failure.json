@@ -1,0 +1,7 @@
+{
+  "status": "failed-before-build",
+  "exitCode": 1,
+  "reason": "Copied wheel hash omitted 00; pinned install refused expected/actual mismatch",
+  "officialSource": "https://pypi.org/pypi/wheel/0.45.1/json",
+  "verifiedCorrectSha256": "708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248"
+}

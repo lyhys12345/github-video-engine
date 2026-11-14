@@ -1,0 +1,49 @@
+$ tsc --noEmit
+
+ RUN  v3.2.4 D:/gve-flagship-publish
+
+ ✓ tests/qwen-public-adapter.test.ts (7 tests) 3903ms
+   ✓ public Qwen adapter (mocked Python process) > propagates the bounded process timeout and leaves only a retryable failed task  411ms
+   ✓ public Qwen adapter (mocked Python process) > cancels in-flight synthesis, deletes partial audio, and records a cancelled task  933ms
+   ✓ public Qwen adapter (mocked Python process) > rejects 'wrong speaker' before committing audio  349ms
+   ✓ public Qwen adapter (mocked Python process) > rejects 'wrong samples' before committing audio  375ms
+   ✓ public Qwen adapter (mocked Python process) > rejects 'silent WAV' before committing audio  451ms
+   ✓ public Qwen adapter (mocked Python process) > separates exact text and language/preset identities and reuses equal generations  1348ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  22:41:51
+   Duration  4.51s (transform 200ms, setup 0ms, collect 416ms, tests 3.90s, environment 0ms, prepare 67ms)
+
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.103s
+
+OK
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.005s
+
+OK
+$ node scripts/test-suite.mjs check
+{
+  "status": "pass",
+  "classified": 112,
+  "groups": {
+    "unit": 28,
+    "integration": 61,
+    "media": 11,
+    "optional": 2,
+    "node": 2,
+    "node-media": 1,
+    "provider": 2,
+    "python": 5
+  }
+}
+warning: in the working copy of '.agents/skills/github-explainer/SKILL.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'README.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/capability-onboarding.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/first-owner-quickstart.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/narration-voice-preference.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/product-completion-roadmap.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/support-and-release.md', CRLF will be replaced by LF the next time Git touches it

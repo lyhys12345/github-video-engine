@@ -1,0 +1,26 @@
+{
+  "movies": [
+    {
+      "name": "baseline",
+      "sha256": "1edea3ffe86c1b1c619092ea7fa846defdc2a0b631eccb06b54049faca8fadc7",
+      "matches": true,
+      "fullDecodeExit": 0
+    },
+    {
+      "name": "edited",
+      "sha256": "13bbf0affad2ea6119ab47c2a6c7295375cf744dc9880dd78de91f009e2c9863",
+      "matches": true,
+      "fullDecodeExit": 0
+    },
+    {
+      "name": "replay",
+      "sha256": "1edea3ffe86c1b1c619092ea7fa846defdc2a0b631eccb06b54049faca8fadc7",
+      "matches": true,
+      "fullDecodeExit": 0
+    }
+  ],
+  "sourceEvidenceRoot": "D:\\gve-anna-render-temp\\public-voice-20261113\\tmp\\gve-pv-5t65Qw",
+  "packageFiles": 105,
+  "badFiles": 0,
+  "packageHash": "cb3f474e4e2df435697227bab3f42c2d82b5f5a264d762ecde8f81b7514f776a"
+}

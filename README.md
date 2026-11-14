@@ -34,7 +34,7 @@ The agent should clarify any missing audience, platform, duration, style and voi
 The Claude entry point has been checked for repository routing, but a real Claude Code session and end-to-end media generation have not been verified. A skill file alone does not install the engine or guarantee a finished video.
 ## Check your setup
 
-Start with the [first-owner guide](docs/first-owner-quickstart.md). Install the pinned dependencies with `pnpm install --frozen-lockfile --ignore-scripts`, then run `pnpm gve doctor --first-owner`. You can research and review a script before installing media tools. For narrated output, select a configured local voice or import finished WAV recordings you have the right to use; an explicitly silent video is also supported. The owner's Anna reference is not bundled.
+Start with the [first-owner guide](docs/first-owner-quickstart.md). Install the pinned dependencies with `pnpm install --frozen-lockfile --ignore-scripts`, then run `pnpm gve doctor --first-owner`. You can research and review a script before installing media tools. For narrated output, choose the [free public local voice](docs/public-local-voice-v1.md), configure your own authorized voice, or import finished WAV recordings; an explicitly silent video is also supported. The public option needs a separate model/runtime install and no reference recording. The owner's Anna reference is not bundled.
 
 [First-run capabilities](docs/capability-onboarding.md) · [Durable cinematic rendering](docs/showcase-runtime-v1.md) · [Speech timing diagnostics](docs/speech-alignment.md) · [Supported environments and tests](docs/support-and-release.md)
 
@@ -52,13 +52,13 @@ Open with a concrete example and explain the problem it solves and how it works.
 Show me the full narration and storyboard for review before generating the video.
 ```
 
-**Currently intended for use in a configured Codex environment.** The Codex session researches the repository and develops the script and visuals; the engine persists evidence, approvals, jobs and rendering artifacts. The built-in research flow reads the target repository without executing it. Local narration requires a separately configured voice runtime, model and reference audio you have the right to use. [Voice configuration](docs/narration-voice-preference.md)
+**Currently intended for use in a configured Codex environment.** The Codex session researches the repository and develops the script and visuals; the engine persists evidence, approvals, jobs and rendering artifacts. The built-in research flow reads the target repository without executing it. Local narration requires a separately installed voice runtime and model. The public preset path needs no private reference audio; reference-conditioned voices require your own authorized recording. [Voice configuration](docs/narration-voice-preference.md)
 
 ## Engineering docs
 
 | What you want to do | Start here |
 | --- | --- |
-| Start without the maintainer’s private setup | [First-owner guide](docs/first-owner-quickstart.md) |
+| Start without the maintainer’s private setup | [First-owner guide](docs/first-owner-quickstart.md) · [Free public local voice](docs/public-local-voice-v1.md) |
 | Create a narrated preview from a URL with Codex | [User guide](docs/codex-user-path-v1.md) · [Unified run entry point](docs/narrative-run-v1.md) |
 | Review facts, handle revisions and export an editable project | [Fact review](docs/script-facts-v1.md) · [Revision workflow](docs/rsi-repair-v1.md) · [Cross-machine portability](docs/long-preview-portability-v1.md) |
 | Use Claude Code or your own API | [Claude Code](docs/claude-code-user-path-v1.md) · [Bring your own API](docs/byo-api-author-v1.md). Entry points exist; full end-to-end video production with a real model remains unverified. |

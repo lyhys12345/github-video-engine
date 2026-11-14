@@ -18,7 +18,7 @@ type Options = {
 
 export const firstOwnerUsage =
   'doctor --first-owner [--phase planning|preview] [--repo <public GitHub URL>] [--workspace <directory>] ' +
-  '[--voice none|imported|anna-local|chen-local|windows-huihui|reference|byo-api] [--language <tag>]';
+  `[--voice ${voices.join('|')}] [--language <tag>]`;
 
 async function previewFontCheck(phase: Phase, signal: AbortSignal) {
   if (phase === 'planning') return {status: 'not-checked'} as const;
@@ -75,8 +75,9 @@ export async function firstOwnerReport({phase = 'planning', repo, workspace, voi
       imported: {languages: capabilities.narration.imported.languages, requires: [
         'Supply authorized finished WAV recordings bound to the exact approved scene text and local import receipts.',
       ]},
-      local: {profiles: localNarrationVoices, languages: capabilities.narration.local.languages, requires: [
-        'Explicitly select and configure your own local profile. Anna and Chen need local Windows CUDA, Python, model and authorized reference inputs. Huihui needs the installed Windows WinRT voice.',
+      local: {...capabilities.narration.local, requires: [
+        'Select qwen-public for the free built-in Serena (zh-CN) or Ryan (en-US) preset. Prepare the pinned local model and Windows CUDA Python runtime. No reference recording or API key is required.',
+        'Anna and Chen need their own local Windows CUDA, Python, model and authorized reference inputs. Huihui needs the installed Windows WinRT voice.',
       ]},
       unavailable: capabilities.narration.unavailable,
     },

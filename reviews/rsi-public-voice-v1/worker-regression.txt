@@ -1,0 +1,33 @@
+$ tsc --noEmit
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.131s
+
+OK
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.005s
+
+OK
+$ node scripts/test-suite.mjs check
+{
+  "status": "pass",
+  "classified": 111,
+  "groups": {
+    "unit": 28,
+    "integration": 60,
+    "media": 11,
+    "optional": 2,
+    "node": 2,
+    "node-media": 1,
+    "provider": 2,
+    "python": 5
+  }
+}
+warning: in the working copy of '.agents/skills/github-explainer/SKILL.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'README.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/capability-onboarding.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/first-owner-quickstart.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/narration-voice-preference.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/product-completion-roadmap.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/support-and-release.md', CRLF will be replaced by LF the next time Git touches it

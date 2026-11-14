@@ -1,0 +1,14 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mD:/gve-flagship-publish[39m
+
+[90mstdout[2m | tests/public-voice-workflow.media.test.ts[2m > [22m[2msynthesizes a public voiced CLI preview, replays a portable copy without voice setup, and revoices one approved edit
+[22m[39mTEST ONLY real public-voice CLI evidence: D:\gve-anna-render-temp\public-voice-20261113\tmp\gve-pv-5t65Qw
+
+ [32m✓[39m tests/public-voice-workflow.media.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 523448[2mms[22m[39m
+   [33m[2m✓[22m[39m synthesizes a public voiced CLI preview, replays a portable copy without voice setup, and revoices one approved edit [33m 523447[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m   Start at [22m 22:47:38
+[2m   Duration [22m 528.50s[2m (transform 1.18s, setup 0ms, collect 701ms, tests 523.45s, environment 0ms, prepare 2.38s)[22m
+

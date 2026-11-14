@@ -63,7 +63,7 @@ export async function measureNarrativeSpeech(data:string,plan:any,config:any,sig
  for(const speech of config.speech){
   const scene=plan.scenes.find((s:any)=>s.id===speech.sceneId);
   if(!scene||scene.execution.kind!=='supported-story')throw new EngineError('NARRATIVE_SPEECH','Cannot measure speech for an unproduced evidence/adapter scene.');
-  const recording=await prepareNarrativeRecording(scene,speech.recording,data,signal,voice);
+  const recording=recordings?.get(scene.id)??await prepareNarrativeRecording(scene,speech.recording,data,signal,voice);
   recordings?.set(scene.id,recording);
   const {samples,clip:base,generationTaskId,generation,import:imported,source}=recording;
   if(speech.captions){try{const clip={...base,captions:speech.captions.map((c:any)=>({...c,endSample:c.endSample==='$FULL_RECORDING_SAMPLES'?samples:c.endSample}))},validated=narrativeCaptionTiming(scene,{startFrame:0,endFrame:Math.ceil(samples/1600)},clip,samples);if(portraitFont)portraitCaptionLines(portraitFont,validated.captions.map(cue=>cue.transcript));else for(const cue of validated.captions)captionSafeLines(cue.transcript);captionChecks.push({sceneId:scene.id,status:'valid',transcriptSha256:clip.transcriptSha256,receiptFingerprint:base.receiptFingerprint,captionCount:validated.captions.length,cues:validated.captions,timing:'caller-authored clip-relative; not word alignment'});}catch(error){captionChecks.push({sceneId:scene.id,status:'invalid',transcriptSha256:base.transcriptSha256,receiptFingerprint:base.receiptFingerprint,error:String(error)});}}

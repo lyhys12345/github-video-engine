@@ -1,0 +1,55 @@
+$ tsc --noEmit
+
+ RUN  v3.2.4 D:/gve-flagship-publish
+
+ ✓ tests/capabilities.test.ts (7 tests) 5921ms
+   ✓ keeps silent speech independent of media or a default voice, and explains blocked adapters separately  1439ms
+   ✓ guides planning without consulting a configured voice or rendering tools  507ms
+   ✓ distinguishes visual blockers from undecided and unsupported narration  1689ms
+   ✓ reports public options without a private profile or unrequested synthesis  1986ms
+ ✓ tests/usage-audit.test.ts (3 tests) 2593ms
+   ✓ readonly audit distinguishes recorded local fees, unknown generic charges and cache receipts without changing source  623ms
+   ✓ audit rejects forged ledger SQL keys and missing accounting immutability guards  886ms
+   ✓ legacy task rows retain unknown costs after migration and do not gain invented old receipts  1084ms
+ ✓ tests/creative-brief-runtime.test.ts (2 tests) 13016ms
+   ✓ real brief-bound planning snapshots choices, requires review before media and rejects changed receipt  7357ms
+   ✓ real run refuses requested timeline overflow and stops unsupported voice before synthesis  5658ms
+ ✓ tests/tts.test.ts (25 tests) 3784ms
+   ✓ real CLI offline dry-run and generate default refuse network, secret config and unrelated flags  2096ms
+ ✓ tests/usage.test.ts (11 tests) 1628ms
+   ✓ coverage bounds fail explicitly before huge attempt traversal or receipt loading  500ms
+   ✓ real Node process crash/resume preserves prior receipt and records unknown crash wall duration  693ms
+ ✓ tests/creative-brief.test.ts (6 tests) 1430ms
+   ✓ persists canonical brief through real CLI and refuses overwriting saved choices  1372ms
+ ✓ tests/project-portable.test.ts (9 tests) 141ms
+ ✓ tests/narrative-speech-checkpoint.test.ts (8 tests) 30ms
+ ✓ tests/narration-voice-policy.test.ts (3 tests) 3ms
+
+ Test Files  9 passed (9)
+      Tests  74 passed (74)
+   Start at  22:37:03
+   Duration  32.54s (transform 730ms, setup 0ms, collect 2.22s, tests 28.55s, environment 1ms, prepare 622ms)
+
+$ node scripts/test-suite.mjs check
+{
+  "status": "pass",
+  "classified": 110,
+  "groups": {
+    "unit": 28,
+    "integration": 60,
+    "media": 11,
+    "optional": 2,
+    "node": 2,
+    "node-media": 1,
+    "provider": 2,
+    "python": 4
+  }
+}
+warning: in the working copy of '.agents/skills/github-explainer/SKILL.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'README.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/capability-onboarding.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/first-owner-quickstart.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/narration-voice-preference.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/product-completion-roadmap.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/support-and-release.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'tests/catalog.json', CRLF will be replaced by LF the next time Git touches it

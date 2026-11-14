@@ -7,17 +7,23 @@ import {EngineError} from '../core/errors.js';
 import {sha256} from '../core/util.js';
 import {decodeClipSamples} from '../presentation/narration.js';
 import {generateHuihui} from '../tts/huihui.js';
-import {importHuihuiTts, readLocalTts} from '../tts/runtime.js';
+import {importHuihuiTts, importPublicVoiceTts, readLocalTts} from '../tts/runtime.js';
 import {generateLocalChen} from '../tts/local-chen.js';
-import {requireNarrationVoice, type LocalNarrationVoice} from './narration-voice-policy.js';
+import {generatePublicVoice} from '../tts/qwen-public.js';
+import {requireNarrationVoice, type CompositionLanguage, type LocalNarrationVoice} from './narration-voice-policy.js';
 
 export const ImportedRecording = z.strictObject({
  receiptFingerprint:Hash, receiptSha256:Hash, sourceAudioSha256:Hash, transcriptSha256:Hash,
 });
 type RecordingBinding = z.infer<typeof ImportedRecording>;
-export type NarrationSource = {mode:'local'; profile:LocalNarrationVoice} | {mode:'imported'; voiceLabel:string};
+export type NarrationSource = {mode:'local'; profile:LocalNarrationVoice; language?:CompositionLanguage} | {mode:'imported'; voiceLabel:string};
 
-export async function synthesizeNarration(text:string,data:string,signal:AbortSignal,selected=requireNarrationVoice()){
+export async function synthesizeNarration(text:string,data:string,signal:AbortSignal,selected=requireNarrationVoice(),language:CompositionLanguage='zh-CN'){
+ if(selected==='qwen-public'){
+  const {generation}=await generatePublicVoice(text,language,data,signal);
+  const imported=await importPublicVoiceTts(data,generation.taskId,signal);
+  return {generation,imported};
+ }
  if(selected==='anna-local')return generateLocalChen(text,data,signal,'anna-local');
  if(selected==='chen-local')return generateLocalChen(text,data,signal);
  const generation=await generateHuihui({schemaVersion:'tts-huihui/1.0',text},data,signal);
@@ -54,7 +60,7 @@ export async function prepareNarrativeRecording(scene:{id:string;narration:strin
   }finally{await rm(work,{recursive:true,force:true});}
  }
  if(binding)throw new EngineError('NARRATION_IMPORT_RECEIPT','Finished WAV receipt bindings require the approved imported narration mode.');
- const {generation,imported}=await synthesizeNarration(transcript,data,signal,voice.profile);
+ const {generation,imported}=await synthesizeNarration(transcript,data,signal,voice.profile,voice.language);
  return {samples:generation.manifest.audio.samples*3,generationTaskId:generation.taskId,generation:generation.cached,
   import:imported.cached,source:'generated' as const,
   clip:{beatId:scene.id,receiptFingerprint:imported.fingerprint,receiptSha256:imported.receiptArtifact.sha256,

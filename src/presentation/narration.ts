@@ -100,7 +100,7 @@ export async function loadClip(data: string, clip: Clip, policy: VoiceSpec['voic
   return source;
 }
 
-function exactHuihuiDuration(stream: {duration_ts?: unknown; time_base?: unknown; sample_rate?: unknown}, samples: number) {
+function exactGeneratedDuration(stream: {duration_ts?: unknown; time_base?: unknown; sample_rate?: unknown}, samples: number) {
   const base = typeof stream.time_base === 'string' ? /^(\d{1,10})\/([1-9]\d{0,9})$/.exec(stream.time_base) : null;
   const ticks = stream.duration_ts;
   return !!base && stream.sample_rate === '16000' && typeof ticks === 'number' && Number.isSafeInteger(ticks) && ticks > 0 &&
@@ -120,10 +120,11 @@ export async function decodeClipSamples(source: LocalAudio, dir: string, index: 
   await writeFile(path, source.audio, {flag: 'wx'});
   const probe = JSON.parse(await command(ffprobePath(), ['-v', 'error', '-protocol_whitelist', 'file', '-f', format, '-show_streams', '-show_format',
     '-of', 'json', path], {signal, timeout: 30_000}));
-  const huihuiSamples = 'huihuiV2' in source ? source.huihuiV2?.samples : undefined;
+  const generatedSamples = 'publicVoice' in source ? source.publicVoice?.samples :
+    'huihuiV2' in source ? source.huihuiV2?.samples : undefined;
   const seconds = source.receipt.durationSeconds;
   if (probe.streams?.length !== 1 || probe.streams[0]?.codec_type !== 'audio' ||
-      (huihuiSamples === undefined ? Number(probe.format?.duration) !== seconds : !exactHuihuiDuration(probe.streams[0], huihuiSamples))) {
+      (generatedSamples === undefined ? Number(probe.format?.duration) !== seconds : !exactGeneratedDuration(probe.streams[0], generatedSamples))) {
     voiceError('VOICE_MEDIA', 'Measured container differs from the import receipt.');
   }
   const maxSeconds = maxSamples / RATE;
@@ -136,8 +137,8 @@ export async function decodeClipSamples(source: LocalAudio, dir: string, index: 
     '-ac', '1', '-ar', String(RATE), '-c:a', 'pcm_s16le', '-fs', String(outputCeiling), '-f', 's16le', output], {signal, timeout: 30_000});
   const pcm = await boundedFile(output, outputCeiling + RATE * 2);
   if (pcm.length >= outputCeiling) voiceError('VOICE_DOES_NOT_FIT', 'Decoded clip exceeded the complete preview sample budget.');
-  if (huihuiSamples !== undefined && pcm.length !== huihuiSamples * (RATE / 16_000) * 2) {
-    voiceError('VOICE_MEDIA', 'Decoded Huihui PCM does not have the expected exact sample count.');
+  if (generatedSamples !== undefined && pcm.length !== generatedSamples * (RATE / 16_000) * 2) {
+    voiceError('VOICE_MEDIA', 'Decoded local generation PCM does not have the expected exact sample count.');
   }
   return pcm;
 }

@@ -8,7 +8,6 @@ import {EngineError,checkAbort} from '../core/errors.js';
 import {canonical,sha256} from '../core/util.js';
 import {command} from '../core/process.js';
 import {projectRoot} from '../providers/local.js';
-import type {LocalNarrationVoice} from '../workflow/narration-voice-policy.js';
 import {TaskRunner} from '../orchestrator/tasks.js';
 import {boundedFile,preflightStatePath} from '../story-planner/runtime.js';
 import {measureHuihuiWav} from './huihui.js';
@@ -29,7 +28,7 @@ export async function loadLocalChenProfile(path=process.env.GVE_CHEN_PROFILE??jo
  const python=await fileHash(profile.pythonPath),worker=await boundedFile(join(projectRoot,'scripts','windows-local-chen.py'),32_000);
  return{profile,identity:{schemaVersion:profile.schemaVersion,modelRevision:'Qwen3-TTS-12Hz-0.6B-Base@5d83992436eae1d760afd27aff78a71d676296fc',modelFiles:profile.modelFiles,referenceSha256:profile.referenceSha256,referenceTextSha256:sha256(profile.referenceText),pythonSha256:python.sha256,workerSha256:sha256(worker),runtime:'qwen-tts-0.1.1 / torch-2.8.0+cu128 / Windows CUDA',voiceLabel},worker};
 }
-type CudaVoice = Exclude<LocalNarrationVoice, 'windows-huihui'>;
+type CudaVoice = 'anna-local' | 'chen-local';
 function localProfilePath(profile: CudaVoice) {
  return profile==='anna-local' ? (process.env.GVE_ANNA_PROFILE??join(projectRoot,'work','local-anna-profile.json')) : undefined;
 }
