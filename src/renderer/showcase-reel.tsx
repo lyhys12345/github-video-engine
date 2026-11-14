@@ -7,9 +7,9 @@ type Crop={x:number;y:number;width:number;height:number};
 type Media={file:string;type:'image'|'video';width:number;height:number;frames?:number};
 type Panel=ShowcasePanel&{media?:Media};
 type Shot=Media&{sourceAnchors?:SourceAnchor[];start:number;end:number;crop:Crop;cropEnd?:Crop;label?:string;annotation?:string;panels?:Panel[];startFrame?:number;endFrame?:number;overlays?:ShowcaseOverlay[]};
-type Props={frames:number;theme:'paper'|'copper'|'classroom';layout?:'standard'|'immersive'|'cinematic';cinematic?:{safeInset?:number;captionSize?:number;accent?:string};projectLabel:string;shots:Shot[];captions:{text:string;start:number;end:number}[]};
+export type ShowcaseProps={frames:number;theme:'paper'|'copper'|'classroom';layout?:'standard'|'immersive'|'cinematic';cinematic?:{safeInset?:number;captionSize?:number;accent?:string};projectLabel:string;shots:Shot[];captions:{text:string;start:number;end:number}[]};
 const palettes={paper:{bg:'#f3efe5',ink:'#1e211e',soft:'#736e60',accent:'#e96530'},copper:{bg:'#151413',ink:'#fff4e8',soft:'#ccaa8c',accent:'#e49c62'},classroom:{bg:'#f7f5ff',ink:'#25213c',soft:'#77718b',accent:'#8d48ec'}};
-const Reel:React.FC<Props>=p=>{
+const Reel:React.FC<ShowcaseProps>=p=>{
  const cinema=p.layout==='cinematic';
  const inset=p.cinematic?.safeInset??76;
  const f=useCurrentFrame(),c=cinema?{bg:'#0b1211',ink:'#f5efe4',soft:'#b8beb3',accent:p.cinematic?.accent??'#d4bd95'}:palettes[p.theme],[handle]=React.useState(()=>delayRender('font'));

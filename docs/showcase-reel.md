@@ -1,10 +1,10 @@
 # Source-footage showcase adapter
 
-Experimental `showcase-reel/1.0`: `node --import tsx scripts/render-showcase-reel.ts --spec <manifest> --out <new-dir> [--frames-only]`.
+`showcase-reel/1.0` works with the [durable showcase runtime](showcase-runtime-v1.md). The original command remains available: `node --import tsx scripts/render-showcase-reel.ts --spec <manifest> --out <new-dir> [--frames-only]`.
 
 1080x1920/30fps, three restrained palettes, real images/video as principal content. Each approved narration beat distributes its complete original-speed PCM among weighted shots with no intershot silence. Only sub-frame audio padding is added. Per-shot normalized source crops and optional synchronized focal panels preserve source context while making details readable. By default, each video uses an explicit 30fps start/end source-frame interval, plays once at original speed, then holds its last selected frame. Explicit action anchors can retime source footage as described below; those edited timings do not demonstrate the product runtime speed. Narration remains at original speed. Labels distinguish official demos, edited excerpts and explanatory annotations. No invented interface.
 
-Exact script hash/owner approval, ordered narration hashes and local TTS receipt bindings are mandatory. Caption chunks must reproduce exact approved text. Timing remains proportional display estimation, not measured word alignment or listening verification. Input images/video are hash-bound; declared source dimensions/frame metadata must be prepared from real media probe. This tool is an experimental rendering adapter, not a complete durable-job or portable export implementation.
+Exact script hash/owner approval, ordered narration hashes and local TTS receipt bindings are mandatory. Caption chunks must reproduce exact approved text. Timing remains proportional display estimation, not measured word alignment or listening verification. Input images/video are hash-bound; declared source dimensions/frame metadata must be prepared from real media probe.
 
 `--frames-only` creates real preview PNGs without an MP4. Final encode checks1080x1920/H264/AAC/frame count/duration with FFprobe and full FFmpeg decode. A successful decode is not a visual/listening PASS. Script approval and independent media review remain separate gates. Do not infer consent to publish.
 
