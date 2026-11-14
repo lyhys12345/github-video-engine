@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "fixture": "D:/gve-anna-render-temp/gvsstand-obdf0u",
+  "sourceTaskId": "adb534b6087cbd3f60020e9b56ce46a056339853f81dee54af61ad87bdda5e05",
+  "scriptReviewSha256": "c0af244b7da25c5efcca33cd6690f38fcc3a81155ce6e77ab555deb87d77dbce",
+  "normalManifestRead": "retains review binding and exact raw bytes",
+  "stripReview": "rejected by approved script policy",
+  "mismatchedDigest": "rejected",
+  "importedSourceAndPackage": "review bytes preserved",
+  "renderTasksStarted": 0
+}

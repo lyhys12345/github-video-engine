@@ -31,6 +31,8 @@ Local synthesis uses the configured owner profile, currently Windows CUDA Anna/C
 
 No original-code license is selected by these checks. The owner still decides distribution terms, and third-party media/fonts/models/voice references retain their own requirements.
 
+For changes to an existing approved reel, use [guarded showcase revisions](showcase-revisions-v1.md). The session agent turns feedback into an explicit, reviewable change plan; unsupported narration or new-asset edits remain separate authoring work. Preparing a draft makes no media and preserves the accepted baseline.
+
 ## Test inventory
 
 `tests/catalog.json` explicitly classifies every `*.test.ts`, `*.node.ts` and `*_test.py` entry. Support/child files are not entrypoints. A new, stale or duplicated entry fails `pnpm run test:catalog` before a suite starts.

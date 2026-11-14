@@ -3,10 +3,11 @@ import {sha256} from '../core/util.js';
 import {boundedFile} from '../story-planner/runtime.js';
 import {Hash, MAX_JSON, SOURCE_KIND, SourceInput, fail, json, openShowcase, showcaseStoryboardSha256, taskId} from './inputs.js';
 import {exportShowcase, importShowcase} from './portable.js';
+import {finalizeShowcaseRevision, prepareShowcaseRevision, showcaseFeedbackContext, showcaseRevisionImpact} from './revision.js';
 import {PreviewOptions, RENDER_KIND, renderShowcase, resumeShowcase, reviewShowcase, showcaseStatus} from './runtime.js';
 import {lockShowcaseWorkspace, readShowcasePointer, workspaceShowcaseSource, writeShowcasePointer} from './workspace.js';
 
-const help = 'showcase storyboard --spec <draft-manifest> | showcase render --spec <manifest> (--data <state> | --workspace <URL workspace> --review <script report>) [--out <new-dir>] | showcase status/resume/export/review --data <state> --task <id> | showcase import --package <bundle> --digest <sha256> --workspace <new-dir>';
+const help = 'showcase storyboard --spec <draft-manifest> | showcase render --spec <manifest> (--data <state> | --workspace <URL workspace> --review <script report>) [--out <new-dir>] | showcase status/resume/export/review --data <state> --task <id> | showcase import --package <bundle> --digest <sha256> --workspace <new-dir> | showcase feedback-context/revision-impact/revision-prepare/revision-finalize (--data <state> | --workspace <URL workspace>) --task <baseline-render> [--spec <plan> | --package <draft> --digest <draft-receipt-sha256> --approval <receipt> --review <script report>] [--out <new-dir>]';
 const previewFlags = ['frames-only', 'skip-stills', 'still-frames'];
 const allowed = {
   storyboard: ['spec'],
@@ -16,6 +17,10 @@ const allowed = {
   review: ['data', 'workspace', 'task', 'review'],
   export: ['data', 'workspace', 'task', 'out'],
   import: ['package', 'digest', 'workspace'],
+  'feedback-context': ['data', 'workspace', 'task'],
+  'revision-impact': ['data', 'workspace', 'task', 'spec'],
+  'revision-prepare': ['data', 'workspace', 'task', 'spec', 'out'],
+  'revision-finalize': ['data', 'workspace', 'task', 'package', 'digest', 'approval', 'review', 'out'],
 } as const;
 const usage = () => fail(help, 'USAGE');
 function preview(flags: Record<string, unknown>) {
@@ -85,6 +90,12 @@ export async function showcaseCommand(pos: string[], flags: Record<string, unkno
     } finally { await release(); }
   }
   const task = need('task');
+  if (action === 'feedback-context') return showcaseFeedbackContext(data, task, workspace, signal);
+  if (action === 'revision-impact') return showcaseRevisionImpact(data, task, workspace, need('spec'), signal);
+  if (action === 'revision-prepare') return prepareShowcaseRevision(data, task, workspace, need('spec'), need('out'), signal);
+  if (action === 'revision-finalize') {
+    return finalizeShowcaseRevision(data, task, workspace, need('package'), need('digest'), need('approval'), need('review'), need('out'), signal);
+  }
   if (action === 'resume') {
     const options = previewFlags.some(flag => flags[flag] !== undefined) ? preview(flags) : undefined;
     if (!workspace) return resumeShowcase(data, task, signal, out, options);

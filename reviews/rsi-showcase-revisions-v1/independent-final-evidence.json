@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "closure": {
+    "pcmSha256": "ff897d27697643876908df847d38b553b9502a11824c3c08e501ffc7408f6c49",
+    "sourceTaskId": "b3e0fcf97bf5d225bd16e743f9d4506a5fdc5d5c2756e7b12ab5d479194fcd1b",
+    "scriptReviewSha256": "1b719f610e4804b473792f847b272f816c2d629e05849f41fca2581611145b74",
+    "reviewer": "TEST_ONLY independent synthetic fixture",
+    "unchangedShotAttempt": 1,
+    "baselineReviews": 1,
+    "revisedReviews": 0
+  },
+  "portableExportAndImport": "exact closure verified",
+  "cli": {
+    "nested": "rejected before output",
+    "ancestor": "rejected",
+    "samePublication": "rejected",
+    "disjointRetry": "same receipt and source reused",
+    "staleWorkspace": "rejected"
+  },
+  "frameHashes": {
+    "baseline-shot-0.png": "14798c2b16d9aadbcfd661220b26718fb0826f3e0986b11ccd535af0faab14f3",
+    "revised-shot-0.png": "f8843171d3dbace79257e2a865bc4f251331007a29b3c7b35ab1c98e999d1f91",
+    "baseline-shot-1.png": "14798c2b16d9aadbcfd661220b26718fb0826f3e0986b11ccd535af0faab14f3",
+    "revised-shot-1.png": "14798c2b16d9aadbcfd661220b26718fb0826f3e0986b11ccd535af0faab14f3"
+  },
+  "history": [
+    {
+      "path": "work/artcraft-result-refine-v1/render-plan/manifest-v2.json",
+      "files": 17,
+      "lines": 6,
+      "sourceManifestSha256": "ae61184a28218ba88abe1fa38bfc7a6932912eb72349f793f5aeb27a4271ab82"
+    },
+    {
+      "path": "work/xhs-pilot-v1/render-plans/O-B/manifest.json",
+      "files": 15,
+      "lines": 5,
+      "sourceManifestSha256": "f24d0ec5f5f304fdde11644216116a4e5667fdbf3fca9d7dd7bdd212e486de41"
+    }
+  ],
+  "renderTasksStarted": 0,
+  "perceptualReview": "not performed",
+  "ownerAcceptance": "pending"
+}

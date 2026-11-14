@@ -9,7 +9,7 @@ const Motion=z.strictObject({from:Rect,start:Unit,end:Unit}).refine(m=>m.end>m.s
 const Panel=z.strictObject({crop:Crop,cropEnd:Crop.optional(),x:Unit,y:Unit,width:z.number().positive().max(1),height:z.number().positive().max(1),fit:z.enum(['contain','cover']).optional(),mediaId:Id.optional(),startFrame:z.number().int().min(0).optional(),endFrame:z.number().int().positive().optional(),motion:Motion.optional(),reveal:Unit.optional()}).refine(c=>c.x+c.width<=1.001&&c.y+c.height<=1.001,'Panel exceeds stage bounds');
 const CaptionCue=z.strictObject({text:z.string().min(1).max(80),startFrame:z.number().int().min(0),endFrame:z.number().int().positive()}).refine(c=>c.endFrame>c.startFrame,'Caption interval must be positive');
 const Overlay=z.strictObject({kind:z.enum(['label','arrow','ring']),text:z.string().min(1).max(55).optional(),x:Unit,y:Unit,width:z.number().positive().max(1),height:z.number().positive().max(1),start:Unit,end:Unit,fontSize:z.number().int().min(20).max(66).optional(),tone:z.enum(['accent','ink','soft']).optional()}).refine(o=>o.end>o.start&&o.x+o.width<=1.001&&o.y+o.height<=1.001,'Invalid overlay interval or bounds').refine(o=>o.kind!=='label'||!!o.text,'Label text required');
-export const ShowcaseManifest=z.strictObject({schemaVersion:z.literal('showcase-reel/1.0'),theme:z.enum(['paper','copper','classroom']),layout:z.enum(['standard','immersive','cinematic']).optional(),
+export const ShowcaseDraftManifest=z.strictObject({schemaVersion:z.literal('showcase-reel/1.0'),theme:z.enum(['paper','copper','classroom']),layout:z.enum(['standard','immersive','cinematic']).optional(),
   cinematic: z.strictObject({
     safeInset: z.number().int().min(48).max(140).optional(),
     captionSize: z.number().int().min(30).max(52).optional(),
@@ -19,18 +19,24 @@ export const ShowcaseManifest=z.strictObject({schemaVersion:z.literal('showcase-
     shotMidpoints: z.boolean().optional(),
     actionFrames: z.boolean().optional(),
     frames: z.array(z.number().int().nonnegative()).max(80).optional(),
-  }).optional(),projectLabel:z.string().min(1).max(80),script:Asset,approval:Asset,font:Asset,narration:z.array(Asset.extend({id:Id,transcriptSha256:Hash,receipt:Asset,captionCues:z.array(CaptionCue).min(1).max(80).optional(),captionChunks:z.array(z.string().min(1).max(80)).min(1).max(80).optional()})).min(1).max(20),media:z.array(Asset.extend({id:Id,type:z.enum(['image','video']),width:z.number().int().positive(),height:z.number().int().positive(),frames:z.number().int().positive().optional(),fps:z.number().positive().optional()})).min(1).max(30),beats:z.array(z.strictObject({id:Id,shots:z.array(z.strictObject({mediaId:Id,
+  }).optional(),projectLabel:z.string().min(1).max(80),script:Asset,font:Asset,narration:z.array(Asset.extend({id:Id,transcriptSha256:Hash,receipt:Asset,captionCues:z.array(CaptionCue).min(1).max(80).optional(),captionChunks:z.array(z.string().min(1).max(80)).min(1).max(80).optional()})).min(1).max(20),media:z.array(Asset.extend({id:Id,type:z.enum(['image','video']),width:z.number().int().positive(),height:z.number().int().positive(),frames:z.number().int().positive().optional(),fps:z.number().positive().optional()})).min(1).max(30),beats:z.array(z.strictObject({id:Id,shots:z.array(z.strictObject({mediaId:Id,
     startCue: z.number().int().nonnegative().optional(),
     actions: z.array(z.strictObject({
       cue: z.number().int().nonnegative(),
       sourceFrame: z.number().int().nonnegative(),
     })).min(1).max(20).optional(),
     weight:z.number().positive().max(1000),crop:Crop,cropEnd:Crop.optional(),label:z.string().max(80).optional(),startFrame:z.number().int().min(0).optional(),endFrame:z.number().int().positive().optional(),annotation:z.string().max(60).optional(),panels:z.array(Panel).min(1).max(4).optional(),overlays:z.array(Overlay).max(8).optional()})).min(1).max(10)})).min(1).max(20)});
+export const ShowcaseManifest = ShowcaseDraftManifest.extend({approval: Asset, scriptReview: Asset.optional()});
 export type ShowcasePanel=z.infer<typeof Panel>;
 export type ShowcaseOverlay=z.infer<typeof Overlay>;
 export function validateShowcase(bytes:Buffer,approval:any,raw:unknown){
- const manifest=ShowcaseManifest.parse(raw),script=z.object({lines:z.array(z.tuple([Id,z.string().min(1).max(300)])),shots:z.array(z.string())}).parse(JSON.parse(bytes.toString()));
+ const manifest=ShowcaseManifest.parse(raw);
  if(sha256(bytes)!==manifest.script.sha256||approval.schemaVersion!=='script-owner-authorization/1.0'||approval.scriptSha256!==manifest.script.sha256||!approval.authority)throw Error('Exact owner approval required');
+ return {manifest, script: validateShowcaseContent(manifest, JSON.parse(bytes.toString()))};
+}
+
+export function validateShowcaseContent(manifest: z.infer<typeof ShowcaseDraftManifest>, rawScript: unknown) {
+ const script=z.object({lines:z.array(z.tuple([Id,z.string().min(1).max(300)])),shots:z.array(z.string())}).parse(rawScript);
  const ids=script.lines.map(l=>l[0]);if(new Set(ids).size!==ids.length||JSON.stringify(ids)!==JSON.stringify(manifest.narration.map(n=>n.id))||JSON.stringify(ids)!==JSON.stringify(manifest.beats.map(b=>b.id)))throw Error('Every approved line must occur once in order');
  const media=new Map(manifest.media.map(m=>[m.id,m]));if(media.size!==manifest.media.length)throw Error('Duplicate media id');
  for(const[i,n]of manifest.narration.entries()){const text=script.lines[i]![1];if(n.transcriptSha256!==sha256(text)||n.captionChunks&&(n.captionChunks.join('')!==text||n.captionChunks.some(c=>/^[，。！？：；]+$/u.test(c))))throw Error('Caption or transcript differs');if(n.captionCues&&(n.captionChunks||n.captionCues.map(c=>c.text).join('')!==text||n.captionCues[0]!.startFrame!==0||n.captionCues.some((c,j)=>j>0&&c.startFrame!==n.captionCues![j-1]!.endFrame)))throw Error('Authored caption partition differs');}
@@ -47,7 +53,7 @@ export function validateShowcase(bytes:Buffer,approval:any,raw:unknown){
      }
    }
  }
- return{manifest,script};
+ return script;
 }
 export function distributeShots<T extends{weight:number}>(shots:T[],start:number,frames:number){const sum=shots.reduce((n,s)=>n+s.weight,0);let used=0;return shots.map((s,i)=>{const from=start+Math.round(frames*used/sum);used+=s.weight;const end=i===shots.length-1?start+frames:start+Math.round(frames*used/sum);if(end<=from)throw Error('Shot duration under one frame');return{...s,start:from,end};});}
 

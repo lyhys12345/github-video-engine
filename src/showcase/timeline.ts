@@ -4,7 +4,7 @@ import {scheduleShowcaseShots, showcaseCaptions} from '../renderer/showcase-reel
 import {resolveSourceAnchors} from '../renderer/showcase-timing.js';
 
 type MeasuredLine = {samples: number; frames: number};
-export function showcaseTimeline(manifest: Manifest, lines: [string, string][], measured: MeasuredLine[]) {
+export function showcaseTimeline(manifest: Omit<Manifest, 'approval'>, lines: [string, string][], measured: MeasuredLine[]) {
   const {theme, layout, cinematic, projectLabel} = manifest;
   const props: ShowcaseProps = {frames: 0, theme, projectLabel, shots: [], captions: [],
     ...(layout === undefined ? {} : {layout}), ...(cinematic === undefined ? {} : {cinematic})};

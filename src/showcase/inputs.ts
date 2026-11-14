@@ -7,7 +7,7 @@ import {canonical, sha256} from '../core/util.js';
 import {TaskRunner} from '../orchestrator/tasks.js';
 import {ImportTtsSchema, ttsInput} from '../providers/tts.js';
 import {validateReelNarrationReceipt} from '../renderer/approved-reel.js';
-import {ShowcaseManifest, validateShowcase} from '../renderer/showcase-reel-contract.js';
+import {ShowcaseDraftManifest, ShowcaseManifest, validateShowcase} from '../renderer/showcase-reel-contract.js';
 import {ancestors, boundedFile, preflightStatePath} from '../story-planner/runtime.js';
 import {candidateReviewDecision} from '../workflow/candidate-review.js';
 import {MAX_WORKSPACE_SOURCE, validateWorkspaceSource, workspaceReviewName, workspaceSourceName} from './workspace.js';
@@ -27,7 +27,7 @@ export function fail(message: string, code = 'SHOWCASE_INPUT'): never {
   throw new EngineError(code, message);
 }
 
-const Owner = z.strictObject({
+export const ShowcaseOwnerApproval = z.strictObject({
   schemaVersion: z.literal('script-owner-authorization/1.0'),
   scriptSha256: Hash,
   authority: z.string().trim().min(1).max(4000),
@@ -51,9 +51,10 @@ const Receipt = z.strictObject({
   transcriptVerification: z.literal('caller-declared; recorded speech not verified'),
   review: z.literal('pending-owner-listening'),
 });
-const Script = z.strictObject({
+export const ShowcaseScript = z.strictObject({
   sourceBindingSha256: Hash.optional(),
   storyboardSha256: Hash.optional(),
+  reviewPolicy: z.literal('independent-script-review-required').optional(),
   lines: z.array(z.tuple([z.string(), z.string()])),
   shots: z.array(z.string()),
 });
@@ -72,7 +73,7 @@ const sourceFormat = (path: string, formats: Readonly<Record<string, string>>) =
 
 /** Stable across file moves. Policy excludes generated audio, receipts, and still sampling. */
 export function showcaseStoryboardSha256(raw: unknown) {
-  const manifest = ShowcaseManifest.parse(raw);
+  const manifest = z.union([ShowcaseDraftManifest, ShowcaseManifest]).parse(raw);
   const {theme, layout, cinematic, projectLabel, beats, font, media, narration} = manifest;
   return sha256(canonical({schemaVersion: 'showcase-storyboard/1.0', theme, layout: layout ?? 'standard',
     cinematic: cinematic ?? {}, projectLabel, beats, fontSha256: font.sha256,
@@ -109,6 +110,9 @@ function sourceEntries(manifest: Manifest) {
       };
     }),
   };
+  if (manifest.scriptReview) {
+    normalized.scriptReview = put(manifest.scriptReview, workspaceReviewName, 'application/json', MAX_JSON);
+  }
   return {manifest: normalized, entries};
 }
 export const SourceInput = z.strictObject({
@@ -116,6 +120,7 @@ export const SourceInput = z.strictObject({
   sourceManifestSha256: Hash,
   manifest: ShowcaseManifest,
   provenance: z.strictObject({sourceSha256: Hash, reviewSha256: Hash}).optional(),
+  standaloneReviewSha256: Hash.optional(),
 });
 export type SourceInput = z.infer<typeof SourceInput>;
 function inputEntries(input: SourceInput) {
@@ -125,6 +130,10 @@ function inputEntries(input: SourceInput) {
     for (const [path, hash, limit] of [[workspaceSourceName, sourceSha256, MAX_WORKSPACE_SOURCE], [workspaceReviewName, reviewSha256, MAX_JSON]] as const) {
       material.entries.set(path, {entry: {path, sha256: hash, limit, mediaType: 'application/json'}, local: path});
     }
+  }
+  if ((input.manifest.scriptReview?.sha256 ?? null) !== (input.standaloneReviewSha256 ?? null) ||
+      (input.provenance && input.standaloneReviewSha256)) {
+    fail('Expected one exact source-derived script review binding.');
   }
   return material;
 }
@@ -150,7 +159,7 @@ export function validateSource(input: SourceInput, assets: ReadonlyMap<string, B
     fail('Font asset must be a local TrueType/OpenType font.');
   }
   const scriptBytes = assets.get(manifest.script.path)!;
-  const approved = Script.parse(json(scriptBytes));
+  const approved = ShowcaseScript.parse(json(scriptBytes));
   if (input.provenance) {
     const source = validateWorkspaceSource(assets.get(workspaceSourceName)!);
     const decision = candidateReviewDecision(json(assets.get(workspaceReviewName)!), manifest.script.sha256, 'script');
@@ -159,12 +168,21 @@ export function validateSource(input: SourceInput, assets: ReadonlyMap<string, B
       fail('Workspace showcase requires an exact script/storyboard bound to the pinned source and a passing owner-authorized script review.', 'SHOWCASE_REVIEW');
     }
   } else {
+    if (approved.reviewPolicy && !input.standaloneReviewSha256) {
+      fail('This approved script requires its exact independent script review.', 'SHOWCASE_REVIEW');
+    }
+    if (input.standaloneReviewSha256 && (
+        approved.storyboardSha256 === undefined ||
+        candidateReviewDecision(json(assets.get(workspaceReviewName)!), manifest.script.sha256, 'script').status !== 'passed'
+    )) {
+      fail('Finalized showcase requires an exact storyboard and passing owner-authorized script review.', 'SHOWCASE_REVIEW');
+    }
     if (approved.sourceBindingSha256 !== undefined) fail('Use the original URL workspace or a verified portable package for this source-bound script.');
     if (approved.storyboardSha256 !== undefined && approved.storyboardSha256 !== showcaseStoryboardSha256(manifest)) {
       fail('Authored showcase visuals differ from the exact approved storyboard.', 'SHOWCASE_REVIEW');
     }
   }
-  const {script} = validateShowcase(scriptBytes, Owner.parse(json(assets.get(manifest.approval.path)!)), manifest);
+  const {script} = validateShowcase(scriptBytes, ShowcaseOwnerApproval.parse(json(assets.get(manifest.approval.path)!)), manifest);
   for (const [index, line] of manifest.narration.entries()) {
     const receipt = Receipt.parse(json(assets.get(line.receipt.path)!));
     const {adapterVersion: _adapterVersion, ...localImport} = receipt.input;
@@ -210,6 +228,7 @@ export async function readShowcaseSpec(path: string, signal: AbortSignal) {
     schemaVersion: 'showcase-source/1.0',
     sourceManifestSha256: sha256(raw),
     manifest: normalized.manifest,
+    ...(normalized.manifest.scriptReview ? {standaloneReviewSha256: normalized.manifest.scriptReview.sha256} : {}),
   });
   const assets = new Map<string, Buffer>();
   let total = 0;

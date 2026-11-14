@@ -162,7 +162,7 @@ export async function exportAssetPack(data:string,id:string,out:string,signal:Ab
  return publishAssetFiles(data,id,out,checked.files,signal,publication);
 }
 
-export async function publishAssetFiles(data:string,id:string,out:string,files:ReadonlyMap<string,Buffer>,signal:AbortSignal,publication?:Publication){
+export async function publishAssetFiles(data:string,id:string,out:string,files:ReadonlyMap<string,Buffer>,signal:AbortSignal,publication?:Publication, options?: {rejectDamagedPublication?: boolean}){
  checkAbort(signal);data=resolve(data);out=resolve(out);
  if(inside(data,out)||inside(out,data))throw new Error('Output and task state overlap');
  await ancestors(dirname(out),true);await ancestors(out);
@@ -252,7 +252,7 @@ export async function publishAssetFiles(data:string,id:string,out:string,files:R
    if(!isNamedJson(name,receiptPrefix))continue;
    const suffix=name.slice(receiptPrefix.length,-5);
    const expected=receiptBytes(suffix), receipt=join(out,name), versionDir=join(out,stagePrefix+suffix);
-   try{await verifyReceipt(receipt,versionDir,expected);}catch{checkAbort(signal);continue;}
+   try{await verifyReceipt(receipt,versionDir,expected);}catch(error){checkAbort(signal);if(options?.rejectDamagedPublication)throw error;continue;}
    if(committed)throw new EngineError('ASSET_EXPORT_AMBIGUOUS','More than one valid published version exists. Preserve them and choose a fresh output directory.');
    committed=result(versionDir,receipt,expected,true);
   }

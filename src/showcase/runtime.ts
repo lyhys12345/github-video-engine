@@ -19,7 +19,7 @@ import {workspaceReviewName, workspaceSourceName} from './workspace.js';
 
 export const RENDER_KIND = 'showcase-render-v1';
 export const REVIEW_KIND = 'showcase-video-review-v1';
-const SHOT_KIND = 'showcase-shot-v1';
+export const SHOT_KIND = 'showcase-shot-v1';
 const STILL_KIND = 'showcase-still-v1';
 const AUDIO_KIND = 'showcase-audio-v1';
 const PROBE_KIND = 'showcase-source-probe-v1';
