@@ -1,5 +1,5 @@
 import {it,expect} from 'vitest';
-import {mkdtemp,writeFile,readFile,lstat} from 'node:fs/promises';
+import {mkdtemp,writeFile,readFile,lstat,rename} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {sha256,canonical} from '../src/core/util.js';
@@ -73,6 +73,30 @@ it('does not treat a bare legacy PASS as an observed multimodal review',async()=
  const path=join(root,'bare.json');await writeFile(path,canonical(r.report));
  const {recordRepairReview}=await import('../src/workflow/rsi-repair.js');
  await recordRepairReview(join(chain,'chain'),state.current!.recordSha256,path);
- await expect(mediaRepairStatus(chain)).rejects.toThrow('raw multimodal review');
+ await expect(mediaRepairStatus(chain)).rejects.toThrow();
 });
 
+
+it('binds exact raw observations and rejects competing raw reports without poisoning status',async()=>{
+ const {root,input}=await fixture(),chain=join(root,'repair'),state=await startMediaRepair(chain,input);
+ const original=await review(state.currentPacket!);
+ await recordMediaReview(chain,state.current!.recordSha256,original);
+ const changed={...original,observations:original.observations.map(o=>({...o,notes:'changed observation'}))};
+ await expect(recordMediaReview(chain,state.current!.recordSha256,changed)).rejects.toThrow('Conflicting');
+ expect((await mediaRepairStatus(chain)).currentReview.decision.status).toBe('PASS');
+ const oldHash=sha256(canonical(original)),newHash=sha256(canonical(changed)),oldPath=join(state.currentPacket!,'raw-review-'+oldHash+'.json');
+ await writeFile(oldPath,canonical(changed));
+ await rename(oldPath,join(state.currentPacket!,'raw-review-'+newHash+'.json'));
+ await expect(mediaRepairStatus(chain)).rejects.toThrow();
+});
+
+it('binds the raw-media digest inside the inherited chain review, beyond the local acceptance anchor',async()=>{
+ const {root,input}=await fixture(),chain=join(root,'repair'),state=await startMediaRepair(chain,input);
+ const original=await review(state.currentPacket!);await recordMediaReview(chain,state.current!.recordSha256,original);
+ const changed={...original,observations:original.observations.map(o=>({...o,notes:'rewritten observation'}))};
+ const newHash=sha256(canonical(changed));
+ await writeFile(join(state.currentPacket!,'raw-review-'+newHash+'.json'),canonical(changed));
+ const anchor=join(state.currentPacket!,'accepted-media-review.json'),accepted=JSON.parse(await readFile(anchor,'utf8'));
+ accepted.rawReviewSha256=newHash;await writeFile(anchor,canonical(accepted));
+ await expect(mediaRepairStatus(chain)).rejects.toThrow('Accepted media review binding changed');
+});

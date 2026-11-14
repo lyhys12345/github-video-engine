@@ -14,7 +14,7 @@ export type ExperimentValue=z.infer<typeof Experiment>;
 export function verifyExperiment(raw:unknown){const e=Experiment.parse(raw);if(sha256(e.requirements)!==e.requirementsSha256||sha256(e.rubric)!==e.rubricSha256)throw Error('Changed requirements or rubric');return e;}
 export function nextExperiment(previous:ExperimentValue,candidate:Buffer){const p=verifyExperiment(previous);return Experiment.parse({...p,candidateSha256:sha256(candidate),attempt:p.attempt+1,previousExperimentSha256:sha256(canonical(p))});}
 export function reviewDecision(raw:unknown,eRaw:unknown){
- const e=verifyExperiment(eRaw),r=z.strictObject({experimentSha256:Hash,reviewer:z.string().min(1),verdict:z.enum(['PASS','REVISE','UNVERIFIED']),coverage:z.array(Modality),findings:z.array(z.string().min(1)),preferred:z.enum(['A','B','tie','neither'])}).parse(raw);
+ const e=verifyExperiment(eRaw),r=z.strictObject({experimentSha256:Hash,reviewer:z.string().min(1),evidenceSha256:Hash.optional(),verdict:z.enum(['PASS','REVISE','UNVERIFIED']),coverage:z.array(Modality),findings:z.array(z.string().min(1)),preferred:z.enum(['A','B','tie','neither'])}).parse(raw);
  if(r.experimentSha256!==sha256(canonical(e)))throw Error('Review belongs to another experiment');
  if(e.requiredModalities.some(m=>!r.coverage.includes(m)))return {status:'UNVERIFIED',reason:'Required modality was not reviewed'};
  if(r.verdict==='REVISE'&&!r.findings.length)throw Error('Revision needs actionable findings');

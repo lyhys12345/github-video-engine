@@ -2,8 +2,8 @@ import {z} from 'zod';
 import {createHash, randomUUID} from 'node:crypto';
 import {createReadStream, createWriteStream} from 'node:fs';
 import {pipeline} from 'node:stream/promises';
-import {mkdir, readFile, writeFile, rename, lstat, readdir} from 'node:fs/promises';
-import {dirname, extname, join, resolve} from 'node:path';
+import {mkdir, readFile, writeFile, rename, lstat, readdir, rm} from 'node:fs/promises';
+import {dirname, basename, extname, join, resolve} from 'node:path';
 import {ancestors, boundedFile} from '../story-planner/runtime.js';
 import {canonical, sha256} from '../core/util.js';
 import {freezeExperiment, verifyFrozenPacket, nextExperiment, reviewDecision, type ExperimentValue} from './rsi-experiment.js';
@@ -29,7 +29,7 @@ const Binding=z.strictObject({schemaVersion:z.literal('rsi-media-binding/1.0'),e
 type Input=z.infer<typeof MediaExperimentInput>;
 type CandidateInput=z.infer<typeof Candidate>;
 const digest=(x:unknown)=>sha256(canonical(x));
-const json=async(p:string)=>JSON.parse((await boundedFile(p,1_000_000)).toString('utf8'));
+const json=async(p:string)=>JSON.parse((await boundedFile(p,1_000_000)).toString('utf8').replace(/^\uFEFF/,''));
 const suffixes:Record<z.infer<typeof Role>,string[]>={script:['.txt','.md','.json'],brief:['.json','.md','.txt'],source:['.json','.md','.txt','.ts','.py','.js','.go','.rs'],video:['.mp4'],audio:['.wav','.mp3','.flac'],frame:['.png','.jpg','.jpeg','.webp']};
 async function fileHash(p:string){
  await ancestors(dirname(resolve(p)));const st=await lstat(p);
@@ -97,6 +97,9 @@ export async function freezeMediaExperiment(raw:unknown,out:string,previous?:Exp
  const binding=Binding.parse({schemaVersion:'rsi-media-binding/1.0',experimentSha256:op.experimentSha256,repository:input.repository,category:input.category,split:input.split,labels:{[op.baselineLabel]:digest(base),[op.candidateLabel]:digest(next)}});
  await writeFile(join(stage,'media-binding.json'),canonical(binding),{flag:'wx'});
  await verifyMediaExperiment(stage);await rename(stage,out);
+ // Only delete the generated scratch we created, never an input or published directory.
+ if(dirname(resolve(scratch))!==dirname(out)||!basename(scratch).startsWith('.media-input-'))throw Error('Unexpected scratch path');
+ await ancestors(scratch);await rm(scratch,{recursive:true});
  return {packet:join(out,'reviewer'),operator:join(out,'operator-manifest.json'),bindingSha256:digest(binding),experimentSha256:op.experimentSha256};
 }
 export async function verifyMediaExperiment(root:string){
@@ -162,16 +165,11 @@ export async function mediaRepairStatus(root:string){
   if(identity&&identity!==currentIdentity)throw Error('Changed media experiment identity');identity??=currentIdentity;
   const saved=state.reviews.find(r=>r.attempt===attempt.experiment.attempt);
   if(saved){
-   const names=(await readdir(packet)).filter(n=>/^raw-review-[a-f0-9]{64}\.json$/.test(n));
-   if(names.length>100)throw Error('Too many raw media reports');
-   let matched=false;
-   for(const name of names){
-    const raw=await json(join(packet,name));
-    if(digest(raw.report)!==saved.reviewSha256)continue;
-    if(name!=='raw-review-'+digest(raw)+'.json')throw Error('Raw media review changed');
-    await mediaReviewDecision(packet,raw);matched=true;
-   }
-   if(!matched)throw Error('Missing exact raw multimodal review');
+   const accepted=z.strictObject({schemaVersion:z.literal('rsi-media-accepted-review/1.0'),recordSha256:Hash,reportSha256:Hash,rawReviewSha256:Hash}).parse(await json(join(packet,'accepted-media-review.json')));
+   if(accepted.recordSha256!==attempt.recordSha256||accepted.reportSha256!==saved.reviewSha256||saved.report.evidenceSha256!==accepted.rawReviewSha256)throw Error('Accepted media review binding changed');
+   const raw=await json(join(packet,'raw-review-'+accepted.rawReviewSha256+'.json'));
+   if(digest(raw)!==accepted.rawReviewSha256||digest({...raw.report,evidenceSha256:accepted.rawReviewSha256})!==saved.reviewSha256)throw Error('Exact raw multimodal review changed');
+   await mediaReviewDecision(packet,raw);
   }
  }
  const currentPacket=state.current?packetRoot(root,state.current.experiment.attempt):undefined;
@@ -180,8 +178,18 @@ export async function mediaRepairStatus(root:string){
 export async function recordMediaReview(root:string,expected:string,raw:unknown){
  const state=await mediaRepairStatus(root);if(!state.current||state.current.recordSha256!==expected)throw Error('Stale media review target');
  const result=await mediaReviewDecision(state.currentPacket!,raw),dir=state.currentPacket!;
- const rawPath=join(dir,'raw-review-'+digest(result.review)+'.json'),reportPath=join(dir,'chain-review-'+digest(result.review.report)+'.json');
- for(const [path,value]of [[rawPath,result.review],[reportPath,result.review.report]] as const){
+ const chainReport={...result.review.report,evidenceSha256:digest(result.review)};
+ const expectedReviewer=state.reviews[0]?.report.reviewer??state.current.record.reviewer;
+ if(expectedReviewer&&result.review.report.reviewer!==expectedReviewer)throw Error('Reviewer changed');
+ if(state.currentReview&&state.currentReview.reviewSha256!==digest(chainReport))throw Error('Conflicting saved review; preserve original');
+ const accepted={schemaVersion:'rsi-media-accepted-review/1.0',recordSha256:expected,reportSha256:digest(chainReport),rawReviewSha256:digest(result.review)};
+ const acceptedPath=join(dir,'accepted-media-review.json');
+ try{await writeFile(acceptedPath,canonical(accepted),{flag:'wx'});}catch(e){
+  if((e as NodeJS.ErrnoException).code!=='EEXIST')throw e;
+  if(canonical(await json(acceptedPath))!==canonical(accepted))throw Error('Conflicting exact raw media review; preserve original');
+ }
+ const rawPath=join(dir,'raw-review-'+digest(result.review)+'.json'),reportPath=join(dir,'chain-review-'+digest(chainReport)+'.json');
+ for(const [path,value]of [[rawPath,result.review],[reportPath,chainReport]] as const){
   try{await writeFile(path,canonical(value),{flag:'wx'});}catch(e){if((e as NodeJS.ErrnoException).code!=='EEXIST'||canonical(await json(path))!==canonical(value))throw e;}
  }
  await recordRepairReview(join(root,'chain'),expected,reportPath);return {...await mediaRepairStatus(root),comparison:result.comparison};
