@@ -1,0 +1,55 @@
+{
+  "task": {
+    "attempt": 1,
+    "error": null,
+    "finishedAt": "2026-11-14T06:40:14.356Z",
+    "id": "48f1df1174dc5b435703864f41a117d716503d84714ad7c1afc492a1561f304f",
+    "input": {
+      "language": "en-US",
+      "license": "Apache-2.0",
+      "modelLockSha256": "4951f1df7f2581651052e740594dbabf8c1c20af0cec1c731db5909e173a572a",
+      "pythonSha256": "b95409b2edc04f3db3f2a5021fa52d2e0791ae978c13cdeb857cab0f35476919",
+      "repository": "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
+      "requirementsSha256": "00f3bc66834e1162b14d398bc44e8213ef2c53e16d54d87029ea25d677bd9500",
+      "revision": "85e237c12c027371202489a0ec509ded67b5e4b5",
+      "speaker": "Ryan",
+      "text": "A request arrives.",
+      "workerSha256": "1ce1b69f8ed426a7814e159ff077d6d5594bce3593cc87ea396781164a08714c"
+    },
+    "kind": "qwen-public-generation-v1",
+    "leaseUntil": 0,
+    "outputs": [
+      {
+        "bytes": 81964,
+        "createdAt": "2026-11-14T06:40:14.301Z",
+        "id": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408",
+        "inputFingerprint": "48f1df1174dc5b435703864f41a117d716503d84714ad7c1afc492a1561f304f",
+        "integrity": "verified",
+        "mediaType": "audio/wav",
+        "producingStage": "RESOLVE_ASSETS",
+        "schemaVersion": "1.0",
+        "sha256": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408",
+        "storage": "76/76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408.wav"
+      }
+    ],
+    "owner": "e4648989-c6b9-4251-9b36-078dc3acf8a4",
+    "result": {
+      "bytes": 1285,
+      "createdAt": "2026-11-14T06:40:14.323Z",
+      "id": "83aca4afb1a9e9323a145f104e73cd64bb290c1d604236a3bc8a3dfd4dd8ed70",
+      "inputFingerprint": "48f1df1174dc5b435703864f41a117d716503d84714ad7c1afc492a1561f304f",
+      "integrity": "verified",
+      "mediaType": "application/json",
+      "producingStage": "PUBLISH",
+      "schemaVersion": "1.0",
+      "sha256": "83aca4afb1a9e9323a145f104e73cd64bb290c1d604236a3bc8a3dfd4dd8ed70",
+      "storage": "83/83aca4afb1a9e9323a145f104e73cd64bb290c1d604236a3bc8a3dfd4dd8ed70.json"
+    },
+    "scopeKey": null,
+    "startedAt": "2026-11-14T06:39:59.667Z",
+    "state": "succeeded"
+  },
+  "wallTimesMs": [
+    14688.1838
+  ]
+}

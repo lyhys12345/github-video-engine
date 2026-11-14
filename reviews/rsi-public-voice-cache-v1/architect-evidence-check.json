@@ -1,0 +1,10 @@
+{
+  "historicalSha256": "bfa8cadfdfddb967a324ac5a21f00201bc9421e939fb26e10fdc3fca9c146ebe",
+  "lockedModelBytes": 2498383610,
+  "baselineMedianMs": 4038.3120000000017,
+  "candidateMedianMs": 85.21499999999992,
+  "ratio": 47.38968491462777,
+  "originalStateUnchanged": true,
+  "preAbortPreservesReason": true,
+  "preAbortStateCreated": false
+}

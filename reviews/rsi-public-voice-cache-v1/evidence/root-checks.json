@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-14",
+  "checks": [
+    {
+      "command": "pnpm test:catalog",
+      "exitCode": 0,
+      "classified": 112
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "fullRegression": false
+}

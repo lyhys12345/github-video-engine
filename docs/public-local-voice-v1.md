@@ -29,7 +29,7 @@ The runtime needs the small python-sox wrapper, which has no official wheel for 
 
 Both helpers preserve failed output and refuse to overwrite existing destinations. Use a new directory for a retry. The dependency helper accepts `--source /path/to/sox-1.5.0.tar.gz` for an already obtained exact archive, still verifying its pinned hash. Inference never invokes these setup steps.
 
-The model setup helper verifies the fixed public model inventory and creates a local machine profile; you do not need to write profile JSON. `--download` is the explicit online action. To validate a complete existing model directory and create a profile, omit that flag. A profile is not a substitute for its model files or virtual environment.
+The model setup helper verifies the fixed public model inventory and creates a local machine profile; you do not need to write profile JSON. `--download` is the explicit online action. To validate a complete existing model directory and create a profile, omit that flag. A profile is not a substitute for the model files or virtual environment needed to generate new speech.
 
 The fixed model is [Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice at 85e237c](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice/tree/85e237c12c027371202489a0ec509ded67b5e4b5). Setup verifies the bytes and SHA-256 of weights, tokenizer and configuration against the committed lock. Generation uses local files and does not fetch missing dependencies or switch voices. Doctor readiness verifies prerequisites; it does not create or listen to speech.
 
@@ -53,6 +53,16 @@ Use the [normal project export/import](first-owner-quickstart.md#receive-and-con
 
 After import, exact unchanged recordings may be reused from the verified selected project. Generating changed words needs the separately installed public model/runtime on the destination. A changed script or voice cannot reuse old approval merely because a previous movie exists. Keep the original package and review history.
 
+## Reuse recordings without rereading the model
+
+Repeating an unchanged public narration task reuses its verified recording. The engine checks the current text, language/preset, worker, requirements, model lock and Python executable identity, then validates the committed WAV and generation manifest. A successful cache hit does not reread the model weights or launch Python synthesis.
+
+That recording can still be reused if the model files are temporarily missing or damaged. This is playback of an existing artifact, not proof that your speech runtime is ready. The local profile and Python executable remain necessary for this same-workspace lookup. Fully verified imported project replay is a separate path that can work without either.
+
+New narration, a changed voice/language or a changed generation identity requires full model verification before synthesis. Doctor also continues to verify the complete model. A damaged cached recording or manifest fails visibly; it is not silently regenerated. If another process changes a successful task during lookup, retry after it finishes; the cache-only path cannot start unchecked generation.
+
+This optimization speeds repeated recordings, not the first synthesis or the renderer. It does not approve a changed script, certify spoken-word completeness or replace listening review. See the [measured cache results](rsi-public-voice-cache-results-2026-11-14.md).
+
 ## Optional real integration test
 
 After the prerequisites above pass, this opt-in test generates synthetic technical media and exercises export/import/edit. It uses a mocked GitHub source and TEST ONLY approval receipts, never your real project's approval. The verified run took about nine minutes on this host.
@@ -69,6 +79,6 @@ Without `GVE_PUBLIC_VOICE_MEDIA=1`, this test is intentionally skipped. Keep nor
 
 The [official model card](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice/blob/85e237c12c027371202489a0ec509ded67b5e4b5/README.md) labels the model Apache-2.0; [Qwen's source license](https://github.com/QwenLM/Qwen3-TTS/blob/main/LICENSE) is Apache-2.0. These are published upstream terms, not a guarantee about all possible utterances or uses. Third-party runtime dependencies retain their own licenses. This repository commits setup code and locks, not the model or voice recordings.
 
-Offline environment flags, local-only loading and a Python network audit hook constrain normal inference. They are not an OS-level security sandbox and do not protect against a malicious local administrator changing the installed runtime. Supported dependency and model checks must pass; missing files, unsupported languages or an unavailable GPU produce explicit errors, never a paid fallback.
+Offline environment flags, local-only loading and a Python network audit hook constrain normal inference. They are not an OS-level security sandbox and do not protect against a malicious local administrator changing the installed runtime. Before new synthesis or a successful doctor check, the supported dependency and model checks must pass; missing files, unsupported languages or an unavailable GPU produce explicit errors, never a paid fallback. Verified recording reuse follows the separate cache and imported-replay rules above.
 
 Actual installation, generation, edit/cache, media verification and independent review are recorded in the [cycle results](rsi-public-voice-results-2026-11-13.md). Technical checks do not establish naturalness, perfect pronunciation, continuous audiovisual quality or final human acceptance.

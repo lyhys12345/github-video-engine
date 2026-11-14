@@ -1,0 +1,38 @@
+[
+  {
+    "sha256": "8c1827f8e7c6f706a04c5a21477d04c25e4d2df99272d5a0f801da5c89d6696a",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s16le",
+          "sample_rate": "16000",
+          "channels": 1,
+          "bits_per_sample": 16,
+          "duration_ts": 34560,
+          "duration": "2.160000"
+        }
+      ]
+    },
+    "decodeExit": 0
+  },
+  {
+    "sha256": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s16le",
+          "sample_rate": "16000",
+          "channels": 1,
+          "bits_per_sample": 16,
+          "duration_ts": 40960,
+          "duration": "2.560000"
+        }
+      ]
+    },
+    "decodeExit": 0
+  }
+]

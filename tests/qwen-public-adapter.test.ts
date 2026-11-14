@@ -1,18 +1,26 @@
-import {lstat, mkdir, readFile, readdir, unlink, writeFile} from 'node:fs/promises';
-import {dirname, join, resolve} from 'node:path';
+import {createReadStream} from 'node:fs';
+import {lstat, mkdir, readFile, readdir, unlink, utimes, writeFile} from 'node:fs/promises';
+import {dirname, join, resolve, sep} from 'node:path';
+import {DatabaseSync} from 'node:sqlite';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {EngineError} from '../src/core/errors.js';
 import {canonical, sha256} from '../src/core/util.js';
+import {TASK_SCHEMA_SQL, USAGE_SCHEMA_SQL} from '../src/operations/usage.js';
 import {TaskRunner} from '../src/orchestrator/tasks.js';
-import {generatePublicVoice, probePublicVoice} from '../src/tts/qwen-public.js';
+import {readTask} from '../src/story-planner/runtime.js';
+import {generatePublicVoice, probePublicVoice, readPublicVoiceGeneration} from '../src/tts/qwen-public.js';
 import {type CompositionLanguage} from '../src/workflow/narration-voice-policy.js';
 import {workflowRoot} from './workflow-support.js';
 
 const mocks = vi.hoisted(() => ({worker: vi.fn(), checkout: {root: ''}}));
 vi.mock('../src/core/process.js', () => ({command: mocks.worker}));
+vi.mock('node:fs', async importOriginal => {
+  const actual = await importOriginal<typeof import('node:fs')>();
+  return {...actual, createReadStream: vi.fn(actual.createReadStream)};
+});
 vi.mock('../src/story-planner/runtime.js', async importOriginal => {
   const actual = await importOriginal<typeof import('../src/story-planner/runtime.js')>();
-  return {...actual, boundedFile(path: string, max?: number) {
+  return {...actual, readTask: vi.fn(actual.readTask), boundedFile(path: string, max?: number) {
     const config = path.replaceAll('\\', '/').match(/(?:^|\/)(config\/public-voice-v1\/[^/]+|scripts\/qwen-public-voice\.py)$/);
     return actual.boundedFile(config ? join(mocks.checkout.root, config[1]!) : path, max);
   }};
@@ -79,11 +87,27 @@ function inspectTasks(data: string) {
   try {return runner.list();} finally {runner.close();}
 }
 
+function inspectUsage(data: string) {
+  const runner = new TaskRunner(data, {readOnly: true});
+  try {return runner.usage();} finally {runner.close();}
+}
+
+function modelReads(model: string) {
+  return vi.mocked(createReadStream).mock.calls.filter(([path]) => String(path).startsWith(model + sep));
+}
+
 type Invocation = {cwd: string; signal: AbortSignal; timeout: number; inheritEnv: boolean; env: NodeJS.ProcessEnv};
 function mockWorker(handle: (options: Invocation) => Promise<string>) {
   mocks.worker.mockImplementation(async (_exe: string, _args: string[], options: Invocation) => {
     workerPaths.push(options.cwd);
     return handle(options);
+  });
+}
+
+function mockSuccessfulWorker() {
+  mockWorker(async options => {
+    await writeFile(join(options.cwd, 'speech.wav'), speechWav());
+    return canonical({speaker: 'Ryan', samples: 16001, sampleRate: 16000});
   });
 }
 
@@ -109,6 +133,7 @@ async function assertNoSpeech(data: string) {
 describe.skipIf(process.platform !== 'win32' || process.arch !== 'x64')('public Qwen adapter (mocked Python process)', () => {
   beforeEach(() => {
     mocks.worker.mockReset();
+    vi.mocked(createReadStream).mockClear();
     workerPaths.length = 0;
   });
   afterEach(() => vi.unstubAllEnvs());
@@ -195,4 +220,161 @@ describe.skipIf(process.platform !== 'win32' || process.arch !== 'x64')('public 
     expect(mocks.worker).toHaveBeenCalledTimes(3);
     await assertOwnedCleanup(fixture.data);
   });
+
+  it('replays the exact committed WAV with no model reads and records a cache receipt', async () => {
+    const fixture = await publicVoiceFixture();
+    mockSuccessfulWorker();
+    const first = (await generatePublicVoice(english, 'en-US', fixture.data, freshSignal())).generation;
+    const initial = await readPublicVoiceGeneration(fixture.data, first.taskId, freshSignal());
+    expect(modelReads(fixture.model)).toHaveLength(modelFiles.length);
+    vi.mocked(createReadStream).mockClear();
+    await unlink(join(fixture.model, 'model.safetensors'));
+
+    const repeat = (await generatePublicVoice(english, 'en-US', fixture.data, freshSignal())).generation;
+    const checked = await readPublicVoiceGeneration(fixture.data, repeat.taskId, freshSignal());
+    expect(repeat).toEqual({...first, cached: true});
+    expect(checked.wav.equals(initial.wav)).toBe(true);
+    expect(checked.manifestBytes.equals(initial.manifestBytes)).toBe(true);
+    expect(modelReads(fixture.model)).toEqual([]);
+    expect(mocks.worker).toHaveBeenCalledTimes(1);
+    expect(inspectUsage(fixture.data)).toMatchObject({totalAttempts: 1, cacheHits: 1, cacheFailures: 0});
+  });
+
+  it('checks same-size and same-mtime model tampering for doctor and new text', async () => {
+    const fixture = await publicVoiceFixture();
+    mockSuccessfulWorker();
+    const first = (await generatePublicVoice(english, 'en-US', fixture.data, freshSignal())).generation;
+    const weights = join(fixture.model, 'model.safetensors');
+    const original = await readFile(weights);
+    const stamp = new Date('2025-01-01T00:00:00Z');
+    await utimes(weights, stamp, stamp);
+    const before = await lstat(weights);
+    await writeFile(weights, Buffer.alloc(original.length, 65));
+    await utimes(weights, stamp, stamp);
+    expect(await lstat(weights)).toMatchObject({size: before.size, mtimeMs: before.mtimeMs});
+
+    const repeat = (await generatePublicVoice(english, 'en-US', fixture.data, freshSignal())).generation;
+    expect(repeat).toEqual({...first, cached: true});
+    await expect(probePublicVoice(freshSignal())).rejects.toMatchObject({code: 'PUBLIC_VOICE_MODEL'});
+    const changed = 'A different request arrives.';
+    await expect(generatePublicVoice(changed, 'en-US', fixture.data, freshSignal()))
+      .rejects.toMatchObject({code: 'PUBLIC_VOICE_MODEL'});
+    expect(mocks.worker).toHaveBeenCalledTimes(1);
+    expect(inspectUsage(fixture.data)).toMatchObject({totalAttempts: 1, cacheHits: 1});
+    await writeFile(weights, original);
+    const repaired = (await generatePublicVoice(changed, 'en-US', fixture.data, freshSignal())).generation;
+    expect(repaired.cached).toBe(false);
+    expect(inspectTasks(fixture.data).find(task => task.id === repaired.taskId)).toMatchObject({attempt: 1});
+  });
+
+  it('retries a missing-model miss after repair without consuming an attempt', async () => {
+    const fixture = await publicVoiceFixture();
+    mockSuccessfulWorker();
+    const weights = join(fixture.model, 'model.safetensors');
+    const original = await readFile(weights);
+    await unlink(weights);
+    await expect(generatePublicVoice(english, 'en-US', fixture.data, freshSignal()))
+      .rejects.toMatchObject({code: 'PUBLIC_VOICE_MODEL'});
+    await expect(lstat(fixture.data)).rejects.toMatchObject({code: 'ENOENT'});
+    expect(mocks.worker).not.toHaveBeenCalled();
+
+    await writeFile(weights, original);
+    const repaired = (await generatePublicVoice(english, 'en-US', fixture.data, freshSignal())).generation;
+    expect(repaired.cached).toBe(false);
+    expect(inspectTasks(fixture.data)).toMatchObject([{id: repaired.taskId, attempt: 1}]);
+  });
+
+  it.each(['audio', 'manifest'] as const)('fails closed on corrupted cached %s', async artifactType => {
+    const fixture = await publicVoiceFixture();
+    mockSuccessfulWorker();
+    await generatePublicVoice(english, 'en-US', fixture.data, freshSignal());
+    const task = inspectTasks(fixture.data)[0]!;
+    const artifact = artifactType === 'audio' ? task.outputs[0]! : task.result!;
+    const blobPath = join(fixture.data, 'artifacts', artifact.storage);
+    const damaged = await readFile(blobPath);
+    damaged[damaged.length - 1] = damaged[damaged.length - 1]! ^ 1;
+    await writeFile(blobPath, damaged);
+
+    await expect(generatePublicVoice(english, 'en-US', fixture.data, freshSignal()))
+      .rejects.toMatchObject({code: 'INTEGRITY'});
+    expect(mocks.worker).toHaveBeenCalledTimes(1);
+    expect(inspectTasks(fixture.data)).toEqual([task]);
+    expect(inspectUsage(fixture.data)).toMatchObject({totalAttempts: 1, cacheHits: 0, cacheFailures: 1});
+  });
+
+  it('does not start work when a lookup observes a success that the runner cannot find', async () => {
+    const fixture = await publicVoiceFixture();
+    mockSuccessfulWorker();
+    await generatePublicVoice(english, 'en-US', fixture.data, freshSignal());
+    const [success] = inspectTasks(fixture.data);
+    const empty = join(fixture.root, 'changed-state');
+    new TaskRunner(empty).close();
+    vi.mocked(readTask).mockResolvedValueOnce(success!);
+    vi.mocked(createReadStream).mockClear();
+
+    await expect(generatePublicVoice(english, 'en-US', empty, freshSignal())).rejects.toMatchObject({code: 'RETRY_EXHAUSTED'});
+    expect(inspectTasks(empty)).toEqual([]);
+    expect(inspectUsage(empty)).toMatchObject({totalAttempts: 0, cacheHits: 0});
+    expect(modelReads(fixture.model)).toEqual([]);
+    expect(mocks.worker).toHaveBeenCalledTimes(1);
+  });
+
+  it('requires a fresh verified generation after the Python executable identity changes', async () => {
+    const fixture = await publicVoiceFixture();
+    mockSuccessfulWorker();
+    const first = (await generatePublicVoice(english, 'en-US', fixture.data, freshSignal())).generation;
+    await writeFile(fixture.pythonPath, 'A different synthetic executable');
+    vi.mocked(createReadStream).mockClear();
+    const second = (await generatePublicVoice(english, 'en-US', fixture.data, freshSignal())).generation;
+    expect(second.cached).toBe(false);
+    expect(second.taskId).not.toBe(first.taskId);
+    expect(second.manifest.input.pythonSha256).not.toBe(first.manifest.input.pythonSha256);
+    expect(modelReads(fixture.model)).toHaveLength(modelFiles.length);
+    expect(inspectUsage(fixture.data)).toMatchObject({totalAttempts: 2, cacheHits: 0});
+  });
+
+  it('honors cancellation on an exact hit before accounting for replay', async () => {
+    const fixture = await publicVoiceFixture();
+    mockSuccessfulWorker();
+    await generatePublicVoice(english, 'en-US', fixture.data, freshSignal());
+    const control = new AbortController();
+    const cancellation = new EngineError('CANCELLED', 'Synthetic replay cancellation', 'cancelled');
+    const actual = vi.mocked(readTask).getMockImplementation()!;
+    vi.mocked(readTask).mockImplementationOnce(async (...args) => {
+      const task = await actual(...args);
+      control.abort(cancellation);
+      return task;
+    });
+
+    await expect(generatePublicVoice(english, 'en-US', fixture.data, control.signal)).rejects.toBe(cancellation);
+    expect(mocks.worker).toHaveBeenCalledTimes(1);
+    expect(inspectUsage(fixture.data)).toMatchObject({totalAttempts: 1, cacheHits: 0});
+  });
+
+  it.each([
+    {label: 'valid legacy', version: 0, extraSchema: '', accepted: true},
+    {label: 'malformed legacy', version: 0, extraSchema: 'CREATE TABLE unexpected(x TEXT);', accepted: false, code: 'USAGE_DB_SCHEMA'},
+    {label: 'future version', version: 2, extraSchema: '', accepted: false, code: 'USAGE_DB_VERSION'},
+    {label: 'malformed current version', version: 1, extraSchema: 'CREATE TABLE unexpected(x TEXT);', accepted: false, code: 'EXPLAIN_STATE'},
+  ])('preserves state version and schema validation for $label', async ({version, extraSchema, accepted, code}) => {
+    const fixture = await publicVoiceFixture();
+    mockSuccessfulWorker();
+    await mkdir(fixture.data);
+    const db = new DatabaseSync(join(fixture.data, 'tasks.sqlite'));
+    try {
+      db.exec(`${TASK_SCHEMA_SQL} ${version === 0 ? '' : USAGE_SCHEMA_SQL} ${extraSchema} PRAGMA user_version=${version}`);
+    } finally {
+      db.close();
+    }
+    const generation = generatePublicVoice(english, 'en-US', fixture.data, freshSignal());
+    if (accepted) {
+      await expect(generation).resolves.toMatchObject({generation: {cached: false}});
+      expect(inspectUsage(fixture.data)).toMatchObject({totalAttempts: 1, cacheHits: 0});
+      expect(mocks.worker).toHaveBeenCalledTimes(1);
+    } else {
+      await expect(generation).rejects.toMatchObject({code});
+      expect(mocks.worker).not.toHaveBeenCalled();
+    }
+  });
+
 });

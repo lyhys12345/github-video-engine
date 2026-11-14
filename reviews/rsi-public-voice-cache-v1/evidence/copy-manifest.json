@@ -1,0 +1,98 @@
+[
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/compact-proof.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\compact-proof.json",
+    "bytes": 6196,
+    "sha256": "05782104b38c2f6c7d4286c3c3c9c7f5f4f0e40ec4e01284846f20d85b3dd968"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/repeat-voice.mjs",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\repeat-voice.mjs",
+    "bytes": 3403,
+    "sha256": "9acd8b660f6a9fc0faeafe24e2243b9e152930ce41f5f54bceff233c5483e302"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/validate-voice.mjs",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\validate-voice.mjs",
+    "bytes": 6970,
+    "sha256": "b74eb6e0ef0dce9ed639411911ae664c880688c81810e42bfcb23ddd338df43a"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/existing-voice-task.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\existing-voice-task.json",
+    "bytes": 2302,
+    "sha256": "dcb5a5169a82e2ddeb4897778878bf74e4fb6db59edb853c5a5ebbdf32491f39"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/original-state-sha256.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\original-state-sha256.json",
+    "bytes": 194,
+    "sha256": "af5a4da9dda6e2b2b2ce03b1aec96ef607ae74395598a67b5e7160af021adaf8"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/baseline/repeat.ndjson",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\baseline\\repeat.ndjson",
+    "bytes": 2635,
+    "sha256": "d54875861a3859a31f441e075a3610831a457992110f218e95769d719ebd122f"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/baseline/ffprobe.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\baseline\\ffprobe.json",
+    "bytes": 364,
+    "sha256": "446ef8c3747ab2f43eb2bf3c35c8d4f3a10d36f9b14a07dcff0979196cb511b1"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/baseline/wav-decode.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\baseline\\wav-decode.json",
+    "bytes": 101,
+    "sha256": "5627bc5a97dc5e363aede27989bb2ebd256e32816634a19ba3afebedcc3297f1"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/final/repeat.ndjson",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\final\\repeat.ndjson",
+    "bytes": 2468,
+    "sha256": "d1f0f9a1311783232880692361114dc44b69ad65d4f378f41782bb3ab2ec0e8f"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/final/unavailable-model.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\final\\unavailable-model.json",
+    "bytes": 1081,
+    "sha256": "c4fc3091cc562e4f12798f21b827f334d9cb4d1891d81268815014f4428edec5"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/final/doctor-missing-model-proof.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\final\\doctor-missing-model-proof.json",
+    "bytes": 343,
+    "sha256": "05acb63718ab4004155fcfba1c99bfd47bcc4098486d11a4242a4e2c0a55b174"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/final/fresh-approved.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\final\\fresh-approved.json",
+    "bytes": 2230,
+    "sha256": "ecc97ea791811b6ae71633c91b5c34eb96f7cc80772f208a92bc050b5d6ec09b"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/final/fresh-approved-ffprobe.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\final\\fresh-approved-ffprobe.json",
+    "bytes": 364,
+    "sha256": "ce68bf8efb4dc106a4867e57d03c32644bae52066dbe52075615beb6a4c17bd6"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/final/fresh-approved-decode.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\final\\fresh-approved-decode.json",
+    "bytes": 113,
+    "sha256": "a39920e3dc9127384d6737749ac3ef9c1b623e6c01ed9fd322a90681b9765b7a"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/candidate/fresh-approved.json",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\candidate\\fresh-approved.json",
+    "bytes": 436,
+    "sha256": "e429f57eeb9815d27fbc0cabc1aa5ace1f957a9825b2069a83bad4ca18a4d3a9"
+  },
+  {
+    "path": "reviews/rsi-public-voice-cache-v1/evidence/candidate/fresh-sandbox.log",
+    "original": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\candidate\\fresh-sandbox.log",
+    "bytes": 883,
+    "sha256": "25a4ff43c3ef9d1f04cc633689f5c56c494e380841a088bc1cfa857cbf63d508"
+  }
+]

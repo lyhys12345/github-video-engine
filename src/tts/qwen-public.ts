@@ -9,6 +9,7 @@ import {EngineError, checkAbort} from '../core/errors.js';
 import {cleanupOwnedRuntimeTmp, createOwnedRuntimeTmp} from '../core/owned-runtime.js';
 import {command} from '../core/process.js';
 import {canonical, sha256} from '../core/util.js';
+import {UsageTaskSchema} from '../operations/usage.js';
 import {TaskRunner} from '../orchestrator/tasks.js';
 import {projectRoot} from '../providers/local.js';
 import {ancestors, boundedFile, preflightStatePath, readTask} from '../story-planner/runtime.js';
@@ -72,7 +73,7 @@ async function hashFile(path: string, signal: AbortSignal, expectedBytes?: numbe
   return hash.digest('hex');
 }
 
-async function prepare(signal: AbortSignal) {
+async function prepareIdentity(signal: AbortSignal) {
   checkAbort(signal);
   if (process.platform !== 'win32' || process.arch !== 'x64') {
     return fail('PUBLIC_VOICE_PLATFORM', 'The public Qwen adapter currently needs Windows x64 and NVIDIA CUDA.');
@@ -98,6 +99,16 @@ async function prepare(signal: AbortSignal) {
     checkAbort(signal);
     return fail('PUBLIC_VOICE_PROFILE', 'The prepared public voice Python executable is missing, linked, or invalid.');
   }
+  return {profile, worker, requirements, lock, identity: {
+    repository: lock.repository, revision: lock.revision, license: lock.license,
+    modelLockSha256: sha256(modelLock), requirementsSha256: sha256(requirements), workerSha256: sha256(worker), pythonSha256,
+  }};
+}
+
+type Prepared = Awaited<ReturnType<typeof prepareIdentity>>;
+
+async function verifyModel({profile, lock}: Prepared, signal: AbortSignal) {
+  checkAbort(signal);
   try {
     const tokenizer = join(profile.modelPath, 'speech_tokenizer');
     await ancestors(tokenizer);
@@ -115,13 +126,7 @@ async function prepare(signal: AbortSignal) {
     if (error instanceof EngineError && error.code === 'PUBLIC_VOICE_MODEL') throw error;
     return fail('PUBLIC_VOICE_MODEL', 'The public model directory is missing, linked, or unreadable.');
   }
-  return {profile, worker, requirements, identity: {
-    repository: lock.repository, revision: lock.revision, license: lock.license,
-    modelLockSha256: sha256(modelLock), requirementsSha256: sha256(requirements), workerSha256: sha256(worker), pythonSha256,
-  }};
 }
-
-type Prepared = Awaited<ReturnType<typeof prepare>>;
 
 async function runWorker(prepared: Prepared, work: string, signal: AbortSignal, input?: Input) {
   const systemRoot = process.env.SystemRoot;
@@ -159,7 +164,8 @@ async function runWorker(prepared: Prepared, work: string, signal: AbortSignal, 
 }
 
 export async function probePublicVoice(signal: AbortSignal) {
-  const prepared = await prepare(signal);
+  const prepared = await prepareIdentity(signal);
+  await verifyModel(prepared, signal);
   const work = await mkdtemp(join(tmpdir(), 'gve-public-voice-'));
   try {
     const worker = Probe.safeParse(await runWorker(prepared, work, signal));
@@ -210,27 +216,48 @@ export async function readPublicVoiceGeneration(data: string, id: string, signal
   return {manifest, manifestBytes, manifestSha256: result.sha256, wav};
 }
 
+async function hasCommittedGeneration(data: string, id: string) {
+  try {
+    const task = UsageTaskSchema.parse(await readTask(data, id, KIND));
+    return task.state === 'succeeded';
+  } catch (error) {
+    if (error instanceof EngineError && error.code === 'EXPLAIN_TASK') return false;
+    // Leave legacy state migration and version enforcement to TaskRunner after verification.
+    if (error instanceof EngineError && error.code === 'EXPLAIN_STATE' &&
+        error.message === 'Unsupported task state version') return false;
+    throw error;
+  }
+}
+
 export async function generatePublicVoice(text: string, language: CompositionLanguage, data: string, signal: AbortSignal) {
   checkAbort(signal);
   if (!text.trim() || [...text].length > 120 || /[\p{C}\p{Zl}\p{Zp}]/u.test(text)) {
     return fail('PUBLIC_VOICE_INPUT', 'Use one line of public narration with at most 120 Unicode code points.');
   }
-  const prepared = await prepare(signal);
+  const prepared = await prepareIdentity(signal);
   const input = Input.parse({text, language, speaker: publicVoicePresets[language], ...prepared.identity});
   const id = sha256(canonical({version: 'production-task-v1', kind: KIND, input}));
   data = resolve(data);
   preflightStatePath(data);
   await ancestors(join(data, 'tmp'));
   await ancestors(join(data, 'artifacts'));
+  let hasTaskDatabase = false;
   for (const name of ['tasks.sqlite', 'tasks.sqlite-wal', 'tasks.sqlite-shm', 'tasks.sqlite-journal']) {
     const stat = await lstat(join(data, name)).catch(error => {
       if (error.code !== 'ENOENT') throw error;
     });
     if (stat && (!stat.isFile() || stat.isSymbolicLink())) return fail('PUBLIC_VOICE_STATE', 'Expected ordinary task database files.');
+    if (name === 'tasks.sqlite') hasTaskDatabase = stat !== undefined;
   }
+  // TaskRunner checks success before the attempt limit, so a replay-only call
+  // can refuse to claim work if the successful task disappears.
+  const replayOnly = hasTaskDatabase && await hasCommittedGeneration(data, id);
+  if (!replayOnly) await verifyModel(prepared, signal);
+  checkAbort(signal);
   const runner = new TaskRunner(data);
   try {
     const task = await runner.run(KIND, input, async (directory, active) => {
+      if (replayOnly) return fail('PUBLIC_VOICE_STATE', 'The committed public voice task changed before replay.');
       const work = (await createOwnedRuntimeTmp(directory)).directory;
       const output = WorkerOutput.safeParse(await runWorker(prepared, work, active, input));
       const wav = await boundedFile(join(work, 'speech.wav'), MAX_WAV);
@@ -242,7 +269,7 @@ export async function generatePublicVoice(text: string, language: CompositionLan
       checkAbort(active);
       const audio = await runner.artifacts.commit(wav, 'audio/wav', 'RESOLVE_ASSETS', id);
       return {value: manifest, outputs: [audio]};
-    }, signal, {attempts: 2, timeoutMs: 330_000, beforeDiscardTemporary: cleanupOwnedRuntimeTmp,
+    }, signal, {attempts: replayOnly ? 0 : 2, timeoutMs: 330_000, beforeDiscardTemporary: cleanupOwnedRuntimeTmp,
       accounting: {provider: 'qwen-public', ratePolicy: 'local-zero-v1'}});
     const checked = await readPublicVoiceGeneration(data, id, signal);
     return {generation: {taskId: id, cached: task.cached, manifest: checked.manifest}};

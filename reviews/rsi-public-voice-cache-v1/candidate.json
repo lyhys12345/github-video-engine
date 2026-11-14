@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "rsi-candidate/1.0",
+  "date": "2026-11-14",
+  "baseline": "a89acece8debb68aca0a211382b56b6af7dfd164",
+  "scope": "public Qwen exact audio cache, not formal video or whole-product acceptance",
+  "files": [
+    {
+      "path": "src/tts/qwen-public.ts",
+      "bytes": 15026,
+      "sha256": "eb5d46cd756bd38bf7ce2250a6c2b47f02a1856c7dad615654295ab143fc40db"
+    },
+    {
+      "path": "tests/qwen-public-adapter.test.ts",
+      "bytes": 20034,
+      "sha256": "11f0bcb0a929052d0f6354ac2926b0f527ea0234f847fb7a39ffad8fb9a03f2d"
+    },
+    {
+      "path": "docs/public-local-voice-v1.md",
+      "bytes": 10265,
+      "sha256": "ae283535308d53a4a9d3e2eece77dd609b6d0105c5274f4198b428cc21c626af"
+    },
+    {
+      "path": "docs/rsi-public-voice-cache-results-2026-11-14.md",
+      "bytes": 7470,
+      "sha256": "9b7db3df096c74501ef76010f22ccefa07784d3854f6f1082fc2b9f92333883e"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/contract.md",
+      "bytes": 4090,
+      "sha256": "4dbab94ae94533b4849cdd2f3109f5921aaf4ce24e884e928c5dbb16adfb9041"
+    },
+    {
+      "path": "src/orchestrator/tasks.ts",
+      "bytes": 14546,
+      "sha256": "aea1ccaa5550bb99cca96dcbc8742b5e0d12e0dc88a3e51f321007d9f0ab077d"
+    },
+    {
+      "path": "src/story-planner/runtime.ts",
+      "bytes": 28567,
+      "sha256": "1c8899a9fdbd2eff297d90d5379fb0a985c3a2763c5f496c9049827d4ab1f41b"
+    },
+    {
+      "path": "src/operations/usage.ts",
+      "bytes": 9724,
+      "sha256": "2728730a9649ac19a62fbd0f58a984b86c035693ca5d2cb5591ae3bfbfa42206"
+    },
+    {
+      "path": "src/core/process.ts",
+      "bytes": 2547,
+      "sha256": "03f89abe1d18a3f826fba8694e882396e319186727959f4edafa0a5a0a7d64da"
+    },
+    {
+      "path": "src/assets/store.ts",
+      "bytes": 4301,
+      "sha256": "70b26b81729db4e6e4624f751a688f9fbbdf464af7198cc1cf21716afac8ebd1"
+    },
+    {
+      "path": "scripts/qwen-public-voice.py",
+      "bytes": 4588,
+      "sha256": "1ce1b69f8ed426a7814e159ff077d6d5594bce3593cc87ea396781164a08714c"
+    },
+    {
+      "path": "src/tts/runtime.ts",
+      "bytes": 24677,
+      "sha256": "bc73d2ff01bf6a5b99c241364bbc9022f1807bd91e035e1438d199a5eb5285a7"
+    },
+    {
+      "path": "config/public-voice-v1/model-lock.json",
+      "bytes": 1960,
+      "sha256": "4951f1df7f2581651052e740594dbabf8c1c20af0cec1c731db5909e173a572a"
+    },
+    {
+      "path": "config/public-voice-v1/requirements-windows.txt",
+      "bytes": 8764,
+      "sha256": "00f3bc66834e1162b14d398bc44e8213ef2c53e16d54d87029ea25d677bd9500"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/baseline/ffprobe.json",
+      "bytes": 364,
+      "sha256": "446ef8c3747ab2f43eb2bf3c35c8d4f3a10d36f9b14a07dcff0979196cb511b1"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/baseline/repeat.ndjson",
+      "bytes": 2635,
+      "sha256": "d54875861a3859a31f441e075a3610831a457992110f218e95769d719ebd122f"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/baseline/wav-decode.json",
+      "bytes": 101,
+      "sha256": "5627bc5a97dc5e363aede27989bb2ebd256e32816634a19ba3afebedcc3297f1"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/candidate/fresh-approved.json",
+      "bytes": 436,
+      "sha256": "e429f57eeb9815d27fbc0cabc1aa5ace1f957a9825b2069a83bad4ca18a4d3a9"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/candidate/fresh-sandbox.log",
+      "bytes": 883,
+      "sha256": "25a4ff43c3ef9d1f04cc633689f5c56c494e380841a088bc1cfa857cbf63d508"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/compact-proof.json",
+      "bytes": 6196,
+      "sha256": "05782104b38c2f6c7d4286c3c3c9c7f5f4f0e40ec4e01284846f20d85b3dd968"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/copy-manifest.json",
+      "bytes": 5012,
+      "sha256": "fb81ccf6cad4a1c048f7e8feac2dac95352a3c82fb630ad7cf999c1c59a6c496"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/existing-voice-task.json",
+      "bytes": 2302,
+      "sha256": "dcb5a5169a82e2ddeb4897778878bf74e4fb6db59edb853c5a5ebbdf32491f39"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/doctor-missing-model-proof.json",
+      "bytes": 343,
+      "sha256": "05acb63718ab4004155fcfba1c99bfd47bcc4098486d11a4242a4e2c0a55b174"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/fresh-approved-decode.json",
+      "bytes": 113,
+      "sha256": "a39920e3dc9127384d6737749ac3ef9c1b623e6c01ed9fd322a90681b9765b7a"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/fresh-approved-ffprobe.json",
+      "bytes": 364,
+      "sha256": "ce68bf8efb4dc106a4867e57d03c32644bae52066dbe52075615beb6a4c17bd6"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/fresh-approved.json",
+      "bytes": 2230,
+      "sha256": "ecc97ea791811b6ae71633c91b5c34eb96f7cc80772f208a92bc050b5d6ec09b"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/repeat.ndjson",
+      "bytes": 2468,
+      "sha256": "d1f0f9a1311783232880692361114dc44b69ad65d4f378f41782bb3ab2ec0e8f"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/unavailable-model.json",
+      "bytes": 1081,
+      "sha256": "c4fc3091cc562e4f12798f21b827f334d9cb4d1891d81268815014f4428edec5"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/original-state-sha256.json",
+      "bytes": 194,
+      "sha256": "af5a4da9dda6e2b2b2ce03b1aec96ef607ae74395598a67b5e7160af021adaf8"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/repeat-voice.mjs",
+      "bytes": 3403,
+      "sha256": "9acd8b660f6a9fc0faeafe24e2243b9e152930ce41f5f54bceff233c5483e302"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/root-checks.json",
+      "bytes": 251,
+      "sha256": "2f546351c4b1f6d8fea227ec101c18f499fa85d979fa211aa01680c0c5b2996c"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/typecheck.log",
+      "bytes": 61,
+      "sha256": "7cf5a2983c32dd71b7a0dbbc924e5ba4ab29835eaf1bd7039dbc428b490c8059"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/validate-voice.mjs",
+      "bytes": 6970,
+      "sha256": "b74eb6e0ef0dce9ed639411911ae664c880688c81810e42bfcb23ddd338df43a"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/verification-targeted.log",
+      "bytes": 4413,
+      "sha256": "10a6b3ac43d1cbe4bfac384965141e65bc57442c35afaa48a5468e75fdbac067"
+    }
+  ]
+}

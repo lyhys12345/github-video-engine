@@ -1,0 +1,322 @@
+{
+  "schemaVersion": "rsi-delivery-byte-audit/1.0",
+  "candidateSha256": "bc1d56884d2e3899fc1a614015b7b39726c8ddb18142136a382646e408138829",
+  "scope": "Reviewed hashes bind Windows working bytes. Git attributes normalize text to LF; this maps exact staged repository bytes. Original raw local evidence is preserved. No cross-platform byte identity is claimed.",
+  "files": [
+    {
+      "path": "src/tts/qwen-public.ts",
+      "reviewedWorkingSha256": "eb5d46cd756bd38bf7ce2250a6c2b47f02a1856c7dad615654295ab143fc40db",
+      "reviewedBytes": 15026,
+      "gitBlobOid": "3bd964214d7cefa00ec98416611aab5215a9aec2",
+      "gitBlobSha256": "eb5d46cd756bd38bf7ce2250a6c2b47f02a1856c7dad615654295ab143fc40db",
+      "gitBytes": 15026,
+      "relation": "identical"
+    },
+    {
+      "path": "tests/qwen-public-adapter.test.ts",
+      "reviewedWorkingSha256": "11f0bcb0a929052d0f6354ac2926b0f527ea0234f847fb7a39ffad8fb9a03f2d",
+      "reviewedBytes": 20034,
+      "gitBlobOid": "c4c4d3e5645253a0a060534059e571c61acf8912",
+      "gitBlobSha256": "11f0bcb0a929052d0f6354ac2926b0f527ea0234f847fb7a39ffad8fb9a03f2d",
+      "gitBytes": 20034,
+      "relation": "identical"
+    },
+    {
+      "path": "docs/public-local-voice-v1.md",
+      "reviewedWorkingSha256": "ae283535308d53a4a9d3e2eece77dd609b6d0105c5274f4198b428cc21c626af",
+      "reviewedBytes": 10265,
+      "gitBlobOid": "52ac8b7e7a9b63dcc915a23fdaffc442392b4f8a",
+      "gitBlobSha256": "a7286bbd4fd4b184a4edb05f61a58346d7e681261984a7975b8241f01481a928",
+      "gitBytes": 10181,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "docs/rsi-public-voice-cache-results-2026-11-14.md",
+      "reviewedWorkingSha256": "a49a4c598ad37456bd6f5b30e0f11da1baaf4ca78c4a103c85de07af89d11b7e",
+      "reviewedBytes": 7485,
+      "gitBlobOid": "bab8a78f1b3939ffedd7182c0c6593212cf4ebeb",
+      "gitBlobSha256": "7a68dd9f9a266994a97bc932330c06eef4b278595c3b959e4caaaf10d231ff0d",
+      "gitBytes": 7442,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/contract.md",
+      "reviewedWorkingSha256": "4dbab94ae94533b4849cdd2f3109f5921aaf4ce24e884e928c5dbb16adfb9041",
+      "reviewedBytes": 4090,
+      "gitBlobOid": "e7c2a165178514f87de4d6ce52fbdb44d63c26af",
+      "gitBlobSha256": "c5e2d9d32407f9ed1df2fbac5874ee9ab10b1ceab8efc4d09767183f1b53bc8f",
+      "gitBytes": 4067,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "src/orchestrator/tasks.ts",
+      "reviewedWorkingSha256": "aea1ccaa5550bb99cca96dcbc8742b5e0d12e0dc88a3e51f321007d9f0ab077d",
+      "reviewedBytes": 14546,
+      "gitBlobOid": "94148f2d262ce6dc2a70dc06207781ed04f3de48",
+      "gitBlobSha256": "aea1ccaa5550bb99cca96dcbc8742b5e0d12e0dc88a3e51f321007d9f0ab077d",
+      "gitBytes": 14546,
+      "relation": "identical"
+    },
+    {
+      "path": "src/story-planner/runtime.ts",
+      "reviewedWorkingSha256": "1c8899a9fdbd2eff297d90d5379fb0a985c3a2763c5f496c9049827d4ab1f41b",
+      "reviewedBytes": 28567,
+      "gitBlobOid": "3de62292fae05f6329a31433bd93b884d46c85ed",
+      "gitBlobSha256": "1c8899a9fdbd2eff297d90d5379fb0a985c3a2763c5f496c9049827d4ab1f41b",
+      "gitBytes": 28567,
+      "relation": "identical"
+    },
+    {
+      "path": "src/operations/usage.ts",
+      "reviewedWorkingSha256": "2728730a9649ac19a62fbd0f58a984b86c035693ca5d2cb5591ae3bfbfa42206",
+      "reviewedBytes": 9724,
+      "gitBlobOid": "6db531b0efcc654988fb942795ea465bc2e71857",
+      "gitBlobSha256": "2728730a9649ac19a62fbd0f58a984b86c035693ca5d2cb5591ae3bfbfa42206",
+      "gitBytes": 9724,
+      "relation": "identical"
+    },
+    {
+      "path": "src/core/process.ts",
+      "reviewedWorkingSha256": "03f89abe1d18a3f826fba8694e882396e319186727959f4edafa0a5a0a7d64da",
+      "reviewedBytes": 2547,
+      "gitBlobOid": "2483d3e047725a16a8661caa192b1e55a6b3f97d",
+      "gitBlobSha256": "03f89abe1d18a3f826fba8694e882396e319186727959f4edafa0a5a0a7d64da",
+      "gitBytes": 2547,
+      "relation": "identical"
+    },
+    {
+      "path": "src/assets/store.ts",
+      "reviewedWorkingSha256": "70b26b81729db4e6e4624f751a688f9fbbdf464af7198cc1cf21716afac8ebd1",
+      "reviewedBytes": 4301,
+      "gitBlobOid": "6c8a54dbe773e0076b984919839af2c1dba804b5",
+      "gitBlobSha256": "70b26b81729db4e6e4624f751a688f9fbbdf464af7198cc1cf21716afac8ebd1",
+      "gitBytes": 4301,
+      "relation": "identical"
+    },
+    {
+      "path": "scripts/qwen-public-voice.py",
+      "reviewedWorkingSha256": "1ce1b69f8ed426a7814e159ff077d6d5594bce3593cc87ea396781164a08714c",
+      "reviewedBytes": 4588,
+      "gitBlobOid": "466de54dfbe12f51c3588c0e7486624f44010527",
+      "gitBlobSha256": "1ce1b69f8ed426a7814e159ff077d6d5594bce3593cc87ea396781164a08714c",
+      "gitBytes": 4588,
+      "relation": "identical"
+    },
+    {
+      "path": "src/tts/runtime.ts",
+      "reviewedWorkingSha256": "bc73d2ff01bf6a5b99c241364bbc9022f1807bd91e035e1438d199a5eb5285a7",
+      "reviewedBytes": 24677,
+      "gitBlobOid": "c050eb9ea0b69d74767add89d4a489cbae693582",
+      "gitBlobSha256": "bc73d2ff01bf6a5b99c241364bbc9022f1807bd91e035e1438d199a5eb5285a7",
+      "gitBytes": 24677,
+      "relation": "identical"
+    },
+    {
+      "path": "config/public-voice-v1/model-lock.json",
+      "reviewedWorkingSha256": "4951f1df7f2581651052e740594dbabf8c1c20af0cec1c731db5909e173a572a",
+      "reviewedBytes": 1960,
+      "gitBlobOid": "e17fd0454cd71cdc1eddbac41bdef2d48cc2fbb1",
+      "gitBlobSha256": "4951f1df7f2581651052e740594dbabf8c1c20af0cec1c731db5909e173a572a",
+      "gitBytes": 1960,
+      "relation": "identical"
+    },
+    {
+      "path": "config/public-voice-v1/requirements-windows.txt",
+      "reviewedWorkingSha256": "00f3bc66834e1162b14d398bc44e8213ef2c53e16d54d87029ea25d677bd9500",
+      "reviewedBytes": 8764,
+      "gitBlobOid": "1755f9cc69252d0d0dff9b3ea2045d72d2fb0c43",
+      "gitBlobSha256": "00f3bc66834e1162b14d398bc44e8213ef2c53e16d54d87029ea25d677bd9500",
+      "gitBytes": 8764,
+      "relation": "identical"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/baseline/ffprobe.json",
+      "reviewedWorkingSha256": "446ef8c3747ab2f43eb2bf3c35c8d4f3a10d36f9b14a07dcff0979196cb511b1",
+      "reviewedBytes": 364,
+      "gitBlobOid": "c1590c059cca346367dd72e1fc13f0be59ab7707",
+      "gitBlobSha256": "e8524e0ec78c41f93abb34d050a0689c2a308c86433fece839d18ee054829720",
+      "gitBytes": 345,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/baseline/repeat.ndjson",
+      "reviewedWorkingSha256": "d54875861a3859a31f441e075a3610831a457992110f218e95769d719ebd122f",
+      "reviewedBytes": 2635,
+      "gitBlobOid": "7bdf63e29533978aa688464a8de30b8d9bb90f25",
+      "gitBlobSha256": "21d5525deef7ee7bb48b458b56da9fe6dfbdd01e1fd571de99e2b4b68b81d8fd",
+      "gitBytes": 2628,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/baseline/wav-decode.json",
+      "reviewedWorkingSha256": "5627bc5a97dc5e363aede27989bb2ebd256e32816634a19ba3afebedcc3297f1",
+      "reviewedBytes": 101,
+      "gitBlobOid": "52edb79e7d6f0563e7f7f5ef867208826f2056ff",
+      "gitBlobSha256": "85c5fe0d77d087b31bcd96a15ed8bfa2c6c843798a6d3040bf11337444ab9cb7",
+      "gitBytes": 100,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/candidate/fresh-approved.json",
+      "reviewedWorkingSha256": "e429f57eeb9815d27fbc0cabc1aa5ace1f957a9825b2069a83bad4ca18a4d3a9",
+      "reviewedBytes": 436,
+      "gitBlobOid": "81d001a278a9063a37501c4b30a8db61c31ce31e",
+      "gitBlobSha256": "65f51602f1163c4f16efab76ccbf0c672b8480047d4710264eaec73b4f97bd58",
+      "gitBytes": 425,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/candidate/fresh-sandbox.log",
+      "reviewedWorkingSha256": "25a4ff43c3ef9d1f04cc633689f5c56c494e380841a088bc1cfa857cbf63d508",
+      "reviewedBytes": 883,
+      "gitBlobOid": "fbfe4beb25d76ff390c0a6f1f78d483afc76914e",
+      "gitBlobSha256": "4a78778b5548774536835289ad6a477463655786d05d78b746734293e791c889",
+      "gitBytes": 866,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/compact-proof.json",
+      "reviewedWorkingSha256": "05782104b38c2f6c7d4286c3c3c9c7f5f4f0e40ec4e01284846f20d85b3dd968",
+      "reviewedBytes": 6196,
+      "gitBlobOid": "c4061a67c19b5898206af0923fe4e039a4904aaa",
+      "gitBlobSha256": "021c8c503ad6b1e1682cfd004138a33447714bbf45bb33e2f9c70e1920cb55b5",
+      "gitBytes": 6011,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/copy-manifest.json",
+      "reviewedWorkingSha256": "fb81ccf6cad4a1c048f7e8feac2dac95352a3c82fb630ad7cf999c1c59a6c496",
+      "reviewedBytes": 5012,
+      "gitBlobOid": "60a5e1aee4206a92d88decd14434f75d2e1f4b7d",
+      "gitBlobSha256": "435924cd95ae9fff319521a199d51bd08510de5fc4614fbed669dbbf6c17a44f",
+      "gitBytes": 4915,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/existing-voice-task.json",
+      "reviewedWorkingSha256": "dcb5a5169a82e2ddeb4897778878bf74e4fb6db59edb853c5a5ebbdf32491f39",
+      "reviewedBytes": 2302,
+      "gitBlobOid": "6cd4cb89027750dc7a04e0ec9e0276cb1d1cfeb3",
+      "gitBlobSha256": "2527fbbfb5e01314b591686e47d083aa8afc0ede97b230f7181aa65a78687efe",
+      "gitBytes": 2247,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/doctor-missing-model-proof.json",
+      "reviewedWorkingSha256": "05acb63718ab4004155fcfba1c99bfd47bcc4098486d11a4242a4e2c0a55b174",
+      "reviewedBytes": 343,
+      "gitBlobOid": "b4d77c8208d0cbb78681fbba2df7af325f0c81fe",
+      "gitBlobSha256": "12e639be654a1c1713ef23ba8680222ff551ce699f686cb7acd6dc2cdab502cc",
+      "gitBytes": 331,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/fresh-approved-decode.json",
+      "reviewedWorkingSha256": "a39920e3dc9127384d6737749ac3ef9c1b623e6c01ed9fd322a90681b9765b7a",
+      "reviewedBytes": 113,
+      "gitBlobOid": "982a78be3c80201c04163462d93b010c145459f5",
+      "gitBlobSha256": "e934c37f5854ba5c933796e24e9b7e4d15b809039f4d586cce44f5da3c8fedb8",
+      "gitBytes": 109,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/fresh-approved-ffprobe.json",
+      "reviewedWorkingSha256": "ce68bf8efb4dc106a4867e57d03c32644bae52066dbe52075615beb6a4c17bd6",
+      "reviewedBytes": 364,
+      "gitBlobOid": "a81be660a44abaee988a06876fd68898ecfe6455",
+      "gitBlobSha256": "4455ae67b87e83c957b9ebffd58db2bed40767f5469d91071a0812760da0fa4e",
+      "gitBytes": 345,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/fresh-approved.json",
+      "reviewedWorkingSha256": "ecc97ea791811b6ae71633c91b5c34eb96f7cc80772f208a92bc050b5d6ec09b",
+      "reviewedBytes": 2230,
+      "gitBlobOid": "38eaee902e028eab4f0cf81a848bef38502822c8",
+      "gitBlobSha256": "e801e6276664e2a836e2f283067513d2742bb05e3fd38b05eec900e64fa27960",
+      "gitBytes": 2181,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/repeat.ndjson",
+      "reviewedWorkingSha256": "d1f0f9a1311783232880692361114dc44b69ad65d4f378f41782bb3ab2ec0e8f",
+      "reviewedBytes": 2468,
+      "gitBlobOid": "2e7d6d4e308cc7fc03313ef23139b845c30da811",
+      "gitBlobSha256": "63e88f0066d8a72a66a1d4896ed71516deb4e971c1c3992cc438959ab7b9bde4",
+      "gitBytes": 2461,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/final/unavailable-model.json",
+      "reviewedWorkingSha256": "c4fc3091cc562e4f12798f21b827f334d9cb4d1891d81268815014f4428edec5",
+      "reviewedBytes": 1081,
+      "gitBlobOid": "ab3f69404962c7ad59ae87fa408c09d526552c77",
+      "gitBlobSha256": "6b660134f95ee6245de7978c7950c740b32baa84cd24e2940febf8d90d5e1359",
+      "gitBytes": 1040,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/original-state-sha256.json",
+      "reviewedWorkingSha256": "af5a4da9dda6e2b2b2ce03b1aec96ef607ae74395598a67b5e7160af021adaf8",
+      "reviewedBytes": 194,
+      "gitBlobOid": "a56d7f241322de975e3b1a3fc49043533b4d1756",
+      "gitBlobSha256": "9092db6d71d13426f9272c402dd1ee32717804cd22f646edcde81132313323a2",
+      "gitBytes": 190,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/repeat-voice.mjs",
+      "reviewedWorkingSha256": "9acd8b660f6a9fc0faeafe24e2243b9e152930ce41f5f54bceff233c5483e302",
+      "reviewedBytes": 3403,
+      "gitBlobOid": "a6c91cbcdaa6b467101ce8b39c2b241f9119c2b9",
+      "gitBlobSha256": "9168d53fb6fbd9d9de6608e338f590c0e8b6310423b62280f495ce1c8238fa2f",
+      "gitBytes": 3402,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/root-checks.json",
+      "reviewedWorkingSha256": "2f546351c4b1f6d8fea227ec101c18f499fa85d979fa211aa01680c0c5b2996c",
+      "reviewedBytes": 251,
+      "gitBlobOid": "de6ca0a264f8eb2d35e7da432cd5de5c60089f47",
+      "gitBlobSha256": "ebd0200cccbb59231536d8f7740b0d75beaa9fb59b66eaa4e5a75ca8766c6953",
+      "gitBytes": 237,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/typecheck.log",
+      "reviewedWorkingSha256": "7cf5a2983c32dd71b7a0dbbc924e5ba4ab29835eaf1bd7039dbc428b490c8059",
+      "reviewedBytes": 61,
+      "gitBlobOid": "2a0367367a83b00776013b1a59597848f81e4ed8",
+      "gitBlobSha256": "77673bf1298e021bcfb1e8bfa99e56da127da4562a36b504e2f290d1bc791e3a",
+      "gitBytes": 59,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/validate-voice.mjs",
+      "reviewedWorkingSha256": "b74eb6e0ef0dce9ed639411911ae664c880688c81810e42bfcb23ddd338df43a",
+      "reviewedBytes": 6970,
+      "gitBlobOid": "0eb7664fcd04c60517e4e5671f067f2d6402df10",
+      "gitBlobSha256": "2cefa27b809617ddfda8d984c35743f7cc6e88c8726b1574e9d319d830acd2ea",
+      "gitBytes": 6969,
+      "relation": "CRLF-to-LF-only"
+    },
+    {
+      "path": "reviews/rsi-public-voice-cache-v1/evidence/verification-targeted.log",
+      "reviewedWorkingSha256": "10a6b3ac43d1cbe4bfac384965141e65bc57442c35afaa48a5468e75fdbac067",
+      "reviewedBytes": 4413,
+      "gitBlobOid": "6b3c9f05eb47a31efbf82ea40c55d7ae59d91d9b",
+      "gitBlobSha256": "60466f7a1f0c2f59ed896698388be7489090a25b1f87f19c4b5ba9db3190a60e",
+      "gitBytes": 4367,
+      "relation": "CRLF-to-LF-only"
+    }
+  ],
+  "stagedSourceDocPatchCheck": "PASS",
+  "fullStagedWhitespaceCheck": {
+    "exitCode": 2,
+    "advisories": [
+      "contract.md:23 new blank line at EOF",
+      "evidence/verification-targeted.log:46 new blank line at EOF"
+    ],
+    "decision": "Preserve the frozen contract and original raw log bytes; source/test/user-doc patch check passes. No source whitespace error."
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "mode": "fresh",
+  "cached": false,
+  "elapsedMs": 57518.1653,
+  "workerTaskDurationMs": 53423.6686,
+  "measuredAdapterSha256": "eb5d46cd756bd38bf7ce2250a6c2b47f02a1856c7dad615654295ab143fc40db",
+  "taskId": "e5dd05e5620ad6bdd73f11784bfeb0c7a034ac60889fe147b6f83dee10022b11",
+  "mediaPath": "C:\\Users\\luyuh\\Documents\\Codex\\rsi-public-voice-cache-20261114\\final\\fresh-approved\\artifacts\\8c\\8c1827f8e7c6f706a04c5a21477d04c25e4d2df99272d5a0f801da5c89d6696a.wav",
+  "attempt": 1,
+  "providerChargeMicros": 0,
+  "manifestSha256": "7ded53a7e5f468d8ec2afba986b679a79fd762261ae43b97a98663f6454d2c86",
+  "manifest": {
+    "schemaVersion": "qwen-public-generation/1.0",
+    "taskId": "e5dd05e5620ad6bdd73f11784bfeb0c7a034ac60889fe147b6f83dee10022b11",
+    "input": {
+      "text": "Test only.",
+      "language": "en-US",
+      "speaker": "Ryan",
+      "repository": "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
+      "revision": "85e237c12c027371202489a0ec509ded67b5e4b5",
+      "license": "Apache-2.0",
+      "modelLockSha256": "4951f1df7f2581651052e740594dbabf8c1c20af0cec1c731db5909e173a572a",
+      "requirementsSha256": "00f3bc66834e1162b14d398bc44e8213ef2c53e16d54d87029ea25d677bd9500",
+      "workerSha256": "1ce1b69f8ed426a7814e159ff077d6d5594bce3593cc87ea396781164a08714c",
+      "pythonSha256": "b95409b2edc04f3db3f2a5021fa52d2e0791ae978c13cdeb857cab0f35476919"
+    },
+    "textSha256": "f7338979fd075867cc0b06aca011e1b87d8087629228529f92e247a211edbc15",
+    "voiceLabel": "Qwen3-TTS 0.6B CustomVoice / Ryan / en-US",
+    "audio": {
+      "mediaType": "audio/wav",
+      "sha256": "8c1827f8e7c6f706a04c5a21477d04c25e4d2df99272d5a0f801da5c89d6696a",
+      "bytes": 69164,
+      "sampleRate": 16000,
+      "channels": 1,
+      "sampleFormat": "s16le",
+      "samples": 34560,
+      "durationSeconds": 2.16
+    },
+    "origin": "built-in public speaker preset; no reference audio",
+    "engineRemoteDispatch": "none",
+    "networkControls": "local model path, offline flags, Python socket audit hook",
+    "review": {
+      "speechContent": "unverified",
+      "speechAlignment": "unverified",
+      "ownerListening": "pending"
+    }
+  },
+  "originalStateUnchanged": true
+}

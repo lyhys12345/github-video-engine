@@ -1,0 +1,30 @@
+{
+  "candidateSha256": "bc1d56884d2e3899fc1a614015b7b39726c8ddb18142136a382646e408138829",
+  "filesVerified": 34,
+  "originalEvidenceCopiesVerified": 16,
+  "cacheTask": "48f1df1174dc5b435703864f41a117d716503d84714ad7c1afc492a1561f304f",
+  "cacheWavSha256": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408",
+  "cacheManifestSha256": "83aca4afb1a9e9323a145f104e73cd64bb290c1d604236a3bc8a3dfd4dd8ed70",
+  "negatives": [
+    {
+      "label": "changed text",
+      "code": "PUBLIC_VOICE_MODEL"
+    },
+    {
+      "label": "fresh state",
+      "code": "PUBLIC_VOICE_MODEL"
+    },
+    {
+      "label": "doctor",
+      "code": "PUBLIC_VOICE_MODEL"
+    },
+    {
+      "label": "damaged cached WAV with model absent",
+      "code": "INTEGRITY"
+    }
+  ],
+  "unchangedAttempt": 1,
+  "freshTask": "e5dd05e5620ad6bdd73f11784bfeb0c7a034ac60889fe147b6f83dee10022b11",
+  "freshWavSha256": "8c1827f8e7c6f706a04c5a21477d04c25e4d2df99272d5a0f801da5c89d6696a",
+  "freshSamples": 34560
+}

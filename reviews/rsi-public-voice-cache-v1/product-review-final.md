@@ -1,0 +1,11 @@
+# Independent product review — final
+
+Verdict: PASS for the bounded public voice cache product scope, candidate v2. This is not owner acceptance of speech or video.
+
+Candidate manifest SHA-256: bc1d56884d2e3899fc1a614015b7b39726c8ddb18142136a382646e408138829. Independently checked all 34 listed file byte lengths and SHA-256 values: zero mismatches. The initial finding is preserved in product-review-initial.md; v2 corrects the results to identify the source text as a task declaration rather than asserting what was spoken.
+
+The public guide clearly describes exact current-identity reuse, retained WAV/manifest checks, the profile and Python identity requirements, the ability to reuse a valid recording with unavailable or damaged model files, and the separate portable replay path. It distinguishes cache reuse from doctor readiness and states that new synthesis and doctor validate the model. It preserves script approval and listening limits.
+
+The five raw baseline and candidate repeat records report the same task, WAV and manifest digests, medians 4038.312 ms and 85.215 ms, and respectively 2,498,383,610 and zero measured model bytes per repeat. These are host-specific repeated cache measurements, not first-synthesis or whole-video results. The unavailable-model record reports a same-task cache hit, unchanged attempt count, added usage receipt, and blocked changed text and doctor. The test log reports 65 passing targeted tests; adapter subprocess tests are mocked. Fresh real generation is separately recorded, including its initial failure and later different-text, longer-deadline success without a claim of root-cause repair.
+
+Independently hashed both actual WAVs and probed and fully decoded them with ffprobe/ffmpeg: existing 76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408, mono PCM16 16 kHz, 2.56 s; fresh 8c1827f8e7c6f706a04c5a21477d04c25e4d2df99272d5a0f801da5c89d6696a, mono PCM16 16 kHz, 2.16 s. Both decode exit codes were 0. These checks do not establish spoken content, completeness, pronunciation, naturalness, alignment or continuous audiovisual quality. Listening and final human acceptance remain pending; no formal video was examined or claimed.

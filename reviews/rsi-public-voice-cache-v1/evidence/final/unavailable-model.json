@@ -1,0 +1,41 @@
+{
+  "mode": "unavailable",
+  "taskId": "48f1df1174dc5b435703864f41a117d716503d84714ad7c1afc492a1561f304f",
+  "cached": true,
+  "cachedElapsedMs": 122.65729999999985,
+  "wavSha256": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408",
+  "manifestSha256": "83aca4afb1a9e9323a145f104e73cd64bb290c1d604236a3bc8a3dfd4dd8ed70",
+  "unchangedTask": true,
+  "attempt": 1,
+  "accountingBefore": {
+    "cache_hit": 2,
+    "started": 1,
+    "terminal": 1
+  },
+  "accountingAfterValidModelRepeats": {
+    "cache_hit": 7,
+    "started": 1,
+    "terminal": 1
+  },
+  "accountingAfterUnavailableModelRepeat": {
+    "cache_hit": 8,
+    "started": 1,
+    "terminal": 1
+  },
+  "rejected": [
+    {
+      "label": "changed exact text with prior state",
+      "code": "PUBLIC_VOICE_MODEL"
+    },
+    {
+      "label": "changed exact text with fresh state",
+      "code": "PUBLIC_VOICE_MODEL"
+    },
+    {
+      "label": "public doctor probe",
+      "code": "PUBLIC_VOICE_MODEL"
+    }
+  ],
+  "unchangedTotalTasks": 15,
+  "freshStateCreated": false
+}

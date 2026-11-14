@@ -1,0 +1,12 @@
+{
+  "exitCode": 1,
+  "storage": {
+    "status": "ready",
+    "detail": "Temporary write, atomic hard link and SQLite WAL readback succeeded."
+  },
+  "voice": {
+    "status": "blocked",
+    "code": "PUBLIC_VOICE_MODEL",
+    "detail": "Prepare a clean copy of the pinned model with scripts/prepare-public-voice.py --download."
+  }
+}

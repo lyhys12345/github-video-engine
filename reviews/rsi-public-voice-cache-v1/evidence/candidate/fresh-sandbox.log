@@ -1,0 +1,17 @@
+D:\gve-flagship-publish\src\tts\qwen-public.ts:155
+    throw new EngineError('PUBLIC_VOICE_RUNTIME', input
+          ^
+
+EngineError: Local public speech generation failed. Check the pinned Python/CUDA environment and scene text.
+    at runWorker (D:\gve-flagship-publish\src\tts\qwen-public.ts:155:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async runner.run.attempts (D:\gve-flagship-publish\src\tts\qwen-public.ts:259:45)
+    at async TaskRunner.run (D:\gve-flagship-publish\src\orchestrator\tasks.ts:108:64)
+    at async generatePublicVoice (D:\gve-flagship-publish\src\tts\qwen-public.ts:256:18)
+    at async <anonymous> (C:\Users\luyuh\Documents\Codex\rsi-public-voice-cache-20261114\validate-voice.mjs:81:24) {
+  code: 'PUBLIC_VOICE_RUNTIME',
+  classification: 'retryable',
+  artifacts: []
+}
+
+Node.js v24.22.1

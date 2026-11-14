@@ -1,0 +1,185 @@
+{
+  "schemaVersion": "rsi-qwen-cached-replay-proof/1.0",
+  "scope": "Windows module calls to generatePublicVoice. Each repeat uses the exact committed public speech input and an isolated original-state copy. Start/end clocks surround individual adapter calls in one Node process per variant. Separate receipt checks are outside measured adapter time. Initial OS filesystem cache state was not controlled. The final series overlapped startup of a separate provisional sample; that process later reached its harness deadline.",
+  "baseline": {
+    "adapterSha256": "bfa8cadfdfddb967a324ac5a21f00201bc9421e939fb26e10fdc3fca9c146ebe",
+    "node": "v24.22.1",
+    "iterations": 5,
+    "elapsedMs": [
+      15035.075399999998,
+      3433.026399999999,
+      4927.299200000001,
+      3661.6288999999997,
+      4038.3120000000017
+    ],
+    "medianElapsedMs": 4038.3120000000017,
+    "modelStreams": [
+      11,
+      11,
+      11,
+      11,
+      11
+    ],
+    "modelBytes": [
+      2498383610,
+      2498383610,
+      2498383610,
+      2498383610,
+      2498383610
+    ],
+    "medianModelHashWindowMs": 3940.9636000000028,
+    "medianStandaloneReceiptCheckMs": 23.214799999994284,
+    "exactCachedCount": 5,
+    "rawEvidence": "baseline/repeat.ndjson"
+  },
+  "final": {
+    "adapterSha256": "eb5d46cd756bd38bf7ce2250a6c2b47f02a1856c7dad615654295ab143fc40db",
+    "node": "v24.22.1",
+    "iterations": 5,
+    "elapsedMs": [
+      120.74070000000006,
+      85.21499999999992,
+      105.53199999999993,
+      82.38049999999998,
+      83.92820000000006
+    ],
+    "medianElapsedMs": 85.21499999999992,
+    "modelStreams": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "modelBytes": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "medianModelHashWindowMs": 0,
+    "medianStandaloneReceiptCheckMs": 24.01059999999984,
+    "exactCachedCount": 5,
+    "rawEvidence": "final/repeat.ndjson"
+  },
+  "observedMedianSpeedRatio": 47.38968491462777,
+  "observedMedianElapsedReductionPercent": 97.88983614936141,
+  "retainedExactTask": {
+    "id": "48f1df1174dc5b435703864f41a117d716503d84714ad7c1afc492a1561f304f",
+    "inputText": "A request arrives.",
+    "language": "en-US",
+    "speaker": "Ryan",
+    "attempt": 1,
+    "manifestSha256": "83aca4afb1a9e9323a145f104e73cd64bb290c1d604236a3bc8a3dfd4dd8ed70",
+    "wavSha256": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408",
+    "ffprobe": {
+      "codec_name": "pcm_s16le",
+      "codec_type": "audio",
+      "sample_rate": "16000",
+      "channels": 1,
+      "bits_per_sample": 16,
+      "duration_ts": 40960,
+      "duration": "2.560000"
+    },
+    "fullDecodeExit": 0
+  },
+  "unavailableModel": {
+    "mode": "unavailable",
+    "taskId": "48f1df1174dc5b435703864f41a117d716503d84714ad7c1afc492a1561f304f",
+    "cached": true,
+    "cachedElapsedMs": 122.65729999999985,
+    "wavSha256": "76f55f68788a26b5417600b144bf7c46c0c0383bad8e568b30482534b9326408",
+    "manifestSha256": "83aca4afb1a9e9323a145f104e73cd64bb290c1d604236a3bc8a3dfd4dd8ed70",
+    "unchangedTask": true,
+    "attempt": 1,
+    "accountingBefore": {
+      "cache_hit": 2,
+      "started": 1,
+      "terminal": 1
+    },
+    "accountingAfterValidModelRepeats": {
+      "cache_hit": 7,
+      "started": 1,
+      "terminal": 1
+    },
+    "accountingAfterUnavailableModelRepeat": {
+      "cache_hit": 8,
+      "started": 1,
+      "terminal": 1
+    },
+    "rejected": [
+      {
+        "label": "changed exact text with prior state",
+        "code": "PUBLIC_VOICE_MODEL"
+      },
+      {
+        "label": "changed exact text with fresh state",
+        "code": "PUBLIC_VOICE_MODEL"
+      },
+      {
+        "label": "public doctor probe",
+        "code": "PUBLIC_VOICE_MODEL"
+      }
+    ],
+    "unchangedTotalTasks": 15,
+    "freshStateCreated": false
+  },
+  "cliDoctorWithoutModel": {
+    "exitCode": 1,
+    "storage": {
+      "status": "ready",
+      "detail": "Temporary write, atomic hard link and SQLite WAL readback succeeded."
+    },
+    "voice": {
+      "status": "blocked",
+      "code": "PUBLIC_VOICE_MODEL",
+      "detail": "Prepare a clean copy of the pinned model with scripts/prepare-public-voice.py --download."
+    }
+  },
+  "fresh": {
+    "text": "Test only.",
+    "speaker": "Ryan",
+    "adapterSha256": "eb5d46cd756bd38bf7ce2250a6c2b47f02a1856c7dad615654295ab143fc40db",
+    "cached": false,
+    "elapsedMs": 57518.1653,
+    "workerTaskDurationMs": 53423.6686,
+    "taskId": "e5dd05e5620ad6bdd73f11784bfeb0c7a034ac60889fe147b6f83dee10022b11",
+    "attempt": 1,
+    "providerChargeMicros": 0,
+    "manifestSha256": "7ded53a7e5f468d8ec2afba986b679a79fd762261ae43b97a98663f6454d2c86",
+    "audio": {
+      "mediaType": "audio/wav",
+      "sha256": "8c1827f8e7c6f706a04c5a21477d04c25e4d2df99272d5a0f801da5c89d6696a",
+      "bytes": 69164,
+      "sampleRate": 16000,
+      "channels": 1,
+      "sampleFormat": "s16le",
+      "samples": 34560,
+      "durationSeconds": 2.16
+    },
+    "originalStateUnchanged": true,
+    "ffprobe": {
+      "codec_name": "pcm_s16le",
+      "codec_type": "audio",
+      "sample_rate": "16000",
+      "channels": 1,
+      "bits_per_sample": 16,
+      "duration_ts": 34560,
+      "duration": "2.160000"
+    },
+    "fullDecodeExit": 0
+  },
+  "freshRunNotes": [
+    "First sandboxed provisional generation of Test only. A route matches. returned PUBLIC_VOICE_RUNTIME. A scoped approved provisional retry with the same text hit the 60 s harness deadline. Its owned worker directory and sidecar were removed. The timeout cause was not isolated. The successful final candidate test used different text (Test only.) and a 180 s harness deadline. Its owned worker directory, sidecar and task temporary entries were removed."
+  ],
+  "harnessSha256": {
+    "repeats": "9acd8b660f6a9fc0faeafe24e2243b9e152930ce41f5f54bceff233c5483e302",
+    "checks": "b74eb6e0ef0dce9ed639411911ae664c880688c81810e42bfcb23ddd338df43a"
+  },
+  "review": {
+    "speechContent": "unverified",
+    "speechAlignment": "unverified",
+    "ownerListening": "pending"
+  }
+}

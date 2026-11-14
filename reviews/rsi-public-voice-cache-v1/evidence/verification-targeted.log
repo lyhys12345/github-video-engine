@@ -1,0 +1,46 @@
+
+ RUN  v3.2.4 D:/gve-flagship-publish
+
+ ✓ tests/qwen-public-adapter.test.ts (19 tests) 21852ms
+   ✓ public Qwen adapter (mocked Python process) > propagates the bounded process timeout and leaves only a retryable failed task  1044ms
+   ✓ public Qwen adapter (mocked Python process) > cancels in-flight synthesis, deletes partial audio, and records a cancelled task  599ms
+   ✓ public Qwen adapter (mocked Python process) > rejects 'wrong speaker' before committing audio  633ms
+   ✓ public Qwen adapter (mocked Python process) > rejects 'wrong samples' before committing audio  1032ms
+   ✓ public Qwen adapter (mocked Python process) > rejects 'silent WAV' before committing audio  625ms
+   ✓ public Qwen adapter (mocked Python process) > separates exact text and language/preset identities and reuses equal generations  1974ms
+   ✓ public Qwen adapter (mocked Python process) > replays the exact committed WAV with no model reads and records a cache receipt  1175ms
+   ✓ public Qwen adapter (mocked Python process) > checks same-size and same-mtime model tampering for doctor and new text  1766ms
+   ✓ public Qwen adapter (mocked Python process) > retries a missing-model miss after repair without consuming an attempt  1017ms
+   ✓ public Qwen adapter (mocked Python process) > fails closed on corrupted cached audio  1162ms
+   ✓ public Qwen adapter (mocked Python process) > fails closed on corrupted cached manifest  1150ms
+   ✓ public Qwen adapter (mocked Python process) > does not start work when a lookup observes a success that the runner cannot find  1754ms
+   ✓ public Qwen adapter (mocked Python process) > requires a fresh verified generation after the Python executable identity changes  1320ms
+   ✓ public Qwen adapter (mocked Python process) > honors cancellation on an exact hit before accounting for replay  725ms
+   ✓ public Qwen adapter (mocked Python process) > preserves state version and schema validation for 'valid legacy'  1472ms
+   ✓ public Qwen adapter (mocked Python process) > preserves state version and schema validation for 'malformed legacy'  1092ms
+   ✓ public Qwen adapter (mocked Python process) > preserves state version and schema validation for 'future version'  1783ms
+   ✓ public Qwen adapter (mocked Python process) > preserves state version and schema validation for 'malformed current version'  1398ms
+ ✓ tests/tasks.test.ts (11 tests) 11882ms
+   ✓ task database startup waits for a real lock, reports exhausted SQLite busy as retryable, and recovers  10344ms
+   ✓ timeouts and cancellation stop real sleeping children and leave recoverable persistent failure  969ms
+ ✓ tests/capabilities.test.ts (7 tests) 4795ms
+   ✓ plans on a writable checkout with browser, decoders and local voice deliberately unavailable  312ms
+   ✓ keeps silent speech independent of media or a default voice, and explains blocked adapters separately  919ms
+   ✓ guides planning without consulting a configured voice or rendering tools  306ms
+   ✓ distinguishes visual blockers from undecided and unsupported narration  1819ms
+   ✓ reports public options without a private profile or unrequested synthesis  1417ms
+ ✓ tests/tts.test.ts (25 tests) 8904ms
+   ✓ Huihui v2 commits one import atomically across retry and contention and decodes odd samples without decimal rounding  516ms
+   ✓ mock adapter constructs official POST with pinned inputs, no redirect, bounded signal, request id; durable success cache rereads CAS without key  344ms
+   ✓ atomic same-fingerprint race dispatches at most once; different-key cap race reserves aggregate bound  489ms
+   ✓ tampered or missing audio and receipt cache fail closed without another provider dispatch  643ms
+   ✓ local imported synthetic MP3 is distinct from remote synthesis, full lifecycle and exact-current-story handoff preserve pending listening  549ms
+   ✓ real CLI offline dry-run and generate default refuse network, secret config and unrelated flags  5097ms
+   ✓ binds the public voice receipt to its exact preset, generation manifest and odd-sample WAV without Python  473ms
+ ✓ tests/narration-voice-policy.test.ts (3 tests) 6ms
+
+ Test Files  5 passed (5)
+      Tests  65 passed (65)
+   Start at  00:29:11
+   Duration  53.66s (transform 1.31s, setup 0ms, collect 2.72s, tests 47.44s, environment 1ms, prepare 1.78s)
+

@@ -1,0 +1,11 @@
+node:internal/per_context/domexception:76
+    const self = new Error();
+                 ^
+
+DOMException [TimeoutError]: The operation was aborted due to timeout
+    at new DOMException (node:internal/per_context/domexception:76:18)
+    at Timeout._onTimeout (node:internal/abort_controller:210:9)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7)
+
+Node.js v24.22.1
