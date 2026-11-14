@@ -97,12 +97,24 @@ export class LocalShowcaseRender {
       signal.removeEventListener('abort', abort);
       this.pending = undefined;
     }
-    const output = join(this.directory, request.id + (request.kind === 'still' ? '.png' : '.mp4'));
+    const output = join(this.directory, request.id + (request.kind === 'shot' ? '.mp4' : '.png'));
     const info = await lstat(output);
     if (!info.isFile() || info.isSymbolicLink() || info.size <= 0 || info.size > 256_000_000) {
       throw new EngineError('SHOWCASE_RENDERER', 'Worker output is missing or exceeds the asset bound.', 'retryable');
     }
     return {output, bytes: await readFile(output)};
+  }
+
+  async inspect(request: Omit<WorkerRequest, 'kind' | 'to'>, signal: AbortSignal) {
+    const image = await this.render({...request, kind: 'audit', to: request.from + 1}, signal);
+    const path = join(this.directory, request.id + '.json');
+    const info = await lstat(path);
+    if (!info.isFile() || info.isSymbolicLink() || info.size <= 0 || info.size > 1_000_000) {
+      throw new EngineError('SHOWCASE_RENDERER', 'Worker measurement is missing or exceeds the audit bound.', 'retryable');
+    }
+    const bytes = await readFile(path);
+    if (bytes.length !== info.size) throw new EngineError('SHOWCASE_RENDERER', 'Worker measurement changed during read.', 'retryable');
+    return {image: image.bytes, measurement: JSON.parse(bytes.toString('utf8')) as unknown};
   }
 
   async close() {

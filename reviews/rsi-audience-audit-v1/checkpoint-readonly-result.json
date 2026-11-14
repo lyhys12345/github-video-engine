@@ -1,0 +1,23 @@
+{
+  "before": {
+    "sha256": "dcc54f19cbf82b9129fe83e74cb0d8e01b338479cf9ced2d2f0103b36d8a07a5",
+    "tableRows": {
+      "sqlite_sequence": 2,
+      "task_events": 24,
+      "tasks": 12,
+      "usage_events": 24
+    },
+    "userVersion": 1
+  },
+  "after": {
+    "sha256": "dcc54f19cbf82b9129fe83e74cb0d8e01b338479cf9ced2d2f0103b36d8a07a5",
+    "tableRows": {
+      "sqlite_sequence": 2,
+      "task_events": 24,
+      "tasks": 12,
+      "usage_events": 24
+    },
+    "userVersion": 1,
+    "unchanged": true
+  }
+}

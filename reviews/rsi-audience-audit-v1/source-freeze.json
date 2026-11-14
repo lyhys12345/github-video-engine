@@ -1,0 +1,22 @@
+{
+  "src/renderer/showcase-audit-contract.ts": "119ae59345c00f35a22f4e05e14a6b32375ae9f88f583e91a4b1e12195a8ed01",
+  "src/renderer/showcase-audit-dom.tsx": "daca34ca23fcc8d9c3e4870a3f778b46354e2a051b5be543fb9eef079960aa02",
+  "src/showcase/audience-audit.ts": "117b3694197342137421233a005fb2f1e2c88a9d24015850b8384d0bb3edc271",
+  "src/showcase/audience-contract.ts": "fa2c86c3d8d91b0f39fb38706cc8bcc66c1f7befcbe584a30d5fdcee5664e468",
+  "src/showcase/audience-correspondence.ts": "73d0ac04224d029037dda5dbd7bdbc1b706dd93f5713faf8b7976be390bd3f76",
+  "src/showcase/audience-media.ts": "e625422ce0e43999cc5b3c4bbe2b242a6c6779cac151430be63d48245ba5a64b",
+  "src/showcase/audience-render.ts": "049f0b2efe13f2923dcb1eb0fd706aec3593f3a901964813c44b448b7ff8a45c",
+  "src/showcase/audience-source.ts": "04d6ce515d43bb7f50a7a13b57caa045fc34c9214e26ad72f29da3d9c5d74efb",
+  "src/showcase/audience-speech.ts": "3e8e9c909e421a4f5615838b378804600f1479d02af60ee6e5e7bb7d8b2efc21",
+  "tests/showcase-audience-render.media.test.ts": "c4ea2cb3867ea51ff8ac9a39bd6c8d86b27e0858e78b4c2329afc03d2a002d14",
+  "tests/showcase-audience.test.ts": "147b6e32d4aba19a69805cc3f056f62cd46c0fd3612a4453e1af60b6ab41aea9",
+  "src/cli.ts": "a85ce71cd1bcceaea7009e415e6cd090183ed2cf63a80b670cebdee558127dca",
+  "src/renderer/showcase-reel.tsx": "45c37cf37865dca8110bbe2b8ad7f5665ac42fe585e6c52517d01500cc79fbe4",
+  "src/renderer/showcase-timing.ts": "1470ae0844844a93c9c40bcc0814fe35aad3d664dbad6b4218cb9559ab5e204e",
+  "src/showcase/cli.ts": "93ebc4d475c06ab23ae508cacbe4c4d8e38274a021ae45cbc07eb9d52b345c3e",
+  "src/showcase/local-render.ts": "7a125879e292f57e5be70d6890accb531e78754b3b3c0dece80ff00d68baa0bc",
+  "src/showcase/revision-baseline.ts": "89412f200770998e8130bfcb7963cdba3a69aed31cf033f3f6abb77280cfba45",
+  "src/showcase/worker.ts": "f71caf3faa777220322581372da1887536892cd2f8ade87985dd4e3882d628dc",
+  "tests/catalog.json": "e2156845b6ea3cd605b63eca7abf10a9044d528bccaa323d56d2b8c4cdc468b5",
+  "tests/cli-routing.test.ts": "caa44ea05a9085ba06627e170badfbdb979ef7f5179b712e5b49c1ae15e00f50"
+}

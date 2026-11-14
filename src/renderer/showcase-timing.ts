@@ -36,3 +36,18 @@ export function resolveSourceAnchors(
   }
   return anchors;
 }
+
+
+/** A panel with its own media or range plays independently of parent cue anchors. */
+export function showcasePanelSourceFrame(
+  frame: number,
+  shot: {start: number; startFrame?: number; endFrame?: number; frames?: number; sourceAnchors?: SourceAnchor[]},
+  panel: {media?: {frames?: number}; startFrame?: number; endFrame?: number},
+): number {
+  if (shot.sourceAnchors && !panel.media && panel.startFrame === undefined && panel.endFrame === undefined) {
+    return sourceFrameAt(frame, shot.sourceAnchors);
+  }
+  const sourceStart = panel.startFrame ?? (panel.media ? 0 : shot.startFrame ?? 0);
+  const sourceEnd = panel.endFrame ?? (panel.media ? panel.media.frames : shot.endFrame ?? shot.frames);
+  return Math.min(sourceStart + frame - shot.start, sourceEnd! - 1);
+}

@@ -24,7 +24,7 @@ export function pictureInputs(
   return showcaseShotInputs(timeline.props, new Map(manifest.media.map(media => [media.path, media.sha256])), manifest.font.sha256);
 }
 
-export async function loadRevisionBaseline(runner: TaskRunner, id: string, signal: AbortSignal) {
+export async function loadRevisionBaseline(runner: TaskRunner, id: string, signal: AbortSignal, options?: {mode: 'audience-audit'}) {
   const render = await loadShowcaseRender(runner, id, signal);
   const {verification, shotTaskIds} = render.result;
   if (verification.candidateSha256 === null || render.input.options.mode !== 'movie') {
@@ -72,11 +72,11 @@ export async function loadRevisionBaseline(runner: TaskRunner, id: string, signa
     pinnedSourceSha256: input.provenance?.sourceSha256 ?? null,
     scriptReviewSha256: input.provenance?.reviewSha256 ?? input.standaloneReviewSha256 ?? null,
   });
-  const reviews = await loadShowcaseReviews(runner, id, baseline.candidateSha256, signal);
+  const reviews = options?.mode === 'audience-audit' ? new Map<string, Buffer>() : await loadShowcaseReviews(runner, id, baseline.candidateSha256, signal);
   const pinned = assets.get(workspaceSourceName);
   const pinnedSource = pinned ? validateWorkspaceSource(pinned) : null;
   return {
     baseline, source, script, measured, before, pictures, timelineSha256: sha256(timelineBytes),
-    pcmSha256: verification.pcmSha256, fingerprint, fingerprintSha256: exactHash(fingerprint), reviews, pinnedSource,
+    ...(options?.mode === 'audience-audit' ? {candidate: render.files.get('review.mp4')!} : {}), pcmSha256: verification.pcmSha256, fingerprint, fingerprintSha256: exactHash(fingerprint), reviews, pinnedSource,
   };
 }

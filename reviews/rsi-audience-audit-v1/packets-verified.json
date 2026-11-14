@@ -1,0 +1,20 @@
+[
+  {
+    "output": "artcraft-audit-final",
+    "bindingsSha256": "b3b1f87ba3b7828e748fcd2fab7cc03510c9b5073d2d61fc2553f47295e04ed0",
+    "filesVerified": 30,
+    "inventoryValid": true
+  },
+  {
+    "output": "openmaic-audit-final",
+    "bindingsSha256": "735c5907d257185a087bada0a99478d538e48ec2cd0c6380bc1847e11a87b2ef",
+    "filesVerified": 24,
+    "inventoryValid": true
+  },
+  {
+    "output": "checkpoint-audit",
+    "bindingsSha256": "5851363c904dd97eef0c8a5f1686087282c0f2283f0fc0e74956a9074a925e31",
+    "filesVerified": 15,
+    "inventoryValid": true
+  }
+]

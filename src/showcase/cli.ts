@@ -8,7 +8,7 @@ import {finalizeShowcaseRevision, prepareShowcaseRevision, showcaseFeedbackConte
 import {PreviewOptions, RENDER_KIND, renderShowcase, resumeShowcase, reviewShowcase, showcaseStatus} from './runtime.js';
 import {lockShowcaseWorkspace, readShowcasePointer, workspaceShowcaseSource, writeShowcasePointer} from './workspace.js';
 
-const help = 'showcase storyboard --spec <draft-manifest> | showcase render --spec <manifest> (--data <state> | --workspace <URL workspace> --review <script report>) [--out <new-dir>] | showcase status/resume/export/review --data <state> --task <id> | showcase import --package <bundle> --digest <sha256> --workspace <new-dir> | showcase quality (--data <state> | --workspace <URL workspace>) --task <baseline-render> [--spec <plan>] | showcase feedback-context/revision-impact/revision-prepare/revision-finalize (--data <state> | --workspace <URL workspace>) --task <baseline-render> [--spec <plan> | --package <draft> --digest <draft-receipt-sha256> --approval <receipt> --review <script report>] [--out <new-dir>]';
+const help = 'showcase storyboard --spec <draft-manifest> | showcase render --spec <manifest> (--data <state> | --workspace <URL workspace> --review <script report>) [--out <new-dir>] | showcase status/resume/export/review --data <state> --task <id> | showcase import --package <bundle> --digest <sha256> --workspace <new-dir> | showcase audience-audit --request <audit-request> --out <new-dir> | showcase quality (--data <state> | --workspace <URL workspace>) --task <baseline-render> [--spec <plan>] | showcase feedback-context/revision-impact/revision-prepare/revision-finalize (--data <state> | --workspace <URL workspace>) --task <baseline-render> [--spec <plan> | --package <draft> --digest <draft-receipt-sha256> --approval <receipt> --review <script report>] [--out <new-dir>]';
 const previewFlags = ['frames-only', 'skip-stills', 'still-frames'];
 const allowed = {
   storyboard: ['spec'],
@@ -19,6 +19,7 @@ const allowed = {
   export: ['data', 'workspace', 'task', 'out'],
   import: ['package', 'digest', 'workspace'],
   quality: ['data', 'workspace', 'task', 'spec'],
+  'audience-audit': ['request', 'out'],
   'feedback-context': ['data', 'workspace', 'task'],
   'revision-impact': ['data', 'workspace', 'task', 'spec'],
   'revision-prepare': ['data', 'workspace', 'task', 'spec', 'out'],
@@ -64,6 +65,11 @@ export async function showcaseCommand(pos: string[], flags: Record<string, unkno
   if (action === 'storyboard') return {schemaVersion: 'showcase-storyboard/1.0',
     storyboardSha256: showcaseStoryboardSha256(json(await boundedFile(resolve(need('spec')), MAX_JSON)))};
   if (action === 'import') return importShowcase(need('package'), need('digest'), need('workspace'), signal);
+  if (action === 'audience-audit') {
+    const request = need('request'), output = need('out');
+    const {showcaseAudienceAudit} = await import('./audience-audit.js');
+    return showcaseAudienceAudit(request, output, signal);
+  }
   if (workspace && value('data')) usage();
   const data = workspace ? join(resolve(workspace), 'state') : need('data');
   if (action === 'status') {

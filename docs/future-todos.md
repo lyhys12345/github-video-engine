@@ -9,3 +9,5 @@ Allow users to optionally select and configure reference videos or a reference s
 ## Natural-language revision intent to edit plan
 
 In a later optimization, convert feedback such as “make the hook stronger” into a reviewable, editable plan identifying affected scenes, narration, assets and downstream invalidation. Preserve old versions and apply changes through existing task and artifact boundaries. Do not treat an inferred change as a factual claim or approval. Exact interaction and automation are deferred.
+
+Current scoped support: [guarded showcase revisions](showcase-revisions-v1.md) now covers explicit existing-shot visual changes while preserving narration/media/durations. Broad creative intent such as inventing a new hook or replacing narration still needs authored planning and fresh approval. The [completion roadmap](product-completion-roadmap.md) keeps the remaining work and acceptance criteria separate from implemented capabilities.

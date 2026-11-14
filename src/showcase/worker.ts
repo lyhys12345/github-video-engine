@@ -1,12 +1,13 @@
-import {readFile} from 'node:fs/promises';
+import {readFile, writeFile} from 'node:fs/promises';
 import {dirname, join, resolve} from 'node:path';
 import {bundle} from '@remotion/bundler';
 import {makeCancelSignal, openBrowser, renderMedia, renderStill, selectComposition} from '@remotion/renderer';
 import {killTree} from '../core/process.js';
 import {projectRoot} from '../providers/local.js';
+import {SHOWCASE_AUDIT_ARTIFACT} from '../renderer/showcase-audit-contract.js';
 import type {ShowcaseProps} from '../renderer/showcase-reel.js';
 
-export type WorkerRequest = {id: string; props: ShowcaseProps; from: number; to: number; kind: 'shot' | 'still'};
+export type WorkerRequest = {id: string; props: ShowcaseProps; from: number; to: number; kind: 'shot' | 'still' | 'audit'};
 export type WorkerResponse = {id: string; error?: string};
 const requestPath = process.argv[2]!;
 const directory = dirname(resolve(requestPath));
@@ -37,7 +38,8 @@ process.once('SIGTERM', stop);
 process.on('message', (request: WorkerRequest | {kind: 'stop'}) => {
   if (request.kind === 'stop') { stop(); return; }
   if (stopping) return;
-  const {id, kind, props, from, to} = request;
+  const {id, kind, from, to} = request;
+  const props = kind === 'audit' ? {...request.props, auditDom: true} : request.props;
   if (!/^[0-9a-f]{64}$/.test(id)) { stop(); return; }
   active = active.then(async () => {
     try {
@@ -52,7 +54,17 @@ process.on('message', (request: WorkerRequest | {kind: 'stop'}) => {
       if (composition.durationInFrames !== props.frames || composition.fps !== 30 ||
           composition.width !== 1080 || composition.height !== 1920) throw new Error('Unexpected showcase composition geometry.');
       const options = {serveUrl, composition, inputProps: props, puppeteerInstance: browser, cancelSignal, overwrite: false};
-      if (kind === 'still') {
+      if (kind === 'audit') {
+        let measurement: string | undefined;
+        await renderStill({...options, frame: from, output: join(directory, id + '.png'), imageFormat: 'png',
+          timeoutInMilliseconds: 45_000, logLevel: 'error', onArtifact: artifact => {
+            if (artifact.filename === SHOWCASE_AUDIT_ARTIFACT && artifact.frame === from && typeof artifact.content === 'string') {
+              measurement = artifact.content;
+            }
+          }});
+        if (!measurement) throw new Error('Showcase DOM measurement was not emitted for the rendered frame.');
+        await writeFile(join(directory, id + '.json'), measurement, {flag: 'wx'});
+      } else if (kind === 'still') {
         await renderStill({...options, frame: from, output: join(directory, id + '.png'), imageFormat: 'png'});
       } else {
         await renderMedia({...options, frameRange: [from, to - 1], outputLocation: join(directory, id + '.mp4'),

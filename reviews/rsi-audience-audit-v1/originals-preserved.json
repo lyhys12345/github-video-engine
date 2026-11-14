@@ -1,0 +1,52 @@
+[
+  {
+    "path": "work\\artcraft-result-refine-v1\\render-plan\\manifest-v2.json",
+    "sha256": "ae61184a28218ba88abe1fa38bfc7a6932912eb72349f793f5aeb27a4271ab82",
+    "unchanged": true
+  },
+  {
+    "path": "work\\artcraft-result-refine-v1\\render-plan\\candidate-v2\\review.mp4",
+    "sha256": "bfba63b87a5744de2e14d589adf8c70cd3c95b480605b8d234ed4aa44cb8b1a5",
+    "unchanged": true
+  },
+  {
+    "path": "work\\artcraft-result-refine-v1\\production\\script.json",
+    "sha256": "e26cdbe83c05f6b64f3282584ca00225fcee0451b938dc3819b89e8ea166a893",
+    "unchanged": true
+  },
+  {
+    "path": "work\\artcraft-result-refine-v1\\production\\owner-approval.json",
+    "sha256": "f3866af819dd8b557341e550cafd16396a352fe119a72801ffa15b2e6c6b45c3",
+    "unchanged": true
+  },
+  {
+    "path": "work\\artcraft-result-refine-v1\\production\\line2.wav",
+    "sha256": "7e0418dd4afd47bb3c9efbb56f14d9895dc3e18bf365cb72edb1691272c3c0dd",
+    "unchanged": true
+  },
+  {
+    "path": "work\\xhs-pilot-v1\\render-plans\\O-B\\manifest.json",
+    "sha256": "f24d0ec5f5f304fdde11644216116a4e5667fdbf3fca9d7dd7bdd212e486de41",
+    "unchanged": true
+  },
+  {
+    "path": "work\\xhs-pilot-v1\\render-plans\\O-B\\candidate-v1\\review.mp4",
+    "sha256": "5e7e52d3360117b12ff70433a1bc6f5b54576153fdd60ed14eceb18454b5bc5e",
+    "unchanged": true
+  },
+  {
+    "path": "work\\xhs-pilot-v1\\production\\O-B\\script.json",
+    "sha256": "6c1be155b41527d40dc9c701256b8e7f544ee1606c8bc2127e42e74fbb52f299",
+    "unchanged": true
+  },
+  {
+    "path": "work\\xhs-pilot-v1\\production\\O-B\\owner-approval.json",
+    "sha256": "785cb4129d0db660646dcc9f24c63f61b4cb9bc7de3a81f1bfea26b54151c573",
+    "unchanged": true
+  },
+  {
+    "path": "work\\xhs-pilot-v1\\production\\O-B\\line2.wav",
+    "sha256": "2ea8788f4efa11581c388365dcb1a729fc54571f2539dc70407178864341bbc8",
+    "unchanged": true
+  }
+]

@@ -49,3 +49,5 @@ For changes to an existing approved reel, use [guarded showcase revisions](showc
 Development uses affected suites. Release validation uses a fresh source snapshot, frozen dependency installation, typecheck, skill routing, capability checks and selected real media/recovery tests. Passing a subset must not be reported as a full regression.
 
 The GitHub workflow is `workflow_dispatch` only, with read-only repository permission and no publishing job. It does not run on push. It defaults to unit checks; the operator may explicitly enable the synthetic media smoke, which provisions FFmpeg. Pinned package and Action versions do not pin the hosted OS image or FFmpeg package; the generated runtime inventory identifies what actually ran.
+
+For the remaining first-owner and cross-host acceptance work, see the [product completion roadmap](product-completion-roadmap.md). New feature plans are not claims of implemented or independently accepted support.

@@ -1,0 +1,43 @@
+Showcase audience-audit builder browser test execution account
+Transcript-based record of two actual builder runs on 2026-11-13 local time.
+The tool results were not redirected to raw files. The reproduced result
+lines below are from the Codex tool transcript. No runner was invoked to
+prepare this account.
+
+Working directory: D:/gve-flagship-publish
+PowerShell command used for both runs:
+$env:TEMP='D:/gve-anna-render-temp'; $env:TMP=$env:TEMP; $env:TMPDIR=$env:TEMP; node node_modules/vitest/vitest.mjs run tests/showcase-audience-render.media.test.ts
+
+Runner: Vitest 3.2.4, local Chromium via Remotion 4.0.538 and local FFmpeg.
+The test deliberately uses a synthetic 30-frame video and the existing
+NotoSansSC-Variable.ttf. Real-project evidence is in separate audit packets.
+
+INITIAL FIXTURE FAILURE
+Tool session: 10402. Result chunk: 7613e1. Exit code 1.
+Vitest start 21:33:38; total duration 29.53 s, test duration 29004 ms.
+Test files 1 failed (1); tests 1 failed (1).
+Test: measures font-ready browser text, clipping and paint order on actual selected media frames
+AssertionError: expected [ 'overlay-0', 'caption' ] to not include 'caption'
+tests/showcase-audience-render.media.test.ts:91:12 (initial fixture only).
+Five target stills rendered and prior assertions in that test passed. The
+caption fixture exceeded the approved format's 80-character maximum. The
+computed Range boxes exceeded the allotted caption layout and extended beyond
+the 1920 px stage. The failed assertion wrongly expected no stage clipping for
+that deliberately long input.
+
+FINAL FIXTURE AND FROZEN RENDERER
+Tool session: 93921. Result chunk: a8ffbe. Exit code 0.
+Vitest start 21:35:30; total duration 44.92 s, test duration 44360 ms.
+Test files 1 passed (1); tests 1 passed (1).
+Test: measures font-ready browser text, clipping and paint order on actual selected media frames
+The corrected fixture uses an 80-character caption to exercise layout
+overflow. One narrow overlay overflows its layout box; another additionally
+crosses the stage edge. Added assertions compare the exact PNG digest with
+instrumentation disabled at the same frame, then cancel after the private
+worker runtime appears and assert no owner scratch or published output remains.
+The run also verified actual Range rectangles after font readiness, moving
+panel geometry and source frames at cue boundaries with parent anchors,
+independent media and an explicit panel range, annotation foreground overlap,
+and dimensions of 1080x1920, 360x640 and the phone contact sheet.
+Frozen browser test SHA-256:
+c4ea2cb3867ea51ff8ac9a39bd6c8d86b27e0858e78b4c2329afc03d2a002d14
