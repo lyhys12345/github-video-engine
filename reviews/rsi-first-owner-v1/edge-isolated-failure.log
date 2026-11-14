@@ -1,0 +1,22 @@
+[90mEnsuring browser executable[39m
+[90mEnsured browser is available.[39m
+[40m openBrowser() [49m [90mOpening browser: gl = undefined, executable = C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe, enableMultiProcessOnLinux = true[39m
+[90mAvailable memory: 14423.54 MiB (os.freemem())[39m
+file:///D:/gve-anna-render-temp/first-owner-checkout-8d8d8b0/node_modules/.pnpm/@remotion+renderer@4.0.538__bd20e3be18d725ef112a7a04964b2307/node_modules/@remotion/renderer/dist/esm/index.mjs:4176
+      reject(new TimeoutError(`Timed out after ${timeout} ms while trying to connect to the browser! Chrome logged the following: ${stdioString}`));
+             ^
+
+TimeoutError: Timed out after 25000 ms while trying to connect to the browser! Chrome logged the following: [528:18600:1113/220034.448:ERROR:chrome\installer\util\helper.cc:44] Failed to get path from PathService for key: 112: 试图引用不存在的令牌。 (0x3F0)
+
+
+
+DevTools remote debugging requires a non-default data directory. Specify this using --user-data-dir.
+
+[528:23896:1113/220035.506:ERROR:chrome\common\importer\edge_chrome_importer_utils_win.cc:36] Unable to get local app data path.
+
+
+    at Timeout.onTimeout (file:///D:/gve-anna-render-temp/first-owner-checkout-8d8d8b0/node_modules/.pnpm/@remotion+renderer@4.0.538__bd20e3be18d725ef112a7a04964b2307/node_modules/@remotion/renderer/dist/esm/index.mjs:4176:14)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7)
+
+Node.js v24.22.1

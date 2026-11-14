@@ -1,0 +1,14 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mD:/gve-anna-render-temp/first-owner-checkout-8d8d8b0[39m
+
+[90mstdout[2m | tests/first-owner-workflow.media.test.ts[2m > [22m[2mstarts at a URL, stops for exact script review, then imports and edits a self-contained silent preview through the CLI
+[22m[39mTEST ONLY first-owner technical evidence: D:\gve-anna-render-temp\first-owner-isolation-8d8d8b0\tmp\gve-fo-JjT4tO
+
+ [32m✓[39m tests/first-owner-workflow.media.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 123819[2mms[22m[39m
+   [33m[2m✓[22m[39m starts at a URL, stops for exact script review, then imports and edits a self-contained silent preview through the CLI [33m 123818[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m   Start at [22m 22:02:58
+[2m   Duration [22m 124.15s[2m (transform 56ms, setup 0ms, collect 77ms, tests 123.82s, environment 0ms, prepare 89ms)[22m
+

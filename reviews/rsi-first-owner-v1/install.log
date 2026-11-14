@@ -1,0 +1,47 @@
+? Verifying lockfile against supply-chain policies (314 entries)...
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +219
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Packages are hard linked from the content-addressable store to the virtual store.
+  Content-addressable store is at: D:\gve-anna-render-temp\first-owner-isolation-8d8d8b0\store\v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 219, reused 0, downloaded 57, added 4
+Progress: resolved 219, reused 0, downloaded 215, added 49
+Progress: resolved 219, reused 0, downloaded 217, added 106
+✓ Lockfile passes supply-chain policies (314 entries in 3.2s)
+Progress: resolved 219, reused 0, downloaded 217, added 123
+Progress: resolved 219, reused 0, downloaded 217, added 140
+Progress: resolved 219, reused 0, downloaded 217, added 163
+Progress: resolved 219, reused 0, downloaded 217, added 168
+Progress: resolved 219, reused 0, downloaded 218, added 168
+Progress: resolved 219, reused 0, downloaded 219, added 170
+Progress: resolved 219, reused 0, downloaded 219, added 172
+Progress: resolved 219, reused 0, downloaded 219, added 181
+Progress: resolved 219, reused 0, downloaded 219, added 183
+Progress: resolved 219, reused 0, downloaded 219, added 186
+Progress: resolved 219, reused 0, downloaded 219, added 193
+Progress: resolved 219, reused 0, downloaded 219, added 208
+Progress: resolved 219, reused 0, downloaded 219, added 213
+Progress: resolved 219, reused 0, downloaded 219, added 214
+Progress: resolved 219, reused 0, downloaded 219, added 217
+Progress: resolved 219, reused 0, downloaded 219, added 218
+Progress: resolved 219, reused 0, downloaded 219, added 219, done
+
+dependencies:
++ @remotion/bundler 4.0.538
++ @remotion/renderer 4.0.538
++ react 19.2.0
++ react-dom 19.2.0
++ remotion 4.0.538
++ zod 4.6.7
+
+devDependencies:
++ @types/node 24.10.0
++ @types/react 19.2.2
++ @types/react-dom 19.2.2
++ tsx 4.20.6
++ typescript 5.9.3
++ vitest 3.2.4
+
+Done in 31.5s using pnpm v11.25.0

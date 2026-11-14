@@ -19,6 +19,8 @@ Rows have strict bounded schemas. Task fingerprints, terminal states, accounting
 
 Copying uses owned staging, partial files outside the publishable payload, verified bytes and exclusive publication. A same-digest retry can reuse exact completed staged files and transactionally reconstruct missing trusted rows. Failed work remains available for inspection; no partial destination is published and no historical destination is replaced. Incomplete/foreign staging is not silently repaired. A changed package requires a new digest/output. This does not claim protection against an attacker controlling the trusted engine or local account.
 
+For a selected preview with a validated committed script review, import restores that exact report at `NEW_PROJECT/script-review.json`, outside the author directory, and returns `resume` arguments for the trusted `pnpm gve` entry. The selected author/brief/source/preview bindings must match; a conflicting staged review is refused. No new approval is created. Keep the entire exported package and digest: no external review side file or old workspace path is required. A legacy package without a bound review does not gain one. Changed author data still requires fresh review and owner approval.
+
 After import, the Agent can run the existing executor with the same URL, new workspace and `--author NEW_PROJECT/author`. Publications are regenerated from verified CAS at the new absolute path. Engine upgrades can legitimately invalidate video caches; unchanged recordings remain reusable. The project does not depend on chat history or the original workspace, but still needs compatible engine/runtime dependencies. A second computer was not available and cross-machine execution is not claimed.
 
 ## Actual REA/rembg results

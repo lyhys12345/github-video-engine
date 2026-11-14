@@ -1,0 +1,44 @@
+
+ RUN  v3.2.4 D:/gve-flagship-publish
+
+stdout | tests/first-owner-workflow.media.test.ts > starts at a URL, stops for exact script review, then imports and edits a self-contained silent preview through the CLI
+TEST ONLY first-owner technical evidence: C:\Users\luyuh\AppData\Local\Temp\gve-fo-GWgR2d
+
+ ❯ tests/first-owner-workflow.media.test.ts (1 test | 1 failed) 43739ms
+   × starts at a URL, stops for exact script review, then imports and edits a self-contained silent preview through the CLI 43738ms
+     → C:\Program Files\WindowsApps\OpenAI.CodexPrimaryRuntime.v26-1112-611-0_26.1112.611.0_x64__3k8sg7r9htsxt\dependencies\node\bin\node.exe exited 1: {
+  "error": {
+    "code": "PREVIEW_INPUT_CHANGED",
+    "message": "Engine or renderer environment changed during render. Retry with a new fingerprint.",
+    "classification": "permanent"
+  }
+}
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/first-owner-workflow.media.test.ts > starts at a URL, stops for exact script review, then imports and edits a self-contained silent preview through the CLI
+Error: C:\Program Files\WindowsApps\OpenAI.CodexPrimaryRuntime.v26-1112-611-0_26.1112.611.0_x64__3k8sg7r9htsxt\dependencies\node\bin\node.exe exited 1: {
+  "error": {
+    "code": "PREVIEW_INPUT_CHANGED",
+    "message": "Engine or renderer environment changed during render. Retry with a new fingerprint.",
+    "classification": "permanent"
+  }
+}
+
+ ❯ ChildProcess.<anonymous> src/core/process.ts:32:19
+     30|       if (failure) reject(failure);
+     31|       else if (code === 0) resolve(options.capture==='stderr'?stderr:s…
+     32|       else reject(new EngineError('PROCESS_FAILED', `${exe} exited ${c…
+       |                   ^
+     33|     });
+     34|     if (options.signal?.aborted) abort();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  21:53:27
+   Duration  44.05s (transform 52ms, setup 0ms, collect 80ms, tests 43.74s, environment 0ms, prepare 79ms)
+

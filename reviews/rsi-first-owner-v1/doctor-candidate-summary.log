@@ -1,0 +1,12 @@
+planning-default exit=0 planning=ready preview=not-checked voice=not-checked font=not-checked
+planning-httpx-no-tools exit=0 planning=ready preview=not-checked voice=not-checked font=not-checked
+preview-undecided exit=1 planning=ready preview=awaiting-selection voice=not-checked font=ready
+preview-silent exit=0 planning=ready preview=ready voice=ready font=ready
+preview-silent-no-tools exit=1 planning=ready preview=blocked voice=ready font=ready
+preview-imported exit=0 planning=ready preview=ready voice=ready font=ready
+preview-anna-absent exit=1 planning=ready preview=blocked voice=blocked font=ready
+preview-reference-unsupported exit=1 planning=ready preview=blocked voice=blocked font=ready
+malformed-repo exit=1 error=USAGE
+invalid-phase exit=1 error=USAGE
+conflicting-mode exit=1 error=USAGE
+Probe workspace remained absent

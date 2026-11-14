@@ -34,7 +34,7 @@ The agent should clarify any missing audience, platform, duration, style and voi
 The Claude entry point has been checked for repository routing, but a real Claude Code session and end-to-end media generation have not been verified. A skill file alone does not install the engine or guarantee a finished video.
 ## Check your setup
 
-Install the pinned dependencies with `pnpm install --frozen-lockfile --ignore-scripts`, then run `pnpm gve doctor --capabilities --phase planning`. You can research and review a script before installing media tools. For narrated output, select a configured local voice or import finished WAV recordings you have the right to use; an explicitly silent video is also supported. The owner's Anna reference is not bundled.
+Start with the [first-owner guide](docs/first-owner-quickstart.md). Install the pinned dependencies with `pnpm install --frozen-lockfile --ignore-scripts`, then run `pnpm gve doctor --first-owner`. You can research and review a script before installing media tools. For narrated output, select a configured local voice or import finished WAV recordings you have the right to use; an explicitly silent video is also supported. The owner's Anna reference is not bundled.
 
 [First-run capabilities](docs/capability-onboarding.md) · [Durable cinematic rendering](docs/showcase-runtime-v1.md) · [Speech timing diagnostics](docs/speech-alignment.md) · [Supported environments and tests](docs/support-and-release.md)
 
@@ -58,6 +58,7 @@ Show me the full narration and storyboard for review before generating the video
 
 | What you want to do | Start here |
 | --- | --- |
+| Start without the maintainer’s private setup | [First-owner guide](docs/first-owner-quickstart.md) |
 | Create a narrated preview from a URL with Codex | [User guide](docs/codex-user-path-v1.md) · [Unified run entry point](docs/narrative-run-v1.md) |
 | Review facts, handle revisions and export an editable project | [Fact review](docs/script-facts-v1.md) · [Revision workflow](docs/rsi-repair-v1.md) · [Cross-machine portability](docs/long-preview-portability-v1.md) |
 | Use Claude Code or your own API | [Claude Code](docs/claude-code-user-path-v1.md) · [Bring your own API](docs/byo-api-author-v1.md). Entry points exist; full end-to-end video production with a real model remains unverified. |
@@ -69,13 +70,12 @@ Show me the full narration and storyboard for review before generating the video
 The verified environment is Windows x64/NTFS. You need Node.js 24.x, pnpm 11.25.0 and a filesystem that supports same-volume hard links. Rendering also requires local Chrome/Chromium, FFmpeg and FFprobe.
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm run doctor
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm gve doctor --first-owner
 pnpm run typecheck
-pnpm test
 ```
 
-`pnpm run test:smoke` and `pnpm run test:acceptance` generate local media. Some Windows tests require hard-link and directory-junction permissions. Short checkout and state paths are recommended. Common environment variables include `GVE_DATA`, `GVE_BROWSER`, `GVE_FFMPEG` and `GVE_FFPROBE`.
+Tests are separate from installation. Use the affected suites during development. `pnpm run test:smoke` and `pnpm run test:acceptance` generate local media. Some Windows tests require hard-link and directory-junction permissions. Short checkout and state paths are recommended. Common environment variables include `GVE_DATA`, `GVE_BROWSER`, `GVE_FFMPEG` and `GVE_FFPROBE`.
 
 ```sh
 pnpm gve research --repo https://github.com/OWNER/REPO --out work/snapshot.json

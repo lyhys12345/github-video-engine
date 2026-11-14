@@ -1,0 +1,14 @@
+{
+  "src/providers/first-owner.ts": "dcac82321dfb266c5e22029b6baa31cd5c33d8b07c28fd615df05747f2590c4d",
+  "tests/first-owner-cli-preload.ts": "6b0eae0e4d7da15a1856e3fceb0021494877636c684b537a0757a0c230b7d59b",
+  "tests/first-owner-workflow.media.test.ts": "3204aa2f26adff0f173e3dc7f25ed51644fd1d2505b641d6c9d8c53a2fe54bba",
+  "tests/narrative-author-fixture.ts": "78a4fb60833fafeb85be9eb7b413a06883000a24bfab68bd3f15278907c865c6",
+  "src/cli.ts": "ee08ba6e70e48e997992d0bc145ce4b3665da1899779ae26af975e879c3a5b02",
+  "src/workflow/narrative-run.ts": "df5ec4ef3fcbacfda248227d015c203130ae011ad9ea82457c23e20e088ce02c",
+  "src/workflow/narrative.ts": "17b7d74b2c3096b58bc71c8ebc4c14972669306fe99d120c66c1306e85f747bb",
+  "src/workflow/project-portable.ts": "ee61591e53163f459341616e9bcc82095c43bbce76f38e422f09f7b6bd0ebae7",
+  "tests/byo-api-support.ts": "b4f610aa08900589474d66b64fa5a9f024f44fefcd69160c131e8b62387f0983",
+  "tests/capabilities.test.ts": "62f211e86f69d7b1a29f18e40d86588d4affabe59dac82fa1bc54bbd49d5ba31",
+  "tests/catalog.json": "a16842d5c6e486228279e9e59582881f7ca7654b6853995db8bfea36e6f1ecea",
+  "tests/narrative-run.test.ts": "81c4f86321a4c7d847951965d16397e0589e2f534d4d64aa7dd32c528cf94eb2"
+}

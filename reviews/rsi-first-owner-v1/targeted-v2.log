@@ -1,0 +1,34 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mD:/gve-anna-render-temp/first-owner-checkout-8d8d8b0[39m
+
+ [32m✓[39m tests/narrative-run.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 7912[2mms[22m[39m
+   [33m[2m✓[22m[39m returns a source-bound session-Agent handoff with usable schemas and no user JSON or model dispatch [33m 822[2mms[22m[39m
+   [33m[2m✓[22m[39m new URL workspace pauses for actual authorship and resumes captured source without network or model dispatch [33m 858[2mms[22m[39m
+   [33m[2m✓[22m[39m author directory accepts data only and unknown flags/repository changes never execute author code [33m 909[2mms[22m[39m
+   [33m[2m✓[22m[39m active workspace lock and modified immutable source request are refused instead of overwriting history [33m 866[2mms[22m[39m
+   [33m[2m✓[22m[39m source capture options require safe bounded pinned paths and cannot change an existing source request [33m 1392[2mms[22m[39m
+   [33m[2m✓[22m[39m URL capture and author packet resume work under a long repository workspace path [33m 993[2mms[22m[39m
+   [33m[2m✓[22m[39m keeps hostile repository instructions in source data rather than executable Agent handoff fields [33m 987[2mms[22m[39m
+   [33m[2m✓[22m[39m optional edit preconditions reject advanced checkpoints or changed owning authors while holding the run lock, before any dispatch [33m 1085[2mms[22m[39m
+ [32m✓[39m tests/capabilities.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 2600[2mms[22m[39m
+   [33m[2m✓[22m[39m keeps silent speech independent of media or a default voice, and explains blocked adapters separately [33m 972[2mms[22m[39m
+   [33m[2m✓[22m[39m guides planning without consulting a configured voice or rendering tools [33m 324[2mms[22m[39m
+   [33m[2m✓[22m[39m distinguishes visual blockers from undecided and unsupported narration [33m 1033[2mms[22m[39m
+ [32m✓[39m tests/narrative-workspace.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 90[2mms[22m[39m
+ [32m✓[39m tests/project-portable.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 103[2mms[22m[39m
+ [32m✓[39m tests/byo-api-feedback.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 11162[2mms[22m[39m
+   [33m[2m✓[22m[39m rejects untrusted stale source/hash, changed feedback, invented claims and false session provenance without executing edits [33m 6375[2mms[22m[39m
+   [33m[2m✓[22m[39m credential-bearing feedback is rejected before HTTP and is not persisted as user text [33m 4777[2mms[22m[39m
+ [32m✓[39m tests/creative-brief-runtime.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 10492[2mms[22m[39m
+   [33m[2m✓[22m[39m real brief-bound planning snapshots choices, requires review before media and rejects changed receipt [33m 6365[2mms[22m[39m
+   [33m[2m✓[22m[39m real run refuses requested timeline overflow and stops unsupported voice before synthesis [33m 4126[2mms[22m[39m
+ [32m✓[39m tests/test-catalog.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 221[2mms[22m[39m
+ [32m✓[39m tests/cli-routing.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 3870[2mms[22m[39m
+   [33m[2m✓[22m[39m keeps the URL showcase alias bound to a workspace and refuses extra command words before IO [33m 1666[2mms[22m[39m
+   [33m[2m✓[22m[39m routes the public audience audit and checks its exact flags [33m 2203[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m8 passed[39m[22m[90m (8)[39m
+[2m      Tests [22m [1m[32m36 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 22:05:32
+[2m   Duration [22m 40.16s[2m (transform 590ms, setup 0ms, collect 2.10s, tests 36.45s, environment 1ms, prepare 596ms)[22m
+

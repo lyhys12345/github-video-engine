@@ -1,0 +1,171 @@
+{
+  "schemaVersion": "repository-narrative-workspace-status/1.0",
+  "workspace": "D:\\gve-anna-render-temp\\fo-httpx-src",
+  "repository": "https://github.com/encode/httpx",
+  "status": "awaiting-script-review",
+  "source": {
+    "bindingSha256": "e2a0d04dd03938a7b9cb8b9a8724c9fa643ebdf7552c1e7525bd75ddda7a75c8",
+    "schemaVersion": "repository-narrative-run-source/1.0",
+    "taskId": "2855a734b110366402680001bd29db7f7f8ac4aff8233496131596d99f5cf62a"
+  },
+  "task": "daa5b5c587a412190a37fd1aeab32f9e94f5fff1bbe84621fd79228d9f580ae4",
+  "authorDirectory": "D:\\gve-anna-render-temp\\fo-httpx-src\\author-v2",
+  "authorState": "unchanged",
+  "currentResult": "D:\\gve-anna-render-temp\\fo-httpx-src\\runs\\1d9d1a6b78621e69-93ce9c8de7ff\\attempts\\b497cfae-67ce-4258-ad90-f683fe78df80\\result.json",
+  "currentResultSha256": "8a5010d9967c0e90bb179352bb2eac9b8ee931fcdc88644e94d18580fe96b4fc",
+  "next": {
+    "schemaVersion": "repository-narrative-next-actions/1.0",
+    "taskId": "daa5b5c587a412190a37fd1aeab32f9e94f5fff1bbe84621fd79228d9f580ae4",
+    "taskKind": "repository-complete-narrative-plan-v1",
+    "inputSha256": "669762d9554569592519eed29f2af8ba0859bf3c305394c057e05390b7e94ada",
+    "stage": "complete-plan-bound",
+    "verified": {
+      "schemaVersion": "narrative-plan-status/1.0",
+      "startTaskId": "2855a734b110366402680001bd29db7f7f8ac4aff8233496131596d99f5cf62a",
+      "binding": {
+        "projectId": "explain-2855a734b110366402680001bd29db7f7f8ac4aff8233496",
+        "repository": "https://github.com/encode/httpx",
+        "commit": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+        "snapshotHash": "e30610263c47a401c6183d34a4d6e1f05505888ed9c9e63245dba7ed80d800b8",
+        "evidenceFingerprint": "650839ced760936ed3618adbf4a6d4992e653ca99946936ebd83fbce8d9e4049"
+      },
+      "planHash": "7c98ec4be88ecc585229ac81222e9c26bf1186110818c57b05339da7556d1166",
+      "packetHash": "de5ae584cc30826b2befd4d2d13f25f1503fe8b57a6968e9119678d27a3dfa9a",
+      "estimatedSeconds": 26,
+      "estimatedTiming": "caller-authored-editorial-intent; not measured audio",
+      "sceneStates": [
+        {
+          "sceneId": "httpx-response",
+          "role": "hook",
+          "state": "supported-story",
+          "storyTaskId": "ec69ef41ae2b7df98e0adad021b687a2008a69314475c14bd782f7dee81c8efb",
+          "shotIds": [
+            "httpx-response"
+          ]
+        },
+        {
+          "sceneId": "url-to-get",
+          "role": "mechanism",
+          "state": "supported-story",
+          "storyTaskId": "f7a96b4489b578c92a26fc50be485b0db615520598885bd4961b971cde2789a8",
+          "shotIds": [
+            "url-to-get"
+          ]
+        },
+        {
+          "sceneId": "inspect-response",
+          "role": "example",
+          "state": "supported-story",
+          "storyTaskId": "82b41d9ae732eba3cfa00926906cd8cc4e3db5ddd9a9ef6c76ce9d95ef8f4fc1",
+          "shotIds": [
+            "inspect-response"
+          ]
+        },
+        {
+          "sceneId": "example-boundary",
+          "role": "limitation",
+          "state": "supported-story",
+          "storyTaskId": "2cffd10a92303d67507d1724e4ba37bfac377467360066232de76a372e03cff1",
+          "shotIds": [
+            "example-boundary"
+          ]
+        },
+        {
+          "sceneId": "use-response",
+          "role": "closing",
+          "state": "supported-story",
+          "storyTaskId": "bcf7db831825703cdc48420b00d420c2a6fc86a9077981125342aa873c788e86",
+          "shotIds": [
+            "use-response"
+          ]
+        }
+      ],
+      "unresolvedSceneCount": 0,
+      "factReview": {
+        "status": "pending-independent-review",
+        "semanticTruth": "not-machine-verified",
+        "approval": "none"
+      },
+      "semanticTruth": "not-machine-verified",
+      "approval": "none",
+      "ownerAcceptance": "pending",
+      "scope": "complete authored narrative planning JSON; no whole-video assembly, frame extraction or production",
+      "authorship": "human/session-agent curation is required; no automatic repository understanding"
+    },
+    "automation": "Deterministic guidance and source/media integrity only; a human/session agent must author and interpret content.",
+    "modelCalls": 0,
+    "actionsExecuted": 0,
+    "approval": "none",
+    "currentFacts": "pending",
+    "ownerListening": "pending",
+    "ownerAcceptance": "pending",
+    "limits": {
+      "paidApis": false,
+      "targetRepositoryExecution": false,
+      "formalFullFilm": false,
+      "Judge": false
+    },
+    "actions": [
+      {
+        "id": "inspect-facts-and-gaps",
+        "purpose": "Inspect the complete pending fact packet. Do not fabricate a review receipt or promote unsupported scenes. No Judge is dispatched by this guide.",
+        "authorship": "session-agent",
+        "requiredInputs": [
+          "Complete narrative/exported packet",
+          "Current source quotations and unresolved evidence/capabilities"
+        ]
+      },
+      {
+        "id": "optional-documented-closing",
+        "purpose": "Only an unresolved closing adapter may be narrowed to a documented-summary alternative; this does not complete the original missing capability.",
+        "authorship": "session-agent",
+        "command": [
+          "pnpm",
+          "gve",
+          "explanation",
+          "narrative-card",
+          "--task",
+          "daa5b5c587a412190a37fd1aeab32f9e94f5fff1bbe84621fd79228d9f580ae4",
+          "--data",
+          "D:\\gve-anna-render-temp\\fo-httpx-src\\state",
+          "--spec",
+          "<AUTHORED_DOCUMENT_CARD_JSON>",
+          "--out",
+          "<NEW_CARD_DIRECTORY>"
+        ],
+        "requiredInputs": [
+          "Explicit scope revision",
+          "Existing documented claims for every node and arrow",
+          "Exact parent plan/source/original scene hashes"
+        ]
+      },
+      {
+        "id": "prepare-source-animation",
+        "purpose": "Use next on each linked Story task to create actual source animation before assembling the preview.",
+        "authorship": "engine",
+        "requiredInputs": [
+          "Linked Story task IDs from the complete narrative export"
+        ]
+      }
+    ]
+  },
+  "resume": [
+    "explanation",
+    "run",
+    "--repo",
+    "https://github.com/encode/httpx",
+    "--workspace",
+    "D:\\gve-anna-render-temp\\fo-httpx-src",
+    "--author",
+    "D:\\gve-anna-render-temp\\fo-httpx-src\\author-v2",
+    "--through",
+    "preview"
+  ],
+  "requiresSessionAgent": true,
+  "modelCalls": 0,
+  "actionsExecuted": 0,
+  "approval": "none",
+  "currentFacts": "pending",
+  "ownerListening": "pending",
+  "ownerAcceptance": "pending"
+}

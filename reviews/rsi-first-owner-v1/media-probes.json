@@ -1,0 +1,42 @@
+{
+  "baseline": {
+    "path": "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\w\\runs\\c35d765189b68ce5-93ce9c8de7ff\\editable-preview\\.asset-staging-a9a65612-3ffd-4462-9c39-04f2a64bd32a-OKvMG4\\excerpt.mp4",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 720,
+          "height": 1280,
+          "r_frame_rate": "30/1",
+          "nb_frames": "540"
+        }
+      ],
+      "format": {
+        "duration": "18.000000"
+      }
+    }
+  },
+  "edited": {
+    "path": "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\i\\runs\\411ea27da74acda4-93ce9c8de7ff\\editable-preview\\.asset-staging-759db643-d428-4895-8588-0108d4be3a89-dV33SU\\excerpt.mp4",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 720,
+          "height": 1280,
+          "r_frame_rate": "30/1",
+          "nb_frames": "540"
+        }
+      ],
+      "format": {
+        "duration": "18.000000"
+      }
+    }
+  }
+}

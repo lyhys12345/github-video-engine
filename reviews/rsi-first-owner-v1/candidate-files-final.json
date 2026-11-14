@@ -1,0 +1,102 @@
+[
+  {
+    "path": "docs/first-owner-quickstart.md",
+    "sha256": "5b301e0b996c8f03b257b1400c1b0481a6cd5de823754f93d316a6c33b6f8cbd",
+    "bytes": 8004
+  },
+  {
+    "path": "docs/rsi-first-owner-results-2026-11-13.md",
+    "sha256": "4e460cbf1b3da058747822298256699a8cf1480243961c57e81ad11eb8b08920",
+    "bytes": 12680
+  },
+  {
+    "path": "src/providers/first-owner.ts",
+    "sha256": "dcac82321dfb266c5e22029b6baa31cd5c33d8b07c28fd615df05747f2590c4d",
+    "bytes": 7161
+  },
+  {
+    "path": "tests/first-owner-cli-preload.ts",
+    "sha256": "6b0eae0e4d7da15a1856e3fceb0021494877636c684b537a0757a0c230b7d59b",
+    "bytes": 1376
+  },
+  {
+    "path": "tests/first-owner-workflow.media.test.ts",
+    "sha256": "3204aa2f26adff0f173e3dc7f25ed51644fd1d2505b641d6c9d8c53a2fe54bba",
+    "bytes": 13836
+  },
+  {
+    "path": "tests/narrative-author-fixture.ts",
+    "sha256": "78a4fb60833fafeb85be9eb7b413a06883000a24bfab68bd3f15278907c865c6",
+    "bytes": 4645
+  },
+  {
+    "path": ".agents/skills/github-explainer/SKILL.md",
+    "sha256": "797919b6da9188f6955d48a21a9cff09377972af83991c53296b01e1104d0d98",
+    "bytes": 23431
+  },
+  {
+    "path": "README.md",
+    "sha256": "26de5b3457a1c55af40beca7fe504ea8b0c5568f55abecbdcd3faf9da8db725d",
+    "bytes": 8649
+  },
+  {
+    "path": "docs/narrative-run-v1.md",
+    "sha256": "0d551caac26d9323fb26f5eec11c1923694477637cd7099e3f90c284d33bd643",
+    "bytes": 17962
+  },
+  {
+    "path": "docs/portable-long-project-v1.md",
+    "sha256": "f497cf2a53f161ef90baa8dfeb1dc48cd31311e256da655c742b57ea382c3c7d",
+    "bytes": 7332
+  },
+  {
+    "path": "docs/product-completion-roadmap.md",
+    "sha256": "64c5e182f0f6498a0e3f08a96942c4a19daf2401dce6cb62f76a0ca27b0570a1",
+    "bytes": 7071
+  },
+  {
+    "path": "docs/support-and-release.md",
+    "sha256": "1c464fa9f68abbc31c5cec65194d35b9b2cc171e231c77834c0297411f1cfe07",
+    "bytes": 5643
+  },
+  {
+    "path": "src/cli.ts",
+    "sha256": "ee08ba6e70e48e997992d0bc145ce4b3665da1899779ae26af975e879c3a5b02",
+    "bytes": 12107
+  },
+  {
+    "path": "src/workflow/narrative-run.ts",
+    "sha256": "df5ec4ef3fcbacfda248227d015c203130ae011ad9ea82457c23e20e088ce02c",
+    "bytes": 33206
+  },
+  {
+    "path": "src/workflow/narrative.ts",
+    "sha256": "17b7d74b2c3096b58bc71c8ebc4c14972669306fe99d120c66c1306e85f747bb",
+    "bytes": 23398
+  },
+  {
+    "path": "src/workflow/project-portable.ts",
+    "sha256": "ee61591e53163f459341616e9bcc82095c43bbce76f38e422f09f7b6bd0ebae7",
+    "bytes": 29814
+  },
+  {
+    "path": "tests/byo-api-support.ts",
+    "sha256": "b4f610aa08900589474d66b64fa5a9f024f44fefcd69160c131e8b62387f0983",
+    "bytes": 3105
+  },
+  {
+    "path": "tests/capabilities.test.ts",
+    "sha256": "62f211e86f69d7b1a29f18e40d86588d4affabe59dac82fa1bc54bbd49d5ba31",
+    "bytes": 6277
+  },
+  {
+    "path": "tests/catalog.json",
+    "sha256": "a16842d5c6e486228279e9e59582881f7ca7654b6853995db8bfea36e6f1ecea",
+    "bytes": 5482
+  },
+  {
+    "path": "tests/narrative-run.test.ts",
+    "sha256": "81c4f86321a4c7d847951965d16397e0589e2f534d4d64aa7dd32c528cf94eb2",
+    "bytes": 9103
+  }
+]

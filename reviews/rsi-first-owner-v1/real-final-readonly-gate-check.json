@@ -1,0 +1,23 @@
+{
+  "realOwnerApproval": false,
+  "scriptJudge": {
+    "schemaVersion": "candidate-review/1.0",
+    "candidateSha256": "1d9d1a6b78621e69510e92025eb9930642b52146834f907ebaaa530859f6ac33",
+    "stage": "script",
+    "reviewer": "Independent script and first-owner usability Judge",
+    "verdict": "PASS",
+    "coverage": "script",
+    "findings": []
+  },
+  "taskCount": 11,
+  "taskKinds": {
+    "repository-explanation-start-v1": 1,
+    "explain-story-plan": 8,
+    "repository-complete-narrative-plan-v1": 2
+  },
+  "speechDatabaseExists": false,
+  "optionalReceiptBearingPreview": {
+    "executed": false,
+    "reason": "Automatic approval review rejected the command before process launch because the real script has not been approved by the owner. No retry or bypass."
+  }
+}

@@ -8,6 +8,8 @@ This is an ordered implementation plan, not a statement that the following work 
 
 Phone text/occlusion and narration-action audience audit: browser-derived editorial text geometry, sampled original candidate evidence, source-frame/cue checks and explicit speech-evidence limitations. See [audit workflow](showcase-audience-audit-v1.md) and [actual results](rsi-audience-audit-results-2026-11-13.md). Pixel-budget checking and guarded shot revisions already exist. Neither substitutes for actual viewer comprehension or listening.
 
+First-owner integration has now been [exercised on a clean Windows source checkout](rsi-first-owner-results-2026-11-13.md): actual public URL to reviewed script/owner stop, plus a separate synthetic silent render/export/import/edit closure. Cross-host support, polished production quality and a real new film remain separate acceptance work.
+
 ## Ordered modules and acceptance
 
 | Priority | User-facing capability | Existing foundation to reuse | Evidence required before calling it complete |

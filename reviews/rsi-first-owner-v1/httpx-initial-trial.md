@@ -1,0 +1,28 @@
+# HTTPX first-owner trial
+
+Frozen checkout at `D:/gve-anna-render-temp/first-owner-checkout-8d8d8b0`. Base Git revision directory suffix `8d8d8b0`; tested candidate engine code identity prefix `1cf113b7ca34`. All engine commands used the process-local isolated environment setup shown below. Source and author workspaces were newly created and distinct from the baseline run. Targets were public and unauthenticated.
+
+```powershell
+. 'D:/gve-anna-render-temp/first-owner-isolation-8d8d8b0/isolated-env.ps1'
+pnpm gve doctor --first-owner --repo https://github.com/encode/httpx --workspace D:/gve-anna-render-temp/fo-httpx-url
+pnpm gve doctor --first-owner --phase preview --voice none --language en-US --repo https://github.com/encode/httpx --workspace D:/gve-anna-render-temp/fo-httpx-url
+pnpm gve explanation run --repo https://github.com/encode/httpx --workspace D:/gve-anna-render-temp/fo-httpx-url --through planning
+pnpm gve explanation source-expand --workspace D:/gve-anna-render-temp/fo-httpx-url --out D:/gve-anna-render-temp/fo-httpx-src --doc docs/advanced/clients.md --source-path httpx/_api.py
+node D:/gve-anna-render-temp/first-owner-httpx-logs/author-httpx.mjs D:/gve-anna-render-temp/first-owner-httpx-logs/final-expand.json D:/gve-anna-render-temp/fo-httpx-src
+pnpm gve explanation brief-check --spec D:/gve-anna-render-temp/fo-httpx-src/brief-draft.json --out D:/gve-anna-render-temp/fo-httpx-src/author/creative-brief.json
+pnpm gve explanation run --repo https://github.com/encode/httpx --workspace D:/gve-anna-render-temp/fo-httpx-src --author D:/gve-anna-render-temp/fo-httpx-src/author --through planning
+pnpm gve explanation run --repo https://github.com/encode/httpx --workspace D:/gve-anna-render-temp/fo-httpx-src --author D:/gve-anna-render-temp/fo-httpx-src/author --through preview
+pnpm gve explanation script-facts --spec D:/gve-anna-render-temp/fo-httpx-src/script-facts-input.json --out D:/gve-anna-render-temp/fo-httpx-src/script-facts
+pnpm gve explanation workspace-status --workspace D:/gve-anna-render-temp/fo-httpx-src
+node D:/gve-anna-render-temp/first-owner-httpx-logs/verify-httpx-v2.mjs D:/gve-anna-render-temp/fo-httpx-src D:/gve-anna-render-temp/first-owner-httpx-logs
+```
+
+The URL capture command came from `next.sourceCapture` in the first doctor response. The exact planning arguments came from the expanded capture's `agentHandoff.resume`. The preview test changed its final argument from `planning` to `preview` and intentionally presented no review data. The author helper was written by the live trial agent against the numbered source bytes, with authored text, source assertions, choreography and timings. It is trial data tooling, not a new engine product feature or a predetermined target fixture.
+
+- Pinned HTTPX revision `b5addb64f0161ff6bfe94c124ef76f6a1fba5254`. The expanded capture retained the same commit and includes README, client guide, and the top-level API source. The source and individual hashes are in `final-expand.json` and `final-author.json`.
+- The planned candidate is 52 seconds including the technical lead. Its six-scene storyboard and complete proposed English spoken copy are in `D:/gve-anna-render-temp/fo-httpx-src/script-review.md` and byte-bound to the author as `README.txt`. The engineering brief deliberately selected silence with empty speech data.
+- Author SHA-256 `cd905bfde8554200a0e7c51c09dfab3f3eef879aab905b50bef9e2479daf7101`. Script SHA-256 `2ba5727366d0cfdbe7747b6a854fa73cbb83374ba69aecf826a8b39b4723a33f`. Fact preparation verified exact text quotations and bound six claims plus complete script and brief. Semantic review is independent.
+- Final planning and blocked preview share the same frozen engine code, source, and author. A separate status process recovered `awaiting-script-review` and unchanged author bytes. The read-only task audit found five successful nonmedia tasks total and zero media jobs, media files, or owner-review receipts. See `final-verification-v2.json`. The first audit helper assertion guessed task-kind strings incorrectly. The corrected helper used exact engine kinds with a new read-only DB copy.
+- The technical route implemented three diagram or text-card beats. The temporary Client scope, two requests sharing one TCP connection, and cleanup stayed as three `needs-adapter` scenes because the current small HTTP operation vocabulary cannot represent those mechanisms. The storyboard's exact GitHub crops, full authored text and staged persistence also exceed the selected generic layout. The showcase route could stage pinned GitHub excerpts and authored diagrams after explicit owner review, with its own approved manifest and required finished audio. Production using the full proposed storyboard with technical silence remains unresolved.
+- The public status command exposes the blocking checkpoint, but its nested generic next actions still suggest preparing source animation and an optional closing card. The closing is already supported in this candidate. The returned preview argument list has no review flag and a repeat remains gated. A first-owner action list should front-load the pending review and explain which three adapter gaps need an editorial or renderer choice. The quickstart's silent captions description would benefit from distinguishing exported parent text from actual visible source captions.
+- The doctor preview probe found and probed the installed media prerequisites. It did not launch the browser, synthesize, or verify media quality. The trial agent was given this task and skill path, so this run does not demonstrate automatic skill discovery in a brand-new Codex chat. There was no HTTPX execution, installed target package, paid API, private voice or final movie.

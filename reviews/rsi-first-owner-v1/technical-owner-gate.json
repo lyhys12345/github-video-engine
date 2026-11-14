@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "repository-narrative-run/1.0",
+  "status": "awaiting-owner-approval",
+  "workspace": "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\w",
+  "authorSha256": "c35d765189b68ce57882bd19c04c1ddfe9cf4eba9a59c9224078e2aa6db72ce2",
+  "source": {
+    "schemaVersion": "repository-narrative-run-source/1.0",
+    "taskId": "f3f48863533706af7b768d133ca1f5e08a2132047b98ffb484a6d7912452f5e7",
+    "bindingSha256": "d6968a3f4150f422ef4c37c8751bd27da95e219469c3348f2fd9aabb75bda93b"
+  },
+  "candidate": "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\w\\runs\\c35d765189b68ce5-93ce9c8de7ff",
+  "attempt": "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\w\\runs\\c35d765189b68ce5-93ce9c8de7ff\\attempts\\39c1292f-81ac-4c21-b666-bc9f8e9a51c2",
+  "tasks": {
+    "story.send-request": "90985426e6bb96c2ceaae27753934a36c0cca8f1f9a1482b7f94202f27d24b6c",
+    "story.match-route": "5b50ff26030df34eb4811ca570ea4989a1647c049a8504ec8b3efa1a015dc10a",
+    "story.return-body": "5bdc6aa92625742721b4ae3e93e3c91d76dd8d9dd50eac2bcae419f63639ecef",
+    "narrative": "a501f5ef6035321e9a15abcef601565af9cad2b4009ddfec3f19e983b387111a"
+  },
+  "cache": {
+    "sceneStories": [
+      {
+        "sceneId": "send-request",
+        "cached": true
+      },
+      {
+        "sceneId": "match-route",
+        "cached": true
+      },
+      {
+        "sceneId": "return-body",
+        "cached": true
+      }
+    ],
+    "narrative": true
+  },
+  "modelCalls": 0,
+  "approval": "none",
+  "currentFacts": "pending",
+  "ownerListening": "not-applicable",
+  "ownerAcceptance": "pending",
+  "details": {
+    "through": "planning",
+    "review": {
+      "status": "awaiting-owner-approval",
+      "findings": []
+    }
+  },
+  "workspaceState": {
+    "current": "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\w\\current-run.json"
+  }
+}

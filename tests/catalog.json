@@ -107,6 +107,7 @@
         "tests/capability-narration.media.test.ts",
         "tests/editable-snapshot.test.ts",
         "tests/final-finishing.test.ts",
+        "tests/first-owner-workflow.media.test.ts",
         "tests/showcase-audience-render.media.test.ts",
         "tests/showcase-durable.media.test.ts",
         "tests/showcase-quality.media.test.ts",

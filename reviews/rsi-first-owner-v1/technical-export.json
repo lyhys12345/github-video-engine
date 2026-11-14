@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "portable-narrative-export/1.0",
+  "package": "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\p",
+  "digest": "88cb50c9264ed61f855eb9a0c6775342e44ffdeed4634b7fc141b1a2282c224d",
+  "files": 93,
+  "bytes": 1837801,
+  "tasks": 12,
+  "localSpeech": 0,
+  "previewTaskId": "a93ba1a512f79faed7f78a2b0bbcc83f16063b1bc7702736913ca4fde47baa4f",
+  "authorBinding": "reviewed-author-snapshot",
+  "trust": "controlled-engine-export-only; hashes are integrity, not publisher authentication",
+  "scope": "selected reachable data only; old local paths may remain inside immutable records; no credentials/config/dependencies or package code",
+  "approval": "none"
+}

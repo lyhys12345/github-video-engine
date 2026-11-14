@@ -8,9 +8,11 @@ Current executed evidence: [five-module RSI results, 2026-11-13](rsi-five-module
 
 ```sh
 pnpm install --frozen-lockfile --ignore-scripts
-pnpm gve doctor --capabilities --phase planning
+pnpm gve doctor --first-owner
 pnpm gve doctor --capabilities --phase preview --voice imported --language en-US
 ```
+
+For a new user, follow the [first-owner guide](first-owner-quickstart.md). The first-owner report leaves voice/language undecided until selected and explains the script approval stop; it does not probe the maintainer’s private voice by default.
 
 Planning requires Node 24 and writable local storage with SQLite/hard links. It can run before a browser, FFmpeg or a voice runtime is installed. Media phases check their own dependencies. The capability report contains explicit ready, blocked and not-checked states and actionable reasons; it does not generate media or validate user content.
 

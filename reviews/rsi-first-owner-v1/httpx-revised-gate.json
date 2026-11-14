@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "repository-narrative-run/1.0",
+  "status": "awaiting-script-review",
+  "workspace": "D:\\gve-anna-render-temp\\fo-httpx-src",
+  "authorSha256": "1d9d1a6b78621e69510e92025eb9930642b52146834f907ebaaa530859f6ac33",
+  "source": {
+    "schemaVersion": "repository-narrative-run-source/1.0",
+    "taskId": "2855a734b110366402680001bd29db7f7f8ac4aff8233496131596d99f5cf62a",
+    "bindingSha256": "e2a0d04dd03938a7b9cb8b9a8724c9fa643ebdf7552c1e7525bd75ddda7a75c8"
+  },
+  "candidate": "D:\\gve-anna-render-temp\\fo-httpx-src\\runs\\1d9d1a6b78621e69-93ce9c8de7ff",
+  "attempt": "D:\\gve-anna-render-temp\\fo-httpx-src\\runs\\1d9d1a6b78621e69-93ce9c8de7ff\\attempts\\b497cfae-67ce-4258-ad90-f683fe78df80",
+  "tasks": {
+    "story.httpx-response": "ec69ef41ae2b7df98e0adad021b687a2008a69314475c14bd782f7dee81c8efb",
+    "story.url-to-get": "f7a96b4489b578c92a26fc50be485b0db615520598885bd4961b971cde2789a8",
+    "story.inspect-response": "82b41d9ae732eba3cfa00926906cd8cc4e3db5ddd9a9ef6c76ce9d95ef8f4fc1",
+    "story.example-boundary": "2cffd10a92303d67507d1724e4ba37bfac377467360066232de76a372e03cff1",
+    "story.use-response": "bcf7db831825703cdc48420b00d420c2a6fc86a9077981125342aa873c788e86",
+    "narrative": "daa5b5c587a412190a37fd1aeab32f9e94f5fff1bbe84621fd79228d9f580ae4"
+  },
+  "cache": {
+    "sceneStories": [
+      {
+        "sceneId": "httpx-response",
+        "cached": true
+      },
+      {
+        "sceneId": "url-to-get",
+        "cached": true
+      },
+      {
+        "sceneId": "inspect-response",
+        "cached": true
+      },
+      {
+        "sceneId": "example-boundary",
+        "cached": true
+      },
+      {
+        "sceneId": "use-response",
+        "cached": true
+      }
+    ],
+    "narrative": true
+  },
+  "modelCalls": 0,
+  "approval": "none",
+  "currentFacts": "pending",
+  "ownerListening": "not-applicable",
+  "ownerAcceptance": "pending",
+  "details": {
+    "through": "planning"
+  },
+  "workspaceState": {
+    "current": "D:\\gve-anna-render-temp\\fo-httpx-src\\current-run.json"
+  }
+}

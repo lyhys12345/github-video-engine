@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "first-owner-install-evidence/1.0",
+  "baseline": "8d8d8b06a057325ba719e67f81fd30c59c54a371",
+  "checkout": "D:\\gve-anna-render-temp\\first-owner-checkout-8d8d8b0",
+  "sourceOnlyCheckout": true,
+  "checkoutTransport": "local trusted Git clone; not a remote unauthenticated engine-clone test",
+  "installedPackages": 219,
+  "reusedPackages": 0,
+  "isolatedPnpmStore": true,
+  "scriptsDisabled": true,
+  "lockSha256": "4917589d1c3524acfcb61b68ae61588443647dbe72fb15790e4ff0b88c5feddc",
+  "publicTools": {
+    "node": "24.22.1",
+    "pnpm": "11.25.0",
+    "git": "2.53.0.windows.2",
+    "ffmpeg": "8.1-full_build-www.gyan.dev",
+    "ffprobe": "8.1-full_build-www.gyan.dev",
+    "Chrome": "157.0.8103.51"
+  },
+  "installIsolation": "process-only allowlist; empty npm/git config, isolated HOME/USERPROFILE/APPDATA/LOCALAPPDATA/TMP; no provider/token environment or engine ignored work",
+  "mediaCompatibility": "Only original Windows LOCALAPPDATA restored after the same isolation; owned temporary Chrome user-data-dir retained. No private voice or media inputs. This is not a fresh OS or filesystem access audit.",
+  "beforeInstallStatusFile": "not created by empty PowerShell pipeline; initial clean status came from actual clone check, not a fabricated empty log",
+  "localHarnessHashes": {
+    "isolated-env.ps1": "44c391c37697aa02f3e129f6b05833baea02eeab4aa951a0a116e823dcbda535",
+    "media-env-v2.ps1": "7916263b662f6fe4b343fcae72dfec597a3a20036e529d4855798df45d640e8d",
+    "source-tree.txt": "b047471a255fb86faeae330375b5cb6e9a8cacb97f39b0216cbdaed1c447f43c",
+    "tools.txt": "8c170dd27ccd6b4e9e71dabe177bd9e901cdc79a67a4527144857e054780eb8a"
+  }
+}

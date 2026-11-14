@@ -1,0 +1,32 @@
+{
+  "resume": [
+    "explanation",
+    "run",
+    "--repo",
+    "https://github.com/test-fixture/silent-routing",
+    "--workspace",
+    "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\i",
+    "--author",
+    "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\i\\author",
+    "--through",
+    "preview",
+    "--review",
+    "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\i\\script-review.json"
+  ],
+  "schemaVersion": "portable-narrative-import/1.0",
+  "workspace": "D:\\gve-anna-render-temp\\first-owner-isolation-8d8d8b0\\tmp\\gve-fo-JjT4tO\\i",
+  "digest": "88cb50c9264ed61f855eb9a0c6775342e44ffdeed4634b7fc141b1a2282c224d",
+  "previewTaskId": "a93ba1a512f79faed7f78a2b0bbcc83f16063b1bc7702736913ca4fde47baa4f",
+  "files": 93,
+  "tasks": 12,
+  "localSpeech": 0,
+  "profile": "complete-technical-preview/1.0",
+  "authorBinding": "reviewed-author-snapshot",
+  "source": {
+    "schemaVersion": "repository-narrative-run-source/1.0",
+    "taskId": "f3f48863533706af7b768d133ca1f5e08a2132047b98ffb484a6d7912452f5e7",
+    "bindingSha256": "d6968a3f4150f422ef4c37c8751bd27da95e219469c3348f2fd9aabb75bda93b"
+  },
+  "approval": "none",
+  "resumable": true
+}

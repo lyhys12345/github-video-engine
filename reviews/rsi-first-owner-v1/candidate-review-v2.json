@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "candidate-review/1.0",
+  "candidateSha256": "1d9d1a6b78621e69510e92025eb9930642b52146834f907ebaaa530859f6ac33",
+  "stage": "script",
+  "reviewer": "Independent script and first-owner usability Judge",
+  "verdict": "PASS",
+  "coverage": "script",
+  "findings": []
+}

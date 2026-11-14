@@ -1,0 +1,15 @@
+$ node scripts/test-suite.mjs check
+{
+  "status": "pass",
+  "classified": 108,
+  "groups": {
+    "unit": 28,
+    "integration": 60,
+    "media": 11,
+    "optional": 1,
+    "node": 2,
+    "node-media": 1,
+    "provider": 2,
+    "python": 3
+  }
+}
