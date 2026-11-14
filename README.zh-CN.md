@@ -104,3 +104,9 @@ pnpm gve jobs resume <job-id>
 **English** · Turn a GitHub repository into an editable, narrated explainer. Start with a repo URL and an audience brief, review a source-backed script, then render locally. [Getting started](docs/codex-user-path-v1.md)
 
 维护者换机续作：[Google Drive 交接记录](https://drive.google.com/file/d/1YtEYD-TT-qk87WjYjGPi05OIQpTespxd/view)
+
+## 首次使用与能力检查
+
+安装锁定依赖后，先运行 `pnpm gve doctor --capabilities --phase planning`。研究和脚本审核不再要求先装好视频工具。生成阶段明确选择已配置的本地声音、自带且有权使用的完整 WAV，或无声视频；仓库不附带维护者的 Anna 参考音频。
+
+[能力与声音配置](docs/capability-onboarding.md) · [持久化精美剪辑](docs/showcase-runtime-v1.md) · [字幕与声音诊断](docs/speech-alignment.md) · [环境支持和测试](docs/support-and-release.md)

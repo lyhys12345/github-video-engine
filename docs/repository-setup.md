@@ -1,5 +1,7 @@
 # Repository scope and portable checkout
 
+> Historical architecture/setup snapshot. For the current supported paths, installation and verification boundaries, see [Supported environments and release checks](support-and-release.md). Historical results below are preserved; they do not describe every current capability.
+
 This repository is the maintained source checkout. Local execution archives are deliberately outside the Git snapshot. `.gitignore` does not delete them, and the original files edited during preparation were copied to ignored `work/github-prep/originals/` before edits.
 
 Included: TypeScript source, configuration, pnpm lock/workspace files, tests, versioned schemas, editable example inputs and compositions, source-grounded REA story drafts, architectural documentation, selected gate policies/review instructions/result summaries, and licensed font/source fixtures.

@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "test-catalog/1.0",
+  "note": "Explicit classification: every new test entry must be assigned; local runs unit and integration. Model/media suites remain opt-in. Helpers are not entrypoints.",
+  "suites": {
+    "unit": {
+      "runner": "vitest",
+      "files": [
+        "tests/approved-reel.test.ts",
+        "tests/candidate-review.test.ts",
+        "tests/capabilities.test.ts",
+        "tests/causal-operation.test.ts",
+        "tests/causal-operations.test.ts",
+        "tests/cli-routing.test.ts",
+        "tests/continuous-segment.test.ts",
+        "tests/core-mechanism.test.ts",
+        "tests/creative-brief.test.ts",
+        "tests/http-story-asset.test.ts",
+        "tests/multi-input-operation.test.ts",
+        "tests/narration-voice-policy.test.ts",
+        "tests/narrative-context.test.ts",
+        "tests/narrative-scene-animations.test.ts",
+        "tests/narrative-scene-evidence.test.ts",
+        "tests/narrative-selected.test.ts",
+        "tests/parameterized-rules.test.ts",
+        "tests/revision-diff.test.ts",
+        "tests/rsi-experiment.test.ts",
+        "tests/rsi-media.test.ts",
+        "tests/rsi-repair.test.ts",
+        "tests/short-segment.test.ts",
+        "tests/showcase-reel.test.ts",
+        "tests/test-catalog.test.ts"
+      ]
+    },
+    "integration": {
+      "runner": "vitest",
+      "files": [
+        "tests/agent-authoring.test.ts",
+        "tests/animation-task-adversarial.test.ts",
+        "tests/asset-pack.test.ts",
+        "tests/audience-preview.test.ts",
+        "tests/byo-api-feedback.test.ts",
+        "tests/byo-llm.test.ts",
+        "tests/concurrency-queue.test.ts",
+        "tests/core.test.ts",
+        "tests/creative-brief-runtime.test.ts",
+        "tests/deep-source-capture.test.ts",
+        "tests/evidence-plan.test.ts",
+        "tests/explain-runtime.test.ts",
+        "tests/explanation-portable.test.ts",
+        "tests/explanation.test.ts",
+        "tests/fact-review.test.ts",
+        "tests/final-audit.test.ts",
+        "tests/final-delivery.test.ts",
+        "tests/finalization.test.ts",
+        "tests/frame-preview.test.ts",
+        "tests/independent-document-flow.test.ts",
+        "tests/legacy-runtime-env.test.ts",
+        "tests/legacy-runtime.test.ts",
+        "tests/legacy-story-formatter.test.ts",
+        "tests/narrative-complete.test.ts",
+        "tests/narrative-feedback.test.ts",
+        "tests/narrative-prose-edit.test.ts",
+        "tests/narrative-run-recovery.test.ts",
+        "tests/narrative-run.test.ts",
+        "tests/narrative-source-expand.test.ts",
+        "tests/narrative-speech-checkpoint.test.ts",
+        "tests/narrative-workspace.test.ts",
+        "tests/narrative.test.ts",
+        "tests/operations-cli.test.ts",
+        "tests/operations.test.ts",
+        "tests/owned-runtime.test.ts",
+        "tests/planning.test.ts",
+        "tests/presentation.test.ts",
+        "tests/production.test.ts",
+        "tests/project-portable.test.ts",
+        "tests/proposal-mapping.test.ts",
+        "tests/publication-paths.test.ts",
+        "tests/recovery.test.ts",
+        "tests/repairs.test.ts",
+        "tests/research-handoff.test.ts",
+        "tests/research-persistence.test.ts",
+        "tests/research-workbook.test.ts",
+        "tests/revision-audit.test.ts",
+        "tests/script-facts.test.ts",
+        "tests/showcase-durable.test.ts",
+        "tests/speech-alignment.test.ts",
+        "tests/story-animation.test.ts",
+        "tests/story-planner.test.ts",
+        "tests/tasks.test.ts",
+        "tests/tts.test.ts",
+        "tests/unreviewed-preview.test.ts",
+        "tests/url-intake.test.ts",
+        "tests/usage-audit.test.ts",
+        "tests/usage.test.ts",
+        "tests/voice-handoff.test.ts",
+        "tests/workflow.test.ts"
+      ]
+    },
+    "media": {
+      "runner": "vitest",
+      "files": [
+        "tests/acceptance.test.ts",
+        "tests/capability-narration.media.test.ts",
+        "tests/editable-snapshot.test.ts",
+        "tests/final-finishing.test.ts",
+        "tests/showcase-durable.media.test.ts",
+        "tests/smoke.test.ts",
+        "tests/story-preview.test.ts"
+      ]
+    },
+    "optional": {
+      "runner": "vitest",
+      "files": [
+        "tests/creative-brief-portable.integration.test.ts"
+      ]
+    },
+    "node": {
+      "runner": "node",
+      "files": [
+        "tests/mechanism-pilot.node.ts",
+        "tests/mechanism-publication.node.ts"
+      ]
+    },
+    "node-media": {
+      "runner": "node",
+      "files": [
+        "tests/mechanism-media.node.ts"
+      ]
+    },
+    "provider": {
+      "runner": "node",
+      "files": [
+        "tests/byo-api-feedback-media.node.ts",
+        "tests/byo-api-preview.node.ts"
+      ]
+    },
+    "python": {
+      "runner": "python",
+      "files": [
+        "tests/local_alignment_test.py",
+        "tests/local_voice_reference_test.py",
+        "tests/prepare_local_voice_test.py"
+      ]
+    }
+  }
+}

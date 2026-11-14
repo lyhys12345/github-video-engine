@@ -1,5 +1,7 @@
 # M0 architecture and invariants
 
+> Historical architecture/setup snapshot. For the current supported paths, installation and verification boundaries, see [Supported environments and release checks](support-and-release.md). Historical results below are preserved; they do not describe every current capability.
+
 ## Boundaries
 
 `contracts` defines data independently of Remotion. `core` provides hashing, classified errors and subprocess ownership. `orchestrator` determines stage order and persistence. `assets` publishes local blobs. `renderer` accepts a validated spec and resolved PNG data URLs. `evaluation` inspects actual media. `providers` discovers local tools only. `cli` translates user commands and signals into engine calls.

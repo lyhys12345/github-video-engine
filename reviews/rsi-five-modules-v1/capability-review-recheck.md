@@ -1,0 +1,15 @@
+# Independent recheck of capability and narration bindings
+
+Reviewer: /root/speech_alignment  
+Candidate checked: 2026-11-13 after the portable approval repair  
+Verdict: **PASS for the reviewed capability and authorization contracts.**
+
+The original changed-brief reproduction now fails with `PROJECT_PORTABLE`. The old silent preview had no committed script approval for the substituted brief. The revised complete silent and narrated task inputs persist a passing script report with the exact author snapshot and brief hashes. Portable export and import re-read and verify that task input before attributing a reviewed preview to the current author. The exact author hash rejects an edited audience or generated voice profile. The imported track also retains its exact audio and receipt checks. Legacy inputs omit the optional approval field and are distinguishable as historical. A proposed undecided brief can accompany a historical preview under an explicit historical status.
+
+Workspace status offers the saved script-review path on the checkpoint when the exact author files are available and unchanged. The focused resume regression checks both the returned path and its removal after an author edit. A separate feedback regression verifies that changing imported narration drops the affected finished WAV binding.
+
+Independent targeted verification passed **40 tests** across 9 files: `capabilities`, `creative-brief-runtime`, `narrative-run-recovery`, `narrative-speech-checkpoint`, `project-portable`, `narrative-complete`, `candidate-review`, `narrative-workspace`, and `narrative-feedback`. These checks include actual planning and failure recovery with media tools deliberately absent. I did not independently render a new movie or listen to recorded narration. The reports and portable technical artifacts leave speech identity/content, render perception and final owner acceptance pending.
+
+I independently re-exported the corrected synthetic silent task `bb2bae92241eed3e7f38c63280e5e4adf7716f243284c0c87b07e4e33246f6dd` using a copied state and the original author bytes. The package returned `reviewed-author-snapshot`, and the package author, task author and saved script review all named the same digest. Repeating the export after changing only the copied brief audience failed with `PROJECT_PORTABLE` and the different-reviewed-author message.
+
+I inspected the final media fixture and both reconstructed project packages under `test-output/workflow-byo-HGoQm6` and `test-output/workflow-cap-media-package-HOj9x6`. Independent FFprobe checks found only a video stream in the silent MP4 and both streams in the imported recording MP4. Their portable tasks each agree with the package and synthetic review author hash. The silent package has zero local receipt rows. The narrated package has one local import receipt and exact WAV SHA-256 `17dda3db6c02d2f5aaba21c11447f0ed803e64e9b1bb9a92ac2a1a239b705858`. Both imported projects record `reviewed-author-snapshot` and acceptance pending. These artifacts use synthetic test audio and do not establish speech quality.

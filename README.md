@@ -32,6 +32,12 @@ This repository includes a project-level `github-explainer` skill for [Codex](.a
 The agent should clarify any missing audience, platform, duration, style and voice preferences, then present a complete script and storyboard for your approval before generating a video. Local media tools and an authorized, configured voice are needed for narrated output. [Codex setup](docs/codex-user-path-v1.md) · [Claude Code setup](docs/claude-code-user-path-v1.md) · [Voice setup](docs/narration-voice-preference.md)
 
 The Claude entry point has been checked for repository routing, but a real Claude Code session and end-to-end media generation have not been verified. A skill file alone does not install the engine or guarantee a finished video.
+## Check your setup
+
+Install the pinned dependencies with `pnpm install --frozen-lockfile --ignore-scripts`, then run `pnpm gve doctor --capabilities --phase planning`. You can research and review a script before installing media tools. For narrated output, select a configured local voice or import finished WAV recordings you have the right to use; an explicitly silent video is also supported. The owner's Anna reference is not bundled.
+
+[First-run capabilities](docs/capability-onboarding.md) · [Durable cinematic rendering](docs/showcase-runtime-v1.md) · [Speech timing diagnostics](docs/speech-alignment.md) · [Supported environments and tests](docs/support-and-release.md)
+
 ## Try your own repository
 
 1. Open a configured **GitHub Video Engine repository** in Codex. For first-time setup, see the [installation and usage guide](docs/codex-user-path-v1.md).

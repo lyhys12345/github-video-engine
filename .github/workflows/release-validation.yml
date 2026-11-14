@@ -1,0 +1,52 @@
+name: Manual release validation
+on:
+  workflow_dispatch:
+    inputs:
+      media:
+        description: Run the local synthetic Remotion smoke (installs FFmpeg)
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.22.1'
+      - name: Install pinned package manager and dependencies
+        run: |
+          npm install --global pnpm@11.25.0
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm install --frozen-lockfile --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Check test inventory, contracts and skill routing
+        run: |
+          node --version
+          pnpm --version
+          [System.Runtime.InteropServices.RuntimeInformation]::OSDescription
+          pnpm run test:catalog
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm run typecheck
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node scripts/check-agent-entrypoints.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm run test:unit
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Optional synthetic media smoke
+        if: inputs.media
+        shell: pwsh
+        run: |
+          choco install ffmpeg --no-progress -y
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:Path += ";C:\ProgramData\chocolatey\bin"
+          pnpm run doctor
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm run test:smoke
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+# Manual only: no automatic publishing, target-code execution, model call or voice reference download.
+# Hosted execution has NOT been verified by adding this file; operator controls account/runner costs.

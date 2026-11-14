@@ -1,5 +1,7 @@
 # Architecture v8: local GitHub video workflow
 
+> Historical architecture/setup snapshot. For the current supported paths, installation and verification boundaries, see [Supported environments and release checks](support-and-release.md). Historical results below are preserved; they do not describe every current capability.
+
 Architecture snapshot for the implemented M1–M4 workflow; acceptance is determined separately by frozen candidates and actual role reports. This document proposes no distributed service or new provider. Runtime cleanup work may still be in progress; consult the exact candidate/source manifest for the version certified by any execution record.
 
 ## Data and execution path
