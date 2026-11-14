@@ -151,7 +151,8 @@
         "tests/local_voice_reference_test.py",
         "tests/prepare_local_voice_test.py",
         "tests/prepare_public_voice_deps_test.py",
-        "tests/qwen_public_voice_worker_test.py"
+        "tests/qwen_public_voice_worker_test.py",
+        "tests/windows_local_voice_worker_test.py"
       ]
     }
   }

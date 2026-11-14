@@ -1,0 +1,11 @@
+{
+  "taskId": "618ec5394e00a5c2dd6ec9fa905fae8233ca681bc2c70b3b76e9cd71490ad6c6",
+  "state": "cancelled",
+  "observedWorkerRequest": true,
+  "abortToRejectionMs": 372.1839,
+  "cleanup": {
+    "taskTmpEntries": [],
+    "ownedRuntimeEntries": []
+  },
+  "outputCount": 0
+}

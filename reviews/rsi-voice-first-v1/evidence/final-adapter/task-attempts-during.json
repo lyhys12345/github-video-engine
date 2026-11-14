@@ -1,0 +1,103 @@
+{
+  "capturedAt": "2026-11-14T08:56:42.577Z",
+  "tests": [
+    {
+      "name": "public",
+      "id": "618ec5394e00a5c2dd6ec9fa905fae8233ca681bc2c70b3b76e9cd71490ad6c6",
+      "state": "running",
+      "attempt": 2,
+      "errorCode": null,
+      "outputCount": 0,
+      "resultSha256": null,
+      "events": [
+        {
+          "type": "task_started",
+          "at": "2026-11-14T08:52:29.533Z",
+          "attempt": 1,
+          "sha256": "5e50ab9cd4ca21453af466d4b4be024831a42740de392783309731d33cb4b650"
+        },
+        {
+          "type": "task_failed",
+          "at": "2026-11-14T08:53:47.033Z",
+          "code": "ATOMIC_STORAGE_UNAVAILABLE",
+          "classification": "retryable",
+          "sha256": "5721280cab0ac37905f246b311537c7b5706cf9c4f26d8dbbeb23ae14fb55b47"
+        },
+        {
+          "type": "task_resumed",
+          "at": "2026-11-14T08:56:09.163Z",
+          "attempt": 2,
+          "sha256": "abfe845530bf9466036b012db6236bac572169e453a2121f622d6311df6964a2"
+        }
+      ],
+      "receipts": [
+        {
+          "phase": "started",
+          "attempt": 1,
+          "outcome": null,
+          "wallDurationMs": null,
+          "providerChargeMicros": null,
+          "sha256": "73bbe0c2d5feb97c018ebc017b2ce0186a2d7357b385dae062558dc3bb2c7898"
+        },
+        {
+          "phase": "terminal",
+          "attempt": 1,
+          "outcome": "failed",
+          "wallDurationMs": 77497.8777,
+          "providerChargeMicros": 0,
+          "sha256": "d6b19b2bc94d6b4a877edd9ee5516f27a77a0b8b9c459064451326526ee438aa"
+        },
+        {
+          "phase": "started",
+          "attempt": 2,
+          "outcome": null,
+          "wallDurationMs": null,
+          "providerChargeMicros": null,
+          "sha256": "0acbcc847da04f5975f21ddc74b78a936669ce7f7bd78acb04a69547994e77c3"
+        }
+      ]
+    },
+    {
+      "name": "anna",
+      "id": "4e7a705be560685aad8b063ee03213f0e33b5671a66275b4ebfd581bcd4ca38f",
+      "state": "failed",
+      "attempt": 1,
+      "errorCode": "ATOMIC_STORAGE_UNAVAILABLE",
+      "outputCount": 0,
+      "resultSha256": null,
+      "events": [
+        {
+          "type": "task_started",
+          "at": "2026-11-14T08:54:02.834Z",
+          "attempt": 1,
+          "sha256": "80a5437e9c1db92aeb434dab12771bcf6b3bbf2831dd485f9623d34df7962b6a"
+        },
+        {
+          "type": "task_failed",
+          "at": "2026-11-14T08:56:05.979Z",
+          "code": "ATOMIC_STORAGE_UNAVAILABLE",
+          "classification": "retryable",
+          "sha256": "5721280cab0ac37905f246b311537c7b5706cf9c4f26d8dbbeb23ae14fb55b47"
+        }
+      ],
+      "receipts": [
+        {
+          "phase": "started",
+          "attempt": 1,
+          "outcome": null,
+          "wallDurationMs": null,
+          "providerChargeMicros": null,
+          "sha256": "f08cb9e112603ff59b758aca2d2aa89dc35a26b4e5ad0b085132fb605434c5a8"
+        },
+        {
+          "phase": "terminal",
+          "attempt": 1,
+          "outcome": "failed",
+          "wallDurationMs": 123141.7018,
+          "providerChargeMicros": null,
+          "sha256": "a9973d0671204359951c39634d0e50723d4658e72f2fab6e6e3d04d4e6e653b2"
+        }
+      ]
+    }
+  ]
+}

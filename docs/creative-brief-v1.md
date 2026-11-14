@@ -22,7 +22,9 @@ This example's voice is the existing owner's local preference, not a bundled sou
 
 `decision: proposed` stays pending until choices are confirmed. `user-specified` means the user supplied or confirmed the complete choices; do not label unconfirmed defaults this way. `delegated` requires actual permission to choose. Mixed supplied/default choices remain proposed until remaining choices are confirmed or delegated. Brief confirmation never substitutes for exact script/storyboard approval.
 
-Voice modes: local (`anna-local`, `chen-local`, or `windows-huihui`), reference (`reference`, `rightsConfirmed`), none, byo-api (`provider`, `paidAuthorized`), undecided. Store no secrets. Reference permission and paid authorization are user declarations, not independently authenticated receipts. Merely selecting an API or providing a key does not authorize spending.
+Voice modes: local (`anna-local`, `chen-local`, `windows-huihui`, or `qwen-public`), imported (`voiceLabel`, `rightsConfirmed`), reference (`reference`, `rightsConfirmed`), none, byo-api (`provider`, `paidAuthorized`), undecided. Store no secrets. Reference permission and paid authorization are user declarations, not independently authenticated receipts. Merely selecting an API or providing a key does not authorize spending.
+
+For a delivery request such as "slightly faster but natural," preserve it in `notes` independently of the overall video duration. Keep the selected voice. These notes inform authoring, audition and review; they are not a supported model speed parameter or a guarantee of naturalness. Follow [voice and delivery guidance](narration-voice-preference.md#speaking-pace-and-natural-delivery). Editing the brief or punctuation still changes the approval candidate; a short audio audition does not approve a formal video.
 
 ## Commands and enforcement
 
@@ -35,7 +37,7 @@ The optional output is create-only, never overwrites a saved choice. CLI status 
 
 Complete-profile runs enforce authored total timeline duration including lead/gaps. Before media, unresolved requirements or mismatched runtime voice return `awaiting-creative-requirements`. Brief-bound runs require the script review gate, including internal feedback calls. Once revised scripts are approved, resume using `explanation run ... --review RECEIPT`; feedback-apply itself has no receipt flag.
 
-Current narrated-run capabilities remain zh-CN plus configured local voices. Reference, silent and API modes can be recorded for planning but stop before media with an adapter requirement. This module does not implement these adapters, authorize paid access, set environment variables or silently change voices. The local adapter checks actual installation when invoked. Legacy projects without a brief retain existing behavior; new Skill runs must create one.
+Current execution support is described by [capability onboarding](capability-onboarding.md): public local presets support zh-CN/en-US; legacy local voices remain zh-CN; explicit silent and imported-WAV routes are available. Reference and API narration modes can be recorded for planning but remain blocked when their adapter is unavailable. The brief does not install adapters, authorize paid access, set environment variables or silently change voices. Local synthesis checks its actual installation when invoked. Legacy projects without a brief retain existing behavior; new Skill runs must create one.
 
 ## Validation scope
 

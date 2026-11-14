@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import platform
 import sys
+import sysconfig
 
 
 def deny_network(event, _arguments):
@@ -49,7 +50,8 @@ def read_runtime_lock():
 
 
 def main():
-    if sys.platform != "win32" or platform.machine().upper() not in {"AMD64", "X86_64"} or sys.version_info[:2] != (3, 12):
+    # Read the interpreter build architecture without relying on the scrubbed host environment.
+    if sys.platform != "win32" or sysconfig.get_platform() != "win-amd64" or sys.version_info[:2] != (3, 12):
         raise RuntimeError("The public voice runtime needs Windows x64 and CPython 3.12.")
     if not all(read_runtime_lock().values()):
         raise RuntimeError("The installed voice runtime differs from its pinned dependencies.")

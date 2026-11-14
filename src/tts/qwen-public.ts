@@ -21,6 +21,7 @@ const REPOSITORY = 'Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice';
 const REVISION = '85e237c12c027371202489a0ec509ded67b5e4b5';
 const CONFIG = join(projectRoot, 'config', 'public-voice-v1');
 const MAX_WAV = 2_000_000;
+const MODEL_READ_CHUNK_BYTES = 1024 * 1024;
 const Hash = z.string().regex(/^[a-f0-9]{64}$/);
 const Language = z.enum(compositionLanguages);
 const Speaker = z.enum(['Serena', 'Ryan']);
@@ -65,7 +66,8 @@ async function hashFile(path: string, signal: AbortSignal, expectedBytes?: numbe
     return fail('PUBLIC_VOICE_MODEL', 'A public voice input is missing, linked, or has an unexpected byte length.');
   }
   const hash = createHash('sha256');
-  for await (const chunk of createReadStream(path, {signal})) hash.update(chunk);
+  const highWaterMark = expectedBytes === undefined ? undefined : MODEL_READ_CHUNK_BYTES;
+  for await (const chunk of createReadStream(path, {signal, highWaterMark})) hash.update(chunk);
   const after = await lstat(path);
   if (before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ino !== after.ino || after.isSymbolicLink()) {
     return fail('PUBLIC_VOICE_MODEL', 'A public voice input changed during verification.');

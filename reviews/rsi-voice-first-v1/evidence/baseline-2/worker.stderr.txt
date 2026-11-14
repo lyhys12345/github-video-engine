@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "C:\Users\luyuh\Documents\Codex\voice-first-20261114\baseline-2\worker.py", line 133, in <module>
+    main()
+  File "C:\Users\luyuh\Documents\Codex\voice-first-20261114\baseline-2\worker.py", line 63, in main
+    raise RuntimeError("The public voice runtime needs Windows x64 and CPython 3.12.")
+RuntimeError: The public voice runtime needs Windows x64 and CPython 3.12.

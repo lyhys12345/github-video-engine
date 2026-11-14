@@ -14,6 +14,7 @@ sys.addaudithook(deny_network)
 
 import importlib.metadata
 import torch
+import numpy as np
 import soundfile as sf
 from scipy.signal import resample_poly
 from qwen_tts import Qwen3TTSModel
@@ -26,8 +27,13 @@ if not torch.cuda.is_available():
 torch.manual_seed(42)
 model = Qwen3TTSModel.from_pretrained(request['modelPath'], device_map='cuda:0', dtype=torch.bfloat16, attn_implementation='eager', local_files_only=True)
 waves, sample_rate = model.generate_voice_clone(text=request['text'], language='Chinese', ref_audio=request['referencePath'], ref_text=request['referenceText'], max_new_tokens=512)
-if len(waves) != 1 or sample_rate != 24000:
+if len(waves) != 1 or sample_rate != 24_000:
     raise RuntimeError('Unexpected local model output format')
-audio = resample_poly(waves[0], 2, 3)
+source = np.asarray(waves[0])
+if source.ndim != 1 or not 0 < source.size <= 30 * 24_000 or not np.isfinite(source).all():
+    raise RuntimeError('Local speech waveform is invalid or exceeds the scene budget')
+audio = resample_poly(source, 2, 3)
+if not np.isfinite(audio).all() or not audio.any():
+    raise RuntimeError('Resampled local speech is non-finite or silent')
 sf.write('speech.wav', audio, 16000, subtype='PCM_16')
 print(json.dumps({'sampleRate': 16000, 'samples': len(audio), 'torch': torch.__version__, 'gpu': torch.cuda.get_device_name(0)}, ensure_ascii=True))

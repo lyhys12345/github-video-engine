@@ -1,0 +1,56 @@
+[
+  {
+    "name": "public-adapter",
+    "sha256": "fcafb9ae49253debc8a45385ce3d837a68f744e9f66f82cdf7ae196eadc495ae",
+    "bytes": 289324,
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s16le",
+          "sample_rate": "16000",
+          "channels": 1,
+          "duration": "9.040000"
+        }
+      ]
+    },
+    "fullDecodeExit": 0
+  },
+  {
+    "name": "anna-a",
+    "sha256": "7cc5a7d176ce567af767ceeb6ec1051a630583cd43c823b4233d95df1b2da42d",
+    "bytes": 174124,
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s16le",
+          "sample_rate": "16000",
+          "channels": 1,
+          "duration": "5.440000"
+        }
+      ]
+    },
+    "fullDecodeExit": 0
+  },
+  {
+    "name": "anna-b",
+    "sha256": "69768d0d224df9ef376fa19e4bc6c726c98b5ad6cf453562ccce22cc2631ad9e",
+    "bytes": 166444,
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "pcm_s16le",
+          "sample_rate": "16000",
+          "channels": 1,
+          "duration": "5.200000"
+        }
+      ]
+    },
+    "fullDecodeExit": 0
+  }
+]

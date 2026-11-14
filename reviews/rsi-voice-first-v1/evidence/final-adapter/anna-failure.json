@@ -1,0 +1,8 @@
+{
+  "failedAt": "2026-11-14T08:56:05.991Z",
+  "trial": "anna",
+  "phase": "anna-a",
+  "type": "Error",
+  "code": "ATOMIC_STORAGE_UNAVAILABLE",
+  "message": "See local task status for diagnostic details"
+}

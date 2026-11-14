@@ -1,0 +1,101 @@
+{
+  "variant": "amd64-baseline-2",
+  "torchThreadLimit": null,
+  "textLength": 39,
+  "language": "zh-CN",
+  "textSha256": "f83f8cb03c14a44eeabefdf5dba92324ee684c85f2f259a6e28369f31c409d20",
+  "modelRepository": "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
+  "modelRevision": "85e237c12c027371202489a0ec509ded67b5e4b5",
+  "modelFileCount": 11,
+  "modelBytes": 2498383610,
+  "modelLockSha256": "4951f1df7f2581651052e740594dbabf8c1c20af0cec1c731db5909e173a572a",
+  "workerOriginalSha256": "1ce1b69f8ed426a7814e159ff077d6d5594bce3593cc87ea396781164a08714c",
+  "workerInstrumentedSha256": "6b6d73e43b63e77a0265de31e4558ef5b7ae3c2e6d35a1b18a2675d9763e34bf",
+  "runtimeLockSha256": "00f3bc66834e1162b14d398bc44e8213ef2c53e16d54d87029ea25d677bd9500",
+  "pythonSha256": "b95409b2edc04f3db3f2a5021fa52d2e0791ae978c13cdeb857cab0f35476919",
+  "logicalCpuCount": 20,
+  "gpuBefore": "NVIDIA GeForce RTX 3070, 595.95, 16, 2497, 8192",
+  "modelHashSeconds": 2.3917626999900676,
+  "workerTimeoutSeconds": 300,
+  "workerExit": 0,
+  "workerWallSeconds": 81.04211350000696,
+  "verifyAndWorkerWallSeconds": 83.43387619999703,
+  "phases": [
+    {
+      "phase": "platform_startup",
+      "elapsedSeconds": 0.5957571000035387,
+      "processSeconds": 0.5957571000035387
+    },
+    {
+      "phase": "runtime_lock",
+      "elapsedSeconds": 0.22690879998845048,
+      "processSeconds": 0.8226658999919891
+    },
+    {
+      "phase": "numpy_torch_import",
+      "elapsedSeconds": 4.915351300005568,
+      "processSeconds": 5.738017199997557,
+      "torch": "2.8.0+cu128",
+      "cuda": "12.8",
+      "torchSource": "D:\\gve-anna-render-temp\\public-voice-20261113\\venv\\Lib\\site-packages\\torch\\__init__.py",
+      "intraOp": 4,
+      "interOp": 12
+    },
+    {
+      "phase": "other_runtime_imports",
+      "elapsedSeconds": 11.98989550000988,
+      "processSeconds": 17.727912700007437,
+      "intraOp": 4,
+      "interOp": 12
+    },
+    {
+      "phase": "cuda_readiness",
+      "elapsedSeconds": 0.029872799990698695,
+      "processSeconds": 17.757785499998135,
+      "gpu": "NVIDIA GeForce RTX 3070",
+      "capability": [
+        8,
+        6
+      ],
+      "python": "3.12.14"
+    },
+    {
+      "phase": "model_load",
+      "elapsedSeconds": 3.382028199994238,
+      "processSeconds": 21.139813699992374,
+      "torchGpuAllocatedMiB": 2056.88720703125
+    },
+    {
+      "phase": "preset_validation",
+      "elapsedSeconds": 0.00010130001464858651,
+      "processSeconds": 21.139915000007022
+    },
+    {
+      "phase": "inference",
+      "elapsedSeconds": 58.61837889999151,
+      "processSeconds": 79.75829389999853,
+      "torchGpuPeakAllocatedMiB": 2332.232421875
+    },
+    {
+      "phase": "wav_output",
+      "elapsedSeconds": 0.01552290000836365,
+      "processSeconds": 79.7738168000069
+    }
+  ],
+  "gpuAfter": "NVIDIA GeForce RTX 3070, 595.95, 17, 2483, 8192",
+  "probeExit": 0,
+  "fullDecodeExit": 0,
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "pcm_s16le",
+        "sample_rate": "16000",
+        "channels": 1,
+        "duration": "9.040000"
+      }
+    ]
+  },
+  "wavSha256": "fcafb9ae49253debc8a45385ce3d837a68f744e9f66f82cdf7ae196eadc495ae"
+}

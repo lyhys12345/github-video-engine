@@ -1,0 +1,29 @@
+{
+  "testOnly": true,
+  "playbackRate": 1,
+  "sameWords": true,
+  "seed": 42,
+  "profileUnchanged": true,
+  "shortenedByPunctuationSeconds": 0.2400000000000002,
+  "review": "pending",
+  "samples": [
+    {
+      "name": "anna-a",
+      "text": "把项目链接发给它，先看看脚本。确认没问题，再生成视频。",
+      "durationSeconds": 5.44,
+      "wavPath": "C:\\Users\\luyuh\\Documents\\Codex\\voice-first-20261114\\final-adapter\\a\\artifacts\\7c\\7cc5a7d176ce567af767ceeb6ec1051a630583cd43c823b4233d95df1b2da42d.wav",
+      "taskId": "4e7a705be560685aad8b063ee03213f0e33b5671a66275b4ebfd581bcd4ca38f",
+      "wavSha256": "7cc5a7d176ce567af767ceeb6ec1051a630583cd43c823b4233d95df1b2da42d",
+      "receiptSha256": "e6263f7e6b1d93648ce875349af4fa196511ebd76d1a6ac3700d1ed322b90748"
+    },
+    {
+      "name": "anna-b",
+      "text": "把项目链接发给它，先看看脚本，确认没问题再生成视频。",
+      "durationSeconds": 5.2,
+      "wavPath": "C:\\Users\\luyuh\\Documents\\Codex\\voice-first-20261114\\final-adapter\\a\\artifacts\\69\\69768d0d224df9ef376fa19e4bc6c726c98b5ad6cf453562ccce22cc2631ad9e.wav",
+      "taskId": "73d9ae802078ea616ab0c5b35089f99393f8b41b4cdc795603421de0c067fb64",
+      "wavSha256": "69768d0d224df9ef376fa19e4bc6c726c98b5ad6cf453562ccce22cc2631ad9e",
+      "receiptSha256": "9222a40ce12683c58009e74adaa95dc652f48abe0a22b3b8d94cc618ddb103f4"
+    }
+  ]
+}

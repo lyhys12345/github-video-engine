@@ -1,0 +1,20 @@
+{"phase": "platform_startup", "elapsedSeconds": 0.499174700002186, "processSeconds": 0.499174700002186}
+{"phase": "runtime_lock", "elapsedSeconds": 0.2535636999818962, "processSeconds": 0.7527383999840822}
+{"phase": "numpy_torch_import", "elapsedSeconds": 4.158317399997031, "processSeconds": 4.9110557999811135, "torch": "2.8.0+cu128", "cuda": "12.8", "torchSource": "D:\\gve-anna-render-temp\\public-voice-20261113\\venv\\Lib\\site-packages\\torch\\__init__.py", "intraOp": 4, "interOp": 12}
+'sox' is not recognized as an internal or external command,
+operable program or batch file.
+SoX could not be found!
+
+    If you do not have SoX, proceed here:
+     - - - http://sox.sourceforge.net/ - - -
+
+    If you do (or think that you should) have SoX, double-check your
+    path variables.
+    
+{"phase": "other_runtime_imports", "elapsedSeconds": 12.360225200012792, "processSeconds": 17.271280999993905, "intraOp": 2, "interOp": 1}
+{"phase": "cuda_readiness", "elapsedSeconds": 0.027109799993922934, "processSeconds": 17.29839079998783, "gpu": "NVIDIA GeForce RTX 3070", "capability": [8, 6], "python": "3.12.14"}
+{"phase": "model_load", "elapsedSeconds": 3.6480863000033423, "processSeconds": 20.94647709999117, "torchGpuAllocatedMiB": 2056.88720703125}
+{"phase": "preset_validation", "elapsedSeconds": 0.00010699999984353781, "processSeconds": 20.946584099991014}
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+{"phase": "inference", "elapsedSeconds": 66.79745220000041, "processSeconds": 87.74403629999142, "torchGpuPeakAllocatedMiB": 2332.232421875}
+{"phase": "wav_output", "elapsedSeconds": 0.015631899994332343, "processSeconds": 87.75966819998575}

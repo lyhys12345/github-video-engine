@@ -1,0 +1,42 @@
+{
+  "name": "anna-b",
+  "text": "把项目链接发给它，先看看脚本，确认没问题再生成视频。",
+  "testOnly": true,
+  "listenerReview": "pending",
+  "playbackRate": 1,
+  "taskId": "73d9ae802078ea616ab0c5b35089f99393f8b41b4cdc795603421de0c067fb64",
+  "generationWallSeconds": 54.8818318,
+  "ttsFingerprint": "2f8911fe9ab7ec3dc86f5dc055e29be1623bf65bf28476b9e29f12ac1c768bb2",
+  "ttsReceiptSha256": "9222a40ce12683c58009e74adaa95dc652f48abe0a22b3b8d94cc618ddb103f4",
+  "publishedArtifactMatchesGeneration": true,
+  "modelRevision": "Qwen3-TTS-12Hz-0.6B-Base@5d83992436eae1d760afd27aff78a71d676296fc",
+  "profileSha256": "28cf363e67bf52884bf95c45629eb03e0e3401f90d33f466cccc4dbbe4764366",
+  "cleanup": {
+    "taskTmpEntries": [],
+    "ownedRuntimeEntries": []
+  },
+  "kind": "local-chen-windows-generation-v1",
+  "attempt": 1,
+  "usage": [
+    {
+      "phase": "started",
+      "attempt": 1
+    },
+    {
+      "phase": "terminal",
+      "attempt": 1
+    }
+  ],
+  "audioSha256": "69768d0d224df9ef376fa19e4bc6c726c98b5ad6cf453562ccce22cc2631ad9e",
+  "resultSha256": "148dd8827ebe5bdba333312d32f7f095856f4fbcf8a9c239c39fa4fd70ae0fe6",
+  "wavPath": "C:\\Users\\luyuh\\Documents\\Codex\\voice-first-20261114\\final-adapter\\a\\artifacts\\69\\69768d0d224df9ef376fa19e4bc6c726c98b5ad6cf453562ccce22cc2631ad9e.wav",
+  "audio": {
+    "format": "pcm_s16le",
+    "channels": 1,
+    "sampleRate": 16000,
+    "durationSeconds": 5.2,
+    "fullDecodeExit": 0
+  },
+  "workerSha256": "41422530bd00a348a3ded19c97e3d2b045bbbb4773365da3fcf195522ab8fe8b",
+  "endedAt": "2026-11-14T08:59:14.213Z"
+}

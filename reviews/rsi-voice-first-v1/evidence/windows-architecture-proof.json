@@ -1,0 +1,39 @@
+[
+  {
+    "name": "scrubbed",
+    "envNames": [
+      "SystemRoot",
+      "WINDIR",
+      "PATH",
+      "TEMP",
+      "TMP",
+      "HF_HOME",
+      "NUMBA_CACHE_DIR",
+      "HF_HUB_OFFLINE",
+      "TRANSFORMERS_OFFLINE",
+      "HF_HUB_DISABLE_TELEMETRY"
+    ],
+    "exit": 0,
+    "stdout": "'' win-amd64 None (3, 12)",
+    "stderr": ""
+  },
+  {
+    "name": "architectureOnly",
+    "envNames": [
+      "SystemRoot",
+      "WINDIR",
+      "PATH",
+      "TEMP",
+      "TMP",
+      "HF_HOME",
+      "NUMBA_CACHE_DIR",
+      "HF_HUB_OFFLINE",
+      "TRANSFORMERS_OFFLINE",
+      "HF_HUB_DISABLE_TELEMETRY",
+      "PROCESSOR_ARCHITECTURE"
+    ],
+    "exit": 0,
+    "stdout": "'AMD64' win-amd64 AMD64 (3, 12)",
+    "stderr": ""
+  }
+]

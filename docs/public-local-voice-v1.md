@@ -33,6 +33,14 @@ The model setup helper verifies the fixed public model inventory and creates a l
 
 The fixed model is [Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice at 85e237c](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice/tree/85e237c12c027371202489a0ec509ded67b5e4b5). Setup verifies the bytes and SHA-256 of weights, tokenizer and configuration against the committed lock. Generation uses local files and does not fetch missing dependencies or switch voices. Doctor readiness verifies prerequisites; it does not create or listen to speech.
 
+## First-generation behavior
+
+A new recording still verifies the complete local model and starts a fresh synthesis process. Model files are read in bounded 1 MiB chunks; this reduces verification overhead without omitting hashes or trusting modification timestamps. Existing exact recordings follow the separate reuse path below. The measured gain applies to model verification, not the whole speech generation time.
+
+The Windows x64 check uses the Python interpreter's build platform. It does not require a shell-provided `PROCESSOR_ARCHITECTURE` variable, which is absent in the engine's isolated worker environment. The supported platform and dependency requirements are unchanged. Do not restore unrelated host environment variables to bypass a readiness error.
+
+Worker source changes produce a new generation fingerprint, so unchanged text may need a new recording after this update. Existing profiles and verified imported recordings remain usable; a new worker does not retroactively approve old speech. Details, failed experiments and remaining latency are in the [first-generation results](rsi-voice-first-results-2026-11-14.md). Faster generation is separate from [speaking pace](narration-voice-preference.md#speaking-pace-and-natural-delivery).
+
 ## Use it with the skill
 
 Tell the session agent, for example:

@@ -224,9 +224,15 @@ describe.skipIf(process.platform !== 'win32' || process.arch !== 'x64')('public 
   it('replays the exact committed WAV with no model reads and records a cache receipt', async () => {
     const fixture = await publicVoiceFixture();
     mockSuccessfulWorker();
-    const first = (await generatePublicVoice(english, 'en-US', fixture.data, freshSignal())).generation;
+    const signal = freshSignal();
+    const first = (await generatePublicVoice(english, 'en-US', fixture.data, signal)).generation;
     const initial = await readPublicVoiceGeneration(fixture.data, first.taskId, freshSignal());
-    expect(modelReads(fixture.model)).toHaveLength(modelFiles.length);
+    const reads = modelReads(fixture.model);
+    expect(reads).toHaveLength(modelFiles.length);
+    for (const [, options] of reads) {
+      expect(options).toHaveProperty('highWaterMark', 1024 * 1024);
+      expect(options).toHaveProperty('signal', signal);
+    }
     vi.mocked(createReadStream).mockClear();
     await unlink(join(fixture.model, 'model.safetensors'));
 

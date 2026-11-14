@@ -1,0 +1,50 @@
+{
+  "name": "anna-a",
+  "text": "把项目链接发给它，先看看脚本。确认没问题，再生成视频。",
+  "testOnly": true,
+  "listenerReview": "pending",
+  "playbackRate": 1,
+  "taskId": "4e7a705be560685aad8b063ee03213f0e33b5671a66275b4ebfd581bcd4ca38f",
+  "generationWallSeconds": 58.5533544,
+  "ttsFingerprint": "4b7b56c67688c912c62e8506e3aca426aa50b81e8bd5eab38f0b2e7d8bdbc118",
+  "ttsReceiptSha256": "e6263f7e6b1d93648ce875349af4fa196511ebd76d1a6ac3700d1ed322b90748",
+  "publishedArtifactMatchesGeneration": true,
+  "modelRevision": "Qwen3-TTS-12Hz-0.6B-Base@5d83992436eae1d760afd27aff78a71d676296fc",
+  "profileSha256": "28cf363e67bf52884bf95c45629eb03e0e3401f90d33f466cccc4dbbe4764366",
+  "cleanup": {
+    "taskTmpEntries": [],
+    "ownedRuntimeEntries": []
+  },
+  "kind": "local-chen-windows-generation-v1",
+  "attempt": 2,
+  "usage": [
+    {
+      "phase": "started",
+      "attempt": 1
+    },
+    {
+      "phase": "terminal",
+      "attempt": 1
+    },
+    {
+      "phase": "started",
+      "attempt": 2
+    },
+    {
+      "phase": "terminal",
+      "attempt": 2
+    }
+  ],
+  "audioSha256": "7cc5a7d176ce567af767ceeb6ec1051a630583cd43c823b4233d95df1b2da42d",
+  "resultSha256": "37870e09678be7183f6e9af055a3bf5316b85b4cf378272ec08e23859ef4acb4",
+  "wavPath": "C:\\Users\\luyuh\\Documents\\Codex\\voice-first-20261114\\final-adapter\\a\\artifacts\\7c\\7cc5a7d176ce567af767ceeb6ec1051a630583cd43c823b4233d95df1b2da42d.wav",
+  "audio": {
+    "format": "pcm_s16le",
+    "channels": 1,
+    "sampleRate": 16000,
+    "durationSeconds": 5.44,
+    "fullDecodeExit": 0
+  },
+  "workerSha256": "41422530bd00a348a3ded19c97e3d2b045bbbb4773365da3fcf195522ab8fe8b",
+  "endedAt": "2026-11-14T08:58:19.164Z"
+}

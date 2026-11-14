@@ -1,0 +1,31 @@
+# RSI voice-first candidate v1 — Terra product and pacing review
+
+- Role: Terra, active for F5–F7 and F1 claim-scope check; independent engineering review.
+- Candidate: `reviews/rsi-voice-first-v1/candidate-v1.json`, SHA-256 `23965b8284b11ab97f9f9d58932914788402156873f4f23401ba4100fd5b51c1`, frozen 2026-11-14 09:01:20 UTC; baseline `57795ea0c7b70bb34adfee04f064542928167f7a`.
+- Environment: Windows local checkout, review 2026-11-14 around 09:00–09:05 UTC. Output: this report. Shared sources and evidence were read only. No GPU run, paid service, formal video, export or external service.
+- Verdict: **PASS for assigned engineering criteria**, subject to separate Astra review and F8 delivery. No blocker or major found. This is not audio quality, content completeness, formal-video or owner-acceptance approval.
+- Independence: inspected contract, raw evidence and candidate guidance before results summary; did not read another Judge report.
+
+## Criteria and evidence
+
+| Criterion | Assessment and method | Limits |
+| --- | --- | --- |
+| F5 | PASS engineering. Read `evidence/final-adapter/anna-a.json`, `anna-b.json`, `anna-comparison.json`, `real-voice.mjs` and worker. Inputs have identical Chinese characters after punctuation removal, same profile hash and model revision; worker fixes seed 42, generation uses same local Anna profile, and test metadata records playback 1. Both WAVs in `D:/gve-anna-render-temp/voice-first-20261114/` independently SHA-256 match recorded hashes; Node WAV-header inspection reports mono 16-bit 16 kHz and 5.44 s vs 5.20 s. Independent FFmpeg full decodes returned 0 for both. B is 0.24 s shorter in this trial; no general speed or naturalness inference. Failed initial A storage attempt is retained in `anna-failure.json`. Inspected worker and audition harness: no atempo or native rate argument in this path. | I did not hear the files. Spoken content completeness, intelligibility, naturalness, owner preference, and meaningful pauses remain UNVERIFIED pending listening. Duration alone cannot prove content or performance. |
+| F6 | PASS. `SKILL.md` lines 28–40, `docs/creative-brief-v1.md`, `docs/narration-voice-preference.md` and `AGENTS.md` retain requested owner preference in notes, preserve selected voice, provide punctuation audition and distinguish latency from delivery; other users may choose their own voice/pace. The guidance disclaims unsupported speed control, prohibits audio stretching/clipping and requires exact script/storyboard approval and caption/timing review. `pace-brief-input.json`, `pace-brief-saved.json` and `pace-brief-check.log` show a small proposed brief retains notes, remains needs-clarification, script approval pending and voice availability untested. Canonical skill-creator validator independently passed as recorded below. | Guidance and brief behavior are reviewed; this does not establish that any future agent will follow them in every scenario. |
+| F7 | PASS for Terra's scope. All 70 frozen file byte lengths and SHA-256 values independently matched manifest; manifest hash matched the specified candidate. Original failed evidence retained, test-only audio stays outside candidate. `reviews/owner-av-deferral-2026-10-26.json` documents conditional historical engineering authority and preserves historical UNVERIFIED and final human acceptance. | Overall milestone acceptance requires the independent active Astra report and its unresolved-finding check; this report does not prejudge it. Actual listening and continuous AV remain pending, without a fabricated G4 PASS. |
+| F1 claim scope | PASS for checked product-facing claim scope. `hash-read-benchmark.json` contains interleaved 3+3 runs, 11 matching file digests per run and states cache not purged. Median 3.5221 s vs 1.6156 s, saving 1.9065 s / 54.1%, for model verification stage only. Results doc states no inference, whole-endpoint, streaming-first-sample or machine-cold speed claim and discloses profiler's 8 MiB prerequisite difference. | No independent benchmark rerun or review of all reliability/security F1–F4 details; that belongs to Astra. Single audition duration is not an inference-speed measurement. |
+
+## Check record
+
+- PowerShell `Get-FileHash .../candidate-v1.json -Algorithm SHA256` matched candidate identity; Node script read all manifest files, compared byte lengths and SHA-256: `files 70 mismatches []`.
+- Node inspected both actual WAVs: A `7cc5a7d176ce567af767ceeb6ec1051a630583cd43c823b4233d95df1b2da42d`, 174124 bytes, 5.44 s; B `69768d0d224df9ef376fa19e4bc6c726c98b5ad6cf453562ccce22cc2631ad9e`, 166444 bytes, 5.20 s. `ffmpeg -v error -i <each WAV> -f null NUL`: both exit 0. This checks decoding, not perception.
+- `D:/gve-chen-pilot/venv/Scripts/python.exe -X utf8 C:/Users/luyuh/.codex/skills/.system/skill-creator/scripts/quick_validate.py D:/gve-flagship-publish/.agents/skills/github-explainer`: stdout `Skill is valid!`, exit 0. Earlier bundled Python attempt failed solely because PyYAML was unavailable; no dependency installed.
+- Read `evidence/final-adapter/real-voice.mjs`, `scripts/windows-local-chen.py`, raw trial metadata and brief log, canonical skill and voice/brief docs. Small independent behavior review compared the owner example and a different user's freedom to choose, and followed the audition-to-approval and caption timing path in the text. No script approval was granted.
+
+## Findings / recheck
+
+No blocker, major or minor product finding established. No repairs requested. If candidate inputs change, rebind hashes and rerun the affected review. The final owner must listen to both exact recordings and assess spoken completeness, naturalness, pacing and pauses; any chosen revised production script, scene timing or captions require the existing exact approval/review flow. A new formal video is outside this test.
+
+## Self-limitations
+
+No listening or continuous viewing capability was exercised. Header/decode and text comparison do not prove what was spoken. The brief check is a recorded actual test, not a newly run end-to-end project. Audition generation was reviewed from raw receipts and code rather than repeated GPU synthesis; no claim of general playback performance or quality follows.

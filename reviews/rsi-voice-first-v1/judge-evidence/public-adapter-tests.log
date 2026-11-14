@@ -1,0 +1,28 @@
+
+ RUN  v3.2.4 D:/gve-flagship-publish
+
+ ✓ tests/qwen-public-adapter.test.ts (19 tests) 24654ms
+   ✓ public Qwen adapter (mocked Python process) > propagates the bounded process timeout and leaves only a retryable failed task  761ms
+   ✓ public Qwen adapter (mocked Python process) > cancels in-flight synthesis, deletes partial audio, and records a cancelled task  657ms
+   ✓ public Qwen adapter (mocked Python process) > rejects 'wrong speaker' before committing audio  667ms
+   ✓ public Qwen adapter (mocked Python process) > rejects 'wrong samples' before committing audio  600ms
+   ✓ public Qwen adapter (mocked Python process) > rejects 'silent WAV' before committing audio  526ms
+   ✓ public Qwen adapter (mocked Python process) > separates exact text and language/preset identities and reuses equal generations  1972ms
+   ✓ public Qwen adapter (mocked Python process) > replays the exact committed WAV with no model reads and records a cache receipt  2598ms
+   ✓ public Qwen adapter (mocked Python process) > checks same-size and same-mtime model tampering for doctor and new text  3431ms
+   ✓ public Qwen adapter (mocked Python process) > retries a missing-model miss after repair without consuming an attempt  1122ms
+   ✓ public Qwen adapter (mocked Python process) > fails closed on corrupted cached audio  1785ms
+   ✓ public Qwen adapter (mocked Python process) > fails closed on corrupted cached manifest  1229ms
+   ✓ public Qwen adapter (mocked Python process) > does not start work when a lookup observes a success that the runner cannot find  1132ms
+   ✓ public Qwen adapter (mocked Python process) > requires a fresh verified generation after the Python executable identity changes  1134ms
+   ✓ public Qwen adapter (mocked Python process) > honors cancellation on an exact hit before accounting for replay  1070ms
+   ✓ public Qwen adapter (mocked Python process) > preserves state version and schema validation for 'valid legacy'  1532ms
+   ✓ public Qwen adapter (mocked Python process) > preserves state version and schema validation for 'malformed legacy'  974ms
+   ✓ public Qwen adapter (mocked Python process) > preserves state version and schema validation for 'future version'  1889ms
+   ✓ public Qwen adapter (mocked Python process) > preserves state version and schema validation for 'malformed current version'  1522ms
+
+ Test Files  1 passed (1)
+      Tests  19 passed (19)
+   Start at  01:02:41
+   Duration  27.07s (transform 418ms, setup 0ms, collect 756ms, tests 24.65s, environment 0ms, prepare 1.44s)
+

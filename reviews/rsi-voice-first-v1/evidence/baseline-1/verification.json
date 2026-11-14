@@ -1,0 +1,33 @@
+{
+  "variant": "baseline-1",
+  "torchThreadLimit": null,
+  "textLength": 39,
+  "language": "zh-CN",
+  "textSha256": "f83f8cb03c14a44eeabefdf5dba92324ee684c85f2f259a6e28369f31c409d20",
+  "modelRepository": "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
+  "modelRevision": "85e237c12c027371202489a0ec509ded67b5e4b5",
+  "modelFileCount": 11,
+  "modelBytes": 2498383610,
+  "modelLockSha256": "4951f1df7f2581651052e740594dbabf8c1c20af0cec1c731db5909e173a572a",
+  "workerOriginalSha256": "1ce1b69f8ed426a7814e159ff077d6d5594bce3593cc87ea396781164a08714c",
+  "workerInstrumentedSha256": "6b6d73e43b63e77a0265de31e4558ef5b7ae3c2e6d35a1b18a2675d9763e34bf",
+  "runtimeLockSha256": "00f3bc66834e1162b14d398bc44e8213ef2c53e16d54d87029ea25d677bd9500",
+  "pythonSha256": "b95409b2edc04f3db3f2a5021fa52d2e0791ae978c13cdeb857cab0f35476919",
+  "logicalCpuCount": 20,
+  "gpuBefore": "NVIDIA GeForce RTX 3070, 595.95, 44, 2548, 8192",
+  "modelHashSeconds": 14.3385465000174,
+  "workerTimeoutSeconds": 300,
+  "workerExit": 1,
+  "workerWallSeconds": 0.6965709999785759,
+  "verifyAndWorkerWallSeconds": 15.035117499995977,
+  "phases": [],
+  "gpuAfter": "NVIDIA GeForce RTX 3070, 595.95, 38, 2548, 8192",
+  "workerErrorTail": [
+    "Traceback (most recent call last):",
+    "  File \"C:\\Users\\luyuh\\Documents\\Codex\\voice-first-20261114\\baseline-1\\worker.py\", line 133, in <module>",
+    "    main()",
+    "  File \"C:\\Users\\luyuh\\Documents\\Codex\\voice-first-20261114\\baseline-1\\worker.py\", line 63, in main",
+    "    raise RuntimeError(\"The public voice runtime needs Windows x64 and CPython 3.12.\")",
+    "RuntimeError: The public voice runtime needs Windows x64 and CPython 3.12."
+  ]
+}

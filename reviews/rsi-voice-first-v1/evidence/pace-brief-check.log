@@ -1,0 +1,34 @@
+$ tsx src/cli.ts "explanation" "brief-check" "--spec" "work/rsi-voice-first-v1/pace-brief-input.json" "--out" "work/rsi-voice-first-v1/pace-brief-saved.json"
+{
+  "brief": {
+    "schemaVersion": "creative-brief/1.0",
+    "duration": {
+      "mode": "auto",
+      "maxSeconds": 90
+    },
+    "style": "Concise result-first explanation",
+    "audience": "Curious viewers unfamiliar with the project",
+    "platforms": [
+      "TikTok",
+      "小红书"
+    ],
+    "language": "zh-CN",
+    "voice": {
+      "mode": "local",
+      "profile": "anna-local"
+    },
+    "decision": "proposed",
+    "notes": [
+      "TEST ONLY intake example; not a project script or production approval.",
+      "Owner requests slightly brisk, natural speech; preserve meaningful breathing pauses and the selected Anna voice.",
+      "Measure latency separately from delivery pace. Listen to an audition before selecting revised pacing."
+    ]
+  },
+  "briefSha256": "27c5c235bcfb6eef725bbec2d0be147dc85663995a19fce258152a5d86d06cc7",
+  "status": "needs-clarification",
+  "clarifications": [
+    "Confirm these preferences or explicitly delegate selection; this is not script approval."
+  ],
+  "scriptApproval": "pending",
+  "voiceAvailability": "not-tested"
+}

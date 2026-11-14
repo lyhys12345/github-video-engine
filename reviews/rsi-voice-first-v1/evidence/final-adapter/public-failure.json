@@ -1,0 +1,8 @@
+{
+  "failedAt": "2026-11-14T08:53:47.050Z",
+  "trial": "public",
+  "phase": "public-generation",
+  "type": "Error",
+  "code": "ATOMIC_STORAGE_UNAVAILABLE",
+  "message": "Artifact publication requires same-volume hard-link permission (EPERM). Restore write/link access and resume the same task. No artifact was published."
+}

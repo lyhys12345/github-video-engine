@@ -1,0 +1,51 @@
+{
+  "taskId": "618ec5394e00a5c2dd6ec9fa905fae8233ca681bc2c70b3b76e9cd71490ad6c6",
+  "language": "zh-CN",
+  "textSha256": "f83f8cb03c14a44eeabefdf5dba92324ee684c85f2f259a6e28369f31c409d20",
+  "engineWorkerEnvironmentIncludesProcessorArchitecture": false,
+  "firstCached": false,
+  "firstWallSeconds": 72.33612259999998,
+  "repeatCached": true,
+  "repeatWallSeconds": 0.05587619999999879,
+  "sameWavAsOriginalProfiledWorker": true,
+  "cleanup": {
+    "taskTmpEntries": [],
+    "ownedRuntimeEntries": []
+  },
+  "kind": "qwen-public-generation-v1",
+  "attempt": 2,
+  "usage": [
+    {
+      "phase": "started",
+      "attempt": 1
+    },
+    {
+      "phase": "terminal",
+      "attempt": 1
+    },
+    {
+      "phase": "started",
+      "attempt": 2
+    },
+    {
+      "phase": "terminal",
+      "attempt": 2
+    },
+    {
+      "phase": "cache_hit",
+      "attempt": 2
+    }
+  ],
+  "audioSha256": "fcafb9ae49253debc8a45385ce3d837a68f744e9f66f82cdf7ae196eadc495ae",
+  "resultSha256": "dafe23bbcd38efecc45ef4a0ad028a38c4d20bf8de9f6d669a0416c9e52cc480",
+  "wavPath": "C:\\Users\\luyuh\\Documents\\Codex\\voice-first-20261114\\final-adapter\\p\\artifacts\\fc\\fcafb9ae49253debc8a45385ce3d837a68f744e9f66f82cdf7ae196eadc495ae.wav",
+  "audio": {
+    "format": "pcm_s16le",
+    "channels": 1,
+    "sampleRate": 16000,
+    "durationSeconds": 9.04,
+    "fullDecodeExit": 0
+  },
+  "workerSha256": "aede4741e67518b10f820054fb59308de669fc97ab3c182d6bbb5ae6a0771090",
+  "endedAt": "2026-11-14T08:57:19.377Z"
+}
