@@ -20,6 +20,23 @@ const SAMPLE_RATE = 16_000;
 const MAX_SAMPLES = 30 * SAMPLE_RATE;
 const voiceId = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech_OneCore\\Voices\\Tokens\\MSTTS_V110_zhCN_HuihuiM';
 const voice = {voiceId, language: 'zh-CN'} as const;
+
+export async function probeHuihuiVoice(signal: AbortSignal) {
+  const systemRoot = process.env.SystemRoot;
+  if (process.platform !== 'win32' || !systemRoot || !isAbsolute(systemRoot)) {
+    return fail('HUIHUI_PLATFORM', 'The exact Huihui profile requires Windows WinRT and Windows PowerShell.');
+  }
+  const script = `
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$null = [Windows.Media.SpeechSynthesis.SpeechSynthesizer, Windows.Media.SpeechSynthesis, ContentType=WindowsRuntime]
+$voices = @([Windows.Media.SpeechSynthesis.SpeechSynthesizer]::AllVoices | Where-Object { $_.Id -ceq '${voiceId}' -and $_.Language -ceq '${voice.language}' })
+if ($voices.Count -eq 1) { 'gve-huihui-available' }
+`;
+  const output = await command(join(systemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe'),
+    ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', script], {signal, timeout: 10_000});
+  if (output.trim() !== 'gve-huihui-available') return fail('HUIHUI_VOICE_UNAVAILABLE', 'The exact installed WinRT Huihui zh-CN token is unavailable.');
+}
 export const HUIHUI_VOICE_LABEL = 'Microsoft Huihui / Windows WinRT / zh-CN / technical fixture';
 const Text = z.string().min(1).max(240).refine(text =>
   [...text].length <= 120 && /\p{Script=Han}/u.test(text) && !/[\p{C}\p{Zl}\p{Zp}]/u.test(text),

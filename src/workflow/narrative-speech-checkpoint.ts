@@ -1,14 +1,13 @@
 import {narrativeCaptionTiming,captionSafeLines} from './narrative-caption-timing.js';
-import {sha256} from '../core/util.js';
 import {EngineError} from '../core/errors.js';
 import {NARRATIVE_DEFAULT_LEAD_FRAMES} from '../contracts/narrative.js';
-import {synthesizeNarration} from './narration-voice.js';
+import {prepareNarrativeRecording,type NarrationSource} from './narration-voice.js';
 import {fontBytes} from './narrative-preview.js';
 import {PORTRAIT_STYLE,portraitCaptionLines} from './narrative-portrait.js';
 import {requireNarrationVoice} from './narration-voice-policy.js';
 
 type Selection={kind:string;sceneId:string;frames?:number;slices?:{shotId:string;startFrame:number;endFrame:number}[]};
-type Measurement={sceneId:string;samples:number;generationTaskId:string;receiptFingerprint:string;generation:boolean;import:boolean};
+type Measurement={sceneId:string;samples:number;generationTaskId:string|null;receiptFingerprint:string;generation:boolean;import:boolean;source?:'generated'|'imported'};
 type RhythmPolicy={maxUnnarratedTailFrames:number;leadFrames?:number};
 const FPS=30,SAMPLE_RATE=48000,SAMPLES_PER_FRAME=SAMPLE_RATE/FPS;
 
@@ -49,13 +48,13 @@ export function narrativeSpeechTiming(selection:Selection[],measurements:Measure
   rhythm:{schemaVersion:'repository-narrative-rhythm/1.0',status:rhythmPolicy?(violations.length?'needs-author-revision':'within-limit'):'diagnostics-only',
    leadFrames,maxUnnarratedTailFrames:rhythmPolicy?.maxUnnarratedTailFrames??null,violations,intentionalSilence,
    scope:'Half-open timeline frames. Scene tails count timeline samples after the complete recording ends. Silence within a recording, speech alignment and listening are unchecked.'},
-  policy:'Measured complete original-speed local recordings; no animation rendered, no automatic timing edits, padding, trimming or stretching. Caption alignment and listening remain unverified.',
+  policy:'Measured complete original-speed recordings; no animation rendered, no automatic timing edits, padding, trimming or stretching. Caption alignment and listening remain unverified.',
   owningFiles:['story.json: shot visualSeconds/holdSeconds/transitionSeconds','run.json: exact whole-shot selection ranges','narrative.json: explicit estimatedSeconds if revised'],
   nextAction:'The session Agent explicitly revises timing or shortens its script, preserves this candidate and reruns. Do not ask the user to edit JSON. No model was dispatched or approval granted.'};
 }
 
-export async function measureNarrativeSpeech(data:string,plan:any,config:any,signal:AbortSignal){
- requireNarrationVoice();
+export async function measureNarrativeSpeech(data:string,plan:any,config:any,signal:AbortSignal,
+ voice:NarrationSource={mode:'local',profile:requireNarrationVoice()},recordings?:Map<string,Awaited<ReturnType<typeof prepareNarrativeRecording>>>){
  const measurements:Measurement[]=[],captionChecks:any[]=[];
  const requested=config.speech.map((s:any)=>s.sceneId),produced=config.selection.filter((s:any)=>s.kind==='story-slice').map((s:any)=>s.sceneId);
  for(const speech of config.speech){const scene=plan.scenes.find((s:any)=>s.id===speech.sceneId);if(!scene||scene.execution.kind!=='supported-story')throw new EngineError('NARRATIVE_SPEECH','Cannot measure speech for an unproduced evidence/adapter scene.');}
@@ -64,11 +63,12 @@ export async function measureNarrativeSpeech(data:string,plan:any,config:any,sig
  for(const speech of config.speech){
   const scene=plan.scenes.find((s:any)=>s.id===speech.sceneId);
   if(!scene||scene.execution.kind!=='supported-story')throw new EngineError('NARRATIVE_SPEECH','Cannot measure speech for an unproduced evidence/adapter scene.');
-  const {generation,imported}=await synthesizeNarration(scene.narration,data,signal);
-  const samples=generation.manifest.audio.samples*3;
-  if(speech.captions){try{const clip={beatId:scene.id,receiptFingerprint:imported.fingerprint,receiptSha256:imported.receiptArtifact.sha256,sourceAudioSha256:imported.receipt.artifact.sha256,transcript:scene.narration,transcriptSha256:sha256(scene.narration),startOffsetFrames:0,captions:speech.captions.map((c:any)=>({...c,endSample:c.endSample==='$FULL_RECORDING_SAMPLES'?samples:c.endSample}))},validated=narrativeCaptionTiming(scene,{startFrame:0,endFrame:Math.ceil(samples/1600)},clip,samples);if(portraitFont)portraitCaptionLines(portraitFont,validated.captions.map(cue=>cue.transcript));else for(const cue of validated.captions)captionSafeLines(cue.transcript);captionChecks.push({sceneId:scene.id,status:'valid',transcriptSha256:clip.transcriptSha256,receiptFingerprint:imported.fingerprint,captionCount:validated.captions.length,cues:validated.captions,timing:'caller-authored clip-relative; not word alignment'});}catch(error){captionChecks.push({sceneId:scene.id,status:'invalid',transcriptSha256:sha256(scene.narration),receiptFingerprint:imported.fingerprint,error:String(error)});}}
+  const recording=await prepareNarrativeRecording(scene,speech.recording,data,signal,voice);
+  recordings?.set(scene.id,recording);
+  const {samples,clip:base,generationTaskId,generation,import:imported,source}=recording;
+  if(speech.captions){try{const clip={...base,captions:speech.captions.map((c:any)=>({...c,endSample:c.endSample==='$FULL_RECORDING_SAMPLES'?samples:c.endSample}))},validated=narrativeCaptionTiming(scene,{startFrame:0,endFrame:Math.ceil(samples/1600)},clip,samples);if(portraitFont)portraitCaptionLines(portraitFont,validated.captions.map(cue=>cue.transcript));else for(const cue of validated.captions)captionSafeLines(cue.transcript);captionChecks.push({sceneId:scene.id,status:'valid',transcriptSha256:clip.transcriptSha256,receiptFingerprint:base.receiptFingerprint,captionCount:validated.captions.length,cues:validated.captions,timing:'caller-authored clip-relative; not word alignment'});}catch(error){captionChecks.push({sceneId:scene.id,status:'invalid',transcriptSha256:base.transcriptSha256,receiptFingerprint:base.receiptFingerprint,error:String(error)});}}
   else captionChecks.push({sceneId:scene.id,status:'not-provided',error:'Exact caller-authored caption ranges are required before animation.'});
-  measurements.push({sceneId:scene.id,samples:generation.manifest.audio.samples*3,generationTaskId:generation.taskId,receiptFingerprint:imported.fingerprint,generation:generation.cached,import:imported.cached});
+  measurements.push({sceneId:scene.id,samples,generationTaskId,receiptFingerprint:base.receiptFingerprint,generation,import:imported,source});
  }
  const timing=narrativeSpeechTiming(config.selection,measurements,config.rhythm),captionsValid=captionChecks.every(c=>c.status==='valid');
  return {...timing,schemaVersion:'repository-narrative-speech-timing/1.1',captionValidation:{status:captionsValid?'valid':'needs-author-revision',scenes:captionChecks,scope:'Existing30fps caption validators over measured complete recording samples; no resegmentation or alignment claim.'},readyForAnimation:timing.allRecordingsFit&&timing.rhythm.status!=='needs-author-revision'&&captionsValid};

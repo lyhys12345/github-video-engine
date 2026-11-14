@@ -16,6 +16,13 @@ const Report = z.strictObject({
   ownerApprovedSha256: Hash.optional(),
 });
 
+export const NarrativeRunApproval = z.strictObject({
+  authorSha256: Hash,
+  briefSha256: Hash.nullable(),
+  report: Report,
+}).refine(value => candidateReviewDecision(value.report, value.authorSha256, 'script').status === 'passed',
+  'Expected a passing script review bound to the exact author snapshot.');
+
 export function candidateReviewDecision(raw: unknown, candidateSha256: string, stage: 'script'|'video') {
   const report = Report.parse(raw);
   if (report.candidateSha256 !== candidateSha256 || report.stage !== stage) {

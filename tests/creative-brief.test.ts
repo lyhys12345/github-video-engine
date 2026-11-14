@@ -18,7 +18,9 @@ it('separates clarification, capability and approval without silently substituti
  expect(assessCreativeBrief({...brief,voice:{mode:'byo-api',provider:'example',paidAuthorized:false}}).clarifications).toHaveLength(1);
  expect(creativeMediaBlockers(CreativeBrief.parse(brief),'chen-local')).toEqual([]);
  expect(creativeMediaBlockers(CreativeBrief.parse(brief),'windows-huihui').join()).toContain('differs');
- for(const voice of [{mode:'none'},{mode:'reference',reference:'owned.wav',rightsConfirmed:true},{mode:'byo-api',provider:'example',paidAuthorized:true}])expect(creativeMediaBlockers(CreativeBrief.parse({...brief,voice}),'chen-local').join()).toContain('needs an adapter');
+ for(const voice of [{mode:'reference',reference:'owned.wav',rightsConfirmed:true},{mode:'byo-api',provider:'example',paidAuthorized:true}])expect(creativeMediaBlockers(CreativeBrief.parse({...brief,voice}),'chen-local')).toHaveLength(1);
+ expect(creativeMediaBlockers(CreativeBrief.parse({...brief,language:'en-US',voice:{mode:'none'}}))).toEqual([]);
+ expect(creativeMediaBlockers(CreativeBrief.parse({...brief,language:'en-US',voice:{mode:'imported',voiceLabel:'Authorized recording',rightsConfirmed:true}}))).toEqual([]);
 });
 it('persists canonical brief through real CLI and refuses overwriting saved choices',async()=>{
  const root=await mkdtemp(join(tmpdir(),'gve-brief-')),input=join(root,'input.json'),output=join(root,'creative-brief.json');await writeFile(input,JSON.stringify(brief));

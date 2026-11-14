@@ -1,4 +1,4 @@
-import {it,expect} from 'vitest';
+import {it,expect,vi} from 'vitest';
 import {mkdir,readFile,writeFile,cp} from 'node:fs/promises';
 import {join} from 'node:path';
 import {started,fixture,signal} from './byo-api-support.js';
@@ -8,6 +8,10 @@ const brief={schemaVersion:'creative-brief/1.0',duration:{mode:'max',maxSeconds:
 async function authored(){const f=await started(),answer=await fixture(f),author=join(f.root,'author');await mkdir(author);for(const [key,name]of [['storyJson','story.json'],['narrativeJson','narrative.json'],['animationJson','animation.json'],['runJson','run.json']]as const)await writeFile(join(author,name),answer[key]);await writeFile(join(author,'creative-brief.json'),canonical(brief));return{...f,author};}
 const noNetwork=async()=>{throw Error('Unexpected network');};
 it('real brief-bound planning snapshots choices, requires review before media and rejects changed receipt',async()=>{
+ vi.stubEnv('GVE_BROWSER','invalid-test-browser.exe');
+ vi.stubEnv('GVE_FFMPEG','invalid-test-ffmpeg.exe');
+ vi.stubEnv('GVE_FFPROBE','invalid-test-ffprobe.exe');
+ try{
  const f=await authored(),repo=f.first.binding.repository;
  const planned=await runNarrativeWorkspace(repo,f.root,f.author,'planning',signal,noNetwork);expect(planned.status).toBe('checkpoint-complete');if(!('candidate'in planned))throw Error('No candidate');
  expect(JSON.parse(await readFile(join(planned.candidate,'author/creative-brief.json'),'utf8'))).toEqual(brief);
@@ -17,10 +21,11 @@ it('real brief-bound planning snapshots choices, requires review before media an
  const receipt=join(f.root,'test-only-review.json');await writeFile(receipt,canonical({schemaVersion:'candidate-review/1.0',candidateSha256:planned.authorSha256,ownerApprovedSha256:planned.authorSha256,stage:'script',reviewer:'TEST ONLY structural fixture',coverage:'script',verdict:'PASS',findings:[]}));
  await expect(runNarrativeWorkspace(repo,f.root,changed,'speech',signal,noNetwork,{},undefined,{reportPath:receipt})).rejects.toThrow('another candidate');
  }finally{if(oldVoice===undefined)delete process.env.GVE_NARRATION_VOICE;else process.env.GVE_NARRATION_VOICE=oldVoice;}
+ }finally{vi.unstubAllEnvs();}
 });
 it('real run refuses requested timeline overflow and stops unsupported voice before synthesis',async()=>{
  const f=await authored(),repo=f.first.binding.repository;await writeFile(join(f.author,'creative-brief.json'),canonical({...brief,duration:{mode:'max',maxSeconds:1}}));
  await expect(runNarrativeWorkspace(repo,f.root,f.author,'planning',signal,noNetwork)).rejects.toThrow('violates the creative brief');
- await writeFile(join(f.author,'creative-brief.json'),canonical({...brief,voice:{mode:'none'}}));const stopped=await runNarrativeWorkspace(repo,f.root,f.author,'preview',signal,noNetwork);expect(stopped.status).toBe('awaiting-creative-requirements');if(!('details'in stopped))throw Error('No details');expect(JSON.stringify(stopped.details)).toContain('needs an adapter');
+ await writeFile(join(f.author,'creative-brief.json'),canonical({...brief,voice:{mode:'reference',reference:'owned.wav',rightsConfirmed:true}}));const stopped=await runNarrativeWorkspace(repo,f.root,f.author,'preview',signal,noNetwork);expect(stopped.status).toBe('awaiting-creative-requirements');if(!('details'in stopped))throw Error('No details');expect(JSON.stringify(stopped.details)).toContain('needs a voice-cloning adapter');
  expect(Object.keys(stopped.tasks)).not.toContain('narratedPreview');expect(Object.keys(stopped.cache)).not.toContain('speech');
 });

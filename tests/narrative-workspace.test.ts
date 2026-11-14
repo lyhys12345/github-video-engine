@@ -29,13 +29,19 @@ it('records and recovers the actual nondefault author/checkpoint with exact trus
  const s=await statusNarrativeWorkspace(f.root,new AbortController().signal);
  expect(s).toMatchObject({authorDirectory:f.author,authorState:'unchanged',task:'e'.repeat(64),modelCalls:0,actionsExecuted:0,approval:'none'});
  expect(s.resume).toEqual(['explanation','run','--repo','https://github.com/example/demo','--workspace',f.root,'--author',f.author,'--through','preview']);
- await writeFile(join(f.author,'narrative.json'),'changed');expect((await statusNarrativeWorkspace(f.root,new AbortController().signal)).authorState).toBe('changed');
+ const approval=join(f.value.attempt,'script-review.json');
+ await writeFile(approval,canonical({schemaVersion:'candidate-review/1.0',candidateSha256:f.value.authorSha256,stage:'script',
+  ownerApprovedSha256:f.value.authorSha256,reviewer:'TEST ONLY',verdict:'PASS',coverage:'script',findings:[]}));
+ expect((await statusNarrativeWorkspace(f.root,new AbortController().signal)).resume.slice(-2)).toEqual(['--review',approval]);
+ await writeFile(join(f.author,'narrative.json'),'changed');
+ const changed=await statusNarrativeWorkspace(f.root,new AbortController().signal);
+ expect(changed.authorState).toBe('changed');expect(changed.resume).not.toContain('--review');
  await writeFile(join(f.value.candidate,'author','narrative.json'),'changed');await expect(statusNarrativeWorkspace(f.root,new AbortController().signal)).rejects.toThrow('snapshot');
 });
 it('publishes a stable last-completed-preview entry and refuses unrelated files',async()=>{
  const f=await fixture(true);const result=await recordNarrativeWorkspace(f.root,f.author,f.value);
  expect(result.preview).toBe(join(f.root,'workspace-preview.html'));
- const page=await readFile(result.preview!,'utf8');expect(page).toContain('Last completed preview');expect(page).toContain('pending');expect(page).toContain('excerpt.mp4');
+ const page=await readFile(result.preview!,'utf8');expect(page).toContain('Experimental preview');expect(page).toContain('pending');expect(page).toContain('excerpt.mp4');
  await writeFile(result.preview!,'user-owned page');await expect(recordNarrativeWorkspace(f.root,f.author,f.value)).rejects.toThrow('unrelated');expect(await readFile(result.preview!,'utf8')).toBe('user-owned page');
 });
 it('does not advance the current pointer when an unrelated preview entry blocks publication',async()=>{

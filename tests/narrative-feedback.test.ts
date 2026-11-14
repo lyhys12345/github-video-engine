@@ -4,6 +4,7 @@ import {canonical,sha256} from '../src/core/util.js';
 import {compileStory} from '../src/story-planner/compile.js';
 import {prepareNarrativeSceneAnimations} from '../src/workflow/narrative-scene-animations.js';
 import {applyNarrativeFeedback,NarrativeFeedbackPlan} from '../src/workflow/narrative-feedback.js';
+import {CreativeBrief} from '../src/workflow/creative-brief.js';
 async function fixture(){
  const story=JSON.parse(await readFile('examples/http-story-v1/express-story.json','utf8')),animation=JSON.parse(await readFile('examples/http-story-v1/express-animation.json','utf8'));
  story.shots.forEach((s:any)=>{s.narration='原始完整旁白。';s.visual='TEST ONLY existing visual';s.visualSeconds=4;s.holdSeconds=0;s.transitionSeconds=0;});
@@ -20,6 +21,23 @@ it('applies explicit Agent-mapped narration and visual plans while preserving ev
  expect(r.animation.schemaVersion).toBe('narrative-scene-animations/1.0');expect((r.animation.scenes[0]!.animation.shots[0] as any).actions[0].end).toBe(.17);
  expect(canonical(r.story.evidence)).toBe(canonical(f.story.evidence));expect(canonical(r.plan.claims)).toBe(canonical(f.plan.claims));expect(r.plan.scenes.slice(-2)).toEqual(f.plan.scenes.slice(-2));expect(canonical(f)).toBe(before);
 });
+it('invalidates only the edited imported recording and keeps an explicit silent revision empty',async()=>{
+ const f=await fixture(),voiceLabel='TEST ONLY finished narration';
+ const brief={schemaVersion:'creative-brief/1.0',duration:{mode:'max',maxSeconds:60},style:'Fixture',audience:'Fixture',
+  platforms:['Fixture'],language:'zh-CN',decision:'user-specified'};
+ const recorded=structuredClone(f.config),unchanged={receiptFingerprint:'a'.repeat(64),receiptSha256:'b'.repeat(64),
+  sourceAudioSha256:'c'.repeat(64),transcriptSha256:sha256(f.plan.scenes[0].narration)};
+ for(const entry of recorded.speech)entry.recording=unchanged;
+ const imported=applyNarrativeFeedback(f.story,f.plan,recorded,f.animation,f.spec,
+  CreativeBrief.parse({...brief,voice:{mode:'imported',voiceLabel,rightsConfirmed:true}}));
+ expect(imported.config.speech[0]!.recording).toBeUndefined();
+ expect(imported.config.speech[1]!.recording).toEqual(unchanged);
+ const silent=applyNarrativeFeedback(f.story,f.plan,{...f.config,speech:[]},f.animation,f.spec,
+  CreativeBrief.parse({...brief,voice:{mode:'none'}}));
+ expect(silent.config.speech).toEqual([]);
+ expect(silent.plan.scenes[0].narration).toBe('修改后的完整旁白。');
+});
+
 it('refuses stale source/scene/narration/animation bindings, unproduced gaps and cross-scene visual replacement',async()=>{
  const f=await fixture();for(const kind of ['source','scene','narration','animation','gap','cross']){const p=structuredClone(f.spec);if(kind==='source')p.source.captureTaskId='0'.repeat(64);if(kind==='scene')p.changes[0]!.expectedSceneSha256='0'.repeat(64);if(kind==='narration')p.changes[0]!.narration!.expectedNarrationSha256='0'.repeat(64);if(kind==='animation')p.changes[0]!.visual!.expectedAnimationSha256='0'.repeat(64);if(kind==='gap'){p.changes[0]!.sceneId='gap';p.changes[0]!.expectedSceneSha256=sha256(canonical(f.plan.scenes.at(-2)));}if(kind==='cross')p.changes[0]!.visual!.sceneAnimation.sceneId=f.plan.scenes[1].id;expect(()=>applyNarrativeFeedback(f.story,f.plan,f.config,f.animation,p)).toThrow();}
 });

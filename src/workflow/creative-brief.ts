@@ -2,6 +2,7 @@ import {z} from 'zod';
 import {writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {EngineError} from '../core/errors.js';
+import {localNarrationVoices,narrationAdapterBlocker} from './narration-voice-policy.js';
 import {canonical,sha256} from '../core/util.js';
 import {ancestors,boundedFile} from '../story-planner/runtime.js';
 const Text=z.string().trim().min(1).max(2000);
@@ -14,8 +15,9 @@ export const CreativeBrief=z.strictObject({
  ]).refine(d=>d.mode!=='range'||d.minSeconds<=d.maxSeconds,'Minimum exceeds maximum'),
  style:Text, audience:Text, platforms:z.array(Text).min(1).max(5), language:Text,
  voice:z.discriminatedUnion('mode',[
-  z.strictObject({mode:z.literal('local'),profile:z.enum(['anna-local','chen-local','windows-huihui'])}),
+  z.strictObject({mode:z.literal('local'),profile:z.enum(localNarrationVoices)}),
   z.strictObject({mode:z.literal('reference'),reference:Text,rightsConfirmed:z.boolean()}),
+  z.strictObject({mode:z.literal('imported'),voiceLabel:z.string().trim().min(1).max(100),rightsConfirmed:z.boolean()}),
   z.strictObject({mode:z.literal('none')}),
   z.strictObject({mode:z.literal('byo-api'),provider:Text,paidAuthorized:z.boolean()}),
   z.strictObject({mode:z.literal('undecided')})
@@ -27,7 +29,8 @@ export type CreativeBriefValue=z.infer<typeof CreativeBrief>;
 export function assessCreativeBrief(raw:unknown){
  const brief=CreativeBrief.parse(raw),clarifications:string[]=[];
  if(brief.decision==='proposed')clarifications.push('Confirm these preferences or explicitly delegate selection; this is not script approval.');
- if(brief.voice.mode==='undecided')clarifications.push('Choose an available voice, authorized reference, or no narration.');
+ if(brief.voice.mode==='undecided')clarifications.push('Choose a configured local voice, authorized finished WAV, or no narration.');
+ if(brief.voice.mode==='imported'&&!brief.voice.rightsConfirmed)clarifications.push('Confirm rights to use the finished narration.');
  if(brief.voice.mode==='reference'&&!brief.voice.rightsConfirmed)clarifications.push('Confirm rights to use the reference audio.');
  if(brief.voice.mode==='byo-api'&&!brief.voice.paidAuthorized)clarifications.push('Paid API use is not authorized; do not call the provider.');
  return {brief,briefSha256:sha256(canonical(brief)),status:clarifications.length?'needs-clarification':'ready-for-planning',clarifications,scriptApproval:'pending',voiceAvailability:'not-tested'};
@@ -35,11 +38,11 @@ export function assessCreativeBrief(raw:unknown){
 export function checkBriefDuration(brief:CreativeBriefValue,seconds:number){
  if(!Number.isFinite(seconds)||seconds<=0||seconds>brief.duration.maxSeconds||(brief.duration.mode==='range'&&seconds<brief.duration.minSeconds))throw new EngineError('CREATIVE_DURATION','Authored duration violates the creative brief; revise content or obtain a changed brief, never silently trim or pad.');
 }
-export function creativeMediaBlockers(brief:CreativeBriefValue,selectedVoice:string){
+export function creativeMediaBlockers(brief:CreativeBriefValue,selectedVoice?:string){
  const blockers=assessCreativeBrief(brief).clarifications;
- if(brief.language!=='zh-CN')blockers.push('This narrated run currently supports zh-CN only; the requested language needs an adapter.');
- if(brief.voice.mode!=='local')blockers.push('This narrated run supports configured local voices only; the selected voice mode needs an adapter. No fallback will run.');
- else if(brief.voice.profile!==selectedVoice)blockers.push('Configured runtime voice differs from the approved brief; configure the requested local voice explicitly.');
+ const adapter=narrationAdapterBlocker(brief.voice.mode,brief.language);
+ if(adapter)blockers.push(adapter);
+ if(brief.voice.mode==='local'&&selectedVoice!==undefined&&brief.voice.profile!==selectedVoice)blockers.push('Configured runtime voice differs from the approved brief. Explicitly configure the requested local voice.');
  return blockers;
 }
 export async function creativeBriefCommand(pos:string[],values:Record<string,unknown>){

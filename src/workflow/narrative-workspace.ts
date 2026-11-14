@@ -5,6 +5,7 @@ import {z} from 'zod';
 import {EngineError,checkAbort} from '../core/errors.js';
 import {canonical,sha256} from '../core/util.js';
 import {ancestors,boundedFile} from '../story-planner/runtime.js';
+import {candidateReviewDecision} from './candidate-review.js';
 import {explanationNextActions} from './narrative-next-actions.js';
 import {captureNarrativeStart} from './explanation-session.js';
 import {RepositoryUrl} from '../contracts/planning.js';
@@ -34,9 +35,11 @@ export async function recordNarrativeWorkspace(workspace:string,authorDirectory:
  let preview:string|undefined;
  if(value.status==='editable-preview-complete'&&typeof bundle==='string'){
   const movie=owned(workspace,join(bundle,'excerpt.mp4')),index=owned(workspace,join(bundle,'index.html'));
-  await ancestors(bundle);await boundedFile(join(bundle,'excerpt.mp4'),128_000_000);
+  await ancestors(bundle);await boundedFile(join(bundle,'excerpt.mp4'),200_000_000);
   preview=join(workspace,'workspace-preview.html');
-  const page=marker+'<meta charset="utf-8"><title>Experimental narrated preview</title><h1>Experimental preview — not reviewed</h1><p>Last completed preview. Source interpretation, listening, alignment, continuous AV and owner acceptance remain pending.</p><p>Exact task: '+html(value.tasks.narratedPreview)+'</p><video controls width="360" src="'+href(movie)+'"></video><p><a href="'+href(index)+'">Complete editable source, narration and captions</a> · <a href="current-run.json">Latest checkpoint pointer</a></p>';
+  const silent=value.details?.narration==='none';
+  const review=silent?'Silent preview without an audio track. Facts, visual review and owner acceptance are pending.':'Source interpretation, listening, alignment, continuous AV and owner acceptance remain pending.';
+  const page=marker+'<meta charset="utf-8"><title>Experimental preview</title><h1>Experimental preview — review pending</h1><p>'+review+'</p><p>Exact task: '+html(value.tasks.silentPreview??value.tasks.narratedPreview)+'</p><video controls width="360" src="'+href(movie)+'"></video><p><a href="'+href(index)+'">Editable preview bundle</a> · <a href="current-run.json">Latest checkpoint pointer</a></p>';
   await replaceOwned(preview,page,old=>{if(!old.startsWith(marker))fail('Refusing to replace an unrelated workspace preview page.');});
  }
  await replaceOwned(join(workspace,'current-run.json'),canonical(pointer),old=>{Pointer.parse(JSON.parse(old));});
@@ -64,10 +67,14 @@ export async function statusNarrativeWorkspace(workspace:string,signal:AbortSign
  for(const f of manifest.files){const b=await boundedFile(join(value.candidate,'author',f.name),1_000_000);if(sha256(b)!==f.sha256||b.length!==f.bytes)fail('Committed author snapshot differs.');}
  let authorState='unchanged';
  try{await ancestors(pointer.authorDirectory);const names=await readdir(pointer.authorDirectory);if(canonical(names.sort())!==canonical(manifest.files.map((f:any)=>f.name).sort()))authorState='changed';else for(const f of manifest.files)if(sha256(await boundedFile(join(pointer.authorDirectory,f.name),1_000_000))!==f.sha256)authorState='changed';}catch{authorState='unavailable';}
- const task=value.tasks.narratedPreview??value.tasks.narrative??source.taskId;
+ const task=value.tasks.narratedPreview??value.tasks.silentPreview??value.tasks.narrative??source.taskId;
  const next=await explanationNextActions(join(workspace,'state'),task,signal);
  const resume=['explanation','run','--repo',owner.repository,'--workspace',workspace,'--author',pointer.authorDirectory,'--through','preview'];
- return{schemaVersion:'repository-narrative-workspace-status/1.0',workspace,repository:owner.repository,status:value.status,source,task,authorDirectory:pointer.authorDirectory,authorState,currentResult:resultPath,currentResultSha256:pointer.resultSha256,next,resume,requiresSessionAgent:authorState!=='unchanged'||value.status!=='editable-preview-complete',...(value.status==='editable-preview-complete'?{preview:join(workspace,'workspace-preview.html'),bundle:value.details.movie.output.bundle}:{}),modelCalls:0,actionsExecuted:0,approval:'none',currentFacts:'pending',ownerListening:'pending',ownerAcceptance:'pending'};
+ const reviewPath=resolve(resultPath,'..','script-review.json');
+ if(authorState==='unchanged'&&await exists(reviewPath)){
+  if(candidateReviewDecision(await json(reviewPath),manifest.authorSha256,'script').status==='passed')resume.push('--review',reviewPath);
+ }
+ return{schemaVersion:'repository-narrative-workspace-status/1.0',workspace,repository:owner.repository,status:value.status,source,task,authorDirectory:pointer.authorDirectory,authorState,currentResult:resultPath,currentResultSha256:pointer.resultSha256,next,resume,requiresSessionAgent:authorState!=='unchanged'||value.status!=='editable-preview-complete',...(value.status==='editable-preview-complete'?{preview:join(workspace,'workspace-preview.html'),bundle:value.details.movie.output.bundle}:{}),modelCalls:0,actionsExecuted:0,approval:'none',currentFacts:'pending',ownerListening:value.details?.narration==='none'?'not-applicable':'pending',ownerAcceptance:'pending'};
 }
 
 export async function narrativeWorkspaceCommand(pos:string[],values:Record<string,unknown>,signal:AbortSignal){

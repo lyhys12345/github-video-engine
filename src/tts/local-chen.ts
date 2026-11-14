@@ -8,6 +8,7 @@ import {EngineError,checkAbort} from '../core/errors.js';
 import {canonical,sha256} from '../core/util.js';
 import {command} from '../core/process.js';
 import {projectRoot} from '../providers/local.js';
+import type {LocalNarrationVoice} from '../workflow/narration-voice-policy.js';
 import {TaskRunner} from '../orchestrator/tasks.js';
 import {boundedFile,preflightStatePath} from '../story-planner/runtime.js';
 import {measureHuihuiWav} from './huihui.js';
@@ -28,19 +29,49 @@ export async function loadLocalChenProfile(path=process.env.GVE_CHEN_PROFILE??jo
  const python=await fileHash(profile.pythonPath),worker=await boundedFile(join(projectRoot,'scripts','windows-local-chen.py'),32_000);
  return{profile,identity:{schemaVersion:profile.schemaVersion,modelRevision:'Qwen3-TTS-12Hz-0.6B-Base@5d83992436eae1d760afd27aff78a71d676296fc',modelFiles:profile.modelFiles,referenceSha256:profile.referenceSha256,referenceTextSha256:sha256(profile.referenceText),pythonSha256:python.sha256,workerSha256:sha256(worker),runtime:'qwen-tts-0.1.1 / torch-2.8.0+cu128 / Windows CUDA',voiceLabel},worker};
 }
-export async function generateLocalChen(text:string,data:string,signal:AbortSignal,profile:'chen-local'|'anna-local'='chen-local'){
+type CudaVoice = Exclude<LocalNarrationVoice, 'windows-huihui'>;
+function localProfilePath(profile: CudaVoice) {
+ return profile==='anna-local' ? (process.env.GVE_ANNA_PROFILE??join(projectRoot,'work','local-anna-profile.json')) : undefined;
+}
+function workerEnvironment(work: string) {
+ const systemRoot=process.env.SystemRoot;
+ if(!systemRoot||!isAbsolute(systemRoot))throw new EngineError('CHEN_LOCAL_UNAVAILABLE','Windows system root unavailable.');
+ return {SystemRoot:systemRoot,WINDIR:systemRoot,PATH:join(systemRoot,'System32'),TEMP:work,TMP:work,
+  NUMBA_CACHE_DIR:work,PYTHONDONTWRITEBYTECODE:'1',HF_HUB_OFFLINE:'1',TRANSFORMERS_OFFLINE:'1',HF_HUB_DISABLE_TELEMETRY:'1'};
+}
+
+export async function probeLocalCudaVoice(profile: CudaVoice, signal: AbortSignal) {
+ if(process.platform!=='win32')throw new EngineError('VOICE_PLATFORM','The Qwen local voice adapter requires Windows CUDA.');
+ const prepared=await loadLocalChenProfile(localProfilePath(profile));
+ const script=await boundedFile(join(projectRoot,'scripts','windows-local-voice-probe.py'),32_000);
+ checkAbort(signal);
+ const work=await mkdtemp(join(tmpdir(),'gve-voice-probe-'));
+ try{
+  await writeFile(join(work,'probe.py'),script,{flag:'wx'});
+  let output:string;
+  try{
+   output=await command(prepared.profile.pythonPath,['-u','probe.py'],{
+    cwd:work,signal,timeout:120_000,inheritEnv:false,env:workerEnvironment(work)});
+  }catch(error){
+   checkAbort(signal);
+   if(error instanceof EngineError&&error.code==='TIMEOUT')throw new EngineError('VOICE_RUNTIME_TIMEOUT','The configured local voice readiness probe exceeded 120 seconds.');
+   throw error;
+  }
+  if(output.trim().split(/\r?\n/).at(-1)!=='gve-local-voice-runtime-ready')throw new EngineError('VOICE_RUNTIME','The local CUDA worker failed the runtime probe.');
+ }finally{await rm(work,{recursive:true,force:true});}
+}
+
+export async function generateLocalChen(text:string,data:string,signal:AbortSignal,profile:CudaVoice='chen-local'){
  checkAbort(signal);if(process.platform!=='win32')throw new EngineError('CHEN_LOCAL_UNAVAILABLE','The local Chen adapter currently supports Windows CUDA only.');
  if(!text.trim()||[...text].length>120||/[\p{C}\p{Zl}\p{Zp}]/u.test(text))throw new EngineError('CHEN_INPUT','Use one line of at most 120 Unicode characters.');
- const profilePath=profile==='anna-local'?(process.env.GVE_ANNA_PROFILE??join(projectRoot,'work','local-anna-profile.json')):undefined;
- const prepared=await loadLocalChenProfile(profilePath);
+ const prepared=await loadLocalChenProfile(localProfilePath(profile));
  const selectedLabel=profile==='anna-local'?'Local Anna-style approximation / Qwen3-TTS 0.6B / pending listening':voiceLabel;
  if(profile==='anna-local')prepared.identity.voiceLabel=selectedLabel;
  const input={text,voice:prepared.identity};preflightStatePath(resolve(data));const runner=new TaskRunner(resolve(data));
  try{const task=await runner.run(kind,input,async(directory,active)=>{
-   const systemRoot=process.env.SystemRoot;if(!systemRoot)throw new EngineError('CHEN_LOCAL_UNAVAILABLE','Windows system root unavailable.');
    await writeFile(join(directory,'worker.py'),prepared.worker,{flag:'wx'});
    await writeFile(join(directory,'request.json'),canonical({text,modelPath:prepared.profile.modelPath,referencePath:prepared.profile.referencePath,referenceText:prepared.profile.referenceText}),{flag:'wx'});
-   const output=await command(prepared.profile.pythonPath,['-u','worker.py'],{cwd:directory,signal:active,timeout:300_000,inheritEnv:false,env:{SystemRoot:systemRoot,WINDIR:systemRoot,PATH:join(systemRoot,'System32'),TEMP:directory,TMP:directory,NUMBA_CACHE_DIR:directory,PYTHONDONTWRITEBYTECODE:'1',HF_HUB_OFFLINE:'1',TRANSFORMERS_OFFLINE:'1',HF_HUB_DISABLE_TELEMETRY:'1'}});
+   const output=await command(prepared.profile.pythonPath,['-u','worker.py'],{cwd:directory,signal:active,timeout:300_000,inheritEnv:false,env:workerEnvironment(directory)});
    let metadata:any;try{metadata=JSON.parse(output.trim().split(/\r?\n/).at(-1)!);}catch{throw new EngineError('CHEN_MEDIA','Invalid local voice worker metadata.');}
    const wav=await boundedFile(join(directory,'speech.wav'),2_000_000),audio=measureHuihuiWav(wav);if(metadata.samples!==audio.samples||metadata.sampleRate!==audio.sampleRate)throw new EngineError('CHEN_MEDIA','Voice sample metadata differs from output.');
    const artifact=await runner.artifacts.commit(wav,'audio/wav','RESOLVE_ASSETS',sha256(canonical({version:'production-task-v1',kind,input})));

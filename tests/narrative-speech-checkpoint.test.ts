@@ -52,7 +52,7 @@ it('separates exact unrecorded scene tails from intentional lead and placeholder
 });
 it('generates and imports exact supported scene scripts only; measured timing keeps receipt identity for downstream reuse',async()=>{
  mocks.generate.mockResolvedValue({taskId:'a'.repeat(64),cached:false,manifest:{audio:{samples:16000}}});
- mocks.import.mockResolvedValue({fingerprint:'b'.repeat(64),cached:false});
+ mocks.import.mockResolvedValue({fingerprint:'b'.repeat(64),cached:false,receiptArtifact:{sha256:'c'.repeat(64)},receipt:{artifact:{sha256:'d'.repeat(64)}}});
  const plan={scenes:[{id:'first',narration:'实际作者脚本。',execution:{kind:'supported-story'}},{id:'gap',narration:'无声缺口。',execution:{kind:'needs-evidence'}},{id:'last',narration:'原速完整录音。',execution:{kind:'supported-story'}}]};
  const report=await measureNarrativeSpeech('state',plan,{selection,speech:[{sceneId:'first'},{sceneId:'last'}]},new AbortController().signal);
  expect(mocks.generate.mock.calls.map(c=>c[0].text)).toEqual(['实际作者脚本。','原速完整录音。']);

@@ -12,6 +12,7 @@ import {prepareNarrativeRunStory} from './narrative-scene-evidence.js';
 import {prepareNarrativeSceneAnimations,NarrativeSceneAnimations} from './narrative-scene-animations.js';
 import {applyNarrativeAuthorRevision,NarrativeAuthorRevision,NarrativeRevisionCaption} from './narrative-author-revision.js';
 import {readNarrativeAuthorData,NarrativeRunAuthor,validateCompleteRunInputs,runNarrativeWorkspace} from './narrative-run.js';
+import {CreativeBrief,type CreativeBriefValue} from './creative-brief.js';
 import {statusNarrativeWorkspace} from './narrative-workspace.js';
 const fail=(s:string):never=>{throw new EngineError('NARRATIVE_FEEDBACK',s);};
 const decode=(b:Buffer)=>JSON.parse(b.toString('utf8').replace(/^\uFEFF/,''));
@@ -35,11 +36,11 @@ const authorJson=(files:Map<string,Buffer>,name:string)=>decode(files.get(name)!
 const normalized=(story:any,plan:any,animation:any,overrides:any)=>[...prepareNarrativeSceneAnimations(story,plan,animation,overrides)].map(([sceneId,x])=>({sceneId,...x}));
 
 /** Agent-authored interpretation only. No model, fuzzy selection or new factual evidence. */
-export function applyNarrativeFeedback(rawStory:any,rawPlan:any,rawConfig:unknown,rawAnimation:any,spec:Feedback){
+export function applyNarrativeFeedback(rawStory:any,rawPlan:any,rawConfig:unknown,rawAnimation:any,spec:Feedback,brief?:CreativeBriefValue){
  spec=NarrativeFeedbackPlan.parse(spec);let storyFile=structuredClone(rawStory),plan=structuredClone(rawPlan),config=NarrativeRunAuthor.parse(structuredClone(rawConfig));
  if(config.schemaVersion!=='repository-narrative-run-author/2.0')return fail('Feedback execution requires the explicit complete2.0 profile.');
  if(config.captureTaskId!==spec.source.captureTaskId||config.bindingSha256!==spec.source.bindingSha256)fail('Feedback belongs to another captured source.');
- const original=prepareNarrativeRunStory(storyFile,plan);validateCompleteRunInputs(original.story,plan,config);
+ const original=prepareNarrativeRunStory(storyFile,plan);validateCompleteRunInputs(original.story,plan,config,brief);
  const beforeAnimations=normalized(original.story,plan,rawAnimation,original.overrides),narEdits=[];
  if(new Set(spec.changes.map(c=>c.sceneId)).size!==spec.changes.length)fail('Duplicate scene changes.');
  for(const c of spec.changes){
@@ -51,7 +52,7 @@ export function applyNarrativeFeedback(rawStory:any,rawPlan:any,rawConfig:unknow
   if(c.narration)narEdits.push({shotId:shot.id,expectedNarrationSha256:c.narration.expectedNarrationSha256,text:c.narration.text,...(c.narration.captions?{captions:c.narration.captions}:{})});
   if(c.visual){const before=beforeAnimations.find(x=>x.sceneId===c.sceneId)!;if(sha256(canonical(before))!==c.visual.expectedAnimationSha256||c.visual.sceneAnimation.sceneId!==c.sceneId)fail('Stale animation hash or cross-scene visual replacement.');if(canonical(before)===canonical(c.visual.sceneAnimation)&&canonical(c.visual.visualContext===undefined?scene.visualContext:c.visual.visualContext)===canonical(scene.visualContext))fail('Description/title-only edits are export-only; supply an actual animation/context change.');}
  }
- if(narEdits.length){const revision=applyNarrativeAuthorRevision(storyFile,plan,config,rawAnimation,NarrativeAuthorRevision.parse({schemaVersion:'narrative-author-revision/1.0',expectedAuthorSha256:spec.expectedAuthorSha256,selectionPolicy:'recompute-existing-whole-shot-estimates',captionPolicy:'rebuild-single-whole-recording-cue',edits:narEdits}));storyFile=revision.story;plan=revision.plan;config=revision.config;}
+ if(narEdits.length){const revision=applyNarrativeAuthorRevision(storyFile,plan,config,rawAnimation,NarrativeAuthorRevision.parse({schemaVersion:'narrative-author-revision/1.0',expectedAuthorSha256:spec.expectedAuthorSha256,selectionPolicy:'recompute-existing-whole-shot-estimates',captionPolicy:'rebuild-single-whole-recording-cue',edits:narEdits}),brief);storyFile=revision.story;plan=revision.plan;config=revision.config;}
  const base=storyFile.schemaVersion==='narrative-scene-evidence/1.0'?storyFile.baseStory:storyFile,animations=structuredClone(beforeAnimations),changes=[];
  for(const c of spec.changes){const scene=plan.scenes.find((s:any)=>s.id===c.sceneId),shot=base.shots.find((s:any)=>s.id===scene.execution.shotIds[0]),beforeScene=rawPlan.scenes.find((s:any)=>s.id===c.sceneId);
   if(c.visual){shot.visual=c.visual.description;scene.visual=c.visual.description;if(c.visual.title!==undefined)scene.title=c.visual.title;if(c.visual.visualContext===null)delete scene.visualContext;else if(c.visual.visualContext!==undefined)scene.visualContext=c.visual.visualContext;animations[animations.findIndex(x=>x.sceneId===c.sceneId)]=structuredClone(c.visual.sceneAnimation);}
@@ -61,7 +62,7 @@ export function applyNarrativeFeedback(rawStory:any,rawPlan:any,rawConfig:unknow
  const prepared=prepareNarrativeRunStory(storyFile,plan),compiled=compileStory(prepared.story);
  for(const scene of plan.scenes){if(scene.execution.kind!=='supported-story')continue;scene.execution.storyTaskId='$SCENE_STORY_TASK_ID';scene.execution.expectedGraphHash='$SCENE_STORY_GRAPH_HASH';const entry=config.selection.find(x=>x.sceneId===scene.id)!;if(entry.kind!=='story-slice')return fail('Invalid supported selection.');entry.slices=scene.execution.shotIds.map((id:string)=>{const s=compiled.shots.find(s=>s.id===id)!;return{shotId:id,startFrame:0,endFrame:s.endFrame-s.startFrame};});if(spec.changes.find(c=>c.sceneId===scene.id)?.timing)scene.estimatedSeconds=entry.slices.reduce((n,s)=>n+s.endFrame-s.startFrame,0)/compiled.fps;}
  const animation=NarrativeSceneAnimations.parse({schemaVersion:'narrative-scene-animations/1.0',storyId:prepared.story.id,scenes:animations});
- validateCompleteRunInputs(prepared.story,plan,config);prepareNarrativeSceneAnimations(prepared.story,plan,animation,prepared.overrides);
+ validateCompleteRunInputs(prepared.story,plan,config,brief);prepareNarrativeSceneAnimations(prepared.story,plan,animation,prepared.overrides);
  const check=structuredClone(plan);for(const s of check.scenes)if(s.execution.kind==='supported-story'){s.execution.storyTaskId='0'.repeat(64);s.execution.expectedGraphHash='0'.repeat(64);}NarrativePlan.parse(check);
  if(canonical(prepared.story.evidence)!==canonical(original.story.evidence)||canonical(plan.claims)!==canonical(rawPlan.claims))fail('Source evidence or factual assertions changed.');
  return{story:storyFile,plan,config,animation,changes,changedScenes:spec.changes.map(c=>c.sceneId),unchangedScenes:plan.scenes.filter((s:any)=>!spec.changes.some(c=>c.sceneId===s.id)).map((s:any)=>s.id)};
@@ -85,7 +86,7 @@ export async function applyNarrativeFeedbackPlan(workspace:string,path:string,ou
  if(await exists(out)){await ancestors(out);context=Context.parse(decode(await boundedFile(join(out,'feedback-context.json'),200000)));if(context.workspace!==workspace||context.planSha256!==planSha256||context.originalCurrentResultSha256!==spec.expectedCurrentResultSha256||context.authorDirectory!==join(out,'author')||canonical(context.source)!==canonical(status.source)||!(await boundedFile(join(out,'feedback-plan.json'),1_000_000)).equals(bytes))fail('Existing feedback candidate belongs to another plan/source.');if((await readNarrativeAuthorData(context.authorDirectory)).hash!==context.authorSha256)fail('Prepared author bytes changed; candidate cannot be silently reused.');reusedCandidate=true;
  }else{
   if(status.currentResultSha256!==spec.expectedCurrentResultSha256)fail('Stale current checkpoint; no feedback candidate created.');const author=await readNarrativeAuthorData(status.authorDirectory);if(author.hash!==spec.expectedAuthorSha256||author.missing)fail('Stale exact author bytes.');
-  const next=applyNarrativeFeedback(authorJson(author.files,'story.json'),authorJson(author.files,'narrative.json'),authorJson(author.files,'run.json'),authorJson(author.files,'animation.json'),spec),files=new Map(author.files),dropped=[];
+  const next=applyNarrativeFeedback(authorJson(author.files,'story.json'),authorJson(author.files,'narrative.json'),authorJson(author.files,'run.json'),authorJson(author.files,'animation.json'),spec,author.files.has('creative-brief.json')?CreativeBrief.parse(authorJson(author.files,'creative-brief.json')):undefined),files=new Map(author.files),dropped=[];
   for(const name of ['silent-voice.json','local-tts.json','narrated-excerpt.json'])if(files.has(name)){dropped.push({name,sha256:sha256(files.get(name)!)});files.delete(name);}for(const[name,value]of Object.entries({'story.json':next.story,'narrative.json':next.plan,'run.json':next.config,'animation.json':next.animation}))files.set(name,json(value));
   await ancestors(resolve(out,'..'),true);await mkdir(out);const staging=join(out,'author-staging');await mkdir(staging);for(const[name,b]of files){checkAbort(signal);await writeFile(join(staging,name),b,{flag:'wx'});}await rename(staging,join(out,'author'));const final=await readNarrativeAuthorData(join(out,'author'));
   context=Context.parse({schemaVersion:'narrative-feedback-candidate/1.0',workspace,planSha256,originalCurrentResultSha256:status.currentResultSha256,originalAuthorDirectory:status.authorDirectory,originalAuthorSha256:author.hash,authorDirectory:join(out,'author'),authorSha256:final.hash,source:status.source});
