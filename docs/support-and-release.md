@@ -2,6 +2,8 @@
 
 The engine is a local toolkit driven by the user's current Codex or Claude Code session. It is not a hosted model service. Capability, execution, perception and distribution permission are separate checks.
 
+Current executed evidence: [five-module RSI results, 2026-11-13](rsi-five-modules-results-2026-11-13.md).
+
 ## Check this computer first
 
 ```sh
