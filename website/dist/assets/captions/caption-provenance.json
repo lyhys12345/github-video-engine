@@ -1,0 +1,199 @@
+{
+  "schemaVersion": "website-translated-captions/1.0",
+  "language": "en",
+  "translationType": "Faithful English translation of existing Chinese narration; no new narration or media generation.",
+  "timingBasis": "Original authored or proportional display estimates. Adjacent cues may be combined for English readability. Composition-derived cues preserve the original frame boundaries; VoiceStudio includes its 130-frame opener offset. Not forced word alignment.",
+  "limitations": [
+    "Chinese text remains burned into the original video.",
+    "Some original films mention repository links in comments. These are translations of the films, not a claim that this website has a comment section.",
+    "No continuous listening or word-level synchronization review is claimed."
+  ],
+  "entries": [
+    {
+      "id": "artcraft-demo",
+      "media": "assets/artcraft-demo.mp4",
+      "mediaSha256": "6dbb299bdf0c29323b6433613c2f368fdca69c4e13e974995aef530ed51836f2",
+      "captionFile": "assets/captions/artcraft-demo.en.vtt",
+      "captionSha256": "f5cf6c372244ba0db50b8dc2583500ef21723a0782fe48f87f22ea10c0270476",
+      "source": "work/artcraft-result-refine-v1/render-plan/candidate-v2/props.json",
+      "sourceSha256": "df648e91e0ae103cc72c6dd769f9831ab499815d51ad3d8f293507ccf1fae14b",
+      "timeline": "work/artcraft-result-refine-v1/render-plan/candidate-v2/timeline.json",
+      "timelineSha256": "9452d1aecb7b4468fd2c864886eda5340e3c7d35713b690bd1b364f8f64e54c5",
+      "fps": 30,
+      "videoFrames": 735,
+      "videoDurationSeconds": 24.5,
+      "containerDurationSeconds": 24.533,
+      "cueCount": 9,
+      "mapping": {
+        "kind": "frame-sequence-comparison",
+        "sourceMedia": "work/artcraft-result-refine-v1/render-plan/candidate-v2/review.mp4",
+        "sourceSha256": "bfba63b87a5744de2e14d589adf8c70cd3c95b480605b8d234ed4aa44cb8b1a5",
+        "comparedFrames": 735,
+        "scaledFullFrameSsim": 0.994362,
+        "offsetFrames": 0,
+        "note": "Distributed MP4 is a 720p encoding of the same 735-frame sequence. Both video streams start at zero and end at 24.5 seconds. The distributed audio container extends to 24.533 seconds."
+      },
+      "validation": {
+        "allCueBoundariesInOriginal": true,
+        "finiteIncreasingWithinDuration": true,
+        "mediaHashMatched": true,
+        "originalMediaUnmodified": true
+      }
+    },
+    {
+      "id": "engine-flagship",
+      "media": "assets/engine-flagship.mp4",
+      "mediaSha256": "d18413a33a0644f1a1498bf12aa773a0c8a7e2c138071856e39f33e804112dce",
+      "captionFile": "assets/captions/engine-flagship.en.vtt",
+      "captionSha256": "d9a8e3136390fb6b1d9e221ff029595ecea52afa72bd25742251f213d3587334",
+      "source": "docs/flagship-video/script.json",
+      "sourceSha256": "923de56745a1bfca6b54d72d115eb052ae7fac148dc9d5c62371ef50f7d82cee",
+      "timeline": "work/engine-flagship-anna-v2/timeline.json",
+      "timelineSha256": "d7bcae9be5284b709284ae69a0bedd05125f05d61a83be6b9ef0cb4916eb99d9",
+      "fps": 30,
+      "videoFrames": 1721,
+      "videoDurationSeconds": 57.366667,
+      "containerDurationSeconds": 57.367,
+      "cueCount": 18,
+      "mapping": {
+        "kind": "documented-exact-media-hash",
+        "sourceDocument": "docs/flagship-video/README.md",
+        "offsetFrames": 0,
+        "note": "Distributed MP4 matches the exact accepted-media SHA256 in the source documentation. Composition uses each beat start plus its caption offsets at 30 fps."
+      },
+      "validation": {
+        "allCueBoundariesInOriginal": true,
+        "finiteIncreasingWithinDuration": true,
+        "mediaHashMatched": true,
+        "originalMediaUnmodified": true
+      }
+    },
+    {
+      "id": "openmaic-b-demo",
+      "media": "assets/openmaic-b-demo.mp4",
+      "mediaSha256": "5e7e52d3360117b12ff70433a1bc6f5b54576153fdd60ed14eceb18454b5bc5e",
+      "captionFile": "assets/captions/openmaic-b-demo.en.vtt",
+      "captionSha256": "a545ddde9955a0bcb15d962006cef0d904008d7e4da75825d4854984abcc1b45",
+      "source": "work/xhs-pilot-v1/render-plans/O-B/candidate-v1/props.json",
+      "sourceSha256": "a85fa91bc83bf57b987a4b511bc3bf00b91d654a4d016097c29b01521561cf1a",
+      "timeline": "work/xhs-pilot-v1/render-plans/O-B/candidate-v1/timeline.json",
+      "timelineSha256": "fe30fe3dbd6fd3f8776f8d7acc2dc430d5f07de09ff08173836a098aa9bd4083",
+      "fps": 30,
+      "videoFrames": 1375,
+      "videoDurationSeconds": 45.833333,
+      "containerDurationSeconds": 45.833333,
+      "cueCount": 16,
+      "mapping": {
+        "kind": "documented-exact-media-hash",
+        "sourceDocument": "work/xhs-pilot-v1/render-plans/O-B/candidate-v1/verification.json",
+        "sourceSha256": "5e7e52d3360117b12ff70433a1bc6f5b54576153fdd60ed14eceb18454b5bc5e",
+        "offsetFrames": 0,
+        "note": "Distributed MP4 exactly matches the documented rendered candidate hash."
+      },
+      "validation": {
+        "allCueBoundariesInOriginal": true,
+        "finiteIncreasingWithinDuration": true,
+        "mediaHashMatched": true,
+        "originalMediaUnmodified": true,
+        "lfOnly": true,
+        "maxCharactersPerSecond": 18.15
+      }
+    },
+    {
+      "id": "worldknow-demo",
+      "media": "assets/worldknow-demo.mp4",
+      "mediaSha256": "758aa099e3df833c791620f5b683a188b6b6089b73d4b91f3f3f6f27244a5103",
+      "captionFile": "assets/captions/worldknow-demo.en.vtt",
+      "captionSha256": "7c2ec8a55d6d42b8767aa55fd3f54527cced960c262529bfa659a5fb64596d03",
+      "source": "work/worldknow/preview-v4/composition-v4.tsx",
+      "sourceSha256": "e2ef58cd72f3a3b578dbabc48162ee30e73d39b667bc0860fc649ef2015b368e",
+      "timeline": "work/worldknow/preview-v4/timeline.json",
+      "timelineSha256": "0c1c6b827d74253ace5dbc637f2972254c4a5984f94b1ebdef2cc0fc6aea7d9f",
+      "fps": 30,
+      "videoFrames": 1302,
+      "videoDurationSeconds": 43.4,
+      "containerDurationSeconds": 43.435,
+      "cueCount": 13,
+      "mapping": {
+        "kind": "frame-and-audio-sequence-comparison",
+        "sourceMedia": "work/worldknow/preview-v4/the-world-we-know.mp4",
+        "sourceSha256": "ab9739895f5c88263920949884509424dccd39ba571993f02b4e966789843896",
+        "comparedFrames": 1302,
+        "fullFrameSsim": 0.988828,
+        "offsetFrames": 0,
+        "audioComparison": {
+          "sampleRate": 24000,
+          "channels": 1,
+          "durationSeconds": 43.4,
+          "offsetSeconds": 0,
+          "psnrDb": 160.142
+        },
+        "note": "Full video sequence compared at 30 fps with identical timebases and no offset. Audio compared from zero through 43.4 seconds. Distributed container adds a 35 ms audio tail. Display cues reconstructed by evaluating the original character-proportion selection at each frame."
+      },
+      "validation": {
+        "allCueBoundariesInOriginal": true,
+        "finiteIncreasingWithinDuration": true,
+        "mediaHashMatched": true,
+        "originalMediaUnmodified": true,
+        "lfOnly": true,
+        "maxCharactersPerSecond": 18.8
+      }
+    },
+    {
+      "id": "voicestudio-demo",
+      "media": "assets/voicestudio-demo.mp4",
+      "mediaSha256": "3472cf44108dea8c494fdc5f09732fee619d3f7fe4428c089fb9abbbd837a870",
+      "captionFile": "assets/captions/voicestudio-demo.en.vtt",
+      "captionSha256": "e721baf586e0ae92ffaa34da5a831ad7a9b2bdac66b870845ec102004b13693f",
+      "source": "work/voice-reel/official-ab/composition-owner-v4.tsx",
+      "sourceSha256": "aca3b6fd45140f76c3a1fca8afc1a35fc4bc085fb1b3577f5e364b129aa3bfdb",
+      "timeline": "work/voice-reel/official-ab/owner-review-v4/timeline.json",
+      "timelineSha256": "4d76e1b02f9593cf1fc75a5d4e3e107d16752c886b37dede2746828fc5e0e65b",
+      "fps": 30,
+      "videoFrames": 1233,
+      "videoDurationSeconds": 41.1,
+      "containerDurationSeconds": 41.131,
+      "cueCount": 14,
+      "mapping": {
+        "kind": "frame-and-audio-sequence-comparison",
+        "sourceMedia": "work/voice-reel/official-ab/owner-review-v4/voicestudio-review.mp4",
+        "sourceSha256": "a131bc14a6db7be6b5a064ac48a8e5f1e7b48309bf39a09a87b3222b1519fac0",
+        "comparedFrames": 1233,
+        "fullFrameSsim": 0.996134,
+        "offsetFrames": 0,
+        "timelineOffsetFrames": 130,
+        "openingCueSource": "work/voice-reel/official-ab/owner-review-v4/opening.ass",
+        "audioComparison": {
+          "sampleRate": 24000,
+          "channels": 1,
+          "durationSeconds": 41.1,
+          "offsetSeconds": 0,
+          "psnrDb": 160.814
+        },
+        "note": "The original render concatenates a 130-frame official A/B opener with the 1103-frame narration timeline. All continuation cues include this offset. Opening cues use the authored ASS times. Full sequence and audio comparisons confirm the distributed cut; its container adds a 31 ms audio tail."
+      },
+      "validation": {
+        "allCueBoundariesInOriginal": true,
+        "finiteIncreasingWithinDuration": true,
+        "mediaHashMatched": true,
+        "originalMediaUnmodified": true,
+        "lfOnly": true,
+        "maxCharactersPerSecond": 18.52
+      },
+      "additionalSources": [
+        {
+          "path": "work/voice-reel/official-ab/owner-review-v4/opening.ass",
+          "sha256": "d87907ea92c1bb29745df0abefbcf8a5d447771d2c6c00fb1ccc0f8c40a91ca5"
+        },
+        {
+          "path": "work/voice-reel/official-ab/render-owner-v4.ts",
+          "sha256": "70b35c65d21089533802220a359baaecac8064b46fd8d77caf2bf6a90e2fcf9c"
+        },
+        {
+          "path": "work/voice-reel/official-ab/owner-review-v4/script.json",
+          "sha256": "e2e2a4d78d08ffdfe027b6d7745cfcc17467945897983d64138314e9737610cb"
+        }
+      ]
+    }
+  ]
+}

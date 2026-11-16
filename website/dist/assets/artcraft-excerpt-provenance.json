@@ -1,0 +1,22 @@
+{
+  "source": "artcraft-demo.mp4",
+  "sourceSha256": "6DBB299BDF0C29323B6433613C2F368FDCA69C4E13E974995AEF530ED51836F2",
+  "sourceStartSeconds": 11.8,
+  "sourceEndSeconds": 14.3,
+  "excerpt": "artcraft-excerpt.mp4",
+  "excerptSha256": "5BB2C24C26645474DA446EFF4C4A2F0AF8AABB0ADF0251A3084A8AFDE71F7E1F",
+  "durationSeconds": 2.5,
+  "width": 540,
+  "height": 960,
+  "fps": 24,
+  "codec": "H264",
+  "muted": true,
+  "videoBytes": 249768,
+  "poster": "artcraft-excerpt.jpg",
+  "posterSourceSeconds": 12.5,
+  "posterSha256": "A6A7BDA4B655DABC3C01E73F168CB31B0464C47C74C6B2A9D2173E444CA76F64",
+  "transforms": "trim, resize, frame-rate conversion, audio removal; no crop or speed change",
+  "fullDecodePassed": true,
+  "selection": "Continuous full-screen robot/Mars result, no diagram frames. Natural source shot shorter than3seconds; retained natural action instead of padding.",
+  "provenance": "Existing ArtCraft demo using official generated result with visible pose-reference qualification. Not a new project execution."
+}

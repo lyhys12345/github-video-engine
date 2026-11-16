@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "sourceDirectory": "docs/media",
+  "sourceWebsiteCommit": "00af11df85603274ca9198de0f49831178b9af9d",
+  "files": [
+    {
+      "file": "artcraft-demo.jpg",
+      "sha256": "d6c99f95f7a75bbf550b0160f41e6e8c621f312ca9ec5badb655939ed8caa133",
+      "bytes": 26664
+    },
+    {
+      "file": "artcraft-demo.mp4",
+      "sha256": "6dbb299bdf0c29323b6433613c2f368fdca69c4e13e974995aef530ed51836f2",
+      "bytes": 2645063
+    },
+    {
+      "file": "engine-flagship.jpg",
+      "sha256": "e00da587c5071f0be0989a780b2f2bc42b3922930bce17b00e9f6ea27baa1a89",
+      "bytes": 87520
+    },
+    {
+      "file": "engine-flagship.mp4",
+      "sha256": "d18413a33a0644f1a1498bf12aa773a0c8a7e2c138071856e39f33e804112dce",
+      "bytes": 10947528
+    },
+    {
+      "file": "openmaic-b-demo.jpg",
+      "sha256": "b6d95e4c85fa5c5f51db1e20f1759c7b99bef506059f973a29e44f6ef6350552",
+      "bytes": 31736
+    },
+    {
+      "file": "openmaic-b-demo.mp4",
+      "sha256": "5e7e52d3360117b12ff70433a1bc6f5b54576153fdd60ed14eceb18454b5bc5e",
+      "bytes": 4883068
+    },
+    {
+      "file": "voicestudio-demo.jpg",
+      "sha256": "9085d2841550a848dbce64c179c9996ec09ba50e782eae6e6df0699dbf367a1d",
+      "bytes": 19314
+    },
+    {
+      "file": "voicestudio-demo.mp4",
+      "sha256": "3472cf44108dea8c494fdc5f09732fee619d3f7fe4428c089fb9abbbd837a870",
+      "bytes": 4528038
+    },
+    {
+      "file": "worldknow-demo.jpg",
+      "sha256": "1b6cbf4579bd5ebe6a13b73a84f0142572e45e123b44cc053ad477a4bfc792d9",
+      "bytes": 46254
+    },
+    {
+      "file": "worldknow-demo.mp4",
+      "sha256": "758aa099e3df833c791620f5b683a188b6b6089b73d4b91f3f3f6f27244a5103",
+      "bytes": 6226495
+    }
+  ]
+}

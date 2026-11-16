@@ -1,0 +1,23 @@
+node_modules/
+.DS_Store
+*.log
+*.tar.gz
+qa/
+
+# Reuse approved originals already versioned in ../docs/media.
+dist/assets/artcraft-demo.mp4
+dist/assets/artcraft-demo.jpg
+dist/assets/engine-flagship.mp4
+dist/assets/engine-flagship.jpg
+dist/assets/openmaic-b-demo.mp4
+dist/assets/openmaic-b-demo.jpg
+dist/assets/voicestudio-demo.mp4
+dist/assets/voicestudio-demo.jpg
+dist/assets/worldknow-demo.mp4
+dist/assets/worldknow-demo.jpg
+
+# Small website-specific assets; other generated media stay ignored.
+!dist/assets/artcraft-excerpt.mp4
+!dist/assets/artcraft-excerpt.jpg
+!dist/assets/social-preview.jpg
+!dist/assets/social-preview-zh.jpg

@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "website-caption-validation/1.0",
+  "executedAt": "2026-11-16T00:02:23.044Z",
+  "tests": [
+    {
+      "id": "openmaic-b-demo",
+      "allCueBoundariesInOriginal": true,
+      "finiteIncreasingWithinDuration": true,
+      "mediaHashMatched": true,
+      "originalMediaUnmodified": true,
+      "lfOnly": true,
+      "maxCharactersPerSecond": 18.15,
+      "cueCount": 16
+    },
+    {
+      "id": "worldknow-demo",
+      "allCueBoundariesInOriginal": true,
+      "finiteIncreasingWithinDuration": true,
+      "mediaHashMatched": true,
+      "originalMediaUnmodified": true,
+      "lfOnly": true,
+      "maxCharactersPerSecond": 18.8,
+      "cueCount": 13
+    },
+    {
+      "id": "voicestudio-demo",
+      "allCueBoundariesInOriginal": true,
+      "finiteIncreasingWithinDuration": true,
+      "mediaHashMatched": true,
+      "originalMediaUnmodified": true,
+      "lfOnly": true,
+      "maxCharactersPerSecond": 18.52,
+      "cueCount": 14
+    },
+    {
+      "id": "engine-flagship",
+      "requestedThreeTranslationsShortened": true,
+      "cueTimesUnchanged": true,
+      "captionHashRefreshed": true
+    }
+  ],
+  "limits": "These checks establish source mapping and timing boundaries, not continuous listening or forced word alignment.",
+  "ffprobeWebvttParse": [
+    {
+      "id": "artcraft-demo",
+      "codec": "webvtt",
+      "packets": 9,
+      "captionHashMatched": true,
+      "mediaHashMatched": true
+    },
+    {
+      "id": "engine-flagship",
+      "codec": "webvtt",
+      "packets": 18,
+      "captionHashMatched": true,
+      "mediaHashMatched": true
+    },
+    {
+      "id": "openmaic-b-demo",
+      "codec": "webvtt",
+      "packets": 16,
+      "captionHashMatched": true,
+      "mediaHashMatched": true
+    },
+    {
+      "id": "worldknow-demo",
+      "codec": "webvtt",
+      "packets": 13,
+      "captionHashMatched": true,
+      "mediaHashMatched": true
+    },
+    {
+      "id": "voicestudio-demo",
+      "codec": "webvtt",
+      "packets": 14,
+      "captionHashMatched": true,
+      "mediaHashMatched": true
+    }
+  ],
+  "refinementValidation": {
+    "executedAt": "2026-11-16T00:06:40.702Z",
+    "changedCaptionIds": [
+      "worldknow-demo",
+      "voicestudio-demo"
+    ],
+    "cueTimesUnchanged": true,
+    "allFiveFfprobeWebvttParseRerun": true,
+    "allFiveCaptionAndMediaHashesMatched": true,
+    "scope": "Text and timing refinement; no listening or browser readability assessment."
+  }
+}

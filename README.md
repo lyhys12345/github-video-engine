@@ -56,6 +56,8 @@ Show me the full narration and storyboard for review before generating the video
 
 ## Engineering docs
 
+The bilingual product website, real-demo gallery, getting-started guide and its tests are now preserved in [website/](website/README.md). It builds locally using the approved media already in this repository. [Website review results](website/REVIEW-RSI-V3.md)
+
 | What you want to do | Start here |
 | --- | --- |
 | Start without the maintainer’s private setup | [First-owner guide](docs/first-owner-quickstart.md) · [Free public local voice](docs/public-local-voice-v1.md) |

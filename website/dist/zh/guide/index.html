@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN" class="no-js"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fafaf9">
+<title>使用指南 — GitHub Video Engine</title><meta name="description" content="从 GitHub 链接开始：在 Codex 中检查环境、准备需求、审核脚本，最后导出可编辑的视频项目。">
+<link rel="canonical" href="https://github-video-engine-studio.luyuhao123qq.chatgpt.site/zh/guide/"><link rel="alternate" hreflang="en" href="https://github-video-engine-studio.luyuhao123qq.chatgpt.site/guide/"><link rel="alternate" hreflang="zh-CN" href="https://github-video-engine-studio.luyuhao123qq.chatgpt.site/zh/guide/"><link rel="alternate" hreflang="x-default" href="https://github-video-engine-studio.luyuhao123qq.chatgpt.site/guide/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="preload" href="/assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/fonts/fonts.css"><link rel="stylesheet" href="/assets/site.css"><link rel="stylesheet" href="/assets/refinement.css"><link rel="stylesheet" href="/assets/quality.css">
+<meta property="og:type" content="website"><meta property="og:site_name" content="GitHub Video Engine"><meta property="og:title" content="使用指南 — GitHub Video Engine"><meta property="og:description" content="从 GitHub 链接开始：在 Codex 中检查环境、准备需求、审核脚本，最后导出可编辑的视频项目。"><meta property="og:url" content="https://github-video-engine-studio.luyuhao123qq.chatgpt.site/zh/guide/"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://github-video-engine-studio.luyuhao123qq.chatgpt.site/assets/social-preview-zh.jpg"><meta property="og:image:alt" content="GitHub Video Engine 与真实 ArtCraft 视频示例"><meta property="og:image:width" content="1160"><meta property="og:image:height" content="608"><meta name="twitter:card" content="summary_large_image">
+<script type="module" src="/assets/site.js"></script></head><body data-page="guide"><div id="app"><a class="skip" href="#main">跳到正文</a><header class="header"><a class="brand" href="/zh/" aria-label="GitHub Video Engine 首页"><img src="/assets/favicon.svg" alt="" width="31" height="31"><span>GitHub <strong>Video Engine</strong></span></a><nav class="navigation" id="navigation" aria-label="主导航"><a  href="/zh/">首页</a><a  href="/zh/showcase/">作品库</a><a aria-current="page" href="/zh/guide/">使用指南</a></nav><div class="nav-actions"><a href="/guide/" id="language" class="language" aria-label="切换为英文"><span aria-hidden="true">◎</span> EN</a><a class="repo-link" href="https://github.com/lyhys12345/github-video-engine" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a><button id="menu" class="menu" aria-controls="navigation" aria-expanded="false" aria-label="展开导航"><span></span><span></span></button></div></header><main id="main">
+    <section class="page-intro guide-intro container">
+      <p class="eyebrow">开始使用</p>
+      <h1>先把故事讲好，<br> 再让画面动起来。</h1>
+      <p>先拿到一版可以审核的脚本。建议从 Windows + Codex 开始，使用你现有的 Agent 会话。</p>
+      <div class="guide-badges"><span>Windows x64</span><span>Node.js 24.x</span><span>pnpm 11.25.0</span></div>
+      <div class="guide-route"><strong>你的第一个成果</strong><p>一份完整旁白、逐镜头分镜和来源清单，等你审核。还没有配置语音模型，也可以先做到这里。</p></div>
+    </section>
+    <div class="guide-layout container">
+      <aside class="guide-sidebar"><span class="eyebrow">第一个项目</span><a href="#install">01 安装与检查</a><a href="#agent">02 在 Codex 中打开</a><a href="#brief">03 准备需求</a><a href="#review">04 审核后生成</a><a href="#export">05 保留项目</a><a href="#voices">声音与媒体选项</a><a href="#support">兼容性</a></aside>
+      <div class="guide-content">
+        <section id="install" class="guide-step">
+          <span class="step-number">01</span><h2>安装并检查，开始策划。</h2>
+          <p>准备 Node.js 24.x、pnpm 11.25.0 和 Git。将引擎克隆到较短的 Windows 本地路径，再检查环境。</p>
+          <details class="guide-detail"><summary>还没安装环境？ <span>+</span></summary><p>从下方官方入口下载，选择 Node.js 24.x 和 Windows x64 安装包。安装 Node 与 Git 后，重新打开终端，再安装指定版本的 pnpm。</p><p><a class="inline-link" href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer">Node.js 官方下载 — 选择 24.x <span aria-hidden="true">↗</span></a> · <a class="inline-link" href="https://git-scm.com/install/windows" target="_blank" rel="noopener noreferrer">Git 官方 Windows 下载 <span aria-hidden="true">↗</span></a></p><div class="code-block"><div class="code-label"><span>安装 NODE 后运行</span><button data-copy="prerequisite-command">复制</button></div><pre><code id="prerequisite-command">npm install --global pnpm@11.25.0</code></pre></div></details>
+          <div class="code-block"><div class="code-label"><span>TERMINAL</span><button data-copy="install-command">复制</button></div><pre><code id="install-command">git clone https://github.com/lyhys12345/github-video-engine.git
+cd github-video-engine
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm gve doctor --first-owner</code></pre></div>
+          <table class="guide-preflight"><caption>按下一步需要，分阶段准备。</caption><thead><tr><th scope="col">下一步</th><th scope="col">需要准备</th></tr></thead><tbody><tr><th scope="row">策划与审稿</th><td>Git、Node 24.x、pnpm 11.25.0 与可写的本地存储。使用现有 Codex 账号，无需另配模型 API 密钥。</td></tr><tr><th scope="row">生成视频</th><td>再准备 Chrome/Chromium、FFmpeg 和 FFprobe。</td></tr><tr><th scope="row">加入配音</th><td>导入有授权的 WAV，或配置受支持的本地声音。只有本地神经语音方式需要单独配置 NVIDIA 显卡与 Python。</td></tr></tbody></table>
+          <div class="guide-checkpoint"><span class="check-label">检查结果怎么看</span><p>看到 planning.status: ready，表示本地运行环境和存储检查已通过。媒体项显示 not-checked 时，可以等脚本审核后再准备。</p></div>
+          <details class="guide-detail"><summary>读懂环境检查结果 <span>+</span></summary><dl class="doctor-states"><dt><code>ready</code></dt><dd>这个阶段列出的检查已通过。</dd><dt><code>blocked</code></dt><dd>按报告解决阻塞项，再重新检查。</dd><dt><code>not-checked</code></dt><dd>不在本次检查范围内；策划阶段的媒体项通常如此。</dd><dt><code>awaiting-selection</code></dt><dd>预览环境还需要明确选择声音方式和语言。</dd></dl><p>Doctor 只检查本地，不访问 GitHub、不启动浏览器，也不生成媒体。之后抓取来源时，才会实际访问你的公开仓库。</p></details>
+          <a class="inline-link" href="https://github.com/lyhys12345/github-video-engine/blob/main/docs/first-owner-quickstart.md" target="_blank" rel="noopener noreferrer">安装详情与排查 <span aria-hidden="true">↗</span></a>
+        </section>
+        <section id="agent" class="guide-step">
+          <span class="step-number">02</span><h2>在 Codex 中打开引擎文件夹。</h2>
+          <p>将刚克隆的 github-video-engine 文件夹作为工作项目打开，里面已包含 github-explainer Skill。你想介绍的仓库只需要提供链接，无需安装或运行。</p>
+          <div class="agent-tabs" role="tablist" aria-label="Agent 配置"><button role="tab" aria-selected="true" aria-controls="agent-panel" id="codex-tab" data-agent="codex">Codex</button><button role="tab" aria-selected="false" aria-controls="agent-panel" id="claude-tab" tabindex="-1" data-agent="claude">Claude Code</button></div>
+          <div id="agent-panel" role="tabpanel" aria-labelledby="codex-tab" class="agent-panel"><h3>使用现有 Codex 会话。</h3><p>仓库已包含 github-explainer Skill 与项目指令。打开引擎文件夹，直接用自然语言提出需求，无需额外 API 密钥或复制全局 Skill。</p><a class="inline-link" href="https://github.com/lyhys12345/github-video-engine/blob/main/docs/codex-user-path-v1.md" target="_blank" rel="noopener noreferrer">Codex 使用说明 <span aria-hidden="true">↗</span></a></div>
+          <p class="guide-hint">会话流程无需另配模型 API 密钥，编程 Agent 的账号与用量规则仍然适用。Claude Code 也有入口，但验证范围更有限，详见下方兼容性说明。</p>
+        </section>
+        <section id="brief" class="guide-step">
+          <span class="step-number">03</span><h2>一个链接，加上你想讲给谁听。</h2>
+          <p>复制下面的示例，或在这里调整需求。不必先设计好每个镜头，创作方向也可以让 Agent 建议。</p>
+          <form id="prompt-builder" class="prompt-builder" data-state="example" novalidate>
+            <div class="builder-grid">
+              <div class="builder-field builder-wide"><label for="brief-repo">GitHub 仓库</label><input id="brief-repo" name="repository" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://github.com/owner/repository" aria-describedby="builder-privacy builder-status"></div>
+              <div class="builder-field"><label for="brief-platform">平台</label><select id="brief-platform" name="platform"><option value="tiktok">TikTok / Reels</option><option value="xiaohongshu">小红书</option><option value="readme">GitHub README</option></select></div>
+              <div class="builder-field"><label for="brief-duration">期望时长</label><select id="brief-duration" name="duration"><option value="agent">让故事决定</option><option value="30">约 30 秒</option><option value="60">约 60 秒</option><option value="90">约 90 秒</option></select></div>
+              <div class="builder-field builder-wide"><label for="brief-style">开场风格</label><select id="brief-style" name="style"><option value="result">先展示有用的结果</option><option value="problem">先讲一个熟悉的问题</option><option value="agent">交给 Agent 建议</option></select></div>
+            </div>
+            <div class="builder-actions"><button class="button dark" type="submit">生成我的提示词 <span aria-hidden="true">↗</span></button><p id="builder-privacy">仅在浏览器中整理文字，不提交、不保存，也不在服务器生成内容。</p></div>
+            <p id="builder-status" class="builder-status" role="status" aria-live="polite">下方是示例提示词。使用前请替换 OWNER/REPO，或在上方填写你的仓库。</p>
+          </form>
+          <div class="code-block"><div class="code-label"><span>复制到 CODEX 会话</span><button data-copy="starter-prompt">复制</button></div><pre><code id="starter-prompt">请用 github-explainer 解读 https://github.com/OWNER/REPO。
+受众：第一次接触这个项目的普通观众。
+策划一条简洁的竖屏短视频，根据故事选择合适的时长和风格。
+从一个具体有用的结果切入，再解释它为什么能实现。
+这一步只研究资料，并准备完整旁白、逐镜头分镜与来源证据。
+先让独立 Agent 审稿，修正有依据的问题，再把完整脚本给我审核。
+不要生成媒体，也不要运行目标仓库。之后生成前，先和我确认受支持的画面素材与配音方式。</code></pre></div>
+          <p class="guide-hint">这条提示词只要求准备和审核脚本。你批准后，再确认兼容的语音与媒体环境，开始生成。</p>
+        </section>
+        <section id="review" class="guide-step">
+          <span class="step-number">04</span><h2>故事确认了，再开始制作。</h2>
+          <p>Agent 会研究仓库，准备完整旁白、分镜和来源；独立审稿帮助提前找出问题，再把修订稿交给你。你可以继续修改，确认想制作的那一版。</p>
+          <p class="guide-hint">第一个预期成果是 awaiting-script-review：草稿已经准备好，等你审核。若先看到 awaiting-session-agent，让 Codex 继续阅读来源资料并编写脚本即可。</p>
+          <blockquote>“先展示结果，再讲清楚它能做到这件事的关键。”</blockquote>
+          <div class="guide-checkpoint"><span class="check-label">下一处检查点</span><p>渲染前，和 Agent 确认受支持的画面与配音方式。生成视频需要 Chrome/Chromium、FFmpeg 和 FFprobe；本地语音还需要下方列出的环境。脚本改变后，需要重新审核。</p></div>
+          <p class="guide-hint">抓取来源不等于生成成片。最终仍请你亲自看画面、听声音；技术检查和 Agent 审阅不能代替你的最终验收。</p>
+        </section>
+        <section id="export" class="guide-step">
+          <span class="step-number">05</span><h2>拿到成片，也保留项目。</h2>
+          <p>支持的导出包含 MP4，以及可编辑的故事、动画、字幕定义和来源记录。之后可以回到这个项目继续修改，而不必从头开始。</p>
+          <blockquote>“把开头缩短，换一个更好懂的例子。”</blockquote><p>重新打开引擎项目，直接告诉 Agent。它会修改计划交给你审核，制作下一版时复用仍然有效、没有变化的内容。</p>
+          <div class="export-chips"><span>story.json</span><span>narrative.json</span><span>animation.json</span><span>run.json</span></div>
+          <details class="guide-detail"><summary>导出具体包含什么 <span>+</span></summary><p>这是可编辑的引擎项目，不是 Premiere 或剪映工程。支持的有声项目包可保留所选原始 WAV；凭据、本地音色配置、模型和运行环境不会打包。换电脑时，需要完整传递项目包及摘要，并安装兼容的引擎。</p><a class="inline-link" href="https://github.com/lyhys12345/github-video-engine/blob/main/docs/portable-long-project-v1.md" target="_blank" rel="noopener noreferrer">导出与导入说明 <span aria-hidden="true">↗</span></a></details>
+        </section>
+        <section id="voices" class="guide-step">
+          <p class="eyebrow">准备生成时再配置</p><h2>选择适合你的配音方式。</h2>
+          <p>部分示例里的声音来自私人配置，不是仓库随附音色。你可以和 Agent 从这些受支持的方式中选择。</p>
+          <details class="guide-detail"><summary>免费公开本地音色 <span>+</span></summary><p>英文 Ryan，中文 Serena。不需要参考录音或付费 TTS 账号，但需单独配置 Windows x64、Python 3.12.14，以及支持原生 BF16 的 NVIDIA CUDA 显卡。已在 RTX 3070 上实测。模型约 2.50 GB，另需运行环境与 CUDA 空间。</p><a class="inline-link" href="https://github.com/lyhys12345/github-video-engine/blob/main/docs/public-local-voice-v1.md" target="_blank" rel="noopener noreferrer">安装公开语音环境 <span aria-hidden="true">↗</span></a></details>
+          <details class="guide-detail"><summary>导入录音或配置本地音色 <span>+</span></summary><p>可以导入有权使用、与已批准场景文案一致的 WAV 录音，或配置有授权、受支持的本地音色。Anna/Chen 参考录音与私人配置不随仓库分发。音色不可用时会明确报错，不会擅自换声。</p><a class="inline-link" href="https://github.com/lyhys12345/github-video-engine/blob/main/docs/narration-voice-preference.md" target="_blank" rel="noopener noreferrer">音色偏好说明 <span aria-hidden="true">↗</span></a></details>
+          <details class="guide-detail"><summary>先做无声技术预览 <span>+</span></summary><p>明确选择无声，可以先检查受支持的图示与视觉变化，不需要语音模型。部分分镜标题、文案和转场可能只保留在导出计划中。真实产品素材与剪辑需要独立的 showcase 流程及有授权的素材；无声技术预览并不代表所有计划中的镜头都能渲染。</p><a class="inline-link" href="https://github.com/lyhys12345/github-video-engine/blob/main/docs/first-owner-quickstart.md" target="_blank" rel="noopener noreferrer">受支持的媒体流程 <span aria-hidden="true">↗</span></a></details>
+        </section>
+        <section id="support" class="guide-step">
+          <p class="eyebrow">兼容性</p><h2>了解当前支持范围。</h2>
+          <details class="guide-detail" open><summary>建议使用：Windows + Codex <span>+</span></summary><p>已验证环境为 Windows x64／NTFS、Node 24、SQLite 与同卷硬链接。真实 Codex 已有 URL 到有声媒体及反馈续改记录，期间有人参与操作。macOS／Linux 原生运行尚未验证，也不保证自动复现作品库水准。</p></details>
+          <details class="guide-detail"><summary>Claude Code 与自备 API 状态 <span>+</span></summary><p>Claude Code 项目入口已做静态检查，真实端到端媒体生成与改稿尚未验证。可选自备 API 策划接口仍属实验能力，真实服务商兼容性尚未验证。Codex 会话流程无需额外模型 API 密钥，但宿主平台仍有账号与用量要求。</p><a class="inline-link" href="https://github.com/lyhys12345/github-video-engine/blob/main/docs/support-and-release.md" target="_blank" rel="noopener noreferrer">完整支持与发布说明 <span aria-hidden="true">↗</span></a></details>
+        </section>
+      </div>
+    </div><section class="closing container"><p class="eyebrow">好项目，值得被看见</p><h2>下一次发布，<br> <em>带上一条好故事。</em></h2><a class="button lime" href="#brief">开始使用 <span aria-hidden="true">↗</span></a><span class="closing-mark" aria-hidden="true">↗</span></section>
+  </main><footer class="footer container"><a class="footer-brand" href="/zh/"><img src="/assets/favicon.svg" width="28" height="28" alt="">GitHub Video Engine</a><p>让代码背后的故事，被更多人看见。</p><div><a href="/zh/showcase/">作品库</a><a href="/zh/guide/">使用指南</a><a class="" href="https://github.com/lyhys12345/github-video-engine" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a></div></footer><dialog id="film-dialog" aria-labelledby="film-dialog-title"><button class="dialog-close" aria-label="关闭视频">✕</button><div class="dialog-layout"><div class="video-shell"><video controls playsinline preload="none"></video></div><div class="dialog-info"><p class="eyebrow">作品库</p><h2 id="film-dialog-title"></h2><p id="film-description"></p><div class="dialog-meta"></div><p id="film-provenance"></p><a id="film-source" class="inline-link" target="_blank" rel="noopener noreferrer"></a><div id="film-notes" class="film-notes"></div><p class="dialog-note" id="film-language-note"></p><p class="play-error" role="status"></p></div></div></dialog><div class="toast" role="status" aria-live="polite"></div></div><noscript><p class="noscript-note container">页面可在没有 JavaScript 时阅读。视频链接打开原文件，请手动复制安装命令；筛选器与提示词生成器需要 JavaScript。</p></noscript></body></html>

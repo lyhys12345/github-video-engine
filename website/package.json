@@ -1,0 +1,11 @@
+{
+  "name": "github-video-engine-website",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=24"},
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "test": "node --test tools/*.test.mjs",
+    "dev": "node tools/serve.mjs"
+  }
+}

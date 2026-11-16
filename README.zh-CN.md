@@ -57,6 +57,8 @@ Claude Code 入口已检查仓库内的路由，但尚未验证真实 Claude Cod
 
 ## 工程文档
 
+中英文产品网站、真实作品库、使用指南及测试已保存在 [website/](website/README.md)，本地构建复用本仓库已有的成片素材。[网站验收记录](website/REVIEW-RSI-V3.md)
+
 | 想了解什么 | 从这里开始 |
 | --- | --- |
 | 用 Codex 从链接做有声预览 | [使用指南](docs/codex-user-path-v1.md) · [统一运行入口](docs/narrative-run-v1.md) |

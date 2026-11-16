@@ -1,0 +1,449 @@
+{
+  "schemaVersion": "website-caption-source-cues/1.0",
+  "purpose": "Original display cues reconstructed from local rendering contracts, not inferred from narration audio.",
+  "entries": [
+    {
+      "id": "openmaic-b-demo",
+      "source": "work/xhs-pilot-v1/render-plans/O-B/candidate-v1/props.json",
+      "sourceSha256": "a85fa91bc83bf57b987a4b511bc3bf00b91d654a4d016097c29b01521561cf1a",
+      "timeline": "work/xhs-pilot-v1/render-plans/O-B/candidate-v1/timeline.json",
+      "timelineSha256": "fe30fe3dbd6fd3f8776f8d7acc2dc430d5f07de09ff08173836a098aa9bd4083",
+      "cues": [
+        {
+          "startFrame": 0,
+          "endFrame": 34,
+          "startMs": 0,
+          "endMs": 1133,
+          "text": "这个教室里，"
+        },
+        {
+          "startFrame": 34,
+          "endFrame": 96,
+          "startMs": 1133,
+          "endMs": 3200,
+          "text": "老师和同学都是 AI。"
+        },
+        {
+          "startFrame": 96,
+          "endFrame": 141,
+          "startMs": 3200,
+          "endMs": 4700,
+          "text": "只有来上课的你，"
+        },
+        {
+          "startFrame": 141,
+          "endFrame": 159,
+          "startMs": 4700,
+          "endMs": 5300,
+          "text": "是人。"
+        },
+        {
+          "startFrame": 159,
+          "endFrame": 270,
+          "startMs": 5300,
+          "endMs": 9000,
+          "text": "这是 OpenMAIC 的官方演示。"
+        },
+        {
+          "startFrame": 270,
+          "endFrame": 313,
+          "startMs": 9000,
+          "endMs": 10433,
+          "text": "题目放在左边，"
+        },
+        {
+          "startFrame": 313,
+          "endFrame": 381,
+          "startMs": 10433,
+          "endMs": 12700,
+          "text": "AI 角色在右边讨论，"
+        },
+        {
+          "startFrame": 381,
+          "endFrame": 424,
+          "startMs": 12700,
+          "endMs": 14133,
+          "text": "你也可以加入。"
+        },
+        {
+          "startFrame": 424,
+          "endFrame": 517,
+          "startMs": 14133,
+          "endMs": 17233,
+          "text": "它把学习做成了一段来回的对话。"
+        },
+        {
+          "startFrame": 517,
+          "endFrame": 562,
+          "startMs": 17233,
+          "endMs": 18733,
+          "text": "课程从哪里来？"
+        },
+        {
+          "startFrame": 562,
+          "endFrame": 652,
+          "startMs": 18733,
+          "endMs": 21733,
+          "text": "你提供一个主题或者一份资料，"
+        },
+        {
+          "startFrame": 652,
+          "endFrame": 691,
+          "startMs": 21733,
+          "endMs": 23033,
+          "text": "它先排大纲，"
+        },
+        {
+          "startFrame": 691,
+          "endFrame": 749,
+          "startMs": 23033,
+          "endMs": 24967,
+          "text": "再生成每一页内容。"
+        },
+        {
+          "startFrame": 749,
+          "endFrame": 807,
+          "startMs": 24967,
+          "endMs": 26900,
+          "text": "课堂里的不同角色，"
+        },
+        {
+          "startFrame": 807,
+          "endFrame": 846,
+          "startMs": 26900,
+          "endMs": 28200,
+          "text": "再接着回应。"
+        },
+        {
+          "startFrame": 846,
+          "endFrame": 915,
+          "startMs": 28200,
+          "endMs": 30500,
+          "text": "有意思的是这种学习方式，"
+        },
+        {
+          "startFrame": 915,
+          "endFrame": 1008,
+          "startMs": 30500,
+          "endMs": 33600,
+          "text": "不是 AI 多说几句就一定正确。"
+        },
+        {
+          "startFrame": 1008,
+          "endFrame": 1049,
+          "startMs": 33600,
+          "endMs": 34967,
+          "text": "想自己搭一套，"
+        },
+        {
+          "startFrame": 1049,
+          "endFrame": 1089,
+          "startMs": 34967,
+          "endMs": 36300,
+          "text": "需要配置模型，"
+        },
+        {
+          "startFrame": 1089,
+          "endFrame": 1142,
+          "startMs": 36300,
+          "endMs": 38067,
+          "text": "重要内容也得核对。"
+        },
+        {
+          "startFrame": 1142,
+          "endFrame": 1238,
+          "startMs": 38067,
+          "endMs": 41267,
+          "text": "如果你也想要一个随时能追问的课堂，"
+        },
+        {
+          "startFrame": 1238,
+          "endFrame": 1272,
+          "startMs": 41267,
+          "endMs": 42400,
+          "text": "可以看看它。"
+        },
+        {
+          "startFrame": 1272,
+          "endFrame": 1375,
+          "startMs": 42400,
+          "endMs": 45833,
+          "text": "OpenMAIC 仓库链接放评论区。"
+        }
+      ]
+    },
+    {
+      "id": "worldknow-demo",
+      "source": "work/worldknow/preview-v4/composition-v4.tsx",
+      "sourceSha256": "e2ef58cd72f3a3b578dbabc48162ee30e73d39b667bc0860fc649ef2015b368e",
+      "timeline": "work/worldknow/preview-v4/timeline.json",
+      "timelineSha256": "0c1c6b827d74253ace5dbc637f2972254c4a5984f94b1ebdef2cc0fc6aea7d9f",
+      "cues": [
+        {
+          "startFrame": 0,
+          "endFrame": 46,
+          "startMs": 0,
+          "endMs": 1533,
+          "text": "郑和的航线图上"
+        },
+        {
+          "startFrame": 46,
+          "endFrame": 98,
+          "startMs": 1533,
+          "endMs": 3267,
+          "text": "怎么有只长颈鹿？"
+        },
+        {
+          "startFrame": 98,
+          "endFrame": 127,
+          "startMs": 3267,
+          "endMs": 4233,
+          "text": "点开亚丁"
+        },
+        {
+          "startFrame": 127,
+          "endFrame": 191,
+          "startMs": 4233,
+          "endMs": 6367,
+          "text": "里面还记着一件趣事"
+        },
+        {
+          "startFrame": 191,
+          "endFrame": 276,
+          "startMs": 6367,
+          "endMs": 9200,
+          "text": "国王送给明朝皇帝的礼物里"
+        },
+        {
+          "startFrame": 276,
+          "endFrame": 311,
+          "startMs": 9200,
+          "endMs": 10367,
+          "text": "就有长颈鹿"
+        },
+        {
+          "startFrame": 311,
+          "endFrame": 395,
+          "startMs": 10367,
+          "endMs": 13167,
+          "text": "这个开源项目叫《山海所知》"
+        },
+        {
+          "startFrame": 395,
+          "endFrame": 439,
+          "startMs": 13167,
+          "endMs": 14633,
+          "text": "你可以拖动年份"
+        },
+        {
+          "startFrame": 439,
+          "endFrame": 522,
+          "startMs": 14633,
+          "endMs": 17400,
+          "text": "看看当时的人认识多大的世界"
+        },
+        {
+          "startFrame": 522,
+          "endFrame": 590,
+          "startMs": 17400,
+          "endMs": 19667,
+          "text": "更有意思的是，同一年"
+        },
+        {
+          "startFrame": 590,
+          "endFrame": 658,
+          "startMs": 19667,
+          "endMs": 21933,
+          "text": "换成中国或欧洲的视角"
+        },
+        {
+          "startFrame": 658,
+          "endFrame": 718,
+          "startMs": 21933,
+          "endMs": 23933,
+          "text": "地图上的雾还不一样"
+        },
+        {
+          "startFrame": 718,
+          "endFrame": 781,
+          "startMs": 23933,
+          "endMs": 26033,
+          "text": "因为船队到了一个地方"
+        },
+        {
+          "startFrame": 781,
+          "endFrame": 844,
+          "startMs": 26033,
+          "endMs": 28133,
+          "text": "不代表消息已经传回去"
+        },
+        {
+          "startFrame": 844,
+          "endFrame": 919,
+          "startMs": 28133,
+          "endMs": 30633,
+          "text": "项目把这两个时间分开记录"
+        },
+        {
+          "startFrame": 919,
+          "endFrame": 972,
+          "startMs": 30633,
+          "endMs": 32400,
+          "text": "背后，每个小格子"
+        },
+        {
+          "startFrame": 972,
+          "endFrame": 1043,
+          "startMs": 32400,
+          "endMs": 34767,
+          "text": "都有不同视角的认识记录"
+        },
+        {
+          "startFrame": 1043,
+          "endFrame": 1125,
+          "startMs": 34767,
+          "endMs": 37500,
+          "text": "逛它的时候，可以多问一句"
+        },
+        {
+          "startFrame": 1125,
+          "endFrame": 1214,
+          "startMs": 37500,
+          "endMs": 40467,
+          "text": "这片地方，当时是谁知道的？"
+        },
+        {
+          "startFrame": 1214,
+          "endFrame": 1302,
+          "startMs": 40467,
+          "endMs": 43400,
+          "text": "在线地图和仓库链接放评论区"
+        }
+      ]
+    },
+    {
+      "id": "voicestudio-demo",
+      "source": "work/voice-reel/official-ab/composition-owner-v4.tsx",
+      "sourceSha256": "aca3b6fd45140f76c3a1fca8afc1a35fc4bc085fb1b3577f5e364b129aa3bfdb",
+      "timeline": "work/voice-reel/official-ab/owner-review-v4/timeline.json",
+      "timelineSha256": "4d76e1b02f9593cf1fc75a5d4e3e107d16752c886b37dede2746828fc5e0e65b",
+      "cues": [
+        {
+          "startMs": 220,
+          "endMs": 2930,
+          "text": "嗨，我是 VoiceStudio 的演示声音。"
+        },
+        {
+          "startMs": 3100,
+          "endMs": 4310,
+          "text": "欢迎加入。"
+        },
+        {
+          "startFrame": 130,
+          "endFrame": 225,
+          "startMs": 4333,
+          "endMs": 7500,
+          "text": "第二句，是照着第一段的音色生成的"
+        },
+        {
+          "startFrame": 225,
+          "endFrame": 320,
+          "startMs": 7500,
+          "endMs": 10667,
+          "text": "这个开源项目叫 VoiceStudio"
+        },
+        {
+          "startFrame": 320,
+          "endFrame": 415,
+          "startMs": 10667,
+          "endMs": 13833,
+          "text": "语音模型可以在自己的设备上跑"
+        },
+        {
+          "startFrame": 415,
+          "endFrame": 496,
+          "startMs": 13833,
+          "endMs": 16533,
+          "text": "它把不同的语音引擎接进同一个界面"
+        },
+        {
+          "startFrame": 496,
+          "endFrame": 577,
+          "startMs": 16533,
+          "endMs": 19233,
+          "text": "选好引擎"
+        },
+        {
+          "startFrame": 577,
+          "endFrame": 657,
+          "startMs": 19233,
+          "endMs": 21900,
+          "text": "后台就会把任务交给对应的模型"
+        },
+        {
+          "startFrame": 657,
+          "endFrame": 718,
+          "startMs": 21900,
+          "endMs": 23933,
+          "text": "刚才用的是 OmniVoice"
+        },
+        {
+          "startFrame": 718,
+          "endFrame": 779,
+          "startMs": 23933,
+          "endMs": 25967,
+          "text": "它会参考原来的录音"
+        },
+        {
+          "startFrame": 779,
+          "endFrame": 840,
+          "startMs": 25967,
+          "endMs": 28000,
+          "text": "和那段录音的文字"
+        },
+        {
+          "startFrame": 840,
+          "endFrame": 901,
+          "startMs": 28000,
+          "endMs": 30033,
+          "text": "再把新台词念出来"
+        },
+        {
+          "startFrame": 901,
+          "endFrame": 968,
+          "startMs": 30033,
+          "endMs": 32267,
+          "text": "比如游戏临时加了段剧情"
+        },
+        {
+          "startFrame": 968,
+          "endFrame": 1034,
+          "startMs": 32267,
+          "endMs": 34467,
+          "text": "少一句角色配音"
+        },
+        {
+          "startFrame": 1034,
+          "endFrame": 1101,
+          "startMs": 34467,
+          "endMs": 36700,
+          "text": "就能用有权使用的旧录音"
+        },
+        {
+          "startFrame": 1101,
+          "endFrame": 1167,
+          "startMs": 36700,
+          "endMs": 38900,
+          "text": "先补一版听听"
+        },
+        {
+          "startFrame": 1167,
+          "endFrame": 1233,
+          "startMs": 38900,
+          "endMs": 41100,
+          "text": "仓库链接放评论区了"
+        }
+      ]
+    }
+  ]
+}

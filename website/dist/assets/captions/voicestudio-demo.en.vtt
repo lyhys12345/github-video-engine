@@ -1,0 +1,67 @@
+WEBVTT
+
+NOTE English translation; original display timings, not word alignment.
+
+1
+00:00:00.220 --> 00:00:02.930
+Hi, I'm VoiceStudio's demo voice.
+
+2
+00:00:03.100 --> 00:00:04.310
+Welcome!
+
+3
+00:00:04.333 --> 00:00:07.500
+The new line was generated
+using the first voice sample.
+
+4
+00:00:07.500 --> 00:00:10.667
+This open-source project
+is called VoiceStudio.
+
+5
+00:00:10.667 --> 00:00:13.833
+Its speech models can run
+on your own device.
+
+6
+00:00:13.833 --> 00:00:16.533
+It puts different speech engines
+in one interface.
+
+7
+00:00:16.533 --> 00:00:19.233
+Choose an engine.
+
+8
+00:00:19.233 --> 00:00:21.900
+The backend sends the job
+to its model.
+
+9
+00:00:21.900 --> 00:00:23.933
+That example used OmniVoice.
+
+10
+00:00:23.933 --> 00:00:28.000
+It uses the reference recording
+and that recording's transcript
+
+11
+00:00:28.000 --> 00:00:30.033
+to speak the new line.
+
+12
+00:00:30.033 --> 00:00:34.467
+Say a game adds a new plot twist
+and needs another line of dialogue.
+
+13
+00:00:34.467 --> 00:00:38.900
+Use an old recording you have rights to,
+and generate a version to listen to.
+
+14
+00:00:38.900 --> 00:00:41.100
+Repository link in the comments.

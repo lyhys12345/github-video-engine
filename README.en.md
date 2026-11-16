@@ -52,6 +52,8 @@ Codex researches the repo and plans the story. The engine records evidence, appr
 
 ## Engineering docs
 
+The bilingual product website, real-demo gallery, getting-started guide and its tests are now preserved in [website/](website/README.md). It builds locally using the approved media already in this repository. [Website review results](website/REVIEW-RSI-V3.md)
+
 | Topic | Start here |
 | --- | --- |
 | Setup and workflow | [Codex guide](docs/codex-user-path-v1.md), [production workflow](docs/narrative-run-v1.md) |
